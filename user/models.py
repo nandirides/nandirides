@@ -6,7 +6,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 class User(models.Model):
     GENDER_CHOICES = [
         ('Male', 'Male'),
-        ('Femail', 'Femail')
+        ('Female', 'Female')
     ]
 
     username = models.CharField(max_length=200)
