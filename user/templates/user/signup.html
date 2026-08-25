@@ -1,12 +1,12 @@
 {% extends 'user/base.html' %}
-{% block title %}User Form{% endblock %}
+{% block title %}User SignUp{% endblock %}
 
 {% block content %}
 <form action="" method="POST" novalidate>
   {% csrf_token %}
   {{form.as_p}}
   <div class="mt-4">
-    <button type="submit" class="btn btn-primary">Login</button>
+    <button type="submit" class="btn btn-primary">Register</button>
   </div>
 </form>
 {% if messages %}

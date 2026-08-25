@@ -14,6 +14,10 @@ class UserLoginView(TemplateView):
         form = UserForm()
         return render(request, 'user/login.html', {'form': form})
 
+class UserSignupView(TemplateView):
+    def get(self, request):
+        form = UserForm()
+        return render(request, 'user/signup.html', {'form': form})
 # class UserListView(TemplateView):
 #     template_name = 'user/user_list.html'
 #     def get_context_data(self, **kwargs):
