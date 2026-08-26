@@ -1,7 +1,9 @@
+
 {% extends 'user/base.html' %}
 {% block title %}User SignUp{% endblock %}
 
 {% block content %}
+<h1 class="d-flex justify-content-center align-items-center">SignUp</h1>
 <form action="" method="POST" novalidate>
   {% csrf_token %}
   {{form.as_p}}
