@@ -1,0 +1,93 @@
+{% extends 'user/base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-8">
+
+            <div class="card shadow-lg border-0">
+
+                <div class="card-body text-center p-5">
+
+                    <h1 class="mb-3">
+                        Welcome to Nandi Ride
+                    </h1>
+
+                    <p class="text-muted mb-5">
+                        Please select your login type
+                    </p>
+
+                    <div class="row">
+
+                        <!-- Public User -->
+                        <div class="col-md-6 mb-3">
+
+                            <div class="card h-100 border-primary">
+
+                                <div class="card-body p-4">
+
+                                    <h3>👤 Public Login</h3>
+
+                                    <p class="text-muted">
+                                        Login as a public user
+                                    </p>
+
+                                    <a href="{% url 'loginuser' %}"
+                                       class="btn btn-primary btn-lg w-100">
+                                        Public Login
+                                    </a>
+
+                                    <a href="{% url 'signup' %}"
+                                       class="btn btn-outline-primary mt-2 w-100">
+                                        Create Account
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Admin -->
+                        <div class="col-md-6 mb-3">
+
+                            <div class="card h-100 border-dark">
+
+                                <div class="card-body p-4">
+
+                                    <h3>🔐 Admin Login</h3>
+
+                                    <p class="text-muted">
+                                        Login to administration panel
+                                    </p>
+
+                                    <a href="{% url 'loginuser' %}"
+                                       class="btn btn-dark btn-lg w-100">
+                                        Admin Login
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock content %}
