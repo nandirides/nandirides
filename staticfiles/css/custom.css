@@ -1,0 +1,11 @@
+.app-content {
+    min-height: calc(100vh - 120px);
+}
+
+.brand-image {
+    object-fit: contain;
+}
+
+.card {
+    margin-bottom: 1rem;
+}

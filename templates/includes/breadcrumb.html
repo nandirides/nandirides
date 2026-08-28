@@ -1,0 +1,71 @@
+<div class="app-content-header">
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <div class="col-sm-6">
+
+                <h3 class="mb-0">
+                    {{ page_title|default:"Dashboard" }}
+                </h3>
+
+            </div>
+
+
+            <div class="col-sm-6">
+
+                <ol class="breadcrumb float-sm-end">
+
+                    <li class="breadcrumb-item">
+
+                        <a href="{% url 'dashboard' %}">
+                            Home
+                        </a>
+
+                    </li>
+
+
+                    {% if breadcrumb_items %}
+
+                        {% for item in breadcrumb_items %}
+
+                            {% if forloop.last %}
+
+                                <li class="breadcrumb-item active">
+
+                                    {{ item.title }}
+
+                                </li>
+
+                            {% else %}
+
+                                <li class="breadcrumb-item">
+
+                                    <a href="{{ item.url }}">
+                                        {{ item.title }}
+                                    </a>
+
+                                </li>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <li class="breadcrumb-item active">
+                            Dashboard
+                        </li>
+
+                    {% endif %}
+
+                </ol>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

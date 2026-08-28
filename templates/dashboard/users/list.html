@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Users
+{% endblock %}
+
+
+{% block content %}
+
+<div class="card">
+
+    <div class="card-header">
+
+        <h3 class="card-title">
+            Users
+        </h3>
+
+        <div class="card-tools">
+
+            <a
+                href="{% url 'user_create' %}"
+                class="btn btn-primary btn-sm"
+            >
+
+                <i class="bi bi-plus-lg"></i>
+
+                Add User
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <p>
+            User list will appear here.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}
