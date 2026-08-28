@@ -1,16 +1,54 @@
 
 {% extends 'user/base.html' %}
-{% block title %}User SignUp{% endblock %}
-
+{% load static %}
+{% block title %}SignUp{% endblock %}
 {% block content %}
-<h1 class="d-flex justify-content-center align-items-center">SignUp</h1>
-<form action="" method="POST" novalidate>
-  {% csrf_token %}
-  {{form.as_p}}
-  <div class="mt-4">
-    <button type="submit" class="btn btn-primary">Register</button>
-  </div>
-</form>
+
+<div class="align-items-center justify-content-center bg-light container ">
+    <div class="border-0 rounded-4">
+        <div class="row">
+            <div class="sup col-md-5 d-flex align-items-center justify-content-center text-white text-center p-5">
+                <div>
+                    <div>
+                        <img src="{% static 'user/images/signup.jpg' %}" alt="SignUp" class="simg img-fluid mb-3">
+                    </div>
+                    <h2 class="fw-bold mb-4">Welcome Back!</h2>
+                    <p class="small mb-4">Enter your personal details to use all of
+                        site features</p>
+                    <a href="{% url 'logintypes' %}" class="btn btn-outline-light px-5 rounded-pill">SIGN IN</a>
+                </div>
+            </div>
+            <div class="col-md-7 p-4 p-md-5">
+                <div class="text-center">
+                    <h2 class="fw-bold mb-3">Create Account</h2>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            {% for social in social_links %}
+                                <a href="{{ social.url }}"class="btn btn-outline-secondary btn-sm rounded-circle" title="{{ social.name }}">
+                                    {{ social.icon }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    <p class="text-muted small mb-4">or use your social sites for registration</p>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        {% if field.name in 'firstname lastname  email mobile_number password confirmpassword' %}
+                            <div class="col-mb-3 pb-2">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="text-center mt-4">
+                        <a href="/logintypes/" class="lbtn btn-primary px-5 rounded-pill">Register</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% if messages %}
   {% for message in messages %}
       <div class="alert alert-{{ message.tags }} alert-dismissible fade show">

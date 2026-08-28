@@ -1,18 +1,19 @@
 {% extends 'user/base.html' %}
+{% load static %}
 
 {% block title %}Login{% endblock %}
 
 {% block content %}
 
-<div class="container mt-5">
+<div class="container">
 
     <div class="row justify-content-center">
 
         <div class="col-md-8">
 
-            <div class="card shadow-lg border-0">
+            <div class="card justify-content-center border-0">
 
-                <div class="card-body text-center p-5">
+                <div class="text-center p-5">
 
                     <h1 class="mb-3">
                         Welcome to Nandi Ride
@@ -24,59 +25,41 @@
 
                     <div class="row">
 
-                        <!-- Public User -->
-                        <div class="col-md-6 mb-3">
+                        {% for login in login_types %}
 
-                            <div class="card h-100 border-primary">
+                            <div class="col-md-6 mb-3">
 
-                                <div class="card-body p-4">
+                                <div class="card h-100 {{ login.border_class }}">
 
-                                    <h3>👤 Public Login</h3>
+                                    <div class="card-body p-4">
 
-                                    <p class="text-muted">
-                                        Login as a public user
-                                    </p>
+                                        <h3>
+                                            {{ login.icon }} {{ login.title }}
+                                        </h3>
 
-                                    <a href="{% url 'loginuser' %}"
-                                       class="btn btn-primary btn-lg w-100">
-                                        Public Login
-                                    </a>
+                                        <p class="text-muted">
+                                            {{ login.description }}
+                                        </p>
 
-                                    <a href="{% url 'signup' %}"
-                                       class="btn btn-outline-primary mt-2 w-100">
-                                        Create Account
-                                    </a>
+                                        <a href="{% url login.url %}"
+                                        class="btn {{ login.button_class }} btn-lg w-100">
+                                            {{ login.button_text }}
+                                        </a>
 
-                                </div>
+                                        {% if login.signup %}
+                                            <a href="{% url 'signup' %}"
+                                            class="btn btn-outline-primary mt-2 w-100">
+                                                Create Account
+                                            </a>
+                                        {% endif %}
 
-                            </div>
-
-                        </div>
-
-
-                        <!-- Admin -->
-                        <div class="col-md-6 mb-3">
-
-                            <div class="card h-100 border-dark">
-
-                                <div class="card-body p-4">
-
-                                    <h3>🔐 Admin Login</h3>
-
-                                    <p class="text-muted">
-                                        Login to administration panel
-                                    </p>
-
-                                    <a href="{% url 'loginuser' %}"
-                                       class="btn btn-dark btn-lg w-100">
-                                        Admin Login
-                                    </a>
+                                    </div>
 
                                 </div>
 
                             </div>
 
-                        </div>
+                        {% endfor %}
 
                     </div>
 
