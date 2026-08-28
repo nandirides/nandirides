@@ -1,14 +1,435 @@
 {% extends 'user/base.html' %}
+{% load static %}
 {% block title %}User Profile{% endblock %}
 
 {% block content %}
-<form action="" method="POST" novalidate>
-  {% csrf_token %}
-  {{form.as_p}}
-  <div class="mt-4">
-    <button type="submit" class="btn btn-primary">Update</button>
-  </div>
-</form>
+
+<div class="container py-4">
+
+    <!-- ================= PROFILE COVER ================= -->
+
+    <div class="card border-0 shadow-sm">
+
+        <!-- Cover Image -->
+        <div class="position-relative">
+
+            <div class="bg-primary" style="height: 220px; background: linear-gradient(135deg, #0d6efd, #0dcaf0);">
+            </div>
+
+
+            <!-- Profile Image -->
+            <div class="position-absolute"
+                 style="left: 40px; bottom: -65px;">
+
+                {% if user.profileimage %}
+
+                    <img src="{% static 'user/images/user_image.jpg' %}"
+                         alt="User Image"
+                         class="rounded-circle border border-5 border-white shadow"
+                         width="140"
+                         height="140"
+                         style="object-fit: cover;">
+
+                {% else %}
+
+                    <div class="rounded-circle bg-secondary
+                                border border-5 border-white shadow
+                                d-flex align-items-center justify-content-center"
+                         style="width:140px; height:140px;
+                                font-size:55px;">
+
+                        👤
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= PROFILE HEADER ================= -->
+
+        <div class="card-body pt-5 px-4">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-8">
+
+                    <h3 class="fw-bold mb-1">
+
+                        {{ user.firstname }}
+                        {{ user.lastname }}
+
+                    </h3>
+
+                    <p class="text-muted mb-1">
+
+                        @{{ user.username }}
+
+                    </p>
+
+                    <small class="text-muted">
+
+                        {{ user.email }}
+
+                    </small>
+
+                </div>
+
+
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+
+                    <a href="/editprofile/" class="btn btn-primary px-4">
+                        ✏️ Edit Profile
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= NAVIGATION ================= -->
+
+            <ul class="nav nav-tabs mt-4">
+
+                <li class="nav-item">
+
+                    <a class="nav-link active" href="{% url 'profile' %}">
+                        Profile
+                    </a>
+
+                </li>
+
+                <li class="nav-item">
+
+                    <a class="nav-link"
+                       href="/myride/">
+
+                        My Rides
+
+                    </a>
+
+                </li>
+
+                <li class="nav-item">
+
+                    <a class="nav-link"
+                       href="/booking/">
+
+                        Bookings
+
+                    </a>
+
+                </li>
+
+                <li class="nav-item">
+
+                    <a class="nav-link"
+                       href="/payment/">
+
+                        Payments
+
+                    </a>
+
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= PROFILE CONTENT ================= -->
+
+    <div class="row g-4 mt-2">
+
+
+        <!-- ================= ABOUT ================= -->
+
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-4">
+                        About
+                    </h5>
+
+
+                    <div class="mb-3">
+
+                        <small class="text-muted">
+                            👤 Username
+                        </small>
+
+                        <div class="fw-semibold">
+                            {{ user.username|default:"-" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <small class="text-muted">
+                            📧 Email
+                        </small>
+
+                        <div class="fw-semibold">
+                            {{ user.email|default:"-" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <small class="text-muted">
+                            📱 Mobile
+                        </small>
+
+                        <div class="fw-semibold">
+                            {{ user.mobilenumber|default:"-" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <small class="text-muted">
+                            ⚧ Gender
+                        </small>
+
+                        <div class="fw-semibold">
+                            {{ user.gender|default:"-" }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <small class="text-muted">
+                            🎂 Date of Birth
+                        </small>
+
+                        <div class="fw-semibold">
+                            {{ user.dob|default:"-" }}
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <small class="text-muted">
+                            ⭐ Rating
+                        </small>
+
+                        <div class="fw-semibold text-warning">
+                            {{ user.average_rating|default:"-" }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= PERSONAL DETAILS ================= -->
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-4">
+                        Personal Information
+                    </h5>
+
+
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted small">
+                                First Name
+                            </label>
+
+                            <div class="fw-semibold">
+                                {{ user.firstname|default:"-" }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted small">
+                                Last Name
+                            </label>
+
+                            <div class="fw-semibold">
+                                {{ user.lastname|default:"-" }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted small">
+                                Country
+                            </label>
+
+                            <div class="fw-semibold">
+                                {{ user.country|default:"-" }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted small">
+                                State
+                            </label>
+
+                            <div class="fw-semibold">
+                                {{ user.state|default:"-" }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted small">
+                                District
+                            </label>
+
+                            <div class="fw-semibold">
+                                {{ user.district|default:"-" }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted small">
+                                Pincode
+                            </label>
+
+                            <div class="fw-semibold">
+                                {{ user.pincode|default:"-" }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-12">
+
+                            <label class="text-muted small">
+                                Address
+                            </label>
+
+                            <div class="fw-semibold">
+                                {{ user.address|default:"-" }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= RIDE SUMMARY ================= -->
+
+            <div class="row g-3 mt-1">
+
+
+                <div class="col-md-4">
+
+                    <div class="card border-0 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <h3 class="fw-bold text-primary">
+                                0
+                            </h3>
+
+                            <small class="text-muted">
+                                Total Rides
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="card border-0 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <h3 class="fw-bold text-success">
+                                0
+                            </h3>
+
+                            <small class="text-muted">
+                                Completed
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="card border-0 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <h3 class="fw-bold text-warning">
+                                {{ user.average_rating|default:"-" }}
+                            </h3>
+
+                            <small class="text-muted">
+                                Rating
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 {% if messages %}
   {% for message in messages %}
       <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
