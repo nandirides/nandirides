@@ -1,0 +1,62 @@
+/* ================================
+   Global
+================================ */
+
+body {
+    min-height: 100vh;
+}
+
+
+/* ================================
+   Sidebar
+================================ */
+
+.app-sidebar .nav-link {
+    transition: background-color 0.15s ease;
+}
+
+
+.app-sidebar .nav-link p {
+    margin-bottom: 0;
+}
+
+
+/* ================================
+   User Image
+================================ */
+
+.user-image {
+    object-fit: cover;
+}
+
+
+/* ================================
+   Dashboard Cards
+================================ */
+
+.card {
+    margin-bottom: 1rem;
+}
+
+
+/* ================================
+   Content
+================================ */
+
+.app-content {
+    min-height: calc(100vh - 120px);
+}
+
+
+/* ================================
+   Mobile
+================================ */
+
+@media (max-width: 991.98px) {
+
+    .app-content-header {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+}

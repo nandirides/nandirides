@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    {% block corecss %} <link rel="stylesheet" href="{% static 'user/css/style.css' %}"> {% endblock corecss %}
+    <script src="{% static 'user/js/scripts.js' %}"></script>
+    
+    <title>{% block title %} Nandi Rides Booking Portal {% endblock %}</title>
+    
+    {% comment %} <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"> {% endcomment %}
+</head>
+<body>
+
+    <header>
+        <img src="{% static 'images/logo.png' %}" alt="Nandi Ride Logo">
+        <h1>Welcome to Nandi Rides Booking Portal
+            
+        <span>
+            <a href="/signup/" class="btn">SignUp</a>
+        </span>
+        <span>
+            <a href="/login/" class="btn">Login</a>
+        </span>                  
+        </h1>
+        <p>Book your Nandi Rides anytime, anywhere</p>
+        
+    </header>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="#">Book rides</a>
+        <a href="#">Booking Status</a>
+        <a href="#">Contact Us</a>
+    </nav>
+
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

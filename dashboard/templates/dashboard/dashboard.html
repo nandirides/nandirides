@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="row">
+
+
+    <!-- Orders -->
+
+    <div class="col-lg-3 col-md-6 col-12">
+
+        <div class="small-box text-bg-primary">
+
+            <div class="inner">
+
+                <h3>
+                    150
+                </h3>
+
+                <p>
+                    New Orders
+                </p>
+
+            </div>
+
+            <div class="small-box-icon">
+
+                <i class="bi bi-cart"></i>
+
+            </div>
+
+            <a
+                href="#"
+                class="small-box-footer"
+            >
+
+                More info
+
+                <i class="bi bi-arrow-right"></i>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Users -->
+
+    <div class="col-lg-3 col-md-6 col-12">
+
+        <div class="small-box text-bg-success">
+
+            <div class="inner">
+
+                <h3>
+                    53
+                </h3>
+
+                <p>
+                    Users
+                </p>
+
+            </div>
+
+            <div class="small-box-icon">
+
+                <i class="bi bi-people"></i>
+
+            </div>
+
+            <a
+                href="#"
+                class="small-box-footer"
+            >
+
+                More info
+
+                <i class="bi bi-arrow-right"></i>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Revenue -->
+
+    <div class="col-lg-3 col-md-6 col-12">
+
+        <div class="small-box text-bg-warning">
+
+            <div class="inner">
+
+                <h3>
+                    ₹45K
+                </h3>
+
+                <p>
+                    Revenue
+                </p>
+
+            </div>
+
+            <div class="small-box-icon">
+
+                <i class="bi bi-currency-rupee"></i>
+
+            </div>
+
+            <a
+                href="#"
+                class="small-box-footer"
+            >
+
+                More info
+
+                <i class="bi bi-arrow-right"></i>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Visitors -->
+
+    <div class="col-lg-3 col-md-6 col-12">
+
+        <div class="small-box text-bg-danger">
+
+            <div class="inner">
+
+                <h3>
+                    65
+                </h3>
+
+                <p>
+                    Visitors
+                </p>
+
+            </div>
+
+            <div class="small-box-icon">
+
+                <i class="bi bi-bar-chart"></i>
+
+            </div>
+
+            <a
+                href="#"
+                class="small-box-footer"
+            >
+
+                More info
+
+                <i class="bi bi-arrow-right"></i>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- Welcome Card -->
+
+<div class="row">
+
+    <div class="col-12">
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3 class="card-title">
+                    Welcome
+                </h3>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <h4>
+                    Welcome
+                    {% if user.is_authenticated %}
+                        {{ user.get_username }}
+                    {% endif %}
+                </h4>
+
+
+                <p class="mb-0">
+
+                    Your Django 6.x application is
+                    running with AdminLTE 4.9.1.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

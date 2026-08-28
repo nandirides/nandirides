@@ -1,0 +1,161 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Login | My Application
+    </title>
+
+
+    <link rel="stylesheet"
+          href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
+
+    <link rel="stylesheet"
+          href="{% static 'css/adminlte.min.css' %}">
+
+</head>
+
+
+<body class="login-page bg-body-secondary">
+
+
+<div class="login-box">
+
+
+    <div class="card card-outline card-primary">
+
+
+        <div class="card-header text-center">
+
+            <a href="{% url 'dashboard' %}"
+               class="h1 text-decoration-none">
+
+                <b>My</b>Application
+
+            </a>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <p class="login-box-msg">
+
+                Sign in to start your session
+
+            </p>
+
+
+            {% if form.errors %}
+
+                <div class="alert alert-danger">
+
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+
+                    Invalid username or password.
+
+                </div>
+
+            {% endif %}
+
+
+            <form method="post">
+
+                {% csrf_token %}
+
+
+                <div class="input-group mb-3">
+
+                    <input type="text"
+                           name="username"
+                           class="form-control"
+                           placeholder="Username"
+                           autocomplete="username"
+                           required>
+
+                    <span class="input-group-text">
+
+                        <i class="bi bi-person"></i>
+
+                    </span>
+
+                </div>
+
+
+                <div class="input-group mb-3">
+
+                    <input type="password"
+                           name="password"
+                           class="form-control"
+                           placeholder="Password"
+                           autocomplete="current-password"
+                           required>
+
+                    <span class="input-group-text">
+
+                        <i class="bi bi-lock"></i>
+
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <div class="col-8">
+
+                        <div class="form-check">
+
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="remember_me"
+                                   id="remember_me">
+
+                            <label class="form-check-label"
+                                   for="remember_me">
+
+                                Remember Me
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-4">
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+
+                            Sign In
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="{% static 'js/adminlte.min.js' %}"></script>
+
+</body>
+
+</html>
