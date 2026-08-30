@@ -1,0 +1,316 @@
+{% extends 'user/base.html' %}
+{% load static %}
+{% block title %}About Us - NandiRide{% endblock %}
+
+{% block content %}
+
+<!-- ================= HERO ================= -->
+
+<section class="hero">
+
+    <div class="container">
+
+        <div class="hero-content">
+
+            <div class="hero-small mb-3">
+                ABOUT US
+            </div>
+
+            <h1>
+                Your Ride,
+                <br>
+                Our <span class="text-warning">Commitment</span>
+            </h1>
+
+            <p class="mt-3">
+                NandiRide is here to make your travel easy, safe,
+                and comfortable. We connect you with reliable rides
+                anytime, anywhere.
+            </p>
+
+            <a href="{% url 'login' %}"
+               class="btn yellow-btn mt-3">
+
+                Ride with NandiRide
+                <i class="fa-solid fa-arrow-right ms-2"></i>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= ABOUT ================= -->
+
+<section class="about-section">
+
+    <div class="container">
+
+        <div class="row align-items-center g-5">
+
+            <div class="col-lg-6">
+
+                <img
+                    src="{% static 'user/images/cabride.png' %}"
+                    class="about-image"
+                    alt="NandiRide">
+
+            </div>
+
+            <div class="col-lg-6">
+
+                <div class="section-small mb-2">
+                    WHO WE ARE
+                </div>
+
+                <h2 class="section-title">
+                    Driven by Trust,
+                    <br>
+                    Focused on You
+                </h2>
+
+                <p class="text-secondary mt-3">
+                    NandiRide was created with a simple vision —
+                    to provide dependable, affordable and convenient
+                    transportation while maintaining the highest
+                    standards of safety and customer satisfaction.
+                </p>
+
+
+                <!-- Feature 1 -->
+
+                <div class="feature-box">
+
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+
+                    <div>
+                        <h6>Customer First</h6>
+
+                        <p>
+                            We put our customers at the heart
+                            of everything we do.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- Feature 2 -->
+
+                <div class="feature-box">
+
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+
+                    <div>
+                        <h6>Safety Always</h6>
+
+                        <p>
+                            Verified drivers, real-time tracking
+                            and reliable support.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- Feature 3 -->
+
+                <div class="feature-box">
+
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-car"></i>
+                    </div>
+
+                    <div>
+                        <h6>Reliable Rides</h6>
+
+                        <p>
+                            From daily commutes to long trips,
+                            we are always here.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= STATS ================= -->
+
+<section class="container">
+
+    <div class="stats">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-3 stat">
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+
+                <h3>10K+</h3>
+                <p>Happy Customers</p>
+
+            </div>
+
+
+            <div class="col-md-3 stat">
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-car"></i>
+                </div>
+
+                <h3>25K+</h3>
+                <p>Rides Completed</p>
+
+            </div>
+
+
+            <div class="col-md-3 stat">
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+
+                <h3>50+</h3>
+                <p>Cities Covered</p>
+
+            </div>
+
+
+            <div class="col-md-3 stat">
+
+                <div class="stat-icon">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+
+                <h3>4.8/5</h3>
+                <p>Customer Rating</p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= VALUES ================= -->
+
+<section class="values-section">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <div class="section-small">
+                OUR VALUES
+            </div>
+
+            <h2 class="section-title">
+                The Principles That Drive Us
+            </h2>
+
+        </div>
+
+
+        <div class="row g-4">
+
+
+            <!-- Mission -->
+
+            <div class="col-lg-4">
+
+                <div class="value-card">
+
+                    <div class="value-icon">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+
+                    <h5>
+                        Our Mission
+                    </h5>
+
+                    <p>
+                        To provide safe, affordable and convenient
+                        rides while building a transportation
+                        ecosystem people can truly rely on.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- Vision -->
+
+            <div class="col-lg-4">
+
+                <div class="value-card">
+
+                    <div class="value-icon">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+
+                    <h5>
+                        Our Vision
+                    </h5>
+
+                    <p>
+                        To become a trusted ride-hailing platform,
+                        connecting people with convenient
+                        transportation every day.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- Promise -->
+
+            <div class="col-lg-4">
+
+                <div class="value-card">
+
+                    <div class="value-icon">
+                        <i class="fa-regular fa-heart"></i>
+                    </div>
+
+                    <h5>
+                        Our Promise
+                    </h5>
+
+                    <p>
+                        We promise transparency, reliability
+                        and respect for every customer and
+                        driver who travels with NandiRide.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% endblock %}
