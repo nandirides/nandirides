@@ -55,7 +55,7 @@ class User(models.Model):
     vehicleinsurance = models.CharField(max_length=200)
     vehiclepollution = models.CharField(max_length=200)
     vehicletype = models.CharField(max_length=200)
-    documnetupload = models.ImageField(upload_to='profile/', blank=True, null=True)
+    documnetupload = models.FileField(upload_to='profile/', blank=True, null=True)
     average_rating = models.DecimalField(
         max_digits=3,
         decimal_places=2,

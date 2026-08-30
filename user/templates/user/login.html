@@ -2,61 +2,60 @@
 {% load static %}
 {% block title %}Login{% endblock %}
 {% block content %}
-<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light container">
-    <div class="l1 card border-0 shadow-lg overflow-hidden">
-        <div class="row g-0">
-            <!-- LEFT SIDE -->
-            <div class="l2 col-md-6 d-flex align-items-center justify-content-center
-                        text-white text-center position-relative">
-                <div class="p-4">
-                    <img src="{% static 'user/images/login_image.png' %}" class="simg img-fluid mb-3" alt="Login">
-                    <h3 class="fw-bold">WELCOME BACK</h3>
-                </div>
-            </div>
-            <!-- RIGHT SIDE -->
-            <div class="col-md-6 bg-white">
-                <div class="p-4 p-md-5">
-                    <h2 class="text-center fw-bold mb-4">LOGIN</h2>
-                    <div class="d-flex justify-content-center gap-2 mb-3">
-                            {% for social in social_links %}
-                                <a href="{{ social.url }}" class="btn btn-outline-secondary btn-sm rounded-circle" title="{{ social.name }}">
-                                    {{ social.icon }}
-                                </a>
-                            {% endfor %}
-                        </div>
-                    <p class="text-center text-muted small mb-4">or use your account</p>
-                    <form method="POST">
-                        {% csrf_token %}
-                        {% for field in form %}
-                        {% if field.name in 'username password' %}
-                            <div class="col-mb-3 pb-2">
-                                {{ field.label_tag }}
-                                {{ field }}
-                                {{ field.errors }}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                        <div class="text-end mb-3">
-                            <a href="/forgetpassword/" class="text-decoration-none small"> Forgot Password? </a>
-                        </div>
-                        <div class="d-grid">
-                            <a href="/dashboard/" class="lbtn btn-primary rounded-pill fw-bold">LOGIN</a>
-                        </div>
-                    </form>
-                    <p class="text-center text-muted small mt-4">Don't have an account?
-                        <a href="{% url 'signup' %}" class="fw-bold text-decoration-none">Sign Up</a>
-                    </p>
+
+    <div class="align-items-center justify-content-center bg-light mt-4 mx-4">
+        <div class="card border-0 shadow-lg overflow-hidden">
+            <div class="row g-0">
+                <div class=" sup col-md-5 d-flex align-items-center justify-content-center text-white text-center position-relative">
+                    <div class="p-4">
+                        <img src="{% static 'user/images/logo.png' %}" class="simg img-fluid mb-3" alt="Login">
+                        <h3 class="fw-bold">WELCOME LOGIN!</h3>
+                    </div>
+                </div> 
+                <div class="col-md-7 bg-white">
+                    <div class="p-4 p-md-5">
+                        <h2 class="text-center fw-bold mb-4">LOGIN</h2>
+                                        <label class="form-label fw-semibold">Login Type </label>
+                                    <div class="form-control col-md-6 bg-light">
+                                        <select name="subject" class="form-select border-0 form-select-lg">
+                                            <option value=""> Please Select </option>
+                                            <option value="">Admin</option>
+                                            <option value="booking">User</option>
+                                        </select>
+                                    </div>
+                                        <form method="POST">
+                                                {% csrf_token %}
+                                                {% for field in form %}
+                                                    {% if field.name in 'username password' %}
+                                                        <div class="col-mb-3 pb-2">
+                                                            {{ field.label_tag }}
+                                                            {{ field }}
+                                                            {{ field.errors }}
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            <div class="text-end mb-3">
+                                                <a href="{% url 'forgetpassword' %}" class="text-decoration-none small"> Forgot Password? </a>
+                                            </div>
+                                            <div class="d-grid d-flex gap-4">
+                                                <a href="{% url 'dashboard' %}" class="lbtn rounded-pill fw-bold col-md-6">USER LOGIN</a>
+                                                <a href="{% url 'dashboard' %}" class="lbtn rounded-pill fw-bold col-md-6">ADMIN LOGIN</a>
+                                            </div>
+                                        </form>
+                        <p class="text-center text-muted small mt-4">Don't have an account?
+                            <a href="{% url 'signup' %}" class="fw-bold text-primary">Sign Up</a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% if messages %}
-  {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-          {{ message }}
-           <span><a href="/profile/" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
-      </div>
-  {% endfor %}
-{% endif %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <span><a href="/profile/" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
+            </div>
+        {% endfor %}
+    {% endif %}
 {% endblock content %}

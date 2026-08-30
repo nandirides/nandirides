@@ -94,31 +94,12 @@ class ResetPassword(forms.Form):
 
 class profile(forms.Form):
 
-    country = forms.ChoiceField(
-                choices=[('', 'Please Select One')] + User.COUNTRY_CHOICES,
-                widget=forms.Select(attrs={
-                'class': 'form-control input-field rounded shadow'
-                }),
-        )
-    state = forms.ChoiceField(
-                choices=[('', 'Please Select One')] + User.STATE_CHOICES,
-                widget=forms.Select(attrs={
-                'class': 'form-control input-field rounded shadow'
-                }),
-            )
-    district = forms.ChoiceField(
-                choices=[('', 'Please Select One')] + User.DISTRICT_CHOICES,
-                widget=forms.Select(attrs={
-                'class': 'form-control input-field rounded shadow'
-                }),
-            )
-    
     profileimage = forms.ImageField(
-            widget=forms.ClearableFileInput(attrs={
-                'class': 'form-control logo'
-            })
-        )
-    
+                widget=forms.ClearableFileInput(attrs={
+                    'class': 'form-control logo'
+                })
+            )
+        
     user_id = forms.CharField(
         widget=forms.HiddenInput(attrs={
             'class': 'form-control',
@@ -145,13 +126,26 @@ class profile(forms.Form):
                 'placeholder': 'Enter Last Name'
             })
         )
-
-    address = forms.CharField(
-                widget=forms.TextInput(attrs={
-                    'class': 'form-control',
-                    'placeholder': 'Enter Address'
-                })
+    country = forms.ChoiceField(
+                choices=[('', 'Please Select One')] + User.COUNTRY_CHOICES,
+                widget=forms.Select(attrs={
+                'class': 'form-control input-field rounded shadow'
+                }),
+        )
+    state = forms.ChoiceField(
+                choices=[('', 'Please Select One')] + User.STATE_CHOICES,
+                widget=forms.Select(attrs={
+                'class': 'form-control input-field rounded shadow'
+                }),
             )
+    district = forms.ChoiceField(
+                choices=[('', 'Please Select One')] + User.DISTRICT_CHOICES,
+                widget=forms.Select(attrs={
+                'class': 'form-control input-field rounded shadow'
+                }),
+            )
+    
+    
     street = forms.CharField(
                 widget=forms.TextInput(attrs={
                     'class': 'form-control',
@@ -177,6 +171,12 @@ class profile(forms.Form):
                 widget=forms.TextInput(attrs={
                     'class': 'form-control',
                     'placeholder': 'Enter Mobile Number'
+                })
+            )
+    email = forms.CharField(
+                widget=forms.TextInput(attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Enter email'
                 })
             )
 
@@ -229,7 +229,7 @@ class profile(forms.Form):
                         })
                     )
 
-    documnet_upload = forms.ImageField(
+    documnet_upload = forms.FileField(
                         widget=forms.ClearableFileInput(attrs={
                             'class': 'form-control'
                         })
