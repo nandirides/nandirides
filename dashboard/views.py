@@ -9,6 +9,19 @@ def dashboard(request):
         "dashboard/dashboard.html",
     )
 
+@login_required
+def user_profile(request):
+    return render(
+        request,
+        "account/profile.html",
+    )
+
+@login_required
+def user_setting(request):
+    return render(
+        request,
+        "account/setting.html",
+    )
 
 @login_required
 def user_list(request):

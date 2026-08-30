@@ -28,6 +28,12 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 ROOT_URLCONF = "nandirides.urls"
+LOGOUT_REDIRECT_URL = "/"
+LOGIN_URL = "/accounts/login/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
+
+LOGIN_REDIRECT_URL = "/admindashboard/"
+
 
 # Application definition
 
