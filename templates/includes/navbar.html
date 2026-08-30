@@ -7,16 +7,16 @@
 
         <!-- Left Navbar -->
         <ul class="navbar-nav">
-<button
-    type="button"
-    class="nav-link border-0 bg-transparent"
-    id="theme-toggle"
->
-    <i
-        class="bi bi-moon-fill"
-        id="theme-icon"
-    ></i>
-</button>
+            <button
+                type="button"
+                class="nav-link border-0 bg-transparent"
+                id="theme-toggle"
+            >
+                <i
+                    class="bi bi-moon-fill"
+                    id="theme-icon"
+                ></i>
+            </button>
             <!-- Sidebar Toggle -->
             <li class="nav-item">
 
@@ -46,33 +46,33 @@
                 </a>
 
             </li>
+            </li>
+      <li class="nav-item d-none d-md-block">
+        <a href="#" class="nav-link">Contact</a>
+      </li>
 
         </ul>
-
+   <!-- End navbar links -->
 
         <!-- Right Navbar -->
-        <ul class="navbar-nav ms-auto">
+        <!-- Navbar search: a quiet pill, the icon is the submit button (md and up) -->
+    <form class="navbar-search d-none d-md-block ms-3" role="search" action="search-results.html">
+      <label for="navbar-search-input" class="visually-hidden">Search</label>
+      <div class="navbar-search-field">
+        <input type="search" id="navbar-search-input" name="q" class="form-control" placeholder="Search…" autocomplete="off" />
+        <button class="navbar-search-submit" type="submit" aria-label="Submit search">
+          <i class="bi bi-search" aria-hidden="true"></i>
+        </button>
+      </div>
+    </form>
 
-
-            <!-- Dark Mode -->
-            <li class="nav-item">
-
-                <button
-                    type="button"
-                    class="nav-link border-0 bg-transparent"
-                    id="theme-toggle"
-                    title="Toggle dark mode"
-                    aria-label="Toggle dark mode"
-                >
-
-                    <i
-                        class="bi bi-moon-fill"
-                        id="theme-icon"
-                    ></i>
-
-                </button>
-
-            </li>
+    <ul class="navbar-nav ms-auto">
+      <!-- Search on small screens: link to the search page -->
+      <li class="nav-item d-md-none">
+        <a class="nav-link" href="search-results.html" aria-label="Search">
+          <i class="bi bi-search" aria-hidden="true"></i>
+        </a>
+      </li>           
 
 
             {% if user.is_authenticated %}
@@ -141,7 +141,7 @@
                         <li>
 
                             <a
-                                href="#"
+                               href="{% url 'user_profile' %}"
                                 class="dropdown-item"
                             >
 
@@ -158,7 +158,7 @@
                         <li>
 
                             <a
-                                href="#"
+                                href="{% url 'user_setting' %}"
                                 class="dropdown-item"
                             >
 

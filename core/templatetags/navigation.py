@@ -13,6 +13,20 @@ NAVIGATION = [
     },
 
     {
+            "title": "User Profile",
+            "icon": "bi-person",
+            "url": "user_profile",
+            "permission": 'auth.user_profile',
+    },
+
+    {
+            "title": "User Setting",
+            "icon": "bi-gear",
+            "url": "user_setting",
+            "permission": 'auth.user_setting',
+    },
+
+    {
         "title": "Users",
         "icon": "bi-people",
         "permission": "auth.view_user",

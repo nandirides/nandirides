@@ -10,7 +10,8 @@
 
 <div class="card">
 
-    <div class="card-header">
+     <!--begin::Card Header-->
+     {% comment %} <div class="card-header">
 
         <h3 class="card-title">
             Users
@@ -31,17 +32,459 @@
 
         </div>
 
-    </div>
+    </div> {% endcomment %}
+                  <div class="card-header">
+                    <div class="row g-2 align-items-center">
+                      <div class="col-12 col-md-4">
+                        <h3 class="card-title">User Directory</h3>
+                      </div>
+                      <div class="col-12 col-md-8">
+                        <div class="d-flex flex-wrap justify-content-md-end gap-2">
+                          <div class="input-group input-group-sm w-auto">
+                            <span class="input-group-text">
+                              <i class="bi bi-search" aria-hidden="true"></i>
+                            </span>
+                            <input
+                              type="search"
+                              id="user-search"
+                              class="form-control"
+                              placeholder="Search users"
+                              aria-label="Search users"
+                              style="width: 180px"
+                            />
+                          </div>
+                          <select
+                            id="user-role-filter"
+                            class="form-select form-select-sm w-auto"
+                            aria-label="Filter by role"
+                          >
+                            <option value="all" selected>All roles</option>
+                            <option value="administrator">Administrator</option>
+                            <option value="editor">Editor</option>
+                            <option value="author">Author</option>
+                            <option value="subscriber">Subscriber</option>
+                          </select>
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal-add-user"
+                          >
+                            <i class="bi bi-person-plus-fill me-1" aria-hidden="true"> </i>
+                            New user
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!--end::Card Header-->
 
 
-    <div class="card-body">
+     <!--begin::Card Body-->
+                  <div class="card-body p-0">
+                    <div class="table-responsive">
+                      <table class="table table-hover align-middle m-0">
+                        <thead>
+                          <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th class="text-end">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <img
+                                  src="./assets/img/user1-128x128.jpg"
+                                  alt=""
+                                  class="img-size-32 rounded-circle me-2"
+                                />
+                                <span class="fw-medium">Alexander Pierce</span>
+                              </div>
+                            </td>
+                            <td>alexander.pierce@example.com</td>
+                            <td>
+                              <span class="badge text-bg-danger"> Administrator </span>
+                            </td>
+                            <td>
+                              <span class="badge text-bg-success">Active</span>
+                            </td>
+                            <td>Mar 12, 2025</td>
+                            <td class="text-end">
+                              <div class="btn-group btn-group-sm">
+                                <button
+                                  type="button"
+                                  class="btn btn-outline-secondary"
+                                  aria-label="Edit Alexander Pierce"
+                                >
+                                  <i class="bi bi-pencil" aria-hidden="true"> </i>
+                                </button>
+                                <button
+                                  type="button"
+                                  class="btn btn-outline-danger"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#modal-delete-user"
+                                  aria-label="Delete Alexander Pierce"
+                                >
+                                  <i class="bi bi-trash" aria-hidden="true"> </i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <img
+                                  src="./assets/img/user3-128x128.jpg"
+                                  alt=""
+                                  class="img-size-32 rounded-circle me-2"
+                                />
+                                <span class="fw-medium">Sarah Bullock</span>
+                              </div>
+                            </td>
+                            <td>sarah.bullock@example.com</td>
+                            <td>
+                              <span class="badge text-bg-primary">Editor</span>
+                            </td>
+                            <td>
+                              <span class="badge text-bg-success">Active</span>
+                            </td>
+                            <td>Apr 3, 2025</td>
+                            <td class="text-end">
+                              <div class="btn-group btn-group-sm">
+                                <button
+                                  type="button"
+                                  class="btn btn-outline-secondary"
+                                  aria-label="Edit Sarah Bullock"
+                                >
+                                  <i class="bi bi-pencil" aria-hidden="true"> </i>
+                                </button>
+                                <button
+                                  type="button"
+                                  class="btn btn-outline-danger"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#modal-delete-user"
+                                  aria-label="Delete Sarah Bullock"
+                                >
+                                  <i class="bi bi-trash" aria-hidden="true"> </i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <img
+                                  src="./assets/img/user6-128x128.jpg"
+                                  alt=""
+                                  class="img-size-32 rounded-circle me-2"
+                                />
+                                <span class="fw-medium">Daniel Cooper</span>
+                              </div>
+                            </td>
+                            <td>daniel.cooper@example.com</td>
+                            <td>
+                              <span class="badge text-bg-info">Author</span>
+                            </td>
+                            <td>
+                              <span class="badge text-bg-warning">Pending</span>
+                            </td>
+                            <td>Apr 28, 2025</td>
+                            <td class="text-end">
+                              <div class="btn-group btn-group-sm">
+                                <button
+                                  type="button"
+                                  class="btn btn-outline-secondary"
+                                  aria-label="Edit Daniel Cooper"
+                                >
+                                  <i class="bi bi-pencil" aria-hidden="true"> </i>
+                                </button>
+                                <button
+                                  type="button"
+                                  class="btn btn-outline-danger"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#modal-delete-user"
+                                  aria-label="Delete Daniel Cooper"
+                                >
+                                  <i class="bi bi-trash" aria-hidden="true"> </i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <img
+                                  src="./assets/img/user7-128x128.jpg"
+                                  alt=""
+                                  class="img-size-32 rounded-circle me-2"
+                                />
+                                <span class="fw-medium">Jane Holland</span>
+                              </div>
+                            </td>
+                            <td>jane.holland@example.com</td>
+                            <td>
+                              <span class="badge text-bg-secondary"> Subscriber </span>
+                            </td>
+                            <td>
+                              <span class="badge text-bg-success">Active</span>
+                            </td>
+                            <td>May 21, 2025</td>
+                            <td class="text-end">
+                              <div class="btn-group btn-group-sm">
+                                <button
+                                  type="button"
+                                  class="btn btn-outline-secondary"
+                                  aria-label="Edit Jane Holland"
+                                >
+                                  <i class="bi bi-pencil" aria-hidden="true"> </i>
+                                </button>
+                                <button
+                                  type="button"
+                                  class="btn btn-outline-danger"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#modal-delete-user"
+                                  aria-label="Delete Jane Holland"
+                                >
+                                  <i class="bi bi-trash" aria-hidden="true"> </i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          
+                        </tbody>
+                      </table>
+                    </div>
+                    <!-- /.table-responsive -->
+                  </div>
+                  <!--end::Card Body-->
+                  <!--begin::Card Footer-->
+                  <div class="card-footer clearfix">
+                    <div class="float-start pt-1 fs-7 text-body-secondary">
+                      Showing 1 to 9 of 42 users
+                    </div>
+                    <ul class="pagination pagination-sm m-0 float-end">
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous"> &laquo; </a>
+                      </li>
+                      <li class="page-item active">
+                        <a class="page-link" href="#">1</a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="#">2</a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="#">3</a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="#">4</a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="#">5</a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next"> &raquo; </a>
+                      </li>
+                    </ul>
+                  </div>
+                  <!--end::Card Footer-->
 
-        <p>
-            User list will appear here.
-        </p>
+                  <!--begin::Add User Modal-->
+            <div
+              class="modal fade"
+              id="modal-add-user"
+              tabindex="-1"
+              aria-labelledby="modal-add-user-label"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <form>
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="modal-add-user-label">Add new user</h5>
+                      <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                      ></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="mb-3">
+                        <label for="new-user-name" class="form-label"> Full name </label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="new-user-name"
+                          placeholder="e.g. Jane Doe"
+                          required
+                        />
+                      </div>
+                      <div class="mb-3">
+                        <label for="new-user-email" class="form-label"> Email address </label>
+                        <input
+                          type="email"
+                          class="form-control"
+                          id="new-user-email"
+                          placeholder="name@example.com"
+                          required
+                        />
+                        <div class="form-text">The invitation will be sent to this address.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="new-user-role" class="form-label"> Role </label>
+                        <select id="new-user-role" class="form-select">
+                          <option selected>Subscriber</option>
+                          <option>Author</option>
+                          <option>Editor</option>
+                          <option>Administrator</option>
+                        </select>
+                      </div>
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="new-user-welcome"
+                          checked
+                        />
+                        <label class="form-check-label" for="new-user-welcome">
+                          Send a welcome email with login details
+                        </label>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                      </button>
+                      <button type="submit" class="btn btn-primary">Create user</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <!--end::Add User Modal-->
 
-    </div>
+            <!--begin::Delete User Modal-->
+            <div
+              class="modal fade"
+              id="modal-delete-user"
+              tabindex="-1"
+              aria-labelledby="modal-delete-user-label"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modal-delete-user-label">Delete user</h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="mb-0">
+                      Are you sure you want to delete this user? All content owned by the account
+                      will be reassigned to the site administrator. This action cannot be undone.
+                    </p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                      Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                      Delete user
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--end::Delete User Modal-->
 
 </div>
+<!--begin::Script-->
+    <!--begin::Third Party Plugin(OverlayScrollbars)-->
+    <script
+      src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
+    <script src="./js/adminlte.js"></script>
+    <!--end::Required Plugin(AdminLTE)-->
+    <!--begin::OverlayScrollbars Configure-->
+    <script>
+      const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+      const Default = {
+        scrollbarTheme: 'os-theme-light',
+        scrollbarAutoHide: 'leave',
+        scrollbarClickScroll: true,
+      };
+      document.addEventListener('DOMContentLoaded', function () {
+        const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
 
+        // Disable OverlayScrollbars on mobile devices to prevent touch interference
+        const isMobile = window.innerWidth <= 992;
+
+        if (
+          sidebarWrapper &&
+          OverlayScrollbarsGlobal?.OverlayScrollbars !== undefined &&
+          !isMobile
+        ) {
+          OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+            scrollbars: {
+              theme: Default.scrollbarTheme,
+              autoHide: Default.scrollbarAutoHide,
+              clickScroll: Default.scrollbarClickScroll,
+            },
+          });
+        }
+      });
+    </script>
+    <!--end::OverlayScrollbars Configure-->
+    <!--begin::Charts follow the colour mode-->
+    <script>
+      // ApexCharts draws light-theme tooltips and axis text unless told otherwise,
+      // which is unreadable in dark mode (#6105). Give it the page's colour mode as
+      // a global default before any chart is created — this runs before the chart
+      // pages' own scripts — and keep every chart that has a `chart.id` in step
+      // when the mode changes (ColorMode, the OS in auto mode, or your own code).
+      (() => {
+        'use strict';
+        const mode = () =>
+          document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light';
+        // `Apex` is ApexCharts' global-options object; it must exist before the library loads.
+        // theme.mode also sets a dark chart background — keep the card's instead.
+        // eslint-disable-next-line unicorn/no-global-object-property-assignment
+        globalThis.Apex ||= {};
+        const apex = globalThis.Apex;
+        apex.theme = { mode: mode() };
+        apex.chart = Object.assign(apex.chart || {}, { background: 'transparent' });
+        new MutationObserver(() => {
+          const next = mode();
+          apex.theme = { mode: next };
+          const instances = apex._chartInstances || [];
+          for (const { chart } of instances) {
+            chart.updateOptions({ theme: { mode: next } }, false, false);
+          }
+        }).observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ['data-bs-theme'],
+        });
+      })();
+    </script>
 {% endblock %}
