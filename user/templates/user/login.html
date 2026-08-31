@@ -1,60 +1,147 @@
 {% extends 'user/base.html' %}
 {% load static %}
-{% block title %}Login{% endblock %}
-{% block content %}
 
-    <div class="align-items-center justify-content-center bg-light mt-4 mx-4">
-        <div class="card border-0 shadow-lg overflow-hidden">
-            <div class="row g-0">
-                <div class=" sup col-md-5 d-flex align-items-center justify-content-center text-white text-center position-relative">
-                    <div class="p-4">
-                        <img src="{% static 'user/images/logo.png' %}" class="simg img-fluid mb-3" alt="Login">
-                        <h3 class="fw-bold">WELCOME LOGIN!</h3>
+{% block title %}Login | NandiRide{% endblock %}
+
+{% block content %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
+    <div class="row justify-content-center w-100">
+        <div class="col-12 col-lg-10 col-xl-9">
+            <!-- Main Card -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="row g-0">
+                    <!-- LEFT SIDE -->
+                    <div class="col-lg-5 bg-danger text-white d-flex align-items-center justify-content-center text-center p-5">
+                        <div>
+                            <img src="{% static 'user/images/logo.png' %}"
+                                 class="img-fluid mb-4"
+                                 style="max-width: 180px;"
+                                 alt="NandiRide Logo">
+
+                            <h2 class="fw-bold mb-3">
+                                Welcome to <span class="text-warning">NandiRide</span>
+                            </h2>
+
+                            <p class="text-white-50 mb-4">
+                                Your trusted ride booking partner.
+                                Book your ride quickly, safely and easily.
+                            </p>
+
+                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                <span class="badge rounded-pill bg-white text-danger px-3 py-2">
+                                    <i class="bi bi-shield-check me-1 text-danger"></i>
+                                    Safe
+                                </span>
+
+                                <span class="badge rounded-pill bg-white text-danger px-3 py-2">
+                                    <i class="bi bi-lightning-charge text-danger me-1"></i>
+                                    Fast
+                                </span>
+
+                                <span class="badge rounded-pill bg-white text-danger px-3 py-2">
+                                    <i class="bi bi-geo-alt text-danger me-1"></i>
+                                    Live Tracking
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                </div> 
-                <div class="col-md-7 bg-white">
-                    <div class="p-4 p-md-5">
-                        <h2 class="text-center fw-bold mb-4">LOGIN</h2>
-                                        <label class="form-label fw-semibold">Login Type </label>
-                                    <div class="form-control col-md-6 bg-light">
-                                        <select name="subject" class="form-select border-0 form-select-lg">
-                                            <option value=""> Please Select </option>
-                                            <option value="">Admin</option>
-                                            <option value="booking">User</option>
-                                        </select>
-                                    </div>
-                                        <form method="POST">
-                                                {% csrf_token %}
-                                                {% for field in form %}
-                                                    {% if field.name in 'username password' %}
-                                                        <div class="col-mb-3 pb-2">
-                                                            {{ field.label_tag }}
-                                                            {{ field }}
-                                                            {{ field.errors }}
-                                                        </div>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            <div class="text-end mb-3">
-                                                <a href="{% url 'forgetpassword' %}" class="text-decoration-none small"> Forgot Password? </a>
-                                            </div>
-                                            <div class="d-grid d-flex gap-4">
-                                                <a href="{% url 'dashboard' %}" class="lbtn rounded-pill fw-bold col-md-6">USER LOGIN</a>
-                                                <a href="{% url 'dashboard' %}" class="lbtn rounded-pill fw-bold col-md-6">ADMIN LOGIN</a>
-                                            </div>
-                                        </form>
-                        <p class="text-center text-muted small mt-4">Don't have an account?
-                            <a href="{% url 'signup' %}" class="fw-bold text-primary">Sign Up</a>
-                        </p>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="col-lg-7 bg-white">
+                        <div class="p-4 p-md-5">
+                            <!-- Heading -->
+                            <div class="text-center mb-4">
+                                <h2 class="fw-bold mb-1">
+                                    Login
+                                </h2>
+                            </div>
+
+                            <!-- Login Type -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    <i class="bi bi-person-badge me-1"></i>
+                                    Login Type
+                                </label>
+
+                                <select name="login_type"
+                                        class="form-select form-select-lg bg-light border-0 shadow-sm">
+                                    <option value="">
+                                        Please Select
+                                    </option>
+                                    <option value="admin">
+                                        Driver USer
+                                    </option>
+                                    <option value="user">
+                                        Public USer
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Login Form -->
+                            <form method="POST">
+                                {% csrf_token %}
+
+                                {% for field in form %}
+                                    {% if field.name in 'username password' %}
+                                        <div class="mb-3">
+                                            {{ field.label_tag }}
+                                            {{ field }}
+
+                                            {% if field.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {{ field.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <!-- Forgot Password -->
+                                <div class="text-end mb-3">
+                                    <a href="{% url 'forgetpassword' %}"
+                                       class="text-decoration-none small fw-semibold">
+                                        Forgot Password?
+                                    </a>
+                                </div>
+
+                                <!-- Login Buttons -->
+                                <div class="d-flex flex-column flex-md-row gap-3">
+                                    <a href="{% url 'user-dashboard' %}"
+                                       class="btn btn-danger rounded-pill fw-bold w-100">
+                                        USER LOGIN
+                                    </a>
+
+                                    <a href="{% url 'dashboard' %}"
+                                       class="btn btn-danger rounded-pill fw-bold w-100">
+                                        ADMIN LOGIN
+                                    </a>
+                                </div>
+                            </form>
+
+                            <!-- Signup -->
+                            <div class="text-center mt-4 pt-3 border-top">
+                                <p class="text-muted mb-0">
+                                    Don't have an account?
+                                    <a href="{% url 'signup' %}"
+                                       class="fw-bold text-danger text-decoration-none">
+                                        Sign Up
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            <!-- End Main Card -->
         </div>
     </div>
+</div>
+
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
                 {{ message }}
-                <span><a href="/profile/" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
+                <span><a href="#" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
             </div>
         {% endfor %}
     {% endif %}

@@ -3,301 +3,173 @@
 {% block page_heading %}
 Edit Profile
 {% endblock %}
-
 {% block dashboard_content %}
-
 <div class="container-fluid bg-light min-vh-100">
-
     <div class="mx-4">
-
-        <!-- ================= PROFILE CARD ================= -->
-
         <div class="card border-0 shadow-lg rounded-4">
-
             <div class="card-body p-4 p-lg-5">
-
-                <form method="POST"
-                      enctype="multipart/form-data"
-                      novalidate>
-
+                <form method="POST" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
-
-
-                    <!-- ================= PROFILE IMAGE ================= -->
-
                     <div class="text-center">
-
                         <div class="profile-image-wrapper mx-auto">
-
                             <div class="profile-circle">
-
                                 👤
-
                             </div>
-
                             <label for="{{ form.profileimage.id_for_label }}"
                                    class="camera-button">
-
                                 📷
-
                             </label>
-
                         </div>
-
                         <div class="d-none">
-
                             {{ form.profileimage }}
-
                         </div>
-
                         <h5 class="fw-bold mt-3 mb-1">
                             Profile Photo
                         </h5>
-
                         <small class="text-muted">
                             Click the camera icon to change your photo
                         </small>
-
                         {% if form.profileimage.errors %}
                             <div class="text-danger small mt-2">
                                 {{ form.profileimage.errors }}
                             </div>
                         {% endif %}
-
                     </div>
-
-
-
-                    <!-- ================= PERSONAL INFORMATION ================= -->
-
                     <div class="section-title mb-4">
-
                         <div class="section-icon">
                             👤
                         </div>
-
                         <div>
                             <h5 class="fw-bold mb-1">
                                 Personal Information
                             </h5>
-
-                            <!-- <small class="text-muted">
-                                Basic information about your account
-                            </small> -->
                         </div>
-
                     </div>
-
-
                     <div class="row g-4 mb-5">
-
                         {% for field in form %}
-
                             {% if field.name in 'user_name first_name last_name user_type Registration_date email mobile_number' %}
-
                                 <div class="col-md-6 col-lg-4">
-
                                     <label class="form-label fw-semibold">
-
                                         {{ field.label|default:"xxxx" }}
-
                                         {% if field.field.required %}
                                             <span class="text-danger">*</span>
                                         {% endif %}
-
                                     </label>
-
                                     {{ field }}
-
                                     {% if field.errors %}
                                         <div class="text-danger small mt-1">
                                             {{ field.errors }}
                                         </div>
                                     {% endif %}
-
                                 </div>
-
                             {% endif %}
-
                         {% endfor %}
-
                     </div>
-
-
-                    <!-- ================= Vehicle ================= -->
-
-                        <div class="section-title mb-4">
-
+                    <div class="section-title mb-4">
                         <div class="section-icon">
                             👤
                         </div>
-
                         <div>
                             <h5 class="fw-bold mb-1">
                                 Vehicle Information
                             </h5>
                         </div>
-
                     </div>
                     <div class="row g-4 mb-5">
-
                         {% for field in form %}
-
                             {% if field.name in 'Driver_Licence_Number vehicle_type vehicle_number vehicle_insurance mobile_number vehicle_pollution documnet_upload' %}
-
                                 <div class="col-md-6 col-lg-4">
-
                                     <label class="form-label fw-semibold">
-
                                         {{ field.label }}
-
                                         {% if field.field.required %}
                                             <span class="text-danger">*</span>
                                         {% endif %}
-
                                     </label>
-
                                     {{ field }}
-
                                     {% if field.errors %}
                                         <div class="text-danger small mt-1">
                                             {{ field.errors }}
                                         </div>
                                     {% endif %}
-
                                 </div>
-
                             {% endif %}
-
                         {% endfor %}
-
                     </div>
-
-                    <!-- ================= ADDRESS ================= -->
-
                     <div class="section-title mb-4">
-
                         <div class="section-icon">
                             📍
                         </div>
-
                         <div>
                             <h5 class="fw-bold mb-1">
                                 Address Information
                             </h5>
-
-                            <!-- <small class="text-muted">
-                                Your current residential address
-                            </small> -->
                         </div>
-
                     </div>
-
-
                     <div class="row g-4 mb-4">
-
                         {% for field in form %}
-
                             {% if field.name in 'street village_colony country state district pin_code' %}
-
                                 <div class="col-md-6 col-lg-4">
-
                                     <label class="form-label fw-semibold">
-
                                         {{ field.label }}
-
                                         {% if field.field.required %}
                                             <span class="text-danger">*</span>
                                         {% endif %}
-
                                     </label>
-
                                     {{ field }}
-
                                     {% if field.errors %}
                                         <div class="text-danger small mt-1">
                                             {{ field.errors }}
                                         </div>
                                     {% endif %}
-
                                 </div>
-
                             {% endif %}
-
                         {% endfor %}
-
                     </div>
-
-
-
-                    <!-- ================= ADDRESS FIELD ================= -->
-
                     {% if form.address %}
-
                         <div class="mb-4">
-
                             <label class="form-label fw-semibold">
                                 {{ form.address.label }}
                             </label>
-
                             {{ form.address }}
-
                             {% if form.address.errors %}
                                 <div class="text-danger small mt-1">
                                     {{ form.address.errors }}
                                 </div>
                             {% endif %}
-
                         </div>
-
                     {% endif %}
-
-
-
-                    <!-- ================= FORM ERRORS ================= -->
-
                     {% if form.non_field_errors %}
-
                         <div class="alert alert-danger rounded-3">
-
                             {{ form.non_field_errors }}
-
                         </div>
-
                     {% endif %}
-
-
-
-                    <!-- ================= BUTTONS ================= -->
-
                     <hr class="my-4">
-
-
                     <div class="d-flex justify-content-end gap-2">
-
                         <a href="/profile/"
                            class="btn btn-light border rounded-pill px-4">
-
                             Cancel
-
                         </a>
-
-
                         <button type="submit"
                                 class="btn btn-primary rounded-pill px-5">
-
                             ✓ Update Profile
-
                         </button>
-
                     </div>
-
                 </form>
-
             </div>
-
         </div>
     </div>
-
 </div>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <span>
+                <a href="#"
+                   class="lbtn btn-primary rounded-pill fw-bold">
+                    Login
+                </a>
+            </span>
+        </div>
+    {% endfor %}
+{% endif %}
 {% endblock %}

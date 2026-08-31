@@ -86,25 +86,21 @@ SOCIAL_LINKS = [
                 'name': 'Google',
                 'icon': 'fa-brands fa-google',
                 'url': '#',
-                'icon_bg': 'bg-opacity-10'
             },
             {
                 'name': 'Facebook',
                 'icon': 'fa-brands fa-facebook-f',
                 'url': '#',
-                'icon_bg': 'bg-success bg-opacity-10'
             },
             {
                 'name': 'Instagram',
                 'icon': 'fa-brands fa-instagram',
                 'url': '#',
-                'icon_bg': 'bg-danger bg-opacity-10'
             },
             {
                 'name': 'LinkedIn',
                 'icon': 'fa-brands fa-linkedin-in',
                 'url': '#',
-                'icon_bg': 'bg-primary bg-opacity-10'
             },
     ]
 
@@ -160,9 +156,24 @@ class Contact(TemplateView):
 class UserHomeView(TemplateView):
     def get(self, request):
         return render(request, 'user/home.html',{
-                'page_title': 'Book Your Ride',
+                'ride_title': '📍 Book Your Ride',
                 'page_subtitle': 'Quick, easy and reliable ride booking',
                 'booking_options': BOOKING_OPTIONS,
+                'book_title': '📍 Track Your Ride',
+                'title': 'Booking Status',
+                'description': (
+                    'Already booked a ride? Check your booking status '
+                    'using your registered mobile number or booking ID.'
+                ),
+                'features': (   '✓ Track booking status\n'
+                                '✓ View ride details'
+                                '✓ Check driver information'),
+                'button_icon': '📋',
+                'button_text': 'Check Status',
+                'url': 'booking-status',
+                'button_class': 'btn-outline-danger',
+                'icon_bg': 'bg-warning bg-opacity-10',
+                'icon_color': 'text-warning',
             })
 
 class UserBookingView(TemplateView):

@@ -1,543 +1,246 @@
 {% extends 'user/base.html' %}
 {% load static %}
-
-{% block title %}Contact Us | Nandi Ride{% endblock %}
-
+{% block title %}Contact Us | {{ site_name }}{% endblock %}
 {% block content %}
-
-<!-- ================= HERO ================= -->
 
 <section class="contact-hero">
     <div class="container">
         <div class="row align-items-center">
-
             <div class="col-lg-7">
-
                 <span class="badge bg-danger px-3 py-2 mb-3">
-                    Nandi Ride Support
+                    {{ contact_hero.badge }}
                 </span>
-
                 <h1 class="display-4 fw-bold text-white">
-                    We're Here to
-                    <span class="text-warning">Help You</span>
+                    {{ contact_hero.title }}
+                    <span class="text-warning">{{ contact_hero.highlight }}</span>
                 </h1>
-
                 <p class="lead text-white-50 mt-3">
-                    Have a question, complaint or feedback?
-                    Our Nandi Ride support team is ready to help you.
+                    {{ contact_hero.description }}
                 </p>
-
             </div>
-
             <div class="col-lg-5 text-center mt-4 mt-lg-0">
-
                 <div class="contact-icon">
-                    📞
+                    {{ contact_hero.icon }}
                 </div>
-
             </div>
-
         </div>
     </div>
 </section>
-
-
-<!-- ================= CONTACT INFO ================= -->
 
 <section class="py-5 bg-light">
-
     <div class="container">
-
         <div class="row g-4">
-
-            <!-- Phone -->
-
+            {% for item in contact_info %}
             <div class="col-md-4">
-
                 <div class="card contact-card border-0 shadow-sm h-100">
-
                     <div class="card-body text-center p-4">
-
-                        <div class="info-icon bg-danger-subtle text-danger">
-                            📞
+                        <div class="info-icon {{ item.icon_class }}">
+                            {{ item.icon }}
                         </div>
-
                         <h5 class="fw-bold mt-3">
-                            Call Us
+                            {{ item.title }}
                         </h5>
-
                         <p class="text-muted mb-2">
-                            Available 24/7 for ride support
+                            {{ item.description }}
                         </p>
-
-                        <a href="tel:+919999999999"
-                           class="text-danger fw-semibold text-decoration-none">
-                            +91 99999 99999
+                        <a href="{{ item.url }}"
+                           class="{{ item.link_class }} fw-semibold text-decoration-none">
+                            {{ item.value }}
                         </a>
-
                     </div>
-
                 </div>
-
             </div>
-
-
-            <!-- Email -->
-
-            <div class="col-md-4">
-
-                <div class="card contact-card border-0 shadow-sm h-100">
-
-                    <div class="card-body text-center p-4">
-
-                        <div class="info-icon bg-primary-subtle text-primary">
-                            ✉️
-                        </div>
-
-                        <h5 class="fw-bold mt-3">
-                            Email Us
-                        </h5>
-
-                        <p class="text-muted mb-2">
-                            Send us your questions anytime
-                        </p>
-
-                        <a href="mailto:support@nandiride.com"
-                           class="text-primary fw-semibold text-decoration-none">
-                            support@nandiride.com
-                        </a>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- Location -->
-
-            <div class="col-md-4">
-
-                <div class="card contact-card border-0 shadow-sm h-100">
-
-                    <div class="card-body text-center p-4">
-
-                        <div class="info-icon bg-success-subtle text-success">
-                            📍
-                        </div>
-
-                        <h5 class="fw-bold mt-3">
-                            Our Office
-                        </h5>
-
-                        <p class="text-muted mb-0">
-                            Nandi Ride Headquarters
-                            <br>
-                            India
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+            {% endfor %}
         </div>
-
     </div>
-
 </section>
 
-
-<!-- ================= CONTACT FORM ================= -->
-
 <section class="py-5">
-
     <div class="container">
-
         <div class="row g-5 align-items-center">
-
-            <!-- Left Content -->
-
             <div class="col-lg-5">
-
                 <span class="text-danger fw-semibold">
-                    GET IN TOUCH
+                    {{ contact_form.small }}
                 </span>
-
                 <h2 class="display-6 fw-bold mt-2">
-                    Have Something
-                    <span class="text-danger">To Say?</span>
+                    {{ contact_form.title }}
+                    <span class="text-danger">
+                        {{ contact_form.highlight }}
+                    </span>
                 </h2>
-
                 <p class="text-muted mt-3">
-                    Whether you need help with your booking,
-                    want to report an issue, or simply want to
-                    share your feedback, send us a message.
+                    {{ contact_form.description }}
                 </p>
 
-
                 <div class="mt-4">
-
-                    <div class="d-flex align-items-center mb-3">
-
+                    {% for point in contact_support_points %}
+                    <div class="d-flex align-items-center {% if not forloop.last %}mb-3{% endif %}">
                         <div class="small-contact-icon">
-                            ✓
+                            {{ point.icon }}
                         </div>
-
-                        <span>
-                            Quick customer support
-                        </span>
-
+                        <span>{{ point.text }}</span>
                     </div>
-
-
-                    <div class="d-flex align-items-center mb-3">
-
-                        <div class="small-contact-icon">
-                            ✓
-                        </div>
-
-                        <span>
-                            Booking assistance
-                        </span>
-
-                    </div>
-
-
-                    <div class="d-flex align-items-center">
-
-                        <div class="small-contact-icon">
-                            ✓
-                        </div>
-
-                        <span>
-                            Feedback & complaints
-                        </span>
-
-                    </div>
-
+                    {% endfor %}
                 </div>
-
             </div>
 
-
-            <!-- Form -->
-
             <div class="col-lg-7">
-
                 <div class="card border-0 shadow-lg rounded-4">
-
                     <div class="card-body p-4 p-lg-5">
-
                         <h4 class="fw-bold mb-4">
                             Send Us a Message
                         </h4>
 
                         <form method="POST">
-
                             {% csrf_token %}
 
                             <div class="row g-3">
-
-                                <!-- Name -->
-
                                 <div class="col-md-6">
-
                                     <label class="form-label fw-semibold">
                                         Full Name
                                     </label>
-
                                     <input type="text"
                                            name="name"
                                            class="form-control form-control-lg"
                                            placeholder="Enter your name"
                                            required>
-
                                 </div>
 
-
-                                <!-- Email -->
-
                                 <div class="col-md-6">
-
                                     <label class="form-label fw-semibold">
                                         Email
                                     </label>
-
                                     <input type="email"
                                            name="email"
                                            class="form-control form-control-lg"
                                            placeholder="Enter your email"
                                            required>
-
                                 </div>
 
-
-                                <!-- Phone -->
-
                                 <div class="col-md-6">
-
                                     <label class="form-label fw-semibold">
                                         Mobile Number
                                     </label>
-
                                     <input type="tel"
                                            name="mobile"
                                            class="form-control form-control-lg"
                                            placeholder="Enter mobile number">
-
                                 </div>
 
-
-                                <!-- Subject -->
-
                                 <div class="col-md-6">
-
                                     <label class="form-label fw-semibold">
                                         Subject
                                     </label>
-
                                     <select name="subject"
                                             class="form-select form-select-lg">
-
                                         <option value="">
                                             Please Select
                                         </option>
 
-                                        <option value="booking">
-                                            Booking Issue
+                                        {% for subject in contact_subjects %}
+                                        <option value="{{ subject.value }}">
+                                            {{ subject.name }}
                                         </option>
-
-                                        <option value="payment">
-                                            Payment Issue
-                                        </option>
-
-                                        <option value="driver">
-                                            Driver Related
-                                        </option>
-
-                                        <option value="complaint">
-                                            Complaint
-                                        </option>
-
-                                        <option value="feedback">
-                                            Feedback
-                                        </option>
-
-                                        <option value="other">
-                                            Other
-                                        </option>
-
+                                        {% endfor %}
                                     </select>
-
                                 </div>
 
-
-                                <!-- Message -->
-
                                 <div class="col-12">
-
                                     <label class="form-label fw-semibold">
                                         Message
                                     </label>
-
                                     <textarea name="message"
                                               rows="5"
                                               class="form-control"
                                               placeholder="Write your message..."
                                               required></textarea>
-
                                 </div>
-
-
-                                <!-- Button -->
 
                                 <div class="col-12">
-
                                     <button type="submit"
-                                            class="btn btn-danger btn-lg
-                                                   rounded-pill px-5">
-
-                                        Send Message
-                                        <span class="ms-2">➜</span>
-
+                                            class="btn btn-danger btn-lg rounded-pill px-5">
+                                        {{ contact_form.button }}
+                                        <span class="ms-2">
+                                            {{ contact_form.button_icon }}
+                                        </span>
                                     </button>
-
                                 </div>
-
                             </div>
-
                         </form>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </section>
 
-
-<!-- ================= FAQ ================= -->
-
 <section class="py-5 bg-light">
-
     <div class="container">
-
         <div class="text-center mb-5">
-
             <span class="text-danger fw-semibold">
                 FAQ
             </span>
-
             <h2 class="fw-bold mt-2">
                 Frequently Asked Questions
             </h2>
-
         </div>
-
 
         <div class="row justify-content-center">
-
             <div class="col-lg-9">
-
                 <div class="accordion" id="contactFAQ">
 
-
-                    <div class="accordion-item border-0 shadow-sm mb-3">
-
+                    {% for faq in contact_faq %}
+                    <div class="accordion-item border-0 shadow-sm {% if not forloop.last %}mb-3{% endif %}">
                         <h2 class="accordion-header">
-
-                            <button class="accordion-button fw-semibold"
+                            <button class="accordion-button {% if not faq.show %}collapsed{% endif %} fw-semibold"
                                     type="button"
                                     data-bs-toggle="collapse"
-                                    data-bs-target="#faqOne">
-
-                                How can I book a Nandi Ride?
-
+                                    data-bs-target="#{{ faq.id }}">
+                                {{ faq.question }}
                             </button>
-
                         </h2>
 
-                        <div id="faqOne"
-                             class="accordion-collapse collapse show"
+                        <div id="{{ faq.id }}"
+                             class="accordion-collapse collapse {% if faq.show %}show{% endif %}"
                              data-bs-parent="#contactFAQ">
-
                             <div class="accordion-body text-muted">
-
-                                You can book your ride through the
-                                Nandi Ride booking page by entering
-                                your pickup and destination.
-
+                                {{ faq.answer }}
                             </div>
-
                         </div>
-
                     </div>
-
-
-                    <div class="accordion-item border-0 shadow-sm mb-3">
-
-                        <h2 class="accordion-header">
-
-                            <button class="accordion-button collapsed fw-semibold"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#faqTwo">
-
-                                How can I track my ride?
-
-                            </button>
-
-                        </h2>
-
-                        <div id="faqTwo"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#contactFAQ">
-
-                            <div class="accordion-body text-muted">
-
-                                After booking, you can view your
-                                ride status and driver information
-                                from the My Rides section.
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="accordion-item border-0 shadow-sm">
-
-                        <h2 class="accordion-header">
-
-                            <button class="accordion-button collapsed fw-semibold"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#faqThree">
-
-                                How can I report a complaint?
-
-                            </button>
-
-                        </h2>
-
-                        <div id="faqThree"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#contactFAQ">
-
-                            <div class="accordion-body text-muted">
-
-                                You can submit your complaint using
-                                the contact form or the Complaints
-                                section of your dashboard.
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
+                    {% endfor %}
 
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </section>
 
-
-<!-- ================= CTA ================= -->
-
 <section class="py-5 bg-img1 text-white">
-
     <div class="container text-center">
-
         <h2 class="fw-bold">
-            Ready to Ride with Nandi?
+            {{ contact_cta.title }}
         </h2>
 
         <p class="mb-4 text-white-50">
-            Book your ride today and enjoy a safe journey.
+            {{ contact_cta.description }}
         </p>
 
-        <a href="{% url 'underconstruction' %}"
+        <a href="{{ contact_cta.url }}"
            class="btn btn-light btn-lg rounded-pill px-5">
-            🚕 Book Your Ride
+            {{ contact_cta.button }}
         </a>
-
     </div>
-
 </section>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <span><a href="#" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
+            </div>
+        {% endfor %}
+    {% endif %}
 
 
 {% endblock content %}
