@@ -6,7 +6,7 @@ urlpatterns = [
     path('booking/', views.UserBookingView.as_view(), name='booking'),
     path('payment/', views.UserPaymentView.as_view(), name='payment'),
     path('myride/', views.UserMyRideView.as_view(), name='myride'),
-    path('userdashboard', views.UserDashboardView.as_view(), name='user-dashboard'),
+    path('dashboard/', views.UserDashboardView.as_view(), name='user-dashboard'),
     path('editprofile/', views.USerEditProfileView.as_view(), name='editprofile'),
     #path('login/', views.UserLoginTypesView.as_view(), name='login'),
     path('signup/', views.UserSignupView.as_view(), name='signup'),
@@ -23,4 +23,5 @@ urlpatterns = [
     path('underconstruction/', views.UnderConstruction.as_view(), name='underconstruction'),
     path('about/', views.About.as_view(), name='about'),
     path('contact/', views.Contact.as_view(), name='contact'),
+    path('track/', views.TrackRideView.as_view(), name='track'),
 ]

@@ -1,6 +1,6 @@
 {% extends 'user/dashboard_base.html' %}
 {% block page_heading %}
-Payment
+Track
 {% endblock %}
 
 {% block dashboard_content %}
@@ -10,18 +10,19 @@ Payment
     <div class="card-body">
 
         <h5 class="mb-4">
-            My Payment
+            Track
         </h5>
 
-        <!-- Payment data यहाँ आएगा -->
+        <!-- Ride data-->
 
         <div class="alert alert-danger">
-            Your payment will appear here.
+            Track will appear here.
         </div>
 
     </div>
 
 </div>
+
 
     {% if messages %}
         {% for message in messages %}
@@ -31,5 +32,4 @@ Payment
             </div>
         {% endfor %}
     {% endif %}
-
 {% endblock %}

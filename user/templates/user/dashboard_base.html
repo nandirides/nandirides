@@ -1,112 +1,57 @@
 {% extends 'user/base.html' %}
 {% load static %}
 {% block content %}
-
 <div class="container-fluid p-0">
-
     <div class="row g-0">
-
-        <!-- ================= SIDEBAR ================= -->
-
         <aside class="col-md-3 col-lg-2 bg-white border-end min-vh-100">
-
             <div class="position-sticky top-0 p-3">
-
-                <!-- Logo -->
-
                 <div class="text-center mb-4">
-
                     <img src="{% static 'user/images/user_image.jpg' %}"
                          alt="Nandi Ride"
                          class="img-fluid"
                          style="max-width: 90px;">
-
                 </div>
-
-
-                <!-- Menu -->
-
                 <div class="nav flex-column nav-pills gap-2">
-
                     {% for item in sidebar_menu %}
-
                         <a href="{% url item.url %}"
-                           class="nav-link
-                           {% if request.resolver_match.url_name == item.url %}
-                               active
-                           {% else %}
-                               text-dark
-                           {% endif %}">
-
-                            <span class="me-2">
-                                {{ item.icon }}
-                            </span>
-
+                           class="nav-link slide {% if request.resolver_match.url_name == item.url %}active {% else %}text-dark{% endif %}">
+                            <span class="me-2"><i class=" {{item.icon }}"></i></span>
                             {{ item.name }}
-
                         </a>
-
                     {% endfor %}
-
                 </div>
-
             </div>
-
         </aside>
-
-
-        <!-- ================= RIGHT CONTENT ================= -->
-
         <main class="col-md-9 col-lg-10 bg-light min-vh-100">
-
-            <!-- Top Header -->
-
             <div class="bg-white border-bottom px-4 py-3">
-
-                <div class="d-flex justify-content-between
-                            align-items-center">
-
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-
                         <h4 class="mb-0">
                             {% block page_heading %}
                                 Dashboard
                             {% endblock %}
                         </h4>
-
                     </div>
-
-
-                    <!-- Profile -->
-
-                    <!-- <p id="rideCarousel"
-                       class="text-dark">
-                        👤 Profile
-                    </p> -->
-                                    <select class="active  border-0">
-                                        <option value="">👤 Profile</option>
-                                        <option value="">Logout</option>
-                                    </select>
-
+                        <select class="active border-0" onchange="if(this.value) window.location.href=this.value;">
+                            <option value="" class=" text-dark">👤 Profile</option>
+                            <option value="{% url 'login' %}">Logout</option>
+                        </select>
                 </div>
-
             </div>
-
-
-            <!-- Page Content -->
-
             <div class="p-4">
-
                 {% block dashboard_content %}
-
                 {% endblock %}
-
             </div>
-
         </main>
-
     </div>
-
 </div>
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <span><a href="#" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
+            </div>
+        {% endfor %}
+    {% endif %}
 {% endblock content %}

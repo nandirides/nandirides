@@ -13,9 +13,11 @@ Dashboard
             {% for dashboard in dashboard_card %}
                 <div class="col-md-4">
                     <div class="card border-0 ">
-                        <div class="card-body alert alert-danger">
-                            <i class="{{ dashboard.icon }}"></i>
-                            <h6 class="text-dark">{{ dashboard.name }}</h6>
+                        <div class="card-body alert alert-info">
+                            <div class="d-flex text-dark">
+                                <i class="{{ dashboard.icon }} me-2"></i>
+                            <h6 class="">{{ dashboard.name }}</h6>
+                            </div>
                             <h2 class="text-success">{{ dashboard.no }}</h2>
                         </div>
                     </div>

@@ -1,102 +1,138 @@
 {% extends 'user/dashboard_base.html' %}
 {% load static %}
+
 {% block page_heading %}
-My Profile
+Profile
 {% endblock %}
 
 {% block dashboard_content %}
-    <div class="card border-0 shadow-sm">
-        <div class="row g-0">
-            <div class="position-relative mb-5 ">
-                <div class="d-flex justify-content-center align-items-center "style="bottom: -65px;">
-                    {% if user.profileimage %}
-                            <img src="{% static 'user/images/user_image.jpg' %}"
-                                alt="User Image"
-                                class="rounded-circle border border-5 border-white shadow"
-                                width="140"
-                                height="140"
-                                style="object-fit: cover;">
-                        {% else %}
-                            <div class="rounded-circle bg-danger border border-5 border-white shadow
-                                        d-flex align-items-center justify-content-center"
-                                style="width:140px; height:140px; font-size:55px;">
-                                👤
-                            </div>
-                    {% endif %}
-                </div>
+<div class="card border-0 shadow-sm">
+    <div class="row g-0">
+        <div class="position-relative mb-5">
+            <div class="d-flex justify-content-center align-items-center" style="bottom: -65px;">
+                {% if user.profileimage %}
+                    <img src="{% static 'user/images/user_image.jpg' %}"
+                         alt="User Image"
+                         class="rounded-circle border border-5 border-white shadow"
+                         width="140"
+                         height="140"
+                         style="object-fit: cover;">
+                {% else %}
+                    <div class="rounded-circle bg-danger border border-5 border-white shadow d-flex align-items-center justify-content-center"
+                         style="width: 140px; height: 140px; font-size: 55px;">
+                        <i class="fa fa-user text-white"></i>
+                    </div>
+                {% endif %}
             </div>
+        </div>
 
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <div class="section-title mb-4">
-                    <div class="section-icon">👤</div>
-                        <div>
-                            <h5 class="fw-bold mb-1"> Personal Information</h5>
+                <div class="p-4">
+                    <div class="d-flex align-items-center gap-3 bg-white border-start border-4 border-danger rounded-3 shadow-sm px-3 py-2 mb-4">
+                        <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
+                             style="width: 40px; height: 40px;">
+                            <span class="fs-5"><i class="fa fa-user text-white"></i></span>
                         </div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            Personal Information
+                        </h5>
                     </div>
+
                     <div class="row g-3">
                         {% for user in form %}
                             {% if user.name in 'user_name first_name last_name user_type Registration_date email mobile_number' %}
                                 <div class="col-md-6 col-lg-3">
-                                    <label class="form-label">{{ user.label_tag }}</label>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'xxxx' }}" readonly>
+                                    <label class="form-label">
+                                        {{ user.label_tag }}
+                                    </label>
+                                    <input type="text"
+                                           class="form-control"
+                                           value="{{ user.value|default:'xxxx' }}"
+                                           readonly>
                                 </div>
                             {% endif %}
                         {% endfor %}
                     </div>
                 </div>
-                    <div class="mx-4">
-                        <div class="section-title mb-4">
-                            <div class="section-icon">👤</div>
-                                <div>
-                                    <h5 class="fw-bold mb-1">
-                                        Vehicle Information
-                                    </h5>
-                                </div>
-                            </div>
-                                <div class="row g-3">
-                                        {% for user in form %}
-                                            {% if user.name in 'Driver_Licence_Number vehicle_type vehicle_number vehicle_insurance vehicle_pollution documnet_upload' %}
-                                                <div class="col-md-6 col-lg-4">
-                                                    <label class="form-label">{{ user.label_tag }}</label>
-                                                    <input type="text" class="form-control" value="{{ field.value|default:'xxxx' }}" readonly>
-                                                </div>
-                                            {% endif %}
-                                        {% endfor %}
-                                </div>
+
+                <div class="p-4">
+                    <div class="d-flex align-items-center gap-3 bg-white border-start border-4 border-danger rounded-3 shadow-sm px-3 py-2 mb-4">
+                        <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
+                             style="width: 40px; height: 40px;">
+                            <span class="fs-5"><i class="fa fa-car text-white"></i></span>
                         </div>
-                            </div>
-                                <div class="p-4">
-                                    <div class="section-title">
-                                        <div class="section-icon">👤</div>
-                                    <div>
-                                        <h5 class="fw-bold mb-1">Address Information</h5>
-                                    </div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            Vehicle Information
+                        </h5>
+                    </div>
+
+                    <div class="row g-3">
+                        {% for user in form %}
+                            {% if user.name in 'Driver_Licence_Number vehicle_type vehicle_number vehicle_insurance vehicle_pollution documnet_upload' %}
+                                <div class="col-md-6 col-lg-4">
+                                    <label class="form-label">
+                                        {{ user.label_tag }}
+                                    </label>
+                                    <input type="text"
+                                           class="form-control"
+                                           value="{{ user.value|default:'xxxx' }}"
+                                           readonly>
                                 </div>
-                                <div class="row g-4">
-                                        {% for user in form %}
-                                            {% if user.name in 'street village_colony country state district pin_code' %}
-                                                <div class="col-md-6 col-lg-4">
-                                                    <label class="form-label">{{ user.label_tag }}</label>
-                                                    <input type="text" class="form-control" value="{{ field.value|default:'xxxx' }}" readonly>
-                                                </div>
-                                            {% endif %}
-                                        {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <div class="d-flex align-items-center gap-3 bg-white border-start border-4 border-danger rounded-3 shadow-sm px-3 py-2 mb-4">
+                        <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
+                             style="width: 40px; height: 40px;">
+                            <span class="fs-5"><i class="fa fa-map-marker text-white"></i></span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0">
+                            Address Information
+                        </h5>
+                    </div>
+
+                    <div class="row g-4">
+                        {% for user in form %}
+                            {% if user.name in 'street village_colony country state district pin_code' %}
+                                <div class="col-md-6 col-lg-4">
+                                    <label class="form-label">
+                                        {{ user.label_tag }}
+                                    </label>
+                                    <input type="text"
+                                           class="form-control"
+                                           value="{{ user.value|default:'xxxx' }}"
+                                           readonly>
                                 </div>
-                        </div> 
-                                </div>          
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a href="/editprofile/" class="btn btn-light border rounded-pill px-4">✏️ Edit Profile</a>
-                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 px-4 pb-4">
+                    <a href="/editprofile/"
+                       class="btn btn-light border rounded-pill px-4">
+                        <i class="fa fa-edit text-white"></i> Edit Profile
+                    </a>
                 </div>
             </div>
+        </div>
     </div>
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+        </div>
+    {% endfor %}
+{% endif %}
 {% endblock %}
