@@ -55,29 +55,34 @@ BOOKING_OPTIONS = [
 
 SIDEBAR_MENU = [
             {
-                'icon': '🏠',
+                'icon': 'fa fa-dashboard',
                 'name': 'Dashboard',
                 'url': 'user-dashboard',
             },
             {
-                'icon': '👤',
+                'icon': 'fa fa-user',
                 'name': 'Profile',
                 'url': 'profile',
             },
             {
-                'icon': '🛵',
+                'icon': 'fa fa-motorcycle',
                 'name': 'My Rides',
                 'url': 'myride',
             },
             {
-                'icon': '📅',
+                'icon': 'fa fa-calendar',
                 'name': 'Bookings',
                 'url': 'booking',
             },
             {
-                'icon': '💳',
+                'icon': 'fa fa-credit-card',
                 'name': 'Payments',
                 'url': 'payment',
+            },
+            {
+                'icon': 'fa fa-map-marker',
+                'name': 'Track',
+                'url': 'track',
             },
         ]
 
@@ -107,33 +112,28 @@ SOCIAL_LINKS = [
 DASHBOARD_CARD = [
         {
                 'name': 'Total Ride',
-                'icon': 'fa-brands fa-road',
+                'icon': 'fa fa-motorcycle',
                 'no': '15',
-                'icon_bg': 'bg-primary bg-opacity-10'
             },
             {
                 'name': 'Completed',
-                'icon': 'fa-brands fa-check',
+                'icon': 'fa fa-check',
                 'no': '25',
-                'icon_bg': 'bg-success bg-opacity-10'
             },
             {
                 'name': 'Cancelled',
-                'icon': 'fa-brands fa-solid fa-xmark',
+                'icon': 'fa-solid fa-xmark',
                 'no': '19',
-                'icon_bg': 'bg-danger bg-opacity-10'
             },
             {
                 'name': 'Booking',
-                'icon': 'fa-brands fa-taxi',
+                'icon': 'fa fa-taxi',
                 'no': '13',
-                'icon_bg': 'bg-primary bg-opacity-10'
             },
             {
                 'name': 'Payment',
-                'icon': 'fa-brands fa-money',
+                'icon': 'fa-solid fa-money-bill',
                 'no': '1K',
-                'icon_bg': 'bg-primary bg-opacity-10'
             },
     ]
 
@@ -187,6 +187,10 @@ class UserMyRideView(TemplateView):
 class UserPaymentView(TemplateView):
     def get(self, request):
         return render(request, 'user/profile/payment.html',{'sidebar_menu': SIDEBAR_MENU})
+
+class TrackRideView(TemplateView):
+    def get(self, request):
+        return render(request, 'user/profile/track.html',{'sidebar_menu': SIDEBAR_MENU})
 
 class USerEditProfileView(TemplateView):
     def get(self, request):

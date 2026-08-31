@@ -136,3 +136,25 @@ body {
             background: #d32f2f;
             color: white;
         }
+        
+        .nav-pills .nav-link.slide {
+            background-color: #ffffff;
+            color: #212529;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-pills .nav-link.slide:hover {
+            background-color: #dc3545 !important;
+            color: #ffffff !important;
+        }
+
+        .nav-pills .nav-link.slide.active {
+            background-color: #dc3545 !important;
+            color: #ffffff !important;
+        }
+
+        .nav-pills .nav-link.slide.active:hover {
+            background-color: #dc3545 !important;
+            color: #ffffff !important;
+        }

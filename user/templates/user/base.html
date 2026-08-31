@@ -44,7 +44,7 @@
                 <li class="nav-item">
                     <a href="{{ nav.url }}"
                        class="nav-link px-3 fw-semibold {% if request.path == nav.url %}active text-danger{% else %}text-dark{% endif %}">
-                        {{ nav.name }}
+                        <i class="{{nav.icon}} me-2"></i>{{ nav.name }}
                     </a>
                 </li>
                 {% endfor %}
@@ -141,7 +141,7 @@
                     <a href="{{ social.url }}"
                        target="_blank"
                        rel="noopener"
-                       class="btn btn-light rounded-circle d-flex align-items-center justify-content-center"
+                       class="text-decoration-none bg-white tn-light rounded-circle d-flex align-items-center justify-content-center"
                        style="width:42px;height:42px;">
                         <i class="{{ social.icon }} text-dark"></i>
                     </a>
@@ -161,7 +161,7 @@
             <div class="col-12 col-md-6 text-center text-md-end mt-2 mt-md-0">
                 <small class="text-white">
                     Made with
-                    <i class="fa-solid fa-heart text-warning"></i>
+                    <i class="fa-solid fa-heart text-white"></i>
                     for Nandi Ride
                 </small>
             </div>

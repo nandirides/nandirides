@@ -20,18 +20,27 @@ def site_data(request):
             {
                 'name': 'Home',
                 'url': reverse('home'),
+                'icon': 'fa fa-home',
             },
             {
                 'name': 'About',
                 'url': reverse('about'),
+                'icon': 'fa fa-info-circle',
             },
             {
                 'name': 'Services',
                 'url': reverse('underconstruction'),
+                'icon': 'fa fa-cogs',
+            },
+            {
+                'name': 'Career',
+                'url': reverse('underconstruction'),
+                'icon': 'fa fa-briefcase',
             },
             {
                 'name': 'Contact',
                 'url': reverse('contact'),
+                'icon': 'fa fa-phone',
             },
         ],
 

@@ -14,8 +14,8 @@
                 <div class="nav flex-column nav-pills gap-2">
                     {% for item in sidebar_menu %}
                         <a href="{% url item.url %}"
-                           class="nav-link {% if request.resolver_match.url_name == item.url %}active{% else %}text-dark{% endif %}">
-                            <span class="me-2">{{ item.icon }}</span>
+                           class="nav-link slide {% if request.resolver_match.url_name == item.url %}active {% else %}text-dark{% endif %}">
+                            <span class="me-2"><i class=" {{item.icon }}"></i></span>
                             {{ item.name }}
                         </a>
                     {% endfor %}
@@ -33,7 +33,7 @@
                         </h4>
                     </div>
                         <select class="active border-0" onchange="if(this.value) window.location.href=this.value;">
-                            <option value="">👤 Profile</option>
+                            <option value="" class=" text-dark">👤 Profile</option>
                             <option value="{% url 'login' %}">Logout</option>
                         </select>
                 </div>

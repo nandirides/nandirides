@@ -23,4 +23,5 @@ urlpatterns = [
     path('underconstruction/', views.UnderConstruction.as_view(), name='underconstruction'),
     path('about/', views.About.as_view(), name='about'),
     path('contact/', views.Contact.as_view(), name='contact'),
+    path('track/', views.TrackRideView.as_view(), name='track'),
 ]
