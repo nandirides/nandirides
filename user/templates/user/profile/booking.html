@@ -2,21 +2,487 @@
 {% block page_heading %}
 My Booking
 {% endblock %}
+{% block title %}NandiRide | Booking{% endblock %}
 
 {% block dashboard_content %}
 
-<div class="card border-0 shadow-sm">
+<div class="container-fluid py-4">
 
-    <div class="card-body">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fa-solid fa-car-side me-2"></i>
+                Book a Ride
+            </h2>
+            <p class="text-muted mb-0">
+                Enter your pickup and destination details
+            </p>
+        </div>
 
-        <h5 class="mb-4">
-            My Booking
-        </h5>
+        <span class="badge bg-success px-3 py-2">
+            <i class="fa-solid fa-circle me-1 small"></i>
+            Available
+        </span>
+    </div>
 
-        <!-- Booking data यहाँ आएगा -->
 
-        <div class="alert alert-danger">
-            Your booking will appear here.
+    <div class="row g-4">
+
+        <!-- Booking Form -->
+        <div class="col-lg-7">
+
+            <div class="card border-0 shadow-sm rounded-4">
+
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-1">
+                        <i class="fa-solid fa-location-dot text-danger me-2"></i>
+                        Trip Details
+                    </h5>
+                    <p class="text-muted small mb-0">
+                        Where would you like to go?
+                    </p>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form method="POST" action="{% url 'booking' %}">
+                        {% csrf_token %}
+
+                        <!-- Pickup -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+                                Pickup Location
+                            </label>
+
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fa-solid fa-location-dot text-success"></i>
+                                </span>
+
+                                <input
+                                    type="text"
+                                    name="pickup_location"
+                                    class="form-control border-start-0"
+                                    placeholder="Enter pickup location"
+                                    required
+                                >
+                            </div>
+
+                        </div>
+
+
+                        <!-- Destination -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+                                Destination
+                            </label>
+
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fa-solid fa-location-crosshairs text-danger"></i>
+                                </span>
+
+                                <input
+                                    type="text"
+                                    name="destination"
+                                    class="form-control border-start-0"
+                                    placeholder="Enter destination"
+                                    required
+                                >
+                            </div>
+
+                        </div>
+
+
+                        <!-- Date & Time -->
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Ride Date
+                                </label>
+
+                                <input
+                                    type="date"
+                                    name="ride_date"
+                                    class="form-control"
+                                    required
+                                >
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Ride Time
+                                </label>
+
+                                <input
+                                    type="time"
+                                    name="ride_time"
+                                    class="form-control"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Vehicle Type -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+                                Select Ride
+                            </label>
+
+                            <div class="row g-3">
+
+                                <!-- Bike -->
+                                <div class="col-md-4">
+
+                                    <input
+                                        type="radio"
+                                        class="btn-check"
+                                        name="vehicle_type"
+                                        id="bike"
+                                        value="bike"
+                                        checked
+                                    >
+
+                                    <label
+                                        class="btn btn-outline-success w-100 py-3"
+                                        for="bike"
+                                    >
+                                        <i class="fa-solid fa-motorcycle fs-4 d-block mb-2"></i>
+                                        Bike
+                                        <small class="d-block text-white">
+                                            Affordable
+                                        </small>
+                                    </label>
+
+                                </div>
+
+
+                                <!-- Auto -->
+                                <div class="col-md-4">
+
+                                    <input
+                                        type="radio"
+                                        class="btn-check"
+                                        name="vehicle_type"
+                                        id="auto"
+                                        value="auto"
+                                    >
+
+                                    <label
+                                        class="btn btn-outline-success w-100 py-3"
+                                        for="auto"
+                                    >
+                                        <i class="fa-solid fa-car-side fs-4 d-block mb-2"></i>
+                                        Auto
+                                        <small class="d-block text-white">
+                                            Comfortable
+                                        </small>
+                                    </label>
+
+                                </div>
+
+
+                                <!-- Cab -->
+                                <div class="col-md-4">
+
+                                    <input
+                                        type="radio"
+                                        class="btn-check"
+                                        name="vehicle_type"
+                                        id="cab"
+                                        value="cab"
+                                    >
+
+                                    <label
+                                        class="btn btn-outline-success w-100 py-3"
+                                        for="cab"
+                                    >
+                                        <i class="fa-solid fa-taxi fs-4 d-block mb-2"></i>
+                                        Cab
+                                        <small class="d-block text-white">
+                                            Premium
+                                        </small>
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Passenger -->
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Passengers
+                                </label>
+
+                                <select
+                                    name="passengers"
+                                    class="form-select"
+                                >
+                                    <option value="1">1 Passenger</option>
+                                    <option value="2">2 Passengers</option>
+                                    <option value="3">3 Passengers</option>
+                                    <option value="4">4 Passengers</option>
+                                    <option value="5">5 Passengers</option>
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Payment Method
+                                </label>
+
+                                <select
+                                    name="payment_method"
+                                    class="form-select"
+                                >
+                                    <option value="cash">
+                                        Cash
+                                    </option>
+
+                                    <option value="upi">
+                                        UPI
+                                    </option>
+
+                                    <option value="online">
+                                        Online Payment
+                                    </option>
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+                                Additional Note
+                                <span class="text-muted fw-normal">
+                                    (Optional)
+                                </span>
+                            </label>
+
+                            <textarea
+                                name="note"
+                                rows="3"
+                                class="form-control"
+                                placeholder="Any special instructions for the driver?"
+                            ></textarea>
+
+                        </div>
+
+
+                        <!-- Submit -->
+                        <button
+                            type="submit"
+                            class="btn btn-danger w-100 py-3 rounded-3 fw-semibold"
+                        >
+                            <i class="fa-solid fa-car me-2"></i>
+                            Confirm Booking
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Right Side -->
+        <div class="col-lg-5">
+
+            <!-- Estimated Fare -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+                        <i class="fa-solid fa-receipt me-2"></i>
+                        Booking Summary
+                    </h5>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">
+                            Base Fare
+                        </span>
+                        <span class="fw-semibold">
+                            ₹50
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">
+                            Distance
+                        </span>
+                        <span class="fw-semibold">
+                            -- km
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">
+                            Ride Charge
+                        </span>
+                        <span class="fw-semibold">
+                            ₹--
+                        </span>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">
+                            Estimated Fare
+                        </span>
+
+                        <span class="fw-bold fs-5 text-danger">
+                            ₹--
+                        </span>
+                    </div>
+
+                    <small class="text-muted d-block mt-2">
+                        * Final fare may vary depending on distance,
+                        traffic and waiting time.
+                    </small>
+
+                </div>
+            </div>
+
+
+            <!-- How It Works -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+                        How Nandi Ride Works
+                    </h5>
+
+                    <div class="d-flex mb-4">
+
+                        <div
+                            class="rounded-circle bg-light d-flex
+                            align-items-center justify-content-center
+                            me-3"
+                            style="width:45px;height:45px;"
+                        >
+                            <i class="fa-solid fa-location-dot text-danger"></i>
+                        </div>
+
+                        <div>
+                            <h6 class="fw-semibold mb-1">
+                                Enter Locations
+                            </h6>
+
+                            <small class="text-muted">
+                                Select your pickup and destination.
+                            </small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="d-flex mb-4">
+
+                        <div
+                            class="rounded-circle bg-light d-flex
+                            align-items-center justify-content-center
+                            me-3"
+                            style="width:45px;height:45px;"
+                        >
+                            <i class="fa-solid fa-car text-danger"></i>
+                        </div>
+
+                        <div>
+                            <h6 class="fw-semibold mb-1">
+                                Choose Your Ride
+                            </h6>
+
+                            <small class="text-muted">
+                                Select Bike, Auto or Cab.
+                            </small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="d-flex">
+
+                        <div
+                            class="rounded-circle bg-light d-flex
+                            align-items-center justify-content-center
+                            me-3"
+                            style="width:45px;height:45px;"
+                        >
+                            <i class="fa-solid fa-circle-check text-success"></i>
+                        </div>
+
+                        <div>
+                            <h6 class="fw-semibold mb-1">
+                                Confirm Booking
+                            </h6>
+
+                            <small class="text-muted">
+                                Confirm your ride and get a driver.
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- Support -->
+            <div class="card border-0 shadow-sm rounded-4">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center">
+
+                        <div
+                            class="rounded-circle bg-danger bg-opacity-10
+                            p-3 me-3"
+                        >
+                            <i class="fa-solid fa-headset text-danger fs-4 text-white"></i>
+                        </div>
+
+                        <div>
+                            <h6 class="fw-bold mb-1">
+                                Need Help?
+                            </h6>
+
+                            <small class="text-white">
+                                Contact Nandi Ride Support
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
         </div>
 
     </div>

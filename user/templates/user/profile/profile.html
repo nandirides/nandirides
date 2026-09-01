@@ -2,137 +2,979 @@
 {% load static %}
 
 {% block page_heading %}
-Profile
+    Profile
 {% endblock %}
+{% block title %}{{site_name}} | Profile{% endblock %}
+
 
 {% block dashboard_content %}
-<div class="card border-0 shadow-sm">
-    <div class="row g-0">
-        <div class="position-relative mb-5">
-            <div class="d-flex justify-content-center align-items-center" style="bottom: -65px;">
-                {% if user.profileimage %}
-                    <img src="{% static 'user/images/user_image.jpg' %}"
-                         alt="User Image"
-                         class="rounded-circle border border-5 border-white shadow"
-                         width="140"
-                         height="140"
-                         style="object-fit: cover;">
-                {% else %}
-                    <div class="rounded-circle bg-danger border border-5 border-white shadow d-flex align-items-center justify-content-center"
-                         style="width: 140px; height: 140px; font-size: 55px;">
-                        <i class="fa fa-user text-white"></i>
+
+<div class="container-fluid px-0">
+
+    <!-- =====================================================
+         PROFILE TOP CARD
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+
+        <!-- RED HEADER -->
+
+        <div class="bg-danger profile-header">
+            <div class="p-4">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="profile-top-icon">
+                        <i class="fa-solid fa-user"></i>
                     </div>
-                {% endif %}
+
+                    <div class="ms-3 text-white">
+
+                        <h4 class="fw-bold mb-1">
+                            My Profile
+                        </h4>
+
+                        <p class="mb-0 opacity-75">
+                            Manage your NandiRide account information
+                        </p>
+
+                    </div>
+
+                </div>
+
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="p-4">
-                    <div class="d-flex align-items-center gap-3 bg-white border-start border-4 border-danger rounded-3 shadow-sm px-3 py-2 mb-4">
-                        <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
-                             style="width: 40px; height: 40px;">
-                            <span class="fs-5"><i class="fa fa-user text-white"></i></span>
-                        </div>
-                        <h5 class="fw-bold text-dark mb-0">
-                            Personal Information
-                        </h5>
-                    </div>
 
-                    <div class="row g-3">
-                        {% for user in form %}
-                            {% if user.name in 'user_name first_name last_name user_type Registration_date email mobile_number' %}
-                                <div class="col-md-6 col-lg-3">
-                                    <label class="form-label">
-                                        {{ user.label_tag }}
-                                    </label>
-                                    <input type="text"
-                                           class="form-control"
-                                           value="{{ user.value|default:'xxxx' }}"
-                                           readonly>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
+        <!-- USER SUMMARY -->
+
+        <div class="card-body p-4">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-auto text-center text-md-start">
+
+                    {% if form.instance.profileimage %}
+
+                        <img
+                            src="{{ form.instance.profileimage.url }}"
+                            alt="Profile"
+                            class="rounded-circle border border-4
+                                   border-white shadow profile-avatar"
+                        >
+
+                    {% else %}
+
+                        <div class="profile-avatar-placeholder">
+
+                            <i class="fa-solid fa-user"></i>
+
+                        </div>
+
+                    {% endif %}
+
                 </div>
 
-                <div class="p-4">
-                    <div class="d-flex align-items-center gap-3 bg-white border-start border-4 border-danger rounded-3 shadow-sm px-3 py-2 mb-4">
-                        <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
-                             style="width: 40px; height: 40px;">
-                            <span class="fs-5"><i class="fa fa-car text-white"></i></span>
-                        </div>
-                        <h5 class="fw-bold text-dark mb-0">
-                            Vehicle Information
-                        </h5>
-                    </div>
 
-                    <div class="row g-3">
-                        {% for user in form %}
-                            {% if user.name in 'Driver_Licence_Number vehicle_type vehicle_number vehicle_insurance vehicle_pollution documnet_upload' %}
-                                <div class="col-md-6 col-lg-4">
-                                    <label class="form-label">
-                                        {{ user.label_tag }}
-                                    </label>
-                                    <input type="text"
-                                           class="form-control"
-                                           value="{{ user.value|default:'xxxx' }}"
-                                           readonly>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
+                <div class="col-md mt-3 mt-md-0">
+
+                    <h4 class="fw-bold mb-1">
+
+                        {{ form.instance.user_name|default:"NandiRide User" }}
+
+                    </h4>
+
+                    <p class="text-secondary mb-2">
+
+                        {% if form.instance.email %}
+
+                            <i class="fa-solid fa-envelope me-2 text-danger"></i>
+
+                            {{ form.instance.email }}
+
+                        {% endif %}
+
+                    </p>
+
+
+                    {% if form.instance.user_type %}
+
+                        <span class="badge rounded-pill
+                                     bg-danger-subtle text-danger px-3 py-2">
+
+                            <i class="fa-solid fa-user-tag me-1"></i>
+
+                            {{ form.instance.user_type }}
+
+                        </span>
+
+                    {% endif %}
+
                 </div>
 
-                <div class="p-4">
-                    <div class="d-flex align-items-center gap-3 bg-white border-start border-4 border-danger rounded-3 shadow-sm px-3 py-2 mb-4">
-                        <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
-                             style="width: 40px; height: 40px;">
-                            <span class="fs-5"><i class="fa fa-map-marker text-white"></i></span>
-                        </div>
-                        <h5 class="fw-bold text-dark mb-0">
-                            Address Information
-                        </h5>
-                    </div>
 
-                    <div class="row g-4">
-                        {% for user in form %}
-                            {% if user.name in 'street village_colony country state district pin_code' %}
-                                <div class="col-md-6 col-lg-4">
-                                    <label class="form-label">
-                                        {{ user.label_tag }}
-                                    </label>
-                                    <input type="text"
-                                           class="form-control"
-                                           value="{{ user.value|default:'xxxx' }}"
-                                           readonly>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
+                <div class="col-md-auto mt-3 mt-md-0">
 
-                <div class="d-flex justify-content-end gap-2 px-4 pb-4">
-                    <a href="/editprofile/"
-                       class="btn btn-light border rounded-pill px-4">
-                        <i class="fa fa-edit text-white"></i> Edit Profile
+                    <a
+                        href="{% url 'editprofile' %}"
+                        class="btn btn-danger rounded-pill px-4"
+                    >
+
+                        <i class="fa-solid fa-pen-to-square me-2"></i>
+
+                        Edit Profile
+
                     </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-            {{ message }}
-            <button type="button"
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         PERSONAL INFORMATION
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="section-heading mb-4">
+
+                <div class="section-icon bg-danger-subtle text-danger">
+
+                    <i class="fa-solid fa-user"></i>
+
+                </div>
+
+                <div>
+
+                    <h5 class="fw-bold mb-0">
+                        Personal Information
+                    </h5>
+
+                    <small class="text-secondary">
+                        Your basic account information
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                {% for field in form %}
+
+                    {% if field.name == 'user_name' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>
+                                    {{ field.label }}
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-user"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% elif field.name == 'first_name' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>
+                                    {{ field.label }}
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-user"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% elif field.name == 'last_name' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>
+                                    {{ field.label }}
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-user"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% elif field.name == 'user_type' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>
+                                    {{ field.label }}
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-user-tag"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% elif field.name == 'Registration_date' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>
+                                    {{ field.label }}
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-calendar-days"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% elif field.name == 'email' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>
+                                    {{ field.label }}
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-envelope"></i>
+                                    </span>
+
+                                    <input
+                                        type="email"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% elif field.name == 'mobile_number' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>
+                                    {{ field.label }}
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-phone"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         VEHICLE INFORMATION
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="section-heading mb-4">
+
+                <div class="section-icon bg-danger-subtle text-danger">
+
+                    <i class="fa-solid fa-car"></i>
+
+                </div>
+
+                <div>
+
+                    <h5 class="fw-bold mb-0">
+                        Vehicle Information
+                    </h5>
+
+                    <small class="text-secondary">
+                        Your registered vehicle details
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                {% for field in form %}
+
+                    {% if field.name == 'Driver_Licence_Number' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-id-card"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    {% elif field.name == 'vehicle_type' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-motorcycle"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    {% elif field.name == 'vehicle_number' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-hashtag"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    {% elif field.name == 'vehicle_insurance' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-shield-halved"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    {% elif field.name == 'vehicle_pollution' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-leaf"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    {% elif field.name == 'documnet_upload' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-file"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ADDRESS INFORMATION
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="section-heading mb-4">
+
+                <div class="section-icon bg-danger-subtle text-danger">
+
+                    <i class="fa-solid fa-location-dot"></i>
+
+                </div>
+
+                <div>
+
+                    <h5 class="fw-bold mb-0">
+                        Address Information
+                    </h5>
+
+                    <small class="text-secondary">
+                        Your registered address
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                {% for field in form %}
+
+                    {% if field.name == 'street' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-road"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    {% elif field.name == 'village_colony' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-house"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    {% elif field.name == 'country' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-globe"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    {% elif field.name == 'state' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-map"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    {% elif field.name == 'district' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    {% elif field.name == 'pin_code' %}
+
+                        <div class="col-md-6 col-xl-4">
+
+                            <div class="profile-field">
+
+                                <label>{{ field.label }}</label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-map-pin"></i>
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ field.value|default:'Not Provided' }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         QUICK ACTIONS
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-1">
+                NandiRide Quick Actions
+            </h5>
+
+            <p class="text-secondary small mb-4">
+                Quickly access your ride and payment services.
+            </p>
+
+
+            <div class="row g-3">
+
+
+                <!-- BOOKING -->
+
+                <div class="col-md-4">
+
+                    <a
+                        href="{% url 'booking' %}"
+                        class="quick-action text-decoration-none"
+                    >
+
+                        <div class="quick-icon bg-danger-subtle text-danger">
+
+                            <i class="fa-solid fa-plus"></i>
+
+                        </div>
+
+                        <div class="ms-3">
+
+                            <h6 class="fw-bold mb-1">
+                                Book a Ride
+                            </h6>
+
+                            <small class="text-secondary">
+                                Create a new ride booking
+                            </small>
+
+                        </div>
+
+                        <i class="fa-solid fa-chevron-right
+                                  ms-auto text-secondary"></i>
+
+                    </a>
+
+                </div>
+
+
+                <!-- MY RIDE -->
+
+                <div class="col-md-4">
+
+                    <a
+                        href="{% url 'myride' %}"
+                        class="quick-action text-decoration-none"
+                    >
+
+                        <div class="quick-icon bg-danger-subtle text-danger">
+
+                            <i class="fa-solid fa-route"></i>
+
+                        </div>
+
+                        <div class="ms-3">
+
+                            <h6 class="fw-bold mb-1">
+                                My Rides
+                            </h6>
+
+                            <small class="text-secondary">
+                                View your ride history
+                            </small>
+
+                        </div>
+
+                        <i class="fa-solid fa-chevron-right
+                                  ms-auto text-secondary"></i>
+
+                    </a>
+
+                </div>
+
+
+                <!-- PAYMENT -->
+
+                <div class="col-md-4">
+
+                    <a
+                        href="{% url 'payment' %}"
+                        class="quick-action text-decoration-none"
+                    >
+
+                        <div class="quick-icon bg-danger-subtle text-danger">
+
+                            <i class="fa-solid fa-credit-card"></i>
+
+                        </div>
+
+                        <div class="ms-3">
+
+                            <h6 class="fw-bold mb-1">
+                                Payments
+                            </h6>
+
+                            <small class="text-secondary">
+                                View payment information
+                            </small>
+
+                        </div>
+
+                        <i class="fa-solid fa-chevron-right
+                                  ms-auto text-secondary"></i>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<!-- =====================================================
+         MESSAGES
+    ====================================================== -->
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div
+                class="alert alert-{{ message.tags }}
+                       alert-dismissible fade show rounded-3"
+            >
+
+                {{ message }}
+
+                <button
+                    type="button"
                     class="btn-close"
                     data-bs-dismiss="alert"
-                    aria-label="Close">
-            </button>
-        </div>
-    {% endfor %}
-{% endif %}
+                ></button>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+</div>
+
+
+
+
+
 {% endblock %}

@@ -1,28 +1,872 @@
 {% extends 'user/dashboard_base.html' %}
 {% block page_heading %}
-Track
+Track Ride
 {% endblock %}
+{% block title %}{{site_name}} | Track Ride{% endblock %}
 
 {% block dashboard_content %}
 
-<div class="card border-0 shadow-sm">
+<div class="container-fluid py-4">
 
-    <div class="card-body">
+    <!-- ================================================= -->
+    <!-- PAGE HEADER -->
+    <!-- ================================================= -->
 
-        <h5 class="mb-4">
-            Track
-        </h5>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
 
-        <!-- Ride data-->
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fa-solid fa-location-crosshairs text-danger me-2"></i>
+                Track Ride
+            </h2>
 
-        <div class="alert alert-danger">
-            Track will appear here.
+            <p class="text-secondary mb-0">
+                Track your NandiRide and driver details
+            </p>
+        </div>
+
+        <span class="badge bg-success rounded-pill px-3 py-2">
+            <i class="fa-solid fa-circle fa-xs me-1"></i>
+            Ride Active
+        </span>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- ================================================= -->
+        <!-- LEFT COLUMN -->
+        <!-- ================================================= -->
+
+        <div class="col-lg-8">
+
+            <!-- ============================================= -->
+            <!-- LIVE TRACKING CARD -->
+            <!-- ============================================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                <!-- HEADER -->
+
+                <div class="card-header bg-white border-0 p-4">
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+                                Live Ride Tracking
+                            </h5>
+
+                            <p class="text-secondary small mb-0">
+                                Driver is on the way to your pickup location
+                            </p>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn btn-danger rounded-pill px-4"
+                        >
+                            <i class="fa-solid fa-location-arrow me-2"></i>
+                            Refresh
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ========================================= -->
+                <!-- MAP -->
+                <!-- ========================================= -->
+
+                <div class="position-relative bg-light">
+
+                    <!-- MAP CONTAINER -->
+
+                    <div
+                        class="position-relative overflow-hidden"
+                        style="height: 420px;"
+                    >
+
+                        <!-- MAP BACKGROUND -->
+
+                        <div class="position-absolute top-0 start-0
+                                    w-100 h-100 bg-light">
+
+                            <!-- Horizontal Road -->
+
+                            <div
+                                class="position-absolute top-50 start-0
+                                       translate-middle-y w-100 bg-white
+                                       border-top border-bottom"
+                                style="height: 55px;"
+                            ></div>
+
+
+                            <!-- Vertical Road -->
+
+                            <div
+                                class="position-absolute top-0 start-50
+                                       translate-middle-x h-100 bg-white
+                                       border-start border-end"
+                                style="width: 55px;"
+                            ></div>
+
+
+                            <!-- Small Road -->
+
+                            <div
+                                class="position-absolute top-0 start-50
+                                       w-100 bg-white"
+                                style="
+                                    height: 35px;
+                                    transform: rotate(35deg);
+                                    transform-origin: center;
+                                    opacity: .8;
+                                "
+                            ></div>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- PICKUP MARKER -->
+                        <!-- ================================= -->
+
+                        <div
+                            class="position-absolute text-center"
+                            style="top: 18%; left: 18%;"
+                        >
+
+                            <div
+                                class="bg-success text-white rounded-circle
+                                       shadow d-flex align-items-center
+                                       justify-content-center mx-auto"
+                                style="width:48px;height:48px;"
+                            >
+
+                                <i class="fa-solid fa-location-dot"></i>
+
+                            </div>
+
+                            <span class="badge bg-success mt-2">
+                                Pickup
+                            </span>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- DRIVER MARKER -->
+                        <!-- ================================= -->
+
+                        <div
+                            class="position-absolute text-center"
+                            style="top: 45%; left: 50%;
+                                   transform: translate(-50%, -50%);"
+                        >
+
+                            <div
+                                class="bg-danger text-white rounded-circle
+                                       shadow d-flex align-items-center
+                                       justify-content-center mx-auto"
+                                style="width:58px;height:58px;"
+                            >
+
+                                <i class="fa-solid fa-motorcycle fs-5"></i>
+
+                            </div>
+
+                            <span class="badge bg-danger mt-2">
+                                Driver
+                            </span>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- DESTINATION MARKER -->
+                        <!-- ================================= -->
+
+                        <div
+                            class="position-absolute text-center"
+                            style="bottom: 18%; right: 15%;"
+                        >
+
+                            <div
+                                class="bg-dark text-white rounded-circle
+                                       shadow d-flex align-items-center
+                                       justify-content-center mx-auto"
+                                style="width:48px;height:48px;"
+                            >
+
+                                <i class="fa-solid fa-flag-checkered"></i>
+
+                            </div>
+
+                            <span class="badge bg-dark mt-2">
+                                Destination
+                            </span>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- ROUTE -->
+                        <!-- ================================= -->
+
+                        <div
+                            class="position-absolute bg-danger rounded-pill"
+                            style="
+                                width: 43%;
+                                height: 5px;
+                                top: 48%;
+                                left: 23%;
+                                transform: rotate(8deg);
+                            "
+                        ></div>
+
+
+                        <!-- ================================= -->
+                        <!-- MAP CENTER PULSE -->
+                        <!-- ================================= -->
+
+                        <div
+                            class="position-absolute rounded-circle
+                                   border border-danger"
+                            style="
+                                width: 85px;
+                                height: 85px;
+                                top: calc(45% - 43px);
+                                left: calc(50% - 43px);
+                                opacity: .15;
+                            "
+                        ></div>
+
+                    </div>
+
+
+                    <!-- ===================================== -->
+                    <!-- BOTTOM MAP SUMMARY -->
+                    <!-- ===================================== -->
+
+                    <div class="position-absolute bottom-0 start-0 end-0 p-3">
+
+                        <div class="card border-0 shadow-sm rounded-3">
+
+                            <div class="card-body py-3">
+
+                                <div class="row g-0 text-center">
+
+                                    <!-- ETA -->
+
+                                    <div class="col-4 border-end">
+
+                                        <small class="text-secondary d-block">
+                                            Driver Arrival
+                                        </small>
+
+                                        <h5 class="fw-bold text-danger mb-0">
+                                            6 min
+                                        </h5>
+
+                                    </div>
+
+
+                                    <!-- DISTANCE -->
+
+                                    <div class="col-4 border-end">
+
+                                        <small class="text-secondary d-block">
+                                            Distance
+                                        </small>
+
+                                        <h5 class="fw-bold mb-0">
+                                            2.4 km
+                                        </h5>
+
+                                    </div>
+
+
+                                    <!-- STATUS -->
+
+                                    <div class="col-4">
+
+                                        <small class="text-secondary d-block">
+                                            Ride Status
+                                        </small>
+
+                                        <h6 class="fw-bold text-success mb-0">
+                                            On The Way
+                                        </h6>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- RIDE PROGRESS -->
+            <!-- ================================================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mt-4">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+
+                        <i class="fa-solid fa-route text-danger me-2"></i>
+
+                        Ride Progress
+
+                    </h5>
+
+
+                    <div class="row g-3">
+
+                        <!-- BOOKING -->
+
+                        <div class="col-6 col-md-3">
+
+                            <div class="text-center">
+
+                                <div
+                                    class="bg-success text-white
+                                           rounded-circle mx-auto mb-2
+                                           d-flex align-items-center
+                                           justify-content-center"
+                                    style="width:50px;height:50px;"
+                                >
+
+                                    <i class="fa-solid fa-check"></i>
+
+                                </div>
+
+                                <h6 class="fw-bold mb-1">
+                                    Booked
+                                </h6>
+
+                                <small class="text-secondary">
+                                    06:15 PM
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DRIVER -->
+
+                        <div class="col-6 col-md-3">
+
+                            <div class="text-center">
+
+                                <div
+                                    class="bg-danger text-white
+                                           rounded-circle mx-auto mb-2
+                                           d-flex align-items-center
+                                           justify-content-center"
+                                    style="width:50px;height:50px;"
+                                >
+
+                                    <i class="fa-solid fa-motorcycle"></i>
+
+                                </div>
+
+                                <h6 class="fw-bold mb-1">
+                                    Driver On Way
+                                </h6>
+
+                                <small class="text-danger fw-semibold">
+                                    Current
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- START -->
+
+                        <div class="col-6 col-md-3">
+
+                            <div class="text-center">
+
+                                <div
+                                    class="bg-light border text-secondary
+                                           rounded-circle mx-auto mb-2
+                                           d-flex align-items-center
+                                           justify-content-center"
+                                    style="width:50px;height:50px;"
+                                >
+
+                                    <i class="fa-solid fa-person"></i>
+
+                                </div>
+
+                                <h6 class="fw-bold mb-1">
+                                    Ride Started
+                                </h6>
+
+                                <small class="text-secondary">
+                                    Waiting
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- COMPLETE -->
+
+                        <div class="col-6 col-md-3">
+
+                            <div class="text-center">
+
+                                <div
+                                    class="bg-light border text-secondary
+                                           rounded-circle mx-auto mb-2
+                                           d-flex align-items-center
+                                           justify-content-center"
+                                    style="width:50px;height:50px;"
+                                >
+
+                                    <i class="fa-solid fa-flag-checkered"></i>
+
+                                </div>
+
+                                <h6 class="fw-bold mb-1">
+                                    Completed
+                                </h6>
+
+                                <small class="text-secondary">
+                                    Pending
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- PICKUP / DESTINATION -->
+            <!-- ================================================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mt-4">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+
+                        <i class="fa-solid fa-location-dot text-danger me-2"></i>
+
+                        Route Details
+
+                    </h5>
+
+
+                    <div class="row g-4">
+
+                        <!-- PICKUP -->
+
+                        <div class="col-md-6">
+
+                            <div class="d-flex align-items-start">
+
+                                <div
+                                    class="bg-success-subtle text-success
+                                           rounded-circle d-flex
+                                           align-items-center
+                                           justify-content-center"
+                                    style="width:45px;height:45px;"
+                                >
+
+                                    <i class="fa-solid fa-location-dot"></i>
+
+                                </div>
+
+                                <div class="ms-3">
+
+                                    <small class="text-secondary">
+                                        Pickup Location
+                                    </small>
+
+                                    <h6 class="fw-bold mb-0">
+                                        Dehradun Railway Station
+                                    </h6>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DESTINATION -->
+
+                        <div class="col-md-6">
+
+                            <div class="d-flex align-items-start">
+
+                                <div
+                                    class="bg-danger-subtle text-danger
+                                           rounded-circle d-flex
+                                           align-items-center
+                                           justify-content-center"
+                                    style="width:45px;height:45px;"
+                                >
+
+                                    <i class="fa-solid fa-flag-checkered"></i>
+
+                                </div>
+
+                                <div class="ms-3">
+
+                                    <small class="text-secondary">
+                                        Destination
+                                    </small>
+
+                                    <h6 class="fw-bold mb-0">
+                                        Clock Tower, Dehradun
+                                    </h6>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- RIGHT COLUMN -->
+        <!-- ================================================= -->
+
+        <div class="col-lg-4">
+
+
+            <!-- ================================================= -->
+            <!-- DRIVER CARD -->
+            <!-- ================================================= -->
+
+            <div class="card border-0 shadow-sm rounded-4">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between
+                                align-items-center mb-4">
+
+                        <h5 class="fw-bold mb-0">
+                            Driver Details
+                        </h5>
+
+                        <span class="badge bg-success">
+                            Online
+                        </span>
+
+                    </div>
+
+
+                    <!-- DRIVER -->
+
+                    <div class="d-flex align-items-center">
+
+                        <div
+                            class="bg-light border rounded-circle
+                                   d-flex align-items-center
+                                   justify-content-center"
+                            style="width:65px;height:65px;"
+                        >
+
+                            <i
+                                class="fa-solid fa-user text-secondary fs-3"
+                            ></i>
+
+                        </div>
+
+
+                        <div class="ms-3 flex-grow-1">
+
+                            <h5 class="fw-bold mb-1">
+                                Rahul Kumar
+                            </h5>
+
+                            <div class="text-warning">
+
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+
+                                <small class="text-secondary ms-1">
+                                    4.9
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn btn-success rounded-circle"
+                            style="width:45px;height:45px;"
+                        >
+
+                            <i class="fa-solid fa-phone"></i>
+
+                        </button>
+
+                    </div>
+
+
+                    <hr class="my-4">
+
+
+                    <!-- VEHICLE -->
+
+                    <div class="d-flex align-items-center">
+
+                        <div
+                            class="bg-danger-subtle text-danger
+                                   rounded-3 d-flex
+                                   align-items-center
+                                   justify-content-center"
+                            style="width:48px;height:48px;"
+                        >
+
+                            <i class="fa-solid fa-motorcycle"></i>
+
+                        </div>
+
+
+                        <div class="ms-3">
+
+                            <small class="text-secondary">
+                                Vehicle
+                            </small>
+
+                            <h6 class="fw-bold mb-0">
+                                Hero Splendor
+                            </h6>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="bg-light rounded-3 text-center
+                               fw-bold py-2 mt-3"
+                    >
+                        UK 07 AB 1234
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- TRIP DETAILS -->
+            <!-- ================================================= -->
+
+            <div class="card border-0 shadow-sm rounded-4 mt-4">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+
+                        <i class="fa-solid fa-receipt text-danger me-2"></i>
+
+                        Trip Details
+
+                    </h5>
+
+
+                    <!-- BOOKING ID -->
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-secondary">
+                            Booking ID
+                        </span>
+
+                        <strong>
+                            #NR1001
+                        </strong>
+
+                    </div>
+
+
+                    <!-- RIDE TYPE -->
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-secondary">
+                            Ride Type
+                        </span>
+
+                        <strong>
+                            <i class="fa-solid fa-motorcycle me-1"></i>
+                            Bike
+                        </strong>
+
+                    </div>
+
+
+                    <!-- DATE -->
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-secondary">
+                            Date
+                        </span>
+
+                        <strong>
+                            31 Aug 2026
+                        </strong>
+
+                    </div>
+
+
+                    <!-- TIME -->
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-secondary">
+                            Time
+                        </span>
+
+                        <strong>
+                            06:30 PM
+                        </strong>
+
+                    </div>
+
+
+                    <!-- PASSENGERS -->
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-secondary">
+                            Passengers
+                        </span>
+
+                        <strong>
+                            1
+                        </strong>
+
+                    </div>
+
+
+                    <!-- DISTANCE -->
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-secondary">
+                            Distance
+                        </span>
+
+                        <strong>
+                            10 km
+                        </strong>
+
+                    </div>
+
+
+                    <hr>
+
+
+                    <!-- FARE -->
+
+                    <div class="d-flex justify-content-between
+                                align-items-center">
+
+                        <span class="fw-bold">
+                            Total Fare
+                        </span>
+
+                        <strong class="text-danger fs-5">
+                            ₹250
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- ACTIONS -->
+            <!-- ================================================= -->
+
+            <div class="row g-2 mt-3">
+
+                <div class="col-6">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger w-100"
+                    >
+
+                        <i class="fa-solid fa-xmark me-1"></i>
+
+                        Cancel
+
+                    </button>
+
+                </div>
+
+                <div class="col-6">
+
+                    <button
+                        type="button"
+                        class="btn btn-danger w-100"
+                    >
+
+                        <i class="fa-solid fa-headset me-1"></i>
+
+                        Help
+
+                    </button>
+
+                </div>
+
+            </div>
+
         </div>
 
     </div>
 
 </div>
-
 
     {% if messages %}
         {% for message in messages %}

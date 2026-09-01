@@ -14,7 +14,7 @@
                 <div class="nav flex-column nav-pills gap-2">
                     {% for item in sidebar_menu %}
                         <a href="{% url item.url %}"
-                           class="nav-link slide {% if request.resolver_match.url_name == item.url %}active {% else %}text-dark{% endif %}">
+                           class="nav-link slide {% if request.resolver_match.url_name == item.url %}active {% else %}{% endif %}">
                             <span class="me-2"><i class=" {{item.icon }}"></i></span>
                             {{ item.name }}
                         </a>
