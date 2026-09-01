@@ -14,10 +14,22 @@ urlpatterns = [
         name="user_profile",
     ),
 
-     path(
+    path(
         "account/setting/",
         views.user_setting,
         name="user_setting",
+    ),
+
+    path(
+        "users/ridestatus/",
+        views.user_ridestatus,
+        name="user_ridestatus",
+    ),
+
+        path(
+        "gallery/",
+        views.ride_gallery,
+        name="ride_gallery",
     ),
     path(
         "users/",
