@@ -43,7 +43,7 @@
                 {% for nav in nav_links %}
                 <li class="nav-item">
                     <a href="{{ nav.url }}"
-                       class="nav-link px-3 fw-semibold {% if request.path == nav.url %}active text-danger{% else %}text-dark{% endif %}">
+                       class="nav-link slide  px-3 fw-semibold {% if request.path == nav.url %}active text-danger{% else %}text-dark{% endif %}">
                         <i class="{{nav.icon}} me-2"></i>{{ nav.name }}
                     </a>
                 </li>

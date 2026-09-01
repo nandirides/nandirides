@@ -2,197 +2,1085 @@
 {% load static %}
 
 {% block page_heading %}
-Edit Profile
+    Edit Profile
 {% endblock %}
 
+
+{% block title %}{{site_name}} | Edit Profile{% endblock %}
+
+
 {% block dashboard_content %}
-<div class="card border-0 shadow-sm">
-    <div class="row g-0">
-        <div class="position-relative mb-5">
-            <div class="d-flex justify-content-center align-items-center">
-                <div class="position-relative">
-                    <div class="rounded-circle bg-danger border border-5 border-white shadow d-flex align-items-center justify-content-center"
-                         style="width: 140px; height: 140px; font-size: 55px;">
-                        <i class="fa fa-user text-white"></i>
-                    </div>
 
-                    <label for="{{ form.profileimage.id_for_label }}"
-                           class="position-absolute bottom-0 end-0 bg-danger text-white rounded-circle d-flex align-items-center justify-content-center shadow"
-                           style="width: 42px; height: 42px; cursor: pointer;">
-                        <i class="fa fa-camera text-white"></i>
-                    </label>
+<div class="container-fluid px-0">
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+
+        <div class="edit-header p-4">
+
+            <div class="d-flex align-items-center">
+
+                <div class="header-icon">
+                    <i class="fa-solid fa-user-pen"></i>
                 </div>
+
+                <div class="ms-3 text-white">
+
+                    <h4 class="fw-bold mb-1">
+                        Edit Profile
+                    </h4>
+
+                    <p class="mb-0 opacity-75">
+                        Update your NandiRide profile information
+                    </p>
+
+                </div>
+
             </div>
 
-            <div class="d-none">
-                {{ form.profileimage }}
-            </div>
-
-            {% if form.profileimage.errors %}
-                <div class="text-danger small text-center mt-2">
-                    {{ form.profileimage.errors }}
-                </div>
-            {% endif %}
         </div>
 
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <div class="p-4">
-                    <div class="d-flex align-items-center gap-3 bg-white border-start border-4 border-danger rounded-3 shadow-sm px-3 py-2 mb-4">
-                        <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
-                             style="width: 40px; height: 40px;">
-                            <span class="fs-5"><i class="fa fa-user text-white"></i></span>
+
+        <!-- ================= FORM ================= -->
+
+        <div class="card-body p-4">
+
+            <form method="post" enctype="multipart/form-data">
+
+                {% csrf_token %}
+
+
+                <!-- ================= PROFILE IMAGE ================= -->
+
+                <div class="text-center mb-4">
+
+                    <div class="profile-image-wrapper">
+
+                        {% if form.instance.profileimage %}
+
+                            <img
+                                src="{{ form.instance.profileimage.url }}"
+                                id="profilePreview"
+                                class="profile-avatar"
+                                alt="Profile Image"
+                            >
+
+                        {% else %}
+
+                            <div
+                                id="profilePlaceholder"
+                                class="profile-placeholder"
+                            >
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+
+                            <img
+                                id="profilePreview"
+                                class="profile-avatar d-none"
+                                alt="Profile Preview"
+                            >
+
+                        {% endif %}
+
+
+                        <label
+                            for="{{ form.profileimage.id_for_label }}"
+                            class="camera-btn"
+                        >
+
+                            <i class="fa-solid fa-camera"></i>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="d-none">
+                        {{ form.profileimage }}
+                    </div>
+
+
+                    {% if form.profileimage.errors %}
+
+                        <div class="text-danger small mt-2">
+                            {{ form.profileimage.errors }}
                         </div>
-                        <h5 class="fw-bold text-dark mb-0">
-                            Personal Information
-                        </h5>
-                    </div>
 
-                    <div class="row g-3">
-                        {% for field in form %}
-                            {% if field.name in 'user_name first_name last_name user_type Registration_date email mobile_number' %}
-                                <div class="col-md-6 col-lg-4">
-                                    <label class="form-label fw-semibold">
-                                        {{ field.label }}
-                                        {% if field.field.required %}
-                                            <span class="text-danger">*</span>
-                                        {% endif %}
-                                    </label>
+                    {% endif %}
 
-                                    {{ field }}
 
-                                    {% if field.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {{ field.errors }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
+                    <small class="text-secondary d-block mt-2">
+                        Click camera icon to change profile picture
+                    </small>
+
                 </div>
 
-                <div class="p-4">
-                    <div class="d-flex align-items-center gap-3 bg-white border-start border-4 border-danger rounded-3 shadow-sm px-3 py-2 mb-4">
-                        <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
-                             style="width: 40px; height: 40px;">
-                            <span class="fs-5"><i class="fa fa-car text-white"></i></span>
+
+
+                <!-- ================= PERSONAL INFORMATION ================= -->
+
+                <div class="edit-section mb-4">
+
+                    <div class="section-title">
+
+                        <div class="section-icon">
+                            <i class="fa-solid fa-user"></i>
                         </div>
-                        <h5 class="fw-bold text-dark mb-0">
-                            Vehicle Information
-                        </h5>
+
+                        <div class="ms-3">
+
+                            <h5 class="fw-bold mb-0">
+                                Personal Information
+                            </h5>
+
+                            <small class="text-secondary">
+                                Update your personal details
+                            </small>
+
+                        </div>
+
                     </div>
 
-                    <div class="row g-3">
+
+                    <div class="row g-3 mt-2">
+
                         {% for field in form %}
-                            {% if field.name in 'Driver_Licence_Number vehicle_type vehicle_number vehicle_insurance vehicle_pollution documnet_upload' %}
-                                <div class="col-md-6 col-lg-4">
-                                    <label class="form-label fw-semibold">
-                                        {{ field.label }}
-                                        {% if field.field.required %}
-                                            <span class="text-danger">*</span>
-                                        {% endif %}
-                                    </label>
 
-                                    {{ field }}
+                            {% if field.name == 'user_name' %}
 
-                                    {% if field.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {{ field.errors }}
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-user"></i>
+                                            </span>
+
+                                            {{ field }}
+
                                         </div>
-                                    {% endif %}
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
+
+
+                            {% elif field.name == 'first_name' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-user"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'last_name' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-user"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'user_type' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-user-tag"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'Registration_date' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-calendar-days"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'email' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-envelope"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'mobile_number' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-phone"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
                             {% endif %}
+
                         {% endfor %}
+
                     </div>
+
                 </div>
 
-                <div class="p-4">
-                    <div class="d-flex align-items-center gap-3 bg-white border-start border-4 border-danger rounded-3 shadow-sm px-3 py-2 mb-4">
-                        <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle"
-                             style="width: 40px; height: 40px;">
-                            <span class="fs-5"><i class="fa fa-map-marker text-white"></i></span>
+
+
+                <!-- ================= VEHICLE INFORMATION ================= -->
+
+                <div class="edit-section mb-4">
+
+                    <div class="section-title">
+
+                        <div class="section-icon">
+                            <i class="fa-solid fa-car"></i>
                         </div>
-                        <h5 class="fw-bold text-dark mb-0">
-                            Address Information
-                        </h5>
+
+                        <div class="ms-3">
+
+                            <h5 class="fw-bold mb-0">
+                                Vehicle Information
+                            </h5>
+
+                            <small class="text-secondary">
+                                Update your vehicle details
+                            </small>
+
+                        </div>
+
                     </div>
 
-                    <div class="row g-3">
+
+                    <div class="row g-3 mt-2">
+
                         {% for field in form %}
-                            {% if field.name in 'street village_colony country state district pin_code' %}
-                                <div class="col-md-6 col-lg-4">
-                                    <label class="form-label fw-semibold">
-                                        {{ field.label }}
-                                        {% if field.field.required %}
-                                            <span class="text-danger">*</span>
-                                        {% endif %}
-                                    </label>
 
-                                    {{ field }}
+                            {% if field.name == 'Driver_Licence_Number' %}
 
-                                    {% if field.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {{ field.errors }}
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-id-card"></i>
+                                            </span>
+
+                                            {{ field }}
+
                                         </div>
-                                    {% endif %}
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
+
+
+                            {% elif field.name == 'vehicle_type' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-motorcycle"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'vehicle_number' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-hashtag"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'vehicle_insurance' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-shield-halved"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'vehicle_pollution' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-leaf"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'documnet_upload' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-file-arrow-up"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
                             {% endif %}
+
                         {% endfor %}
+
                     </div>
+
+                </div>
+
+
+
+                <!-- ================= ADDRESS INFORMATION ================= -->
+
+                <div class="edit-section mb-4">
+
+                    <div class="section-title">
+
+                        <div class="section-icon">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+
+                        <div class="ms-3">
+
+                            <h5 class="fw-bold mb-0">
+                                Address Information
+                            </h5>
+
+                            <small class="text-secondary">
+                                Update your address details
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row g-3 mt-2">
+
+                        {% for field in form %}
+
+                            {% if field.name == 'street' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-road"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'village_colony' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-house"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'country' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-globe"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'state' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-map"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'district' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-location-dot"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            {% elif field.name == 'pin_code' %}
+
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="profile-field">
+                                        <label>{{ field.label }}</label>
+
+                                        <div class="input-group">
+
+                                            <span class="input-group-text">
+                                                <i class="fa-solid fa-map-pin"></i>
+                                            </span>
+
+                                            {{ field }}
+
+                                        </div>
+
+                                        {% if field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ field.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- OPTIONAL ADDRESS -->
 
                     {% if form.address %}
+
                         <div class="mt-3">
+
                             <label class="form-label fw-semibold">
+
                                 {{ form.address.label }}
+
                                 {% if form.address.field.required %}
                                     <span class="text-danger">*</span>
                                 {% endif %}
+
                             </label>
 
                             {{ form.address }}
 
                             {% if form.address.errors %}
+
                                 <div class="text-danger small mt-1">
                                     {{ form.address.errors }}
                                 </div>
+
                             {% endif %}
+
                         </div>
+
                     {% endif %}
+
                 </div>
+
+
+
+                <!-- ================= ERRORS ================= -->
 
                 {% if form.non_field_errors %}
-                    <div class="alert alert-danger mx-4 rounded-3">
+
+                    <div class="alert alert-danger rounded-3">
+
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
                         {{ form.non_field_errors }}
+
                     </div>
+
                 {% endif %}
 
-                <div class="d-flex justify-content-end gap-2 px-4 pb-4">
-                    <a href="{% url 'profile' %}"
-                       class="btn btn-light border rounded-pill px-4">
-                       <i class="fa fa-times text-white"></i> Cancel
+
+
+                <!-- ================= BUTTONS ================= -->
+
+                <div class="d-flex justify-content-end gap-2">
+
+                    <a
+                        href="{% url 'profile' %}"
+                        class="btn btn-light border rounded-pill px-4"
+                    >
+
+                        <i class="fa-solid fa-xmark me-2"></i>
+
+                        Cancel
+
                     </a>
 
-                    <button type="submit"
-                            class="btn btn-danger rounded-pill px-5">
-                        <i class="fa fa-save text-white"></i> Update Profile
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3">
-            {{ message }}
-            <button type="button"
+                    <button
+                        type="submit"
+                        class="btn btn-danger rounded-pill px-4"
+                    >
+
+                        <i class="fa-solid fa-floppy-disk me-2"></i>
+
+                        Update Profile
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================= MESSAGES ================= -->
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div
+                class="alert alert-{{ message.tags }}
+                       alert-dismissible fade show
+                       rounded-3 shadow-sm"
+            >
+
+                {{ message }}
+
+                <button
+                    type="button"
                     class="btn-close"
                     data-bs-dismiss="alert"
-                    aria-label="Close">
-            </button>
-        </div>
-    {% endfor %}
-{% endif %}
+                ></button>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+</div>
+
+
+
+<!-- =====================================================
+     CSS
+====================================================== -->
+
+<style>
+
+.edit-header {
+    background: linear-gradient(
+        135deg,
+        #dc3545,
+        #b02a37
+    );
+}
+
+.header-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    background: rgba(255,255,255,.18);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+
+.profile-image-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-avatar,
+.profile-placeholder {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+}
+
+.profile-avatar {
+    object-fit: cover;
+    border: 5px solid white;
+    box-shadow: 0 .25rem .75rem rgba(0,0,0,.15);
+}
+
+.profile-placeholder {
+    background: #dc3545;
+    border: 5px solid white;
+    box-shadow: 0 .25rem .75rem rgba(0,0,0,.15);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 45px;
+}
+
+.camera-btn {
+    position: absolute;
+    right: 2px;
+    bottom: 4px;
+
+    width: 43px;
+    height: 43px;
+
+    border-radius: 50%;
+
+    background: #dc3545;
+    color: white;
+
+    border: 3px solid white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+.camera-btn:hover {
+    background: #b02a37;
+    transform: scale(1.08);
+}
+
+.edit-section {
+    background: #fff;
+    border: 1px solid #edf0f2;
+    border-radius: 16px;
+    padding: 22px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #edf0f2;
+}
+
+.section-icon {
+    width: 45px;
+    height: 45px;
+
+    border-radius: 12px;
+
+    background: #f8d7da;
+    color: #dc3545;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 18px;
+}
+
+.profile-field label {
+    color: #343a40;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+.profile-field .input-group-text {
+    width: 45px;
+
+    justify-content: center;
+
+    background: #f8f9fa;
+    color: #dc3545;
+
+    border-color: #dee2e6;
+}
+
+.profile-field .form-control,
+.profile-field .form-select {
+    min-height: 45px;
+
+    border-color: #dee2e6;
+
+    box-shadow: none;
+}
+
+.profile-field .form-control:focus,
+.profile-field .form-select:focus {
+    border-color: #dc3545;
+
+    box-shadow:
+        0 0 0 .15rem rgba(220,53,69,.12);
+}
+
+.btn-danger {
+    transition: .2s ease;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 .4rem .8rem rgba(220,53,69,.25);
+}
+
+@media (max-width: 767px) {
+
+    .edit-section {
+        padding: 16px;
+    }
+
+    .profile-avatar,
+    .profile-placeholder {
+        width: 115px;
+        height: 115px;
+    }
+
+    .profile-placeholder {
+        font-size: 38px;
+    }
+
+    .section-title {
+        align-items: flex-start;
+    }
+
+    .d-flex.justify-content-end {
+        flex-direction: column;
+    }
+
+    .d-flex.justify-content-end .btn {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+
+
+<!-- =====================================================
+     IMAGE PREVIEW
+====================================================== -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const imageInput =
+        document.getElementById(
+            "{{ form.profileimage.id_for_label }}"
+        );
+
+    const preview =
+        document.getElementById("profilePreview");
+
+    const placeholder =
+        document.getElementById("profilePlaceholder");
+
+
+    if (imageInput) {
+
+        imageInput.addEventListener("change", function () {
+
+            const file = this.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            if (!file.type.startsWith("image/")) {
+                return;
+            }
+
+
+            const reader = new FileReader();
+
+
+            reader.onload = function (event) {
+
+                if (preview) {
+
+                    preview.src = event.target.result;
+
+                    preview.classList.remove("d-none");
+
+                }
+
+
+                if (placeholder) {
+
+                    placeholder.classList.add("d-none");
+
+                }
+
+            };
+
+
+            reader.readAsDataURL(file);
+
+        });
+
+    }
+
+});
+
+</script>
+
 {% endblock %}
