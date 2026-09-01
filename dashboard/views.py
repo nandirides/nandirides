@@ -24,10 +24,26 @@ def user_setting(request):
     )
 
 @login_required
-def user_list(request):
+def user_ridestatus(request):
     return render(
         request,
-        "dashboard/users/list.html",
+        "dashboard/users/ridestatus.html",
+    )
+
+@login_required
+def ride_gallery(request):
+    return render(
+        request,
+        "includes/gallery.html",
+    )
+
+@login_required
+def user_list(request):
+    from django.contrib.auth.models import User
+    users = User.objects.all()
+    return render(
+        request,
+        "dashboard/users/list.html", {'users': users}
     )
 
 

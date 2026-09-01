@@ -13,17 +13,24 @@ NAVIGATION = [
     },
 
     {
-            "title": "User Profile",
+            "title": "Admin Profile",
             "icon": "bi-person",
             "url": "user_profile",
             "permission": 'auth.user_profile',
     },
 
     {
-            "title": "User Setting",
+            "title": "Admin Setting",
             "icon": "bi-gear",
             "url": "user_setting",
             "permission": 'auth.user_setting',
+    },
+
+    {
+            "title": "User Ride Status",
+            "icon": "bi-scooter",
+            "url": "user_ridestatus",
+            "permission": 'auth.user_ridestatus',
     },
 
     {
@@ -45,6 +52,13 @@ NAVIGATION = [
             },
         ],
     },
+
+    {
+            "title": "Gallery",
+            "icon": "bi-images",
+            "url": "ride_gallery",
+            "permission": "auth.ride_gallery",
+        },
 
     {
         "title": "Administration",
