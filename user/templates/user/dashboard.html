@@ -1,27 +1,36 @@
 {% extends 'user/dashboard_base.html' %}
 
+
 {% block dashboard_title %}
 Dashboard
 {% endblock %}
 
-{% block title %}{{ site_name }} | Dashboard{% endblock %}
+
+{% block title %}
+{{ site_name }} | Dashboard
+{% endblock %}
+
+
 {% block page_heading %}
 Dashboard
 {% endblock %}
 
+
 {% block dashboard_content %}
-        <div class="container-fluid py-4">
+
+<div class="container-fluid py-4">
+
 
     <!-- ================================================= -->
     <!-- WELCOME HEADER -->
     <!-- ================================================= -->
 
-    <div class="card border-0 shadow-sm rounded-4 mb-4
-                overflow-hidden">
+    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
 
         <div class="card-body p-4">
 
             <div class="row align-items-center g-4">
+
 
                 <!-- LEFT -->
 
@@ -40,6 +49,7 @@ Dashboard
                             <i class="fa-solid fa-user fs-5"></i>
 
                         </div>
+
 
                         <div>
 
@@ -70,7 +80,7 @@ Dashboard
 
                         <a
                             href="{% url 'booking' %}"
-                            class="btn btn-danger rounded-pill px-4"
+                            class="btn btn-outline-danger rounded-pill px-4"
                         >
 
                             <i class="fa-solid fa-plus me-2"></i>
@@ -82,8 +92,7 @@ Dashboard
 
                         <a
                             href="{% url 'myride' %}"
-                            class="btn btn-outline-danger
-                                   rounded-pill px-4"
+                            class="btn btn-outline-danger rounded-pill px-4"
                         >
 
                             <i class="fa-solid fa-route me-2"></i>
@@ -99,13 +108,12 @@ Dashboard
 
                 <!-- RIGHT -->
 
-                <div class="col-lg-4 text-lg-end">
+                <div class="col-lg-4">
 
-                    <div class="bg-danger-subtle rounded-4 p-4">
+                    <div class="bg-danger-subtle rounded-4 p-4 text-center">
 
                         <i
-                            class="fa-solid fa-motorcycle
-                                   text-danger"
+                            class="fa-solid fa-motorcycle text-danger"
                             style="font-size:65px;"
                         ></i>
 
@@ -140,8 +148,7 @@ Dashboard
 
         <div class="col-6 col-lg-3">
 
-            <div class="card border-0 shadow-sm
-                        rounded-4 h-100">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
 
                 <div class="card-body p-4">
 
@@ -155,7 +162,7 @@ Dashboard
                             </small>
 
                             <h3 class="fw-bold mb-0 mt-1">
-                                24
+                                {{ dashboard_stats.total_rides|default:"0" }}
                             </h3>
 
                         </div>
@@ -163,8 +170,7 @@ Dashboard
 
                         <div
                             class="bg-danger-subtle text-danger
-                                   rounded-3 d-flex
-                                   align-items-center
+                                   rounded-3 d-flex align-items-center
                                    justify-content-center"
                             style="width:45px;height:45px;"
                         >
@@ -191,12 +197,12 @@ Dashboard
         </div>
 
 
+
         <!-- COMPLETED -->
 
         <div class="col-6 col-lg-3">
 
-            <div class="card border-0 shadow-sm
-                        rounded-4 h-100">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
 
                 <div class="card-body p-4">
 
@@ -210,7 +216,7 @@ Dashboard
                             </small>
 
                             <h3 class="fw-bold mb-0 mt-1">
-                                20
+                                {{ dashboard_stats.completed|default:"0" }}
                             </h3>
 
                         </div>
@@ -218,8 +224,7 @@ Dashboard
 
                         <div
                             class="bg-success-subtle text-success
-                                   rounded-3 d-flex
-                                   align-items-center
+                                   rounded-3 d-flex align-items-center
                                    justify-content-center"
                             style="width:45px;height:45px;"
                         >
@@ -242,12 +247,12 @@ Dashboard
         </div>
 
 
+
         <!-- SPENT -->
 
         <div class="col-6 col-lg-3">
 
-            <div class="card border-0 shadow-sm
-                        rounded-4 h-100">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
 
                 <div class="card-body p-4">
 
@@ -261,7 +266,7 @@ Dashboard
                             </small>
 
                             <h3 class="fw-bold mb-0 mt-1">
-                                ₹5,240
+                                ₹{{ dashboard_stats.total_spent|default:"0" }}
                             </h3>
 
                         </div>
@@ -269,8 +274,7 @@ Dashboard
 
                         <div
                             class="bg-warning-subtle text-warning
-                                   rounded-3 d-flex
-                                   align-items-center
+                                   rounded-3 d-flex align-items-center
                                    justify-content-center"
                             style="width:45px;height:45px;"
                         >
@@ -293,12 +297,12 @@ Dashboard
         </div>
 
 
+
         <!-- RATING -->
 
         <div class="col-6 col-lg-3">
 
-            <div class="card border-0 shadow-sm
-                        rounded-4 h-100">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
 
                 <div class="card-body p-4">
 
@@ -312,7 +316,7 @@ Dashboard
                             </small>
 
                             <h3 class="fw-bold mb-0 mt-1">
-                                4.9
+                                {{ dashboard_stats.rating }}
                             </h3>
 
                         </div>
@@ -320,8 +324,7 @@ Dashboard
 
                         <div
                             class="bg-warning-subtle text-warning
-                                   rounded-3 d-flex
-                                   align-items-center
+                                   rounded-3 d-flex align-items-center
                                    justify-content-center"
                             style="width:45px;height:45px;"
                         >
@@ -356,17 +359,16 @@ Dashboard
     <div class="row g-4 mb-4">
 
 
-        <!-- ================================================= -->
         <!-- ACTIVE RIDE -->
-        <!-- ================================================= -->
 
         <div class="col-lg-8">
 
-            <div class="card border-0 shadow-sm
-                        rounded-4 h-100">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
 
                 <div class="card-body p-4">
 
+
+                    <!-- HEADER -->
 
                     <div class="d-flex justify-content-between
                                 align-items-center mb-4">
@@ -375,12 +377,15 @@ Dashboard
 
                             <h5 class="fw-bold mb-1">
 
-                                <i class="fa-solid fa-location-crosshairs
-                                          text-danger me-2"></i>
+                                <i
+                                    class="fa-solid fa-location-crosshairs
+                                           text-danger me-2"
+                                ></i>
 
                                 Active Ride
 
                             </h5>
+
 
                             <small class="text-secondary">
                                 Your current ride status
@@ -390,23 +395,23 @@ Dashboard
 
 
                         <span
-                            class="badge bg-danger rounded-pill px-3 py-2"
+                            class="badge bg-danger rounded-pill
+                                   px-3 py-2"
                         >
 
                             <i class="fa-solid fa-circle fa-xs me-1"></i>
 
-                            On Trip
+                            {{ booking_data.status }}
 
                         </span>
 
                     </div>
 
 
-                    <!-- ROUTE -->
+
+                    <!-- PICKUP -->
 
                     <div class="d-flex align-items-start">
-
-                        <!-- PICKUP -->
 
                         <div class="text-center">
 
@@ -431,8 +436,8 @@ Dashboard
                                 Pickup
                             </small>
 
-                            <h6 class="fw-bold">
-                                Dehradun Railway Station
+                            <h6 class="fw-bold mb-0">
+                                {{ booking_data.pickup }}
                             </h6>
 
                         </div>
@@ -440,13 +445,15 @@ Dashboard
                     </div>
 
 
+
                     <!-- LINE -->
 
                     <div
-                        class="border-start border-2
-                               border-danger ms-4 my-1"
+                        class="border-start border-2 border-danger
+                               ms-4 my-1"
                         style="height:35px;"
                     ></div>
+
 
 
                     <!-- DESTINATION -->
@@ -476,8 +483,8 @@ Dashboard
                                 Destination
                             </small>
 
-                            <h6 class="fw-bold">
-                                Clock Tower, Dehradun
+                            <h6 class="fw-bold mb-0">
+                                {{ booking_data.destination }}
                             </h6>
 
                         </div>
@@ -485,7 +492,9 @@ Dashboard
                     </div>
 
 
+
                     <hr class="my-4">
+
 
 
                     <!-- RIDE DETAILS -->
@@ -493,45 +502,59 @@ Dashboard
                     <div class="row g-3 text-center">
 
 
-                        <div class="col-4">
+                        <div class="col-6 col-md-3">
 
                             <small class="text-secondary d-block">
                                 Driver
                             </small>
 
                             <strong>
-                                Rahul Kumar
+                                {{ booking_data.driver_name }}
                             </strong>
 
                         </div>
 
 
-                        <div class="col-4">
+                        <div class="col-6 col-md-3">
 
                             <small class="text-secondary d-block">
-                                ETA
+                                Vehicle
+                            </small>
+
+                            <strong>
+                                {{ booking_data.ride_type }}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="col-6 col-md-3">
+
+                            <small class="text-secondary d-block">
+                                Time
                             </small>
 
                             <strong class="text-danger">
-                                6 min
+                                {{ booking_data.time }}
                             </strong>
 
                         </div>
 
 
-                        <div class="col-4">
+                        <div class="col-6 col-md-3">
 
                             <small class="text-secondary d-block">
                                 Fare
                             </small>
 
                             <strong class="text-danger">
-                                ₹250
+                                ₹{{ booking_data.total_amount }}
                             </strong>
 
                         </div>
 
                     </div>
+
 
 
                     <!-- BUTTONS -->
@@ -540,11 +563,13 @@ Dashboard
 
                         <a
                             href="{% url 'track' %}"
-                            class="btn btn-danger rounded-3 px-4"
+                            class="btn btn-outline-danger  rounded-3 px-4"
                         >
 
-                            <i class="fa-solid fa-location-crosshairs
-                                      me-2"></i>
+                            <i
+                                class="fa-solid fa-location-crosshairs
+                                       me-2"
+                            ></i>
 
                             Track Ride
 
@@ -556,6 +581,8 @@ Dashboard
                             class="btn btn-outline-danger
                                    rounded-3 px-4"
                         >
+
+                            <i class="fa-solid fa-route me-2"></i>
 
                             View Ride
 
@@ -571,14 +598,11 @@ Dashboard
 
 
 
-        <!-- ================================================= -->
         <!-- QUICK ACTIONS -->
-        <!-- ================================================= -->
 
         <div class="col-lg-4">
 
-            <div class="card border-0 shadow-sm
-                        rounded-4 h-100">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
 
                 <div class="card-body p-4">
 
@@ -621,6 +645,7 @@ Dashboard
                         </div>
 
 
+
                         <!-- MY RIDES -->
 
                         <div class="col-6">
@@ -648,12 +673,13 @@ Dashboard
                         </div>
 
 
+
                         <!-- PAYMENT -->
 
                         <div class="col-6">
 
                             <a
-                                href="{% url 'payment' %}"
+                                href="{% url 'paymentdetails' %}"
                                 class="quick-action text-decoration-none"
                             >
 
@@ -675,12 +701,13 @@ Dashboard
                         </div>
 
 
-                        <!-- PROFILE -->
+
+                        <!-- TRACK -->
 
                         <div class="col-6">
 
                             <a
-                                href="{% url 'profile' %}"
+                                href="{% url 'track' %}"
                                 class="quick-action text-decoration-none"
                             >
 
@@ -689,12 +716,12 @@ Dashboard
                                            bg-success-subtle text-success"
                                 >
 
-                                    <i class="fa-solid fa-user"></i>
+                                    <i class="fa-solid fa-location-dot"></i>
 
                                 </div>
 
                                 <span>
-                                    Profile
+                                    Track Ride
                                 </span>
 
                             </a>
@@ -702,6 +729,7 @@ Dashboard
                         </div>
 
                     </div>
+
 
 
                     <!-- SUPPORT -->
@@ -724,6 +752,7 @@ Dashboard
                                 <i class="fa-solid fa-headset"></i>
 
                             </div>
+
 
                             <div class="ms-3">
 
@@ -758,14 +787,11 @@ Dashboard
     <div class="row g-4 mb-4">
 
 
-        <!-- ================================================= -->
         <!-- UPCOMING RIDE -->
-        <!-- ================================================= -->
 
         <div class="col-lg-7">
 
-            <div class="card border-0 shadow-sm
-                        rounded-4 h-100">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
 
                 <div class="card-body p-4">
 
@@ -777,12 +803,15 @@ Dashboard
 
                             <h5 class="fw-bold mb-1">
 
-                                <i class="fa-solid fa-calendar-days
-                                          text-danger me-2"></i>
+                                <i
+                                    class="fa-solid fa-calendar-days
+                                           text-danger me-2"
+                                ></i>
 
                                 Upcoming Ride
 
                             </h5>
+
 
                             <small class="text-secondary">
                                 Your next scheduled ride
@@ -791,14 +820,17 @@ Dashboard
                         </div>
 
 
-                        <span class="badge bg-warning-subtle
-                                     text-warning rounded-pill">
+                        <span
+                            class="badge bg-warning-subtle
+                                   text-warning rounded-pill"
+                        >
 
                             Upcoming
 
                         </span>
 
                     </div>
+
 
 
                     <div class="bg-light rounded-4 p-3">
@@ -828,19 +860,25 @@ Dashboard
                             <div class="ms-3">
 
                                 <h6 class="fw-bold mb-1">
-                                    ISBT Dehradun
-                                    → Rajpur Road
+
+                                    {{ booking_data.pickup }}
+
+                                    →
+
+                                    {{ booking_data.destination }}
+
                                 </h6>
+
 
                                 <small class="text-secondary">
 
                                     <i class="fa-solid fa-clock me-1"></i>
 
-                                    09:00 AM
+                                    {{ booking_data.time }}
 
                                     <span class="mx-2">•</span>
 
-                                    Bike
+                                    {{ booking_data.ride_type }}
 
                                 </small>
 
@@ -862,7 +900,7 @@ Dashboard
                                 </small>
 
                                 <h5 class="fw-bold text-danger mb-0">
-                                    ₹320
+                                    ₹{{ booking_data.total_amount }}
                                 </h5>
 
                             </div>
@@ -870,8 +908,7 @@ Dashboard
 
                             <a
                                 href="{% url 'myride' %}"
-                                class="btn btn-outline-danger
-                                       rounded-3"
+                                class="btn btn-outline-danger rounded-3"
                             >
 
                                 View Ride
@@ -890,14 +927,11 @@ Dashboard
 
 
 
-        <!-- ================================================= -->
         <!-- PAYMENT -->
-        <!-- ================================================= -->
 
         <div class="col-lg-5">
 
-            <div class="card border-0 shadow-sm
-                        rounded-4 h-100">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
 
                 <div class="card-body p-4">
 
@@ -909,12 +943,15 @@ Dashboard
 
                             <h5 class="fw-bold mb-1">
 
-                                <i class="fa-solid fa-wallet
-                                          text-danger me-2"></i>
+                                <i
+                                    class="fa-solid fa-wallet
+                                           text-danger me-2"
+                                ></i>
 
                                 Payment
 
                             </h5>
+
 
                             <small class="text-secondary">
                                 Latest payment
@@ -923,14 +960,17 @@ Dashboard
                         </div>
 
 
-                        <span class="badge bg-success-subtle
-                                     text-success rounded-pill">
+                        <span
+                            class="badge bg-success-subtle
+                                   text-success rounded-pill"
+                        >
 
-                            Paid
+                            {{ booking_data.payment_status }}
 
                         </span>
 
                     </div>
+
 
 
                     <div class="text-center py-2">
@@ -950,8 +990,11 @@ Dashboard
 
 
                         <h3 class="fw-bold mb-1">
-                            ₹250
+
+                            ₹{{ booking_data.total_amount }}
+
                         </h3>
+
 
                         <small class="text-secondary">
                             Payment completed
@@ -970,7 +1013,7 @@ Dashboard
                         </small>
 
                         <strong>
-                            #NR1001
+                            #{{ booking_data.booking_id }}
                         </strong>
 
                     </div>
@@ -983,14 +1026,14 @@ Dashboard
                         </small>
 
                         <strong>
-                            UPI
+                            {{ booking_data.payment_method }}
                         </strong>
 
                     </div>
 
 
                     <a
-                        href="{% url 'payment' %}"
+                        href="{% url 'paymentdetails' %}"
                         class="btn btn-outline-danger
                                w-100 rounded-3"
                     >
@@ -1027,12 +1070,15 @@ Dashboard
 
                     <h5 class="fw-bold mb-1">
 
-                        <i class="fa-solid fa-clock-rotate-left
-                                  text-danger me-2"></i>
+                        <i
+                            class="fa-solid fa-clock-rotate-left
+                                   text-danger me-2"
+                        ></i>
 
                         Recent Rides
 
                     </h5>
+
 
                     <small class="text-secondary">
                         Your recent ride activity
@@ -1052,6 +1098,7 @@ Dashboard
                 </a>
 
             </div>
+
 
 
             <!-- TABLE -->
@@ -1095,8 +1142,7 @@ Dashboard
 
                     <tbody>
 
-
-                        <!-- RIDE 1 -->
+                        {% for ride in recent_rides %}
 
                         <tr>
 
@@ -1105,14 +1151,16 @@ Dashboard
                                 <div class="d-flex align-items-center">
 
                                     <div
-                                        class="bg-danger-subtle
-                                               text-danger rounded-3
-                                               d-flex align-items-center
+                                        class="{{ ride.icon_class }}
+                                               rounded-3 d-flex
+                                               align-items-center
                                                justify-content-center"
                                         style="width:40px;height:40px;"
                                     >
 
-                                        <i class="fa-solid fa-motorcycle"></i>
+                                        <i
+                                            class="fa-solid {{ ride.icon }}"
+                                        ></i>
 
                                     </div>
 
@@ -1120,12 +1168,22 @@ Dashboard
                                     <div class="ms-3">
 
                                         <strong>
-                                            Dehradun → Clock Tower
+
+                                            {{ ride.pickup }}
+
+                                            →
+
+                                            {{ ride.destination }}
+
                                         </strong>
 
-                                        <small class="d-block
-                                                     text-secondary">
-                                            #NR0998
+
+                                        <small
+                                            class="d-block text-secondary"
+                                        >
+
+                                            #{{ ride.booking_id }}
+
                                         </small>
 
                                     </div>
@@ -1136,30 +1194,35 @@ Dashboard
 
 
                             <td>
-                                28 Aug 2026
+                                {{ ride.date }}
                             </td>
 
 
                             <td>
-                                Bike
+                                {{ ride.vehicle }}
                             </td>
 
 
                             <td>
+
                                 <strong class="text-danger">
-                                    ₹240
+
+                                    ₹{{ ride.fare }}
+
                                 </strong>
+
                             </td>
 
 
                             <td>
 
                                 <span
-                                    class="badge bg-success-subtle
-                                           text-success rounded-pill"
+                                    class="badge
+                                           {{ ride.status_class }}
+                                           rounded-pill"
                                 >
 
-                                    Completed
+                                    {{ ride.status }}
 
                                 </span>
 
@@ -1168,192 +1231,34 @@ Dashboard
 
                             <td>
 
-                                <button
+                                <a
+                                    href="{% url 'myride' %}"
                                     class="btn btn-sm btn-light
                                            border rounded-3"
                                 >
 
                                     <i class="fa-solid fa-receipt"></i>
 
-                                </button>
+                                </a>
 
                             </td>
 
                         </tr>
 
-
-
-                        <!-- RIDE 2 -->
+                        {% empty %}
 
                         <tr>
 
-                            <td>
+                            <td colspan="6"
+                                class="text-center text-secondary py-4">
 
-                                <div class="d-flex align-items-center">
-
-                                    <div
-                                        class="bg-primary-subtle
-                                               text-primary rounded-3
-                                               d-flex align-items-center
-                                               justify-content-center"
-                                        style="width:40px;height:40px;"
-                                    >
-
-                                        <i class="fa-solid fa-car"></i>
-
-                                    </div>
-
-
-                                    <div class="ms-3">
-
-                                        <strong>
-                                            ISBT → Rajpur Road
-                                        </strong>
-
-                                        <small class="d-block
-                                                     text-secondary">
-                                            #NR0995
-                                        </small>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-                                24 Aug 2026
-                            </td>
-
-
-                            <td>
-                                Car
-                            </td>
-
-
-                            <td>
-                                <strong class="text-danger">
-                                    ₹450
-                                </strong>
-                            </td>
-
-
-                            <td>
-
-                                <span
-                                    class="badge bg-success-subtle
-                                           text-success rounded-pill"
-                                >
-
-                                    Completed
-
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <button
-                                    class="btn btn-sm btn-light
-                                           border rounded-3"
-                                >
-
-                                    <i class="fa-solid fa-receipt"></i>
-
-                                </button>
+                                No recent rides found.
 
                             </td>
 
                         </tr>
 
-
-
-                        <!-- RIDE 3 -->
-
-                        <tr>
-
-                            <td>
-
-                                <div class="d-flex align-items-center">
-
-                                    <div
-                                        class="bg-warning-subtle
-                                               text-warning rounded-3
-                                               d-flex align-items-center
-                                               justify-content-center"
-                                        style="width:40px;height:40px;"
-                                    >
-
-                                        <i class="fa-solid fa-car"></i>
-
-                                    </div>
-
-
-                                    <div class="ms-3">
-
-                                        <strong>
-                                            Clock Tower → ISBT
-                                        </strong>
-
-                                        <small class="d-block
-                                                     text-secondary">
-                                            #NR0992
-                                        </small>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-                                20 Aug 2026
-                            </td>
-
-
-                            <td>
-                                Auto
-                            </td>
-
-
-                            <td>
-                                <strong class="text-danger">
-                                    ₹180
-                                </strong>
-                            </td>
-
-
-                            <td>
-
-                                <span
-                                    class="badge bg-success-subtle
-                                           text-success rounded-pill"
-                                >
-
-                                    Completed
-
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <button
-                                    class="btn btn-sm btn-light
-                                           border rounded-3"
-                                >
-
-                                    <i class="fa-solid fa-receipt"></i>
-
-                                </button>
-
-                            </td>
-
-                        </tr>
+                        {% endfor %}
 
                     </tbody>
 
@@ -1375,7 +1280,10 @@ Dashboard
 
         <small class="text-secondary">
 
-            <i class="fa-solid fa-shield-halved text-success me-1"></i>
+            <i
+                class="fa-solid fa-shield-halved
+                       text-success me-1"
+            ></i>
 
             Your rides and payments are secure with NandiRide
 
@@ -1386,12 +1294,34 @@ Dashboard
 </div>
 
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+
+<!-- ================================================= -->
+<!-- MESSAGES -->
+<!-- ================================================= -->
+
+{% if messages %}
+
+    {% for message in messages %}
+
+        <div
+            class="alert alert-{{ message.tags }}
+                   alert-dismissible fade show"
+        >
+
+            {{ message }}
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+            ></button>
+
+        </div>
+
+    {% endfor %}
+
+{% endif %}
+
+
 {% endblock %}

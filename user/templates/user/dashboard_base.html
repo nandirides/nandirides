@@ -1,57 +1,153 @@
 {% extends 'user/base.html' %}
 {% load static %}
 {% block content %}
-<div class="container-fluid p-0">
+<div class="container-fluid mt-auto rounded-3 pt-4">
     <div class="row g-0">
-        <aside class="col-md-3 col-lg-2 bg-white border-end min-vh-100">
+        <aside class="col-md-3 col-lg-2 bg-white border-end min-vh-100 d-none d-md-block">
             <div class="position-sticky top-0 p-3">
                 <div class="text-center mb-4">
-                    <img src="{% static 'user/images/user_image.jpg' %}"
-                         alt="Nandi Ride"
-                         class="img-fluid"
-                         style="max-width: 90px;">
+                    <img src="{% static 'user/images/user_image.jpg' %}" alt="Nandi Ride" class="img-fluid rounded-circle shadow-sm" style="width:90px;height:90px;object-fit:cover;">
+                    <h6 class="fw-bold mt-3 mb-1">NandiRide</h6>
+                    <small class="text-secondary">Ride Booking</small>
                 </div>
                 <div class="nav flex-column nav-pills gap-2">
                     {% for item in sidebar_menu %}
-                        <a href="{% url item.url %}"
-                           class="nav-link slide {% if request.resolver_match.url_name == item.url %}active {% else %}{% endif %}">
-                            <span class="me-2"><i class=" {{item.icon }}"></i></span>
-                            {{ item.name }}
-                        </a>
+                    <a href="{% url item.url %}" class="nav-link slide d-flex align-items-center px-3 py-2 {% if request.resolver_match.url_name == item.url %}active{% endif %}">
+                        <span class="me-3"><i class="{{ item.icon }}"></i></span>
+                        <span>{{ item.name }}</span>
+                    </a>
                     {% endfor %}
+                </div>
+                <div class="bg-danger-subtle rounded-3 p-3 mt-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fa-solid fa-headset text-danger fs-5 me-2"></i>
+                        <div>
+                            <small class="fw-bold d-block">Need Help?</small>
+                            <small class="text-secondary">Contact support</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </aside>
-        <main class="col-md-9 col-lg-10 bg-light min-vh-100">
-            <div class="bg-white border-bottom px-4 py-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="mb-0">
-                            {% block page_heading %}
-                                Dashboard
-                            {% endblock %}
-                        </h4>
-                    </div>
-                        <select class="active border-0" onchange="if(this.value) window.location.href=this.value;">
-                            <option value="" class=" text-dark">👤 Profile</option>
-                            <option value="{% url 'login' %}">Logout</option>
-                        </select>
+        <div class="d-md-none bg-white border-bottom shadow-sm p-3">
+            <div class="d-flex align-items-center justify-content-between">
+                <button class="btn btn-danger rounded-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="fw-bold fs-5">Nandi<span class="text-danger">Ride</span></div>
+                <div class="dropdown">
+                    <button class="btn btn-light border rounded-circle" type="button" data-bs-toggle="dropdown">
+                        <i class="fa-solid fa-user text-danger"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                        <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fa-solid fa-user me-2"></i>Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{% url 'login' %}"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+                    </ul>
                 </div>
             </div>
-            <div class="p-4">
-                {% block dashboard_content %}
-                {% endblock %}
+        </div>
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar">
+            <div class="offcanvas-header border-bottom">
+                <div class="d-flex align-items-center">
+                    <img src="{% static 'user/images/user_image.jpg' %}" alt="Nandi Ride" class="rounded-circle me-2" style="width:45px;height:45px;object-fit:cover;">
+                    <div>
+                        <h6 class="fw-bold mb-0">NandiRide</h6>
+                        <small class="text-secondary">Ride Booking</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div class="nav flex-column gap-2">
+                    {% for item in sidebar_menu %}
+                        <div class="nav-item">
+                            <a href="{% url item.url %}"
+                            class="nav-link slide d-flex px-3 py-2 fw-bold rounded-pill {% if request.resolver_match.url_name == item.url %}active{% endif %}">
+                                <i class="{{ item.icon }} me-2"></i>
+                                <span>{{ item.name }}</span>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="bg-danger-subtle rounded-3 p-3 mt-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fa-solid fa-headset text-danger fs-5 me-2"></i>
+                        <div>
+                            <small class="fw-bold d-block">Need Help?</small>
+                            <small class="text-secondary">Contact support</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <main class="col-12 col-md-9 col-lg-10 bg-light min-vh-100">
+            <header class="bg-white border-bottom shadow-sm px-3 px-md-4 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="fw-bold mb-1">
+                            {% block page_heading %}Dashboard{% endblock %}
+                        </h4>
+                        <small class="text-secondary d-none d-sm-block">Welcome to your NandiRide dashboard</small>
+                    </div>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-danger border-0 dropdown-toggle d-flex align-items-center gap-2 p-1 pe-2 rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if user.profile_image %}
+                                    <img src="{{ user.profile_image.url }}" alt="Profile" class="rounded-circle object-fit-cover" width="42" height="42">
+                                {% else %}
+                                    <span class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width:42px;height:42px;">
+                                        <i class="fa-solid fa-user"></i>
+                                    </span>
+                                {% endif %}
+                                <span class="d-none d-sm-block text-start">
+                                    <small class=" d-block">Welcome</small>
+                                    <strong class="small">{{ user.first_name|default:user.username }}</strong>
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <li>
+                                    <a class="dropdown-item text-danger py-2" href="{% url 'profile' %}">
+                                        <i class="fa-solid fa-user me-2 text-danger"></i>
+                                        Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger py-2" href="{% url 'editprofile' %}">
+                                        <i class="fa-solid fa-pen me-2 text-danger"></i>
+                                        Edit Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger py-2" href="{% url 'resetpassword' %}">
+                                        <i class="fa-solid fa-key me-2 text-danger"></i>
+                                        Change Password
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item py-2 text-danger" href="{% url 'login' %}">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                </div>
+            </header>
+            <div class="p-2 p-md-2 mb-lg-0">
+                {% block dashboard_content %}{% endblock %}
             </div>
         </main>
     </div>
 </div>
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <span><a href="#" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
-            </div>
-        {% endfor %}
-    {% endif %}
+{% if messages %}
+<div class="position-fixed top-0 end-0 p-3" style="z-index:1100;max-width:400px;width:100%;">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 {% endblock content %}

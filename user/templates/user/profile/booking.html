@@ -6,7 +6,7 @@ My Booking
 
 {% block dashboard_content %}
 
-<div class="container-fluid py-4">
+<div class="container-fluid">
 
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -46,262 +46,122 @@ My Booking
 
                 <div class="card-body p-4">
 
-                    <form method="POST" action="{% url 'booking' %}">
-                        {% csrf_token %}
+<form method="POST" action="{% url 'booking' %}">
+    {% csrf_token %}
 
-                        <!-- Pickup -->
-                        <div class="mb-4">
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Pickup Location</label>
+        <input type="text"
+               name="pickup_location"
+               class="form-control"
+               placeholder="Enter pickup location"
+               required>
+    </div>
 
-                            <label class="form-label fw-semibold">
-                                Pickup Location
-                            </label>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Destination</label>
+        <input type="text"
+               name="destination"
+               class="form-control"
+               placeholder="Enter destination"
+               required>
+    </div>
 
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
-                                    <i class="fa-solid fa-location-dot text-success"></i>
-                                </span>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Select Ride</label>
 
-                                <input
-                                    type="text"
-                                    name="pickup_location"
-                                    class="form-control border-start-0"
-                                    placeholder="Enter pickup location"
-                                    required
-                                >
-                            </div>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <input type="radio"
+                       class="btn-check"
+                       name="ride_type"
+                       id="bike"
+                       value="Bike"
+                       autocomplete="off"
+                       required>
 
-                        </div>
+                <label class="btn btn-outline-danger w-100 p-3"
+                       for="bike">
+                    <i class="fa fa-motorcycle fs-3 d-block mb-2"></i>
+                    Bike
+                </label>
+            </div>
 
+            <div class="col-md-4">
+                <input type="radio"
+                       class="btn-check"
+                       name="ride_type"
+                       id="auto"
+                       value="Auto"
+                       autocomplete="off">
 
-                        <!-- Destination -->
-                        <div class="mb-4">
+                <label class="btn btn-outline-danger w-100 p-3"
+                       for="auto">
+                    <i class="fa fa-car fs-3 d-block mb-2"></i>
+                    Auto
+                </label>
+            </div>
 
-                            <label class="form-label fw-semibold">
-                                Destination
-                            </label>
+            <div class="col-md-4">
+                <input type="radio"
+                       class="btn-check"
+                       name="ride_type"
+                       id="sedan"
+                       value="Sedan"
+                       autocomplete="off">
 
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
-                                    <i class="fa-solid fa-location-crosshairs text-danger"></i>
-                                </span>
+                <label class="btn btn-outline-danger w-100 p-3"
+                       for="sedan">
+                    <i class="fa fa-car-side fs-3 d-block mb-2"></i>
+                    Sedan
+                </label>
+            </div>
+        </div>
+    </div>
 
-                                <input
-                                    type="text"
-                                    name="destination"
-                                    class="form-control border-start-0"
-                                    placeholder="Enter destination"
-                                    required
-                                >
-                            </div>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Ride Date</label>
+            <input type="date"
+                   name="ride_date"
+                   class="form-control"
+                   required>
+        </div>
 
-                        </div>
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Ride Time</label>
+            <input type="time"
+                   name="ride_time"
+                   class="form-control"
+                   required>
+        </div>
+    </div>
 
+    <div class="mb-3 mt-3">
+        <label class="form-label fw-semibold">Passengers</label>
+        <input type="number"
+               name="passengers"
+               class="form-control"
+               min="1"
+               max="6"
+               value="1"
+               required>
+    </div>
 
-                        <!-- Date & Time -->
-                        <div class="row g-3 mb-4">
+    <div class="mb-4">
+        <label class="form-label fw-semibold">Note</label>
+        <textarea name="note"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Any special request?"></textarea>
+    </div>
 
-                            <div class="col-md-6">
-
-                                <label class="form-label fw-semibold">
-                                    Ride Date
-                                </label>
-
-                                <input
-                                    type="date"
-                                    name="ride_date"
-                                    class="form-control"
-                                    required
-                                >
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label fw-semibold">
-                                    Ride Time
-                                </label>
-
-                                <input
-                                    type="time"
-                                    name="ride_time"
-                                    class="form-control"
-                                    required
-                                >
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- Vehicle Type -->
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-                                Select Ride
-                            </label>
-
-                            <div class="row g-3">
-
-                                <!-- Bike -->
-                                <div class="col-md-4">
-
-                                    <input
-                                        type="radio"
-                                        class="btn-check"
-                                        name="vehicle_type"
-                                        id="bike"
-                                        value="bike"
-                                        checked
-                                    >
-
-                                    <label
-                                        class="btn btn-outline-success w-100 py-3"
-                                        for="bike"
-                                    >
-                                        <i class="fa-solid fa-motorcycle fs-4 d-block mb-2"></i>
-                                        Bike
-                                        <small class="d-block text-white">
-                                            Affordable
-                                        </small>
-                                    </label>
-
-                                </div>
-
-
-                                <!-- Auto -->
-                                <div class="col-md-4">
-
-                                    <input
-                                        type="radio"
-                                        class="btn-check"
-                                        name="vehicle_type"
-                                        id="auto"
-                                        value="auto"
-                                    >
-
-                                    <label
-                                        class="btn btn-outline-success w-100 py-3"
-                                        for="auto"
-                                    >
-                                        <i class="fa-solid fa-car-side fs-4 d-block mb-2"></i>
-                                        Auto
-                                        <small class="d-block text-white">
-                                            Comfortable
-                                        </small>
-                                    </label>
-
-                                </div>
-
-
-                                <!-- Cab -->
-                                <div class="col-md-4">
-
-                                    <input
-                                        type="radio"
-                                        class="btn-check"
-                                        name="vehicle_type"
-                                        id="cab"
-                                        value="cab"
-                                    >
-
-                                    <label
-                                        class="btn btn-outline-success w-100 py-3"
-                                        for="cab"
-                                    >
-                                        <i class="fa-solid fa-taxi fs-4 d-block mb-2"></i>
-                                        Cab
-                                        <small class="d-block text-white">
-                                            Premium
-                                        </small>
-                                    </label>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- Passenger -->
-                        <div class="row g-3 mb-4">
-
-                            <div class="col-md-6">
-
-                                <label class="form-label fw-semibold">
-                                    Passengers
-                                </label>
-
-                                <select
-                                    name="passengers"
-                                    class="form-select"
-                                >
-                                    <option value="1">1 Passenger</option>
-                                    <option value="2">2 Passengers</option>
-                                    <option value="3">3 Passengers</option>
-                                    <option value="4">4 Passengers</option>
-                                    <option value="5">5 Passengers</option>
-                                </select>
-
-                            </div>
-
-                            <div class="col-md-6">
-
-                                <label class="form-label fw-semibold">
-                                    Payment Method
-                                </label>
-
-                                <select
-                                    name="payment_method"
-                                    class="form-select"
-                                >
-                                    <option value="cash">
-                                        Cash
-                                    </option>
-
-                                    <option value="upi">
-                                        UPI
-                                    </option>
-
-                                    <option value="online">
-                                        Online Payment
-                                    </option>
-                                </select>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- Notes -->
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-                                Additional Note
-                                <span class="text-muted fw-normal">
-                                    (Optional)
-                                </span>
-                            </label>
-
-                            <textarea
-                                name="note"
-                                rows="3"
-                                class="form-control"
-                                placeholder="Any special instructions for the driver?"
-                            ></textarea>
-
-                        </div>
-
-
-                        <!-- Submit -->
-                        <button
-                            type="submit"
-                            class="btn btn-danger w-100 py-3 rounded-3 fw-semibold"
-                        >
-                            <i class="fa-solid fa-car me-2"></i>
-                            Confirm Booking
-                        </button>
-
-                    </form>
+    <button type="submit"
+            class="btn btn-danger w-100 rounded-pill py-3 fw-bold">
+        <i class="fa fa-arrow-right me-2"></i>
+        Confirm Booking & Continue Payment
+    </button>
+</form>
 
                 </div>
             </div>
@@ -327,7 +187,7 @@ My Booking
                             Base Fare
                         </span>
                         <span class="fw-semibold">
-                            ₹50
+                            ₹{{ booking_data.base_fare }}
                         </span>
                     </div>
 
@@ -345,7 +205,7 @@ My Booking
                             Ride Charge
                         </span>
                         <span class="fw-semibold">
-                            ₹--
+                            ₹{{ booking_data.ride_charge }}
                         </span>
                     </div>
 

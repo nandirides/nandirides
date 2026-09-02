@@ -1,6 +1,60 @@
 from django import forms
 from user.models import User 
 
+class ContactForm(forms.Form):
+
+    name = forms.CharField(
+        label="Full Name",
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Enter your full name"
+            }
+        )
+    )
+
+    email = forms.EmailField(
+        label="Email Address",
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Enter your email"
+            }
+        )
+    )
+
+    mobile_number = forms.CharField(
+        label="Mobile Number",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Enter mobile number"
+            }
+        )
+    )
+
+    subject = forms.CharField(
+        label="Subject",
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "What can we help you with?"
+            }
+        )
+    )
+
+    message = forms.CharField(
+        label="Message",
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Write your message here...",
+                "rows": 5
+            }
+        )
+    )
+
 class LoginForm(forms.Form):
     
     user_id = forms.CharField(
@@ -24,10 +78,10 @@ class LoginForm(forms.Form):
 
 class ForgetPassword(forms.Form):
 
-    user_id = forms.CharField(
-        widget=forms.HiddenInput(attrs={
-            'class': 'form-control',
-        }))
+    # user_id = forms.CharField(
+    #     widget=forms.HiddenInput(attrs={
+    #         'class': 'form-control',
+    #     }))
 
     email_or_Phone_Number = forms.CharField(
         widget=forms.TextInput(attrs={
@@ -50,26 +104,13 @@ class ForgetPassword(forms.Form):
             })
             )
 
-class LoginType(forms.Form):
-
-    user_id = forms.CharField(
-        widget=forms.HiddenInput(attrs={
-            'class': 'form-control',
-        }))
-
-    old_password = forms.CharField(
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter Old Password'
-        })
-    )
 
 class ResetPassword(forms.Form):
 
-    user_id = forms.CharField(
-        widget=forms.HiddenInput(attrs={
-            'class': 'form-control',
-        }))
+    # user_id = forms.CharField(
+    #     widget=forms.HiddenInput(attrs={
+    #         'class': 'form-control',
+    #     }))
 
     old_password = forms.CharField(
         widget=forms.TextInput(attrs={

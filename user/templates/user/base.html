@@ -4,182 +4,268 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="{% static 'user/css/style.css' %}">
-
     <title>{% block title %}Nandi Rides Booking Portal{% endblock %}</title>
 </head>
+<body class="d-flex flex-column min-vh-100 bg-light pt-1">
 
-<body class="d-flex flex-column min-vh-100 bg-white">
-
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-    <div class="container-fluid px-3 px-lg-5">
+<nav class="navbar navbar-expand-xl navbar-light bg-white shadow-sm fixed-top py-2 mx-2 mx-sm-3 rounded-3">
+    <div class="container-fluid px-3 px-sm-4">
         <a href="{% url 'home' %}" class="navbar-brand d-flex align-items-center text-decoration-none">
-            <img src="{% static 'user/images/logo.png' %}"
-                 alt="Nandi Ride Logo"
-                 width="75"
-                 height="75"
-                 class="img-fluid me-2">
-            <span class="fw-bold fs-3 text-dark">
-                Nandi<span class="text-warning">Ride</span>
-            </span>
+            <img src="{% static 'user/images/logo.png' %}" alt="Nandi Ride Logo" width="50" height="50" class="img-fluid me-2">
+            <span class="fw-bold fs-4 text-dark">Nandi<span class="text-danger">Ride</span></span>
         </a>
-
-        <button class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mainNavbar"
-                aria-controls="mainNavbar"
-                aria-expanded="false"
-                aria-label="Toggle navigation">
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="mainNavbar">
-            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-lg-center">
+            <ul class="navbar-nav mx-auto mb-2 mb-xl-0 mt-2 mt-xl-0 align-items-xl-center gap-xl-1">
                 {% for nav in nav_links %}
                 <li class="nav-item">
-                    <a href="{{ nav.url }}"
-                       class="nav-link slide  px-3 fw-semibold {% if request.path == nav.url %}active text-danger{% else %}text-dark{% endif %}">
-                        <i class="{{nav.icon}} me-2"></i>{{ nav.name }}
+                    <a href="{{ nav.url }}" class="nav-link px-3 py-2 fw-bold rounded-pill d-flex align-items-center {% if request.path == nav.url %}active{% endif %}">
+                        <i class="{{ nav.icon }} me-2"></i>
+                        <span>{{ nav.name }}</span>
                     </a>
                 </li>
                 {% endfor %}
             </ul>
-
-            <div class="d-flex flex-column flex-lg-row gap-2">
-                <a href="{{ url_login }}" class="btn btn-danger rounded-pill px-4">
-                    <i class="fa-solid fa-right-to-bracket me-1"></i>
-                    {{ button_login }}
+            <div class="d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center gap-2 pb-2 pb-xl-0">
+                {% if user.is_authenticated %}
+                <div class="dropdown">
+                    <button class="btn btn-light border-0 dropdown-toggle d-flex align-items-center justify-content-center gap-2 p-1 pe-2 rounded-pill w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if user.profile_image %}
+                        <img src="{{ user.profile_image.url }}" alt="Profile" class="rounded-circle object-fit-cover" width="42" height="42">
+                        {% else %}
+                        <span class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width:42px;height:42px;">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        {% endif %}
+                        <span class="text-start">
+                            <small class="text-secondary d-block">Welcome</small>
+                            <strong class="small">{{ user.first_name|default:user.username }}</strong>
+                        </span>
+                        <i class="fa-solid fa-chevron-down small text-secondary"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        <li><a class="dropdown-item py-2" href="{% url 'profile' %}"><i class="fa-solid fa-user me-2 text-danger"></i>Profile</a></li>
+                        <li><a class="dropdown-item py-2" href="{% url 'editprofile' %}"><i class="fa-solid fa-pen me-2 text-danger"></i>Edit Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="{% url 'login' %}"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+                {% else %}
+                <a href="{{ url_login }}" class="btn btn-outline-danger rounded-pill px-4 py-2 fw-bold text-nowrap">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i>{{ button_login }}
                 </a>
-                <a href="{{ url_signup }}" class="btn btn-danger rounded-pill px-4">
-                    <i class="fa-solid fa-user-plus me-1"></i>
-                    {{ button_reg }}
+                <a href="{{ url_signup }}" class="btn btn-outline-danger text-nowrap rounded-pill px-4 py-2 fw-bold text-nowrap">
+                    <i class="fa-solid fa-user-plus me-1"></i>{{ button_reg }}
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>
 </nav>
 
-<main class="flex-grow-1 w-100">
-    {% block content %}
-    {% endblock %}
-</main>
+    <main class="flex-grow-1 w-100 px-2 px-sm-3 px-md-2 pt-5 mt-4">
+        {% block content %}
+        {% endblock %}
+    </main>
 
-<footer class="bg-danger text-white pt-5 pb-3 mt-auto">
-    <div class="container-fluid px-4 px-lg-5">
-        <div class="row g-4">
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="d-flex align-items-center mb-3">
-                    <img src="{% static 'user/images/logo.png' %}"
-                         alt="Nandi Ride Logo"
-                         width="65"
-                         height="65"
-                         class="img-fluid me-2">
-                    <span class="fw-bold fs-4">
-                        Nandi<span class="text-warning">Ride</span>
-                    </span>
+    <footer class="bg-danger text-white mt-auto mx-2 mx-sm-3 mx-lg-2 mb-2 rounded-3">
+        <div class="container-fluid px-3 px-sm-4 px-lg-5 py-5">
+            <div class="row g-4">
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="d-flex align-items-center mb-3">
+                        <div
+                            class="bg-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
+                            style="width:58px;height:58px;"
+                        >
+                            <img
+                                src="{% static 'user/images/logo.png' %}"
+                                alt="Nandi Ride Logo"
+                                width="50"
+                                height="50"
+                                class="img-fluid"
+                            >
+                        </div>
+
+                        <span class="fw-bold fs-4">
+                            Nandi<span class="text-warning">Ride</span>
+                        </span>
+                    </div>
+
+                    <p class="text-white-50 mb-0">
+                        {{ site_tagline }}
+                    </p>
                 </div>
-                <p class="text-white mb-0">
-                    {{ site_tagline }}
-                </p>
-            </div>
 
-            <div class="col-6 col-md-6 col-lg-2">
-                <h6 class="fw-bold text-white mb-3">Quick Links</h6>
-                {% for nav in nav_links %}
-                <div class="mb-2">
-                    <a href="{{ nav.url }}" class="text-white text-decoration-none">
-                        {{ nav.name }}
-                    </a>
+                <div class="col-6 col-md-6 col-lg-2">
+                    <h6 class="fw-bold mb-3">
+                        Quick Links
+                    </h6>
+
+                    <div class="d-flex flex-column gap-2">
+                        {% for nav in nav_links %}
+                            <a
+                                href="{{ nav.url }}"
+                                class="footer-link text-white text-decoration-none d-flex align-items-center"
+                            >
+                                <i class="{{ nav.icon }} me-2"></i>
+                                <span>{{ nav.name }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
                 </div>
-                {% endfor %}
-            </div>
 
-            <div class="col-6 col-md-6 col-lg-2">
-                <h6 class="fw-bold text-white mb-3">Support</h6>
-                {% for support in support_links %}
-                <div class="mb-2">
-                    <a href="{{ support.url }}" class="text-white text-decoration-none">
-                        {{ support.name }}
-                    </a>
+                <div class="col-6 col-md-6 col-lg-2">
+                    <h6 class="fw-bold mb-3">
+                        Support
+                    </h6>
+
+                    <div class="d-flex flex-column gap-2">
+                        {% for support in support_links %}
+                            <a
+                                href="{{ support.url }}"
+                                class="footer-link text-white text-decoration-none d-flex align-items-center"
+                            >
+                                <i class="fa-solid fa-angle-right me-2"></i>
+                                <span>{{ support.name }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
                 </div>
-                {% endfor %}
+
+                <div class="col-12 col-md-6 col-lg-3">
+                    <h6 class="fw-bold mb-3">
+                        Contact Us
+                    </h6>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-start">
+                            <span
+                                class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                style="width:34px;height:34px;"
+                            >
+                                <i class="fa-solid fa-phone"></i>
+                            </span>
+
+                            <div class="ms-3">
+                                <span class="d-block">
+                                    {{ phone }}
+                                </span>
+
+                                {% if phone2 %}
+                                    <span class="d-block text-white-50">
+                                        {{ phone2 }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start">
+                            <span
+                                class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                style="width:34px;height:34px;"
+                            >
+                                <i class="fa-solid fa-envelope"></i>
+                            </span>
+
+                            <div class="ms-3 text-break">
+                                <span class="d-block">
+                                    {{ email }}
+                                </span>
+
+                                {% if email2 %}
+                                    <span class="d-block text-white-50">
+                                        {{ email2 }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start">
+                            <span
+                                class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                style="width:34px;height:34px;"
+                            >
+                                <i class="fa-solid fa-location-dot"></i>
+                            </span>
+
+                            <span class="ms-3 text-break">
+                                {{ location }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-2">
+                    <h6 class="fw-bold mb-3">
+                        Follow Us
+                    </h6>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for social in social_links %}
+                            <a
+                                href="{{ social.url }}"
+                                target="_blank"
+                                rel="noopener"
+                                class="nav-link social-link bg-white text-danger rounded-circle d-flex align-items-center justify-content-center text-decoration-none"
+                                style="width:42px;height:42px;"
+                            >
+                                <i class="{{ social.icon }}"></i>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
 
-            <div class="col-12 col-md-6 col-lg-3">
-                <h6 class="fw-bold text-white mb-3">Contact Us</h6>
-                <p class="text-white mb-2">
-                    <i class="fa-solid fa-phone me-2"></i>
-                    {{ phone }}
-                    {% if phone2 %}
-                    <br>
-                    <span class="ms-4">{{ phone2 }}</span>
-                    {% endif %}
-                </p>
-                <p class="text-white mb-2">
-                    <i class="fa-solid fa-envelope me-2"></i>
-                    {{ email }}
-                    {% if email2 %}
-                    <br>
-                    <span class="ms-4">{{ email2 }}</span>
-                    {% endif %}
-                </p>
-                <p class="text-white mb-0">
-                    <i class="fa-solid fa-location-dot me-2"></i>
-                    {{ location }}
-                </p>
-            </div>
+            <hr class="border-light opacity-50 my-4">
 
-            <div class="col-12 col-md-6 col-lg-2">
-                <h6 class="fw-bold text-white mb-3">Follow Us</h6>
-                <div class="d-flex flex-wrap gap-2">
-                    {% for social in social_links %}
-                    <a href="{{ social.url }}"
-                       target="_blank"
-                       rel="noopener"
-                       class="text-decoration-none bg-white tn-light rounded-circle d-flex align-items-center justify-content-center"
-                       style="width:42px;height:42px;">
-                        <i class="{{ social.icon }} text-dark"></i>
-                    </a>
-                    {% endfor %}
+            <div class="row align-items-center g-2">
+                <div class="col-12 col-md-6 text-center text-md-start">
+                    <small>
+                        © {{ current_year }} {{ site_name }}. {{ footer_tag }}
+                    </small>
+                </div>
+
+                <div class="col-12 col-md-6 text-center text-md-end">
+                    <small>
+                        Made with
+                        <i class="fa-solid fa-heart mx-1"></i>
+                        for Nandi Ride
+                    </small>
                 </div>
             </div>
         </div>
-
-        <hr class="border-light my-4">
-
-        <div class="row align-items-center">
-            <div class="col-12 col-md-6 text-center text-md-start">
-                <small class="text-white">
-                    © {{ current_year }} {{ site_name }}. {{ footer_tag }}
-                </small>
-            </div>
-            <div class="col-12 col-md-6 text-center text-md-end mt-2 mt-md-0">
-                <small class="text-white">
-                    Made with
-                    <i class="fa-solid fa-heart text-white"></i>
-                    for Nandi Ride
-                </small>
-            </div>
-        </div>
-    </div>
-</footer>
+    </footer>
 
     {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <span><a href="#" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
-            </div>
-        {% endfor %}
+        <div
+            class="position-fixed top-0 end-0 p-3"
+            style="z-index:1100;max-width:100%;width:400px;"
+        >
+            {% for message in messages %}
+                <div
+                    class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm mb-2"
+                    role="alert"
+                >
+                    {{ message }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close"
+                    ></button>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'user/js/scripts.js' %}"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'user/js/scripts.js' %}"></script>
 </body>
 </html>

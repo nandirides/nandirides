@@ -2,779 +2,377 @@
 {% block page_heading %}
 Payment
 {% endblock %}
-
-{% block title %}{{site_name}} | Payment{% endblock %}
+{% block title %}{{ site_name }} | Payment{% endblock %}
 {% block dashboard_content %}
-
-<div class="container-fluid py-4">
-
-    <!-- ================= PAGE HEADER ================= -->
-
+<div class="container-fluid">
     <div class="mb-4">
         <h2 class="fw-bold mb-1">
-            <i class="fa-solid fa-credit-card me-2"></i>
+            <i class="fa-solid fa-credit-card text-danger me-2"></i>
             Payment
         </h2>
-
         <p class="text-muted mb-0">
             Complete your payment to confirm your NandiRide
         </p>
     </div>
-
-
-    <div class="row g-4">
-
-        <!-- ================================================= -->
-        <!-- LEFT SIDE - PAYMENT OPTIONS -->
-        <!-- ================================================= -->
-
-        <div class="col-lg-7">
-
-            <div class="card border-0 shadow-sm rounded-4">
-
-                <div class="card-body p-4">
-
-                    <h5 class="fw-bold mb-1">
-                        Select Payment Method
-                    </h5>
-
-                    <p class="text-muted small mb-4">
-                        Choose how you want to pay for your ride
-                    </p>
-
-
-                    <form method="POST">
-
-                        {% csrf_token %}
-
-
-                        <!-- ================= UPI ================= -->
-
-                        <input
-                            type="radio"
-                            class="btn-check"
-                            name="payment_method"
-                            id="upi"
-                            value="upi"
-                            checked
-                        >
-
-                        <label
-                            for="upi"
-                            class="payment-option"
-                        >
-
-                            <div class="payment-icon">
-                                <i class="fa-solid fa-mobile-screen-button"></i>
-                            </div>
-
-                            <div class="payment-info">
-
-                                <h6 class="fw-bold mb-1">
-                                    UPI
-                                </h6>
-
-                                <small class="text-muted">
-                                    Google Pay, PhonePe, Paytm & other UPI apps
-                                </small>
-
-                            </div>
-
-                            <div class="payment-radio">
-                                <i class="fa-solid fa-circle-check"></i>
-                            </div>
-
-                        </label>
-
-
-                        <!-- ================= CARD ================= -->
-
-                        <input
-                            type="radio"
-                            class="btn-check"
-                            name="payment_method"
-                            id="card"
-                            value="card"
-                        >
-
-                        <label
-                            for="card"
-                            class="payment-option"
-                        >
-
-                            <div class="payment-icon">
-                                <i class="fa-solid fa-credit-card"></i>
-                            </div>
-
-                            <div class="payment-info">
-
-                                <h6 class="fw-bold mb-1">
-                                    Credit / Debit Card
-                                </h6>
-
-                                <small class="text-muted">
-                                    Visa, Mastercard, RuPay & more
-                                </small>
-
-                            </div>
-
-                            <div class="payment-radio">
-                                <i class="fa-solid fa-circle-check"></i>
-                            </div>
-
-                        </label>
-
-
-                        <!-- ================= NET BANKING ================= -->
-
-                        <input
-                            type="radio"
-                            class="btn-check"
-                            name="payment_method"
-                            id="netbanking"
-                            value="netbanking"
-                        >
-
-                        <label
-                            for="netbanking"
-                            class="payment-option"
-                        >
-
-                            <div class="payment-icon">
-                                <i class="fa-solid fa-building-columns"></i>
-                            </div>
-
-                            <div class="payment-info">
-
-                                <h6 class="fw-bold mb-1">
-                                    Net Banking
-                                </h6>
-
-                                <small class="text-muted">
-                                    Pay using your bank account
-                                </small>
-
-                            </div>
-
-                            <div class="payment-radio">
-                                <i class="fa-solid fa-circle-check"></i>
-                            </div>
-
-                        </label>
-
-
-                        <!-- ================= CASH ================= -->
-
-                        <input
-                            type="radio"
-                            class="btn-check"
-                            name="payment_method"
-                            id="cash"
-                            value="cash"
-                        >
-
-                        <label
-                            for="cash"
-                            class="payment-option"
-                        >
-
-                            <div class="payment-icon">
-                                <i class="fa-solid fa-money-bill-wave"></i>
-                            </div>
-
-                            <div class="payment-info">
-
-                                <h6 class="fw-bold mb-1">
-                                    Cash
-                                </h6>
-
-                                <small class="text-muted">
-                                    Pay directly to the driver
-                                </small>
-
-                            </div>
-
-                            <div class="payment-radio">
-                                <i class="fa-solid fa-circle-check"></i>
-                            </div>
-
-                        </label>
-
-
-                        <!-- ================= PAY BUTTON ================= -->
-
-                        <button
-                            type="submit"
-                            class="btn btn-danger w-100 py-3 rounded-3 fw-semibold mt-4"
-                        >
-
-                            <i class="fa-solid fa-lock me-2"></i>
-
-                            Pay ₹250
-
-                        </button>
-
-                    </form>
-
-                </div>
-            </div>
-
-
-            <!-- ================= SECURITY ================= -->
-
-            <div class="card border-0 shadow-sm rounded-4 mt-4">
-
-                <div class="card-body p-3">
-
-                    <div class="d-flex align-items-center">
-
-                        <div class="secure-icon">
-                            <i class="fa-solid fa-shield-halved"></i>
-                        </div>
-
-                        <div class="ms-3">
-
-                            <h6 class="fw-bold mb-1">
-                                Safe & Secure Payment
-                            </h6>
-
-                            <small class="text-muted">
-                                Your payment information is protected
-                                and securely processed.
-                            </small>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- ================================================= -->
-        <!-- RIGHT SIDE - BOOKING SUMMARY -->
-        <!-- ================================================= -->
-
-        <div class="col-lg-5">
-
-            <div class="card border-0 shadow-sm rounded-4">
-
-                <div class="card-body p-4">
-
-                    <h5 class="fw-bold mb-4">
-                        <i class="fa-solid fa-receipt me-2"></i>
-                        Ride Summary
-                    </h5>
-
-
-                    <!-- BOOKING ID -->
-
-                    <div class="summary-item">
-
-                        <span>
-                            Booking ID
-                        </span>
-
-                        <strong>
-                            #NR1001
-                        </strong>
-
-                    </div>
-
-
-                    <!-- PICKUP -->
-
-                    <div class="location-box">
-
-                        <div class="location-icon pickup">
-                            <i class="fa-solid fa-location-dot"></i>
-                        </div>
-
-                        <div>
-
-                            <small class="text-muted">
-                                Pickup
-                            </small>
-
-                            <h6 class="fw-semibold mb-0">
-                                Dehradun Railway Station
-                            </h6>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- LINE -->
-
-                    <div class="location-line"></div>
-
-
-                    <!-- DESTINATION -->
-
-                    <div class="location-box">
-
-                        <div class="location-icon destination">
-                            <i class="fa-solid fa-location-crosshairs"></i>
-                        </div>
-
-                        <div>
-
-                            <small class="text-muted">
-                                Destination
-                            </small>
-
-                            <h6 class="fw-semibold mb-0">
-                                Clock Tower, Dehradun
-                            </h6>
-
-                        </div>
-
-                    </div>
-
-
-                    <hr class="my-4">
-
-
-                    <!-- RIDE TYPE -->
-
-                    <div class="summary-item">
-
-                        <span>
-                            Ride Type
-                        </span>
-
-                        <strong>
-                            <i class="fa-solid fa-motorcycle me-1"></i>
-                            Bike
-                        </strong>
-
-                    </div>
-
-
-                    <!-- DATE -->
-
-                    <div class="summary-item">
-
-                        <span>
-                            Date
-                        </span>
-
-                        <strong>
-                            31 Aug 2026
-                        </strong>
-
-                    </div>
-
-
-                    <!-- TIME -->
-
-                    <div class="summary-item">
-
-                        <span>
-                            Time
-                        </span>
-
-                        <strong>
-                            06:30 PM
-                        </strong>
-
-                    </div>
-
-
-                    <!-- PASSENGER -->
-
-                    <div class="summary-item">
-
-                        <span>
-                            Passengers
-                        </span>
-
-                        <strong>
-                            1
-                        </strong>
-
-                    </div>
-
-
-                    <!-- DISTANCE -->
-
-                    <div class="summary-item">
-
-                        <span>
-                            Distance
-                        </span>
-
-                        <strong>
-                            10 km
-                        </strong>
-
-                    </div>
-
-
-                    <hr>
-
-
-                    <!-- FARE -->
-
-                    <div class="fare-row">
-
-                        <span>
-                            Base Fare
-                        </span>
-
-                        <span>
-                            ₹50
-                        </span>
-
-                    </div>
-
-
-                    <div class="fare-row">
-
-                        <span>
-                            Ride Charge
-                        </span>
-
-                        <span>
-                            ₹180
-                        </span>
-
-                    </div>
-
-
-                    <div class="fare-row">
-
-                        <span>
-                            Platform Fee
-                        </span>
-
-                        <span>
-                            ₹20
-                        </span>
-
-                    </div>
-
-
-                    <hr>
-
-
-                    <!-- TOTAL -->
-
-                    <div class="total-row">
-
-                        <span>
-                            Total Amount
-                        </span>
-
-                        <strong>
-                            ₹250
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ================= SUPPORT ================= -->
-
-            <div class="card border-0 shadow-sm rounded-4 mt-4">
-
-                <div class="card-body p-4">
-
-                    <div class="d-flex align-items-center">
-
-                        <div class="support-icon">
-                            <i class="fa-solid fa-headset"></i>
-                        </div>
-
-                        <div class="ms-3">
-
-                            <h6 class="fw-bold mb-1">
-                                Need Help?
-                            </h6>
-
-                            <small class="text-muted">
-                                Contact NandiRide support for payment
-                                related issues.
-                            </small>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- ================================================= -->
-<!-- CSS -->
-<!-- ================================================= -->
-
-<style>
-
-    .payment-option {
-
-        display: flex;
-        align-items: center;
-
-        width: 100%;
-
-        padding: 18px;
-
-        margin-bottom: 14px;
-
-        border: 2px solid #e9ecef;
-
-        border-radius: 14px;
-
-        background: #fff;
-
-        cursor: pointer;
-
-        transition: all 0.2s ease;
-
-    }
-
-
-    .payment-option:hover {
-
-        border-color: #dc3545;
-
-        background: #fff8f8;
-
-    }
-
-
-    .btn-check:checked + .payment-option {
-
-        border-color: #dc3545;
-
-        background: #fff5f5;
-
-    }
-
-
-    .payment-icon {
-
-        width: 48px;
-        height: 48px;
-
-        border-radius: 12px;
-
-        background: #f8f9fa;
-
-        color: #dc3545;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        font-size: 20px;
-
-    }
-
-
-    .payment-info {
-
-        flex: 1;
-
-        margin-left: 15px;
-
-    }
-
-
-    .payment-radio {
-
-        color: #dc3545;
-
-        opacity: 0;
-
-        font-size: 20px;
-
-    }
-
-
-    .btn-check:checked
-    + .payment-option
-    .payment-radio {
-
-        opacity: 1;
-
-    }
-
-
-    .secure-icon,
-    .support-icon {
-
-        width: 45px;
-        height: 45px;
-
-        border-radius: 50%;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        background: #fff5f5;
-
-        color: #dc3545;
-
-    }
-
-
-    .summary-item {
-
-        display: flex;
-
-        justify-content: space-between;
-
-        align-items: center;
-
-        margin-bottom: 15px;
-
-    }
-
-
-    .summary-item span {
-
-        color: #6c757d;
-
-    }
-
-
-    .location-box {
-
-        display: flex;
-
-        align-items: center;
-
-        margin: 18px 0;
-
-    }
-
-
-    .location-icon {
-
-        width: 42px;
-        height: 42px;
-
-        min-width: 42px;
-
-        border-radius: 50%;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        margin-right: 12px;
-
-    }
-
-
-    .pickup {
-
-        color: #198754;
-
-        background: #eaf8f0;
-
-    }
-
-
-    .destination {
-
-        color: #dc3545;
-
-        background: #fff0f1;
-
-    }
-
-
-    .location-line {
-
-        width: 2px;
-
-        height: 20px;
-
-        background: #dee2e6;
-
-        margin-left: 20px;
-
-    }
-
-
-    .fare-row {
-
-        display: flex;
-
-        justify-content: space-between;
-
-        margin-bottom: 12px;
-
-        color: #6c757d;
-
-    }
-
-
-    .total-row {
-
-        display: flex;
-
-        justify-content: space-between;
-
-        align-items: center;
-
-        font-size: 18px;
-
-    }
-
-
-    .total-row strong {
-
-        font-size: 25px;
-
-        color: #dc3545;
-
-    }
-
-
-    @media (max-width: 768px) {
-
-        .payment-option {
-
-            padding: 14px;
-
-        }
-
-    }
-
-</style>
-
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                <i class="fa-solid fa-circle-info me-2"></i>
                 {{ message }}
-                <span><a href="#" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
     {% endif %}
-
+    {% if booking_data %}
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-1">
+                            Select Payment Method
+                        </h5>
+                        <p class="text-muted small mb-4">
+                            Choose how you want to pay for your ride
+                        </p>
+                        <form method="POST" action="{% url 'payment' %}">
+                            {% csrf_token %}
+                            <input type="radio" class="btn-check" name="payment_method" id="upi" value="upi" checked>
+                            <label for="upi" class="payment-option">
+                                <div class="payment-icon">
+                                    <i class="fa-solid fa-mobile-screen-button"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <h6 class="fw-bold mb-1">UPI</h6>
+                                    <small class="text-muted">
+                                        Google Pay, PhonePe, Paytm & other UPI apps
+                                    </small>
+                                </div>
+                                <div class="payment-radio">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                            </label>
+                            <input type="radio" class="btn-check" name="payment_method" id="card" value="card">
+                            <label for="card" class="payment-option">
+                                <div class="payment-icon">
+                                    <i class="fa-solid fa-credit-card"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <h6 class="fw-bold mb-1">Credit / Debit Card</h6>
+                                    <small class="text-muted">
+                                        Visa, Mastercard, RuPay & more
+                                    </small>
+                                </div>
+                                <div class="payment-radio">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                            </label>
+                            <input type="radio" class="btn-check" name="payment_method" id="netbanking" value="netbanking">
+                            <label for="netbanking" class="payment-option">
+                                <div class="payment-icon">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <h6 class="fw-bold mb-1">Net Banking</h6>
+                                    <small class="text-muted">
+                                        Pay using your bank account
+                                    </small>
+                                </div>
+                                <div class="payment-radio">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                            </label>
+                            <input type="radio" class="btn-check" name="payment_method" id="cash" value="cash">
+                            <label for="cash" class="payment-option">
+                                <div class="payment-icon">
+                                    <i class="fa-solid fa-money-bill-wave"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <h6 class="fw-bold mb-1">Cash</h6>
+                                    <small class="text-muted">
+                                        Pay directly to the driver
+                                    </small>
+                                </div>
+                                <div class="payment-radio">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                            </label>
+                            <button type="submit" class="btn btn-danger w-100 py-3 rounded-3 fw-semibold mt-4">
+                                <i class="fa-solid fa-lock me-2"></i>
+                                Pay ₹{{ booking_data.total_amount }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm rounded-4 mt-4">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="secure-icon">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="fw-bold mb-1">
+                                    Safe & Secure Payment
+                                </h6>
+                                <small class="text-muted">
+                                    Your payment information is protected and securely processed.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="fa-solid fa-receipt text-danger me-2"></i>
+                            Ride Summary
+                        </h5>
+                        <div class="summary-item">
+                            <span>Booking ID</span>
+                            <strong>#NR{{ request.session.session_key|slice:":6"|upper }}</strong>
+                        </div>
+                        <div class="location-box">
+                            <div class="location-icon pickup">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted">Pickup</small>
+                                <h6 class="fw-semibold mb-0">
+                                    {{ booking_data.pickup|default:"Not selected" }}
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="location-line"></div>
+                        <div class="location-box">
+                            <div class="location-icon destination">
+                                <i class="fa-solid fa-location-crosshairs"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted">Destination</small>
+                                <h6 class="fw-semibold mb-0">
+                                    {{ booking_data.destination|default:"Not selected" }}
+                                </h6>
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                        <div class="summary-item">
+                            <span>Ride Type</span>
+                            <strong>
+                                <i class="fa-solid fa-motorcycle text-danger me-1"></i>
+                                {{ booking_data.ride_type|default:"Not selected" }}
+                            </strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Date</span>
+                            <strong>
+                                {{ booking_data.date|default:"Not selected" }}
+                            </strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Time</span>
+                            <strong>
+                                {{ booking_data.time|default:"Not selected" }}
+                            </strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Passengers</span>
+                            <strong>
+                                {{ booking_data.passengers|default:"1" }}
+                            </strong>
+                        </div>
+                        <hr>
+                        <div class="fare-row">
+                            <span>Base Fare</span>
+                            <span>₹{{ booking_data.base_fare|default:"0" }}</span>
+                        </div>
+                        <div class="fare-row">
+                            <span>Ride Charge</span>
+                            <span>₹{{ booking_data.ride_charge|default:"0" }}</span>
+                        </div>
+                        <div class="fare-row">
+                            <span>Platform Fee</span>
+                            <span>₹{{ booking_data.platform_fee|default:"0" }}</span>
+                        </div>
+                        <hr>
+                        <div class="total-row">
+                            <span>Total Amount</span>
+                            <strong>
+                                ₹{{ booking_data.total_amount|default:"0" }}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm rounded-4 mt-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="support-icon">
+                                <i class="fa-solid fa-headset"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="fw-bold mb-1">
+                                    Need Help?
+                                </h6>
+                                <small class="text-muted">
+                                    Contact NandiRide support for payment related issues.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body text-center py-5">
+                <div class="empty-icon mx-auto mb-3">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <h4 class="fw-bold">No Booking Found</h4>
+                <p class="text-muted">
+                    Please create a booking before making payment.
+                </p>
+                <a href="{% url 'booking' %}" class="btn btn-danger rounded-pill px-4">
+                    <i class="fa-solid fa-car me-2"></i>
+                    Book a Ride
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+<style>
+.payment-option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 18px;
+    margin-bottom: 14px;
+    border: 2px solid #e9ecef;
+    border-radius: 14px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.payment-option:hover {
+    border-color: #dc3545;
+    background: #fff8f8;
+    transform: translateY(-1px);
+}
+.btn-check:checked + .payment-option {
+    border-color: #dc3545;
+    background: #fff5f5;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.12);
+}
+.payment-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #f8f9fa;
+    color: #dc3545;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+.payment-info {
+    flex: 1;
+    margin-left: 15px;
+}
+.payment-radio {
+    color: #dc3545;
+    opacity: 0;
+    font-size: 20px;
+    transition: opacity 0.2s ease;
+}
+.btn-check:checked + .payment-option .payment-radio {
+    opacity: 1;
+}
+.secure-icon,
+.support-icon,
+.empty-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff5f5;
+    color: #dc3545;
+}
+.empty-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 28px;
+}
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 15px;
+}
+.summary-item span {
+    color: #6c757d;
+}
+.summary-item strong {
+    text-align: right;
+}
+.location-box {
+    display: flex;
+    align-items: center;
+    margin: 18px 0;
+}
+.location-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+.pickup {
+    color: #198754;
+    background: #eaf8f0;
+}
+.destination {
+    color: #dc3545;
+    background: #fff0f1;
+}
+.location-line {
+    width: 2px;
+    height: 20px;
+    background: #dee2e6;
+    margin-left: 20px;
+}
+.fare-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    color: #6c757d;
+}
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    gap: 15px;
+}
+.total-row strong {
+    font-size: 25px;
+    color: #dc3545;
+}
+@media (max-width: 768px) {
+    .payment-option {
+        padding: 14px;
+    }
+    .payment-info small {
+        font-size: 12px;
+    }
+    .total-row strong {
+        font-size: 21px;
+    }
+}
+</style>
 {% endblock %}

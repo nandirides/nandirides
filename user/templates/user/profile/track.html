@@ -1,12 +1,16 @@
 {% extends 'user/dashboard_base.html' %}
+
 {% block page_heading %}
 Track Ride
 {% endblock %}
-{% block title %}{{site_name}} | Track Ride{% endblock %}
+
+{% block title %}
+{{ site_name }} | Track Ride
+{% endblock %}
 
 {% block dashboard_content %}
 
-<div class="container-fluid py-4">
+<div class="container-fluid">
 
     <!-- ================================================= -->
     <!-- PAGE HEADER -->
@@ -39,23 +43,24 @@ Track Ride
         <!-- LEFT COLUMN -->
         <!-- ================================================= -->
 
-        <div class="col-lg-8">
+        <div class="col-12 col-xl-8">
 
-            <!-- ============================================= -->
+            <!-- ================================================= -->
             <!-- LIVE TRACKING CARD -->
-            <!-- ============================================= -->
+            <!-- ================================================= -->
 
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
 
                 <!-- HEADER -->
 
-                <div class="card-header bg-white border-0 p-4">
+                <div class="card-header bg-white border-0 p-3 p-md-4">
 
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
                         <div>
 
                             <h5 class="fw-bold mb-1">
+                                <i class="fa-solid fa-location-crosshairs text-danger me-2"></i>
                                 Live Ride Tracking
                             </h5>
 
@@ -68,6 +73,7 @@ Track Ride
                         <button
                             type="button"
                             class="btn btn-danger rounded-pill px-4"
+                            onclick="window.location.reload();"
                         >
                             <i class="fa-solid fa-location-arrow me-2"></i>
                             Refresh
@@ -78,232 +84,263 @@ Track Ride
                 </div>
 
 
-                <!-- ========================================= -->
-                <!-- MAP -->
-                <!-- ========================================= -->
+                <!-- ================================================= -->
+                <!-- MAP AREA -->
+                <!-- ================================================= -->
 
-                <div class="position-relative bg-light">
+                <div
+                    class="position-relative bg-light overflow-hidden"
+                    style="
+                        height:380px;
+                        min-height:320px;
+                    "
+                >
 
-                    <!-- MAP CONTAINER -->
+                    <!-- ================================================= -->
+                    <!-- MAP BACKGROUND -->
+                    <!-- ================================================= -->
 
-                    <div
-                        class="position-relative overflow-hidden"
-                        style="height: 420px;"
-                    >
+                    <div class="position-absolute top-0 start-0 w-100 h-100">
 
-                        <!-- MAP BACKGROUND -->
-
-                        <div class="position-absolute top-0 start-0
-                                    w-100 h-100 bg-light">
-
-                            <!-- Horizontal Road -->
-
-                            <div
-                                class="position-absolute top-50 start-0
-                                       translate-middle-y w-100 bg-white
-                                       border-top border-bottom"
-                                style="height: 55px;"
-                            ></div>
-
-
-                            <!-- Vertical Road -->
-
-                            <div
-                                class="position-absolute top-0 start-50
-                                       translate-middle-x h-100 bg-white
-                                       border-start border-end"
-                                style="width: 55px;"
-                            ></div>
-
-
-                            <!-- Small Road -->
-
-                            <div
-                                class="position-absolute top-0 start-50
-                                       w-100 bg-white"
-                                style="
-                                    height: 35px;
-                                    transform: rotate(35deg);
-                                    transform-origin: center;
-                                    opacity: .8;
-                                "
-                            ></div>
-
-                        </div>
-
-
-                        <!-- ================================= -->
-                        <!-- PICKUP MARKER -->
-                        <!-- ================================= -->
+                        <!-- Horizontal Road -->
 
                         <div
-                            class="position-absolute text-center"
-                            style="top: 18%; left: 18%;"
-                        >
-
-                            <div
-                                class="bg-success text-white rounded-circle
-                                       shadow d-flex align-items-center
-                                       justify-content-center mx-auto"
-                                style="width:48px;height:48px;"
-                            >
-
-                                <i class="fa-solid fa-location-dot"></i>
-
-                            </div>
-
-                            <span class="badge bg-success mt-2">
-                                Pickup
-                            </span>
-
-                        </div>
-
-
-                        <!-- ================================= -->
-                        <!-- DRIVER MARKER -->
-                        <!-- ================================= -->
-
-                        <div
-                            class="position-absolute text-center"
-                            style="top: 45%; left: 50%;
-                                   transform: translate(-50%, -50%);"
-                        >
-
-                            <div
-                                class="bg-danger text-white rounded-circle
-                                       shadow d-flex align-items-center
-                                       justify-content-center mx-auto"
-                                style="width:58px;height:58px;"
-                            >
-
-                                <i class="fa-solid fa-motorcycle fs-5"></i>
-
-                            </div>
-
-                            <span class="badge bg-danger mt-2">
-                                Driver
-                            </span>
-
-                        </div>
-
-
-                        <!-- ================================= -->
-                        <!-- DESTINATION MARKER -->
-                        <!-- ================================= -->
-
-                        <div
-                            class="position-absolute text-center"
-                            style="bottom: 18%; right: 15%;"
-                        >
-
-                            <div
-                                class="bg-dark text-white rounded-circle
-                                       shadow d-flex align-items-center
-                                       justify-content-center mx-auto"
-                                style="width:48px;height:48px;"
-                            >
-
-                                <i class="fa-solid fa-flag-checkered"></i>
-
-                            </div>
-
-                            <span class="badge bg-dark mt-2">
-                                Destination
-                            </span>
-
-                        </div>
-
-
-                        <!-- ================================= -->
-                        <!-- ROUTE -->
-                        <!-- ================================= -->
-
-                        <div
-                            class="position-absolute bg-danger rounded-pill"
+                            class="position-absolute start-0 w-100 bg-white border-top border-bottom"
                             style="
-                                width: 43%;
-                                height: 5px;
-                                top: 48%;
-                                left: 23%;
-                                transform: rotate(8deg);
+                                top:50%;
+                                height:48px;
+                                transform:translateY(-50%);
                             "
                         ></div>
 
 
-                        <!-- ================================= -->
-                        <!-- MAP CENTER PULSE -->
-                        <!-- ================================= -->
+                        <!-- Vertical Road -->
 
                         <div
-                            class="position-absolute rounded-circle
-                                   border border-danger"
+                            class="position-absolute top-0 h-100 bg-white border-start border-end"
                             style="
-                                width: 85px;
-                                height: 85px;
-                                top: calc(45% - 43px);
-                                left: calc(50% - 43px);
-                                opacity: .15;
+                                left:50%;
+                                width:44px;
+                                transform:translateX(-50%);
+                            "
+                        ></div>
+
+
+                        <!-- Diagonal Road -->
+
+                        <div
+                            class="position-absolute bg-white border-top border-bottom"
+                            style="
+                                width:65%;
+                                height:38px;
+                                top:42%;
+                                left:18%;
+                                transform:rotate(-30deg);
+                                opacity:.9;
+                            "
+                        ></div>
+
+
+                        <!-- Light Map Block -->
+
+                        <div
+                            class="position-absolute bg-white border"
+                            style="
+                                width:28%;
+                                height:28%;
+                                top:-8%;
+                                right:-5%;
+                                opacity:.45;
+                                transform:rotate(35deg);
                             "
                         ></div>
 
                     </div>
 
 
-                    <!-- ===================================== -->
-                    <!-- BOTTOM MAP SUMMARY -->
-                    <!-- ===================================== -->
+                    <!-- ================================================= -->
+                    <!-- ROUTE LINE -->
+                    <!-- ================================================= -->
 
-                    <div class="position-absolute bottom-0 start-0 end-0 p-3">
-
-                        <div class="card border-0 shadow-sm rounded-3">
-
-                            <div class="card-body py-3">
-
-                                <div class="row g-0 text-center">
-
-                                    <!-- ETA -->
-
-                                    <div class="col-4 border-end">
-
-                                        <small class="text-secondary d-block">
-                                            Driver Arrival
-                                        </small>
-
-                                        <h5 class="fw-bold text-danger mb-0">
-                                            6 min
-                                        </h5>
-
-                                    </div>
+                    <div
+                        class="position-absolute bg-danger rounded-pill"
+                        style="
+                            width:68%;
+                            height:4px;
+                            top:52%;
+                            left:22%;
+                            transform:rotate(9deg);
+                            transform-origin:left center;
+                            z-index:5;
+                        "
+                    ></div>
 
 
-                                    <!-- DISTANCE -->
+                    <!-- ================================================= -->
+                    <!-- PICKUP -->
+                    <!-- ================================================= -->
 
-                                    <div class="col-4 border-end">
+                    <div
+                        class="position-absolute text-center"
+                        style="
+                            top:16%;
+                            left:25%;
+                            transform:translateX(-50%);
+                            z-index:10;
+                        "
+                    >
 
-                                        <small class="text-secondary d-block">
-                                            Distance
-                                        </small>
+                        <div
+                            class="bg-success text-white rounded-circle shadow d-flex align-items-center justify-content-center mx-auto"
+                            style="
+                                width:48px;
+                                height:48px;
+                            "
+                        >
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
 
-                                        <h5 class="fw-bold mb-0">
-                                            2.4 km
-                                        </h5>
+                        <span class="badge bg-success mt-2">
+                            Pickup
+                        </span>
 
-                                    </div>
+                    </div>
 
 
-                                    <!-- STATUS -->
+                    <!-- ================================================= -->
+                    <!-- DRIVER -->
+                    <!-- ================================================= -->
 
-                                    <div class="col-4">
+                    <div
+                        class="position-absolute text-center"
+                        style="
+                            top:48%;
+                            left:50%;
+                            transform:translate(-50%,-50%);
+                            z-index:20;
+                        "
+                    >
 
-                                        <small class="text-secondary d-block">
-                                            Ride Status
-                                        </small>
+                        <!-- Pulse -->
 
-                                        <h6 class="fw-bold text-success mb-0">
-                                            On The Way
-                                        </h6>
+                        <div
+                            class="position-absolute rounded-circle border border-danger"
+                            style="
+                                width:78px;
+                                height:78px;
+                                top:-10px;
+                                left:-10px;
+                                opacity:.35;
+                            "
+                        ></div>
 
-                                    </div>
+
+                        <!-- Driver Circle -->
+
+                        <div
+                            class="bg-danger text-white rounded-circle shadow d-flex align-items-center justify-content-center position-relative mx-auto"
+                            style="
+                                width:58px;
+                                height:58px;
+                            "
+                        >
+                            <i class="fa-solid fa-motorcycle fs-5"></i>
+                        </div>
+
+
+                        <span class="badge bg-danger mt-2">
+                            Driver
+                        </span>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- DESTINATION -->
+                    <!-- ================================================= -->
+
+                    <div
+                        class="position-absolute text-center"
+                        style="
+                            top:68%;
+                            right:22%;
+                            transform:translateX(50%);
+                            z-index:10;
+                        "
+                    >
+
+                        <div
+                            class="bg-dark text-white rounded-circle shadow d-flex align-items-center justify-content-center mx-auto"
+                            style="
+                                width:48px;
+                                height:48px;
+                            "
+                        >
+                            <i class="fa-solid fa-flag-checkered"></i>
+                        </div>
+
+                        <span class="badge bg-dark mt-2">
+                            Destination
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- MAP SUMMARY - OUTSIDE MAP -->
+                <!-- ================================================= -->
+
+                <div class="p-2 p-md-3 bg-white">
+
+                    <div class="card border shadow-sm rounded-3">
+
+                        <div class="card-body py-3 px-2">
+
+                            <div class="row g-0 text-center">
+
+                                <!-- ETA -->
+
+                                <div class="col-4 border-end">
+
+                                    <small class="text-secondary d-block">
+                                        Driver Arrival
+                                    </small>
+
+                                    <h5 class="fw-bold text-danger mb-0">
+                                        {{ ride.eta }}
+                                    </h5>
+
+                                </div>
+
+
+                                <!-- DISTANCE -->
+
+                                <div class="col-4 border-end">
+
+                                    <small class="text-secondary d-block">
+                                        Distance
+                                    </small>
+
+                                    <h5 class="fw-bold mb-0">
+                                        {{ ride.remaining_distance }}
+                                    </h5>
+
+                                </div>
+
+
+                                <!-- STATUS -->
+
+                                <div class="col-4">
+
+                                    <small class="text-secondary d-block">
+                                        Ride Status
+                                    </small>
+
+                                    <h6 class="fw-bold text-success mb-0">
+                                        On The Way
+                                    </h6>
 
                                 </div>
 
@@ -324,35 +361,27 @@ Track Ride
 
             <div class="card border-0 shadow-sm rounded-4 mt-4">
 
-                <div class="card-body p-4">
+                <div class="card-body p-3 p-md-4">
 
                     <h5 class="fw-bold mb-4">
-
                         <i class="fa-solid fa-route text-danger me-2"></i>
-
                         Ride Progress
-
                     </h5>
 
 
-                    <div class="row g-3">
+                    <div class="row g-4">
 
-                        <!-- BOOKING -->
+                        <!-- BOOKED -->
 
                         <div class="col-6 col-md-3">
 
                             <div class="text-center">
 
                                 <div
-                                    class="bg-success text-white
-                                           rounded-circle mx-auto mb-2
-                                           d-flex align-items-center
-                                           justify-content-center"
+                                    class="bg-success text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
                                     style="width:50px;height:50px;"
                                 >
-
                                     <i class="fa-solid fa-check"></i>
-
                                 </div>
 
                                 <h6 class="fw-bold mb-1">
@@ -360,7 +389,7 @@ Track Ride
                                 </h6>
 
                                 <small class="text-secondary">
-                                    06:15 PM
+                                    {{ ride.time }}
                                 </small>
 
                             </div>
@@ -375,15 +404,10 @@ Track Ride
                             <div class="text-center">
 
                                 <div
-                                    class="bg-danger text-white
-                                           rounded-circle mx-auto mb-2
-                                           d-flex align-items-center
-                                           justify-content-center"
+                                    class="bg-danger text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
                                     style="width:50px;height:50px;"
                                 >
-
                                     <i class="fa-solid fa-motorcycle"></i>
-
                                 </div>
 
                                 <h6 class="fw-bold mb-1">
@@ -406,15 +430,10 @@ Track Ride
                             <div class="text-center">
 
                                 <div
-                                    class="bg-light border text-secondary
-                                           rounded-circle mx-auto mb-2
-                                           d-flex align-items-center
-                                           justify-content-center"
+                                    class="bg-light border text-secondary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
                                     style="width:50px;height:50px;"
                                 >
-
                                     <i class="fa-solid fa-person"></i>
-
                                 </div>
 
                                 <h6 class="fw-bold mb-1">
@@ -437,15 +456,10 @@ Track Ride
                             <div class="text-center">
 
                                 <div
-                                    class="bg-light border text-secondary
-                                           rounded-circle mx-auto mb-2
-                                           d-flex align-items-center
-                                           justify-content-center"
+                                    class="bg-light border text-secondary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
                                     style="width:50px;height:50px;"
                                 >
-
                                     <i class="fa-solid fa-flag-checkered"></i>
-
                                 </div>
 
                                 <h6 class="fw-bold mb-1">
@@ -468,19 +482,16 @@ Track Ride
 
 
             <!-- ================================================= -->
-            <!-- PICKUP / DESTINATION -->
+            <!-- ROUTE DETAILS -->
             <!-- ================================================= -->
 
             <div class="card border-0 shadow-sm rounded-4 mt-4">
 
-                <div class="card-body p-4">
+                <div class="card-body p-3 p-md-4">
 
                     <h5 class="fw-bold mb-4">
-
                         <i class="fa-solid fa-location-dot text-danger me-2"></i>
-
                         Route Details
-
                     </h5>
 
 
@@ -488,20 +499,15 @@ Track Ride
 
                         <!-- PICKUP -->
 
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
 
                             <div class="d-flex align-items-start">
 
                                 <div
-                                    class="bg-success-subtle text-success
-                                           rounded-circle d-flex
-                                           align-items-center
-                                           justify-content-center"
+                                    class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
                                     style="width:45px;height:45px;"
                                 >
-
                                     <i class="fa-solid fa-location-dot"></i>
-
                                 </div>
 
                                 <div class="ms-3">
@@ -511,7 +517,7 @@ Track Ride
                                     </small>
 
                                     <h6 class="fw-bold mb-0">
-                                        Dehradun Railway Station
+                                        {{ ride.pickup }}
                                     </h6>
 
                                 </div>
@@ -523,20 +529,15 @@ Track Ride
 
                         <!-- DESTINATION -->
 
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
 
                             <div class="d-flex align-items-start">
 
                                 <div
-                                    class="bg-danger-subtle text-danger
-                                           rounded-circle d-flex
-                                           align-items-center
-                                           justify-content-center"
+                                    class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
                                     style="width:45px;height:45px;"
                                 >
-
                                     <i class="fa-solid fa-flag-checkered"></i>
-
                                 </div>
 
                                 <div class="ms-3">
@@ -546,7 +547,7 @@ Track Ride
                                     </small>
 
                                     <h6 class="fw-bold mb-0">
-                                        Clock Tower, Dehradun
+                                        {{ ride.destination }}
                                     </h6>
 
                                 </div>
@@ -568,7 +569,7 @@ Track Ride
         <!-- RIGHT COLUMN -->
         <!-- ================================================= -->
 
-        <div class="col-lg-4">
+        <div class="col-12 col-xl-4">
 
 
             <!-- ================================================= -->
@@ -577,10 +578,9 @@ Track Ride
 
             <div class="card border-0 shadow-sm rounded-4">
 
-                <div class="card-body p-4">
+                <div class="card-body p-3 p-md-4">
 
-                    <div class="d-flex justify-content-between
-                                align-items-center mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
 
                         <h5 class="fw-bold mb-0">
                             Driver Details
@@ -593,28 +593,20 @@ Track Ride
                     </div>
 
 
-                    <!-- DRIVER -->
-
                     <div class="d-flex align-items-center">
 
                         <div
-                            class="bg-light border rounded-circle
-                                   d-flex align-items-center
-                                   justify-content-center"
+                            class="bg-light border rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
                             style="width:65px;height:65px;"
                         >
-
-                            <i
-                                class="fa-solid fa-user text-secondary fs-3"
-                            ></i>
-
+                            <i class="fa-solid fa-user text-secondary fs-3"></i>
                         </div>
 
 
                         <div class="ms-3 flex-grow-1">
 
                             <h5 class="fw-bold mb-1">
-                                Rahul Kumar
+                                {{ ride.driver_name }}
                             </h5>
 
                             <div class="text-warning">
@@ -626,22 +618,21 @@ Track Ride
                                 <i class="fa-solid fa-star"></i>
 
                                 <small class="text-secondary ms-1">
-                                    4.9
+                                    {{ ride.driver_rating }}
                                 </small>
 
                             </div>
 
                         </div>
 
-                        <button
-                            type="button"
-                            class="btn btn-success rounded-circle"
+
+                        <a
+                            href="tel:+919876543210"
+                            class="btn btn-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
                             style="width:45px;height:45px;"
                         >
-
                             <i class="fa-solid fa-phone"></i>
-
-                        </button>
+                        </a>
 
                     </div>
 
@@ -654,15 +645,10 @@ Track Ride
                     <div class="d-flex align-items-center">
 
                         <div
-                            class="bg-danger-subtle text-danger
-                                   rounded-3 d-flex
-                                   align-items-center
-                                   justify-content-center"
+                            class="bg-danger-subtle text-danger rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
                             style="width:48px;height:48px;"
                         >
-
                             <i class="fa-solid fa-motorcycle"></i>
-
                         </div>
 
 
@@ -673,7 +659,7 @@ Track Ride
                             </small>
 
                             <h6 class="fw-bold mb-0">
-                                Hero Splendor
+                                {{ ride.vehicle }}
                             </h6>
 
                         </div>
@@ -681,11 +667,8 @@ Track Ride
                     </div>
 
 
-                    <div
-                        class="bg-light rounded-3 text-center
-                               fw-bold py-2 mt-3"
-                    >
-                        UK 07 AB 1234
+                    <div class="bg-light rounded-3 text-center fw-bold py-2 mt-3">
+                        {{ ride.vehicle_number }}
                     </div>
 
                 </div>
@@ -699,122 +682,65 @@ Track Ride
 
             <div class="card border-0 shadow-sm rounded-4 mt-4">
 
-                <div class="card-body p-4">
+                <div class="card-body p-3 p-md-4">
 
                     <h5 class="fw-bold mb-4">
-
                         <i class="fa-solid fa-receipt text-danger me-2"></i>
-
                         Trip Details
-
                     </h5>
 
 
-                    <!-- BOOKING ID -->
-
-                    <div class="d-flex justify-content-between mb-3">
-
-                        <span class="text-secondary">
-                            Booking ID
-                        </span>
-
-                        <strong>
-                            #NR1001
-                        </strong>
-
+                    <div class="d-flex justify-content-between mb-3 gap-3">
+                        <span class="text-secondary">Booking ID</span>
+                        <strong>#{{ ride.booking_id }}</strong>
                     </div>
 
 
-                    <!-- RIDE TYPE -->
-
-                    <div class="d-flex justify-content-between mb-3">
-
-                        <span class="text-secondary">
-                            Ride Type
-                        </span>
+                    <div class="d-flex justify-content-between mb-3 gap-3">
+                        <span class="text-secondary">Ride Type</span>
 
                         <strong>
                             <i class="fa-solid fa-motorcycle me-1"></i>
-                            Bike
+                            {{ ride.ride_type }}
                         </strong>
-
                     </div>
 
 
-                    <!-- DATE -->
-
-                    <div class="d-flex justify-content-between mb-3">
-
-                        <span class="text-secondary">
-                            Date
-                        </span>
-
-                        <strong>
-                            31 Aug 2026
-                        </strong>
-
+                    <div class="d-flex justify-content-between mb-3 gap-3">
+                        <span class="text-secondary">Date</span>
+                        <strong>{{ ride.date }}</strong>
                     </div>
 
 
-                    <!-- TIME -->
-
-                    <div class="d-flex justify-content-between mb-3">
-
-                        <span class="text-secondary">
-                            Time
-                        </span>
-
-                        <strong>
-                            06:30 PM
-                        </strong>
-
+                    <div class="d-flex justify-content-between mb-3 gap-3">
+                        <span class="text-secondary">Time</span>
+                        <strong>{{ ride.time }}</strong>
                     </div>
 
 
-                    <!-- PASSENGERS -->
-
-                    <div class="d-flex justify-content-between mb-3">
-
-                        <span class="text-secondary">
-                            Passengers
-                        </span>
-
-                        <strong>
-                            1
-                        </strong>
-
+                    <div class="d-flex justify-content-between mb-3 gap-3">
+                        <span class="text-secondary">Passengers</span>
+                        <strong>{{ ride.passengers }}</strong>
                     </div>
 
 
-                    <!-- DISTANCE -->
-
-                    <div class="d-flex justify-content-between mb-3">
-
-                        <span class="text-secondary">
-                            Distance
-                        </span>
-
-                        <strong>
-                            10 km
-                        </strong>
-
+                    <div class="d-flex justify-content-between mb-3 gap-3">
+                        <span class="text-secondary">Distance</span>
+                        <strong>{{ ride.distance }}</strong>
                     </div>
 
 
                     <hr>
 
 
-                    <!-- FARE -->
-
-                    <div class="d-flex justify-content-between
-                                align-items-center">
+                    <div class="d-flex justify-content-between align-items-center">
 
                         <span class="fw-bold">
                             Total Fare
                         </span>
 
                         <strong class="text-danger fs-5">
-                            ₹250
+                            {{ ride.fare }}
                         </strong>
 
                     </div>
@@ -836,14 +762,12 @@ Track Ride
                         type="button"
                         class="btn btn-outline-danger w-100"
                     >
-
                         <i class="fa-solid fa-xmark me-1"></i>
-
                         Cancel
-
                     </button>
 
                 </div>
+
 
                 <div class="col-6">
 
@@ -851,11 +775,8 @@ Track Ride
                         type="button"
                         class="btn btn-danger w-100"
                     >
-
                         <i class="fa-solid fa-headset me-1"></i>
-
                         Help
-
                     </button>
 
                 </div>
@@ -868,12 +789,37 @@ Track Ride
 
 </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <span><a href="#" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
-            </div>
-        {% endfor %}
-    {% endif %}
+
+<!-- ================================================= -->
+<!-- MESSAGES -->
+<!-- ================================================= -->
+
+{% if messages %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+        <div
+            class="alert alert-{{ message.tags }} alert-dismissible fade show"
+            role="alert"
+        >
+
+            {{ message }}
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+            ></button>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endif %}
+
 {% endblock %}
