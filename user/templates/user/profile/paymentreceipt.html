@@ -112,22 +112,28 @@
                                         Booking Details
                                     </h6>
                                     <div class="row g-3">
-                                        <div class="col-12">
+                                        <div class="col-md-4">
                                             <small class="text-muted d-block">Booking ID</small>
                                             <span class="fw-semibold">
-                                                #{{ booking.id|default:"NR10001" }}
+                                                #{{ booking_data.id|default:"NR10001" }}
                                             </span>
                                         </div>
-                                        <div class="col-12">
+                                        <div class="col-md-4">
                                             <small class="text-muted d-block">Ride Date</small>
                                             <span>
-                                                {{ booking.ride_date|date:"d M Y"|default:"02 Sep 2026" }}
+                                                {{ booking_data.ride_date|date:"d M Y"|default:"02 Sep 2026" }}
                                             </span>
                                         </div>
-                                        <div class="col-12">
-                                            <small class="text-muted d-block">Vehicle</small>
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">Ride Type</small>
                                             <span>
-                                                {{ booking.vehicle|default:"NandiRide Cab" }}
+                                                {{ booking_data.ride_type|default:"Sedan" }}
+                                            </span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">Passengers</small>
+                                            <span>
+                                                {{ booking_data.passengers|default:"NandiRide Cab" }}
                                             </span>
                                         </div>
                                     </div>
@@ -152,7 +158,7 @@
                                         <div class="flex-grow-1">
                                             <small class="text-muted d-block">Pickup Location</small>
                                             <span class="fw-semibold">
-                                                {{ booking.pickup_location|default:"Dehradun Railway Station" }}
+                                                {{ booking_data.pickup_location|default:"Dehradun Railway Station" }}
                                             </span>
                                         </div>
                                     </div>
@@ -167,7 +173,7 @@
                                         <div class="flex-grow-1">
                                             <small class="text-muted d-block">Drop Location</small>
                                             <span class="fw-semibold">
-                                                {{ booking.drop_location|default:"Mussoorie" }}
+                                                {{ booking_data.drop_location|default:"Mussoorie" }}
                                             </span>
                                         </div>
                                     </div>
@@ -187,25 +193,25 @@
                                         <tr>
                                             <td>Base Fare</td>
                                             <td class="text-end">
-                                                ₹{{ booking.base_fare|default:"400.00" }}
+                                                ₹{{ booking_data.base_fare|default:"400.00" }}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Distance Charge</td>
                                             <td class="text-end">
-                                                ₹{{ booking.distance_charge|default:"150.00" }}
+                                                ₹{{ booking_data.distance_charge|default:"150.00" }}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Service Fee</td>
                                             <td class="text-end">
-                                                ₹{{ booking.service_fee|default:"30.00" }}
+                                                ₹{{ booking_data.service_fee|default:"30.00" }}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Tax / GST</td>
                                             <td class="text-end">
-                                                ₹{{ booking.tax|default:"50.00" }}
+                                                ₹{{ booking_data.tax|default:"50.00" }}
                                             </td>
                                         </tr>
                                         <tr class="border-top">

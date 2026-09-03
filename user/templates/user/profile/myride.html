@@ -411,7 +411,7 @@ My Rides
 
                 <!-- DATE -->
 
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-2">
 
                     <small class="text-secondary d-block">
                         Date
@@ -428,7 +428,7 @@ My Rides
 
                 <!-- TIME -->
 
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-2">
 
                     <small class="text-secondary d-block">
                         Time
@@ -441,6 +441,14 @@ My Rides
                     </strong>
 
                 </div>
+                <div class="col-6 col-md-2">
+
+                    <small class="text-secondary d-block">Passengers</small>
+                    <i class="fa-solid fa-users me-2 text-danger"></i>
+                            <strong class="text-dark">{{ booking_data.passengers }}</strong>
+
+                </div>
+                
 
 
                 <!-- RIDE TYPE -->
@@ -577,7 +585,7 @@ My Rides
 
                 <a
                     href="{% url 'booking' %}"
-                    class="btn btn-outline-dager rounded-3 px-4">
+                    class="btn btn-outline-danger rounded-3 px-4">
 
                     <i class="fa-solid fa-plus me-2"></i>
 
@@ -724,7 +732,7 @@ My Rides
 
                     <div class="row g-3 text-center">
 
-                        <div class="col-4">
+                        <div class="col-2">
 
                             <small class="text-secondary d-block">
                                 Date
@@ -738,8 +746,32 @@ My Rides
 
                         </div>
 
+                        <div class="col-3">
 
-                        <div class="col-4">
+                    <small class="text-secondary d-block">Passengers</small>
+                    <i class="fa-solid fa-users me-2 text-danger"></i>
+                            <strong class="text-dark">{{ booking_data.passengers }}</strong>
+
+                </div>
+                    <div class="col-3">
+
+                    <small class="text-secondary d-block">Ride Type</small>
+                            <strong>
+                                {% if booking_data.ride_type == "Bike" %}
+                                    <i class="fa-solid fa-motorcycle text-danger me-1"></i>
+                                {% elif booking_data.ride_type == "Auto" %}
+                                    <i class="fa-solid fa-car text-danger me-1"></i>
+                                {% elif booking_data.ride_type == "Sedan" %}
+                                    <i class="fa-solid fa-car-side text-danger me-1"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-car text-danger me-1"></i>
+                                {% endif %}
+                                {{ booking_data.ride_type|default:"Not selected" }}
+                            </strong>
+
+                </div>
+
+                        <div class="col-2">
 
                             <small class="text-secondary d-block">
                                 Time
@@ -754,7 +786,7 @@ My Rides
                         </div>
 
 
-                        <div class="col-4">
+                        <div class="col-2">
 
                             <small class="text-secondary d-block">
                                 Fare

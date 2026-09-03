@@ -1,7 +1,58 @@
 from django.db import models
-from django.urls import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+class Booking(models.Model):
+    booking_id = models.CharField(max_length=200, unique=True)
+    pickup_location = models.CharField(max_length=200)
+    destination = models.CharField(max_length=200)
+    ride_type = models.CharField(max_length=200)
+    ride_date = models.CharField(max_length=200)
+    ride_time = models.CharField(max_length=200)
+    ride_status = models.CharField(max_length=200)
+    passengers = models.CharField(max_length=200)
+    note = models.CharField(max_length=200)
+    base_fare = models.CharField(max_length=200)
+    ride_charge = models.CharField(max_length=200)
+    distance = models.CharField(max_length=200)
+    platform_fee = models.CharField(max_length=200)
+    total_amount = models.CharField(max_length=200)
+    completed_ride = models.CharField(max_length=200)
+    total_ride = models.CharField(max_length=200)
+    total_spent = models.CharField(max_length=200)
+    fare = models.CharField(max_length=200)
+    estimate_fare = models.CharField(max_length=200)
+    your_rating = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(5)], default=0)
+
+class Driver(models.Model):
+    driver_id = models.CharField(max_length=200)
+    driver_name = models.CharField(max_length=200)
+    driver_phone = models.CharField(max_length=200)
+    driver_email = models.CharField(max_length=200)
+    driver_registration = models.CharField(max_length=200)
+    driver_status = models.CharField(max_length=200)
+    driver_arrival = models.CharField(max_length=200)
+    dl_number = models.CharField(max_length=200)
+    vehicle_number = models.CharField(max_length=200)
+    vehicle_insurance = models.CharField(max_length=200)
+    vehicle_pollution = models.CharField(max_length=200)
+    vehicle_type = models.CharField(max_length=200)
+    documnet_upload = models.FileField(upload_to='profile/', blank=True, null=True)
+
+class MyRide(models.Model):
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='my_ride')
+    ride_id = models.CharField(max_length=200)
+    ride_date = models.CharField(max_length=200)
+    ride_time = models.CharField(max_length=200)
+    ride_type = models.CharField(max_length=200)
+    ride_track = models.CharField(max_length=200)
+
+class Payment(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='payments')
+    payment_id = models.CharField(max_length=200)
+    payment_date = models.CharField(max_length=200)
+    payment_time = models.CharField(max_length=200)
+    payment_type = models.CharField(max_length=200)
+    payment_receipt = models.CharField(max_length=200)
 class User(models.Model):
     GENDER_CHOICES = [
         ('Male', 'Male'),

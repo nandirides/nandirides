@@ -58,22 +58,14 @@
 
                             <!-- Login Type -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold">
+                                <label class="form-label fw-bold">
                                     <i class="bi bi-person-badge me-1"></i>
                                     Login Type
                                 </label>
-
-                                <select name="login_type"
-                                        class="form-select form-select-lg bg-light border-0 shadow-sm">
-                                    <option value="">
-                                        Please Select
-                                    </option>
-                                    <option value="admin">
-                                        Driver User
-                                    </option>
-                                    <option value="user">
-                                        Public User
-                                    </option>
+                                <select name="login_type" class="form-select form-select-lg bg-light border-0 shadow-sm" required>
+                                    <option value="">Please Select</option>
+                                    <option value="driver">Driver</option>
+                                    <option value="user">Public User</option>
                                 </select>
                             </div>
 
