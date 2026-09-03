@@ -1,0 +1,480 @@
+{% extends 'user/dashboard_base.html' %}
+{% block page_heading %}
+Payment
+{% endblock %}
+{% block title %}
+    {{ site_name }} | Payment Details
+{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="container-fluid py-4">
+
+    <!-- ================= PAGE HEADER ================= -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="fa-solid fa-credit-card text-danger me-2"></i>
+                Payment Details
+            </h3>
+            <p class="text-muted mb-0">
+                View your payment information and transaction history.
+            </p>
+        </div>
+
+        <a href="{% url 'booking' %}" class="btn btn-danger">
+            <i class="fa-solid fa-plus me-1 text-white"></i>
+            New Booking
+        </a>
+
+    </div>
+
+
+    <!-- ================= PAYMENT SUMMARY ================= -->
+    <div class="row g-3 mb-4">
+
+        <!-- Total Paid -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-3 me-3">
+                        <i class="fa-solid fa-indian-rupee-sign fs-4 text-white"></i>
+                    </div>
+
+                    <div>
+                        <small class="text-muted d-block">
+                            Total Paid
+                        </small>
+                        <h4 class="fw-bold mb-0">
+                            ₹{{ total_paid|default:"0.00" }}
+                        </h4>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Successful -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
+                        <i class="fa-solid fa-circle-check fs-4 text-white"></i>
+                    </div>
+
+                    <div>
+                        <small class="text-muted d-block">
+                            Successful
+                        </small>
+                        <h4 class="fw-bold mb-0">
+                            {{ successful_payments|default:"0" }}
+                        </h4>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Pending -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
+                        <i class="fa-solid fa-clock fs-4 text-white"></i>
+                    </div>
+
+                    <div>
+                        <small class="text-muted d-block">
+                            Pending
+                        </small>
+                        <h4 class="fw-bold mb-0">
+                            {{ pending_payments|default:"0" }}
+                        </h4>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Failed -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-3 me-3">
+                        <i class="fa-solid fa-circle-xmark fs-4 text-white"></i>
+                    </div>
+
+                    <div>
+                        <small class="text-muted d-block">
+                            Failed
+                        </small>
+                        <h4 class="fw-bold mb-0">
+                            {{ failed_payments|default:"0" }}
+                        </h4>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <div class="row g-4">
+
+        <!-- ================= PAYMENT DETAILS ================= -->
+        <div class="col-12 col-lg-5">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fa-solid fa-file-invoice-dollar  text-white me-2"></i>
+                        Latest Payment
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    {% if latest_payment %}
+
+                        <!-- Amount -->
+                        <div class="text-center mb-4">
+
+                            <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                                <i class="fa-solid fa-indian-rupee-sign text-danger fs-2"></i>
+                            </div>
+
+                            <h2 class="fw-bold mb-1">
+                                ₹{{ latest_payment.amount }}
+                            </h2>
+
+                            {% if latest_payment.status == "success" %}
+                                <span class="badge bg-success rounded-pill px-3 py-2">
+                                    <i class="fa-solid fa-check me-1"></i>
+                                    Successful
+                                </span>
+                            {% elif latest_payment.status == "pending" %}
+                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                    <i class="fa-solid fa-clock me-1 text-white"></i>
+                                    Pending
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger rounded-pill px-3 py-2">
+                                    <i class="fa-solid fa-xmark me-1"></i>
+                                    Failed
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Details -->
+                        <div class="border rounded-3 p-3">
+
+                            <div class="d-flex justify-content-between py-2 border-bottom">
+                                <span class="text-muted">
+                                    Transaction ID
+                                </span>
+                                <span class="fw-semibold text-break ms-3">
+                                    {{ latest_payment.transaction_id }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between py-2 border-bottom">
+                                <span class="text-muted">
+                                    Booking ID
+                                </span>
+                                <span class="fw-semibold">
+                                    #{{ latest_payment.booking_id }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between py-2 border-bottom">
+                                <span class="text-muted">
+                                    Payment Method
+                                </span>
+                                <span class="fw-semibold">
+                                    {{ latest_payment.payment_method }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between py-2 border-bottom">
+                                <span class="text-muted">
+                                    Payment Date
+                                </span>
+                                <span class="fw-semibold">
+                                    {{ latest_payment.created_at|date:"d M Y" }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between pt-2">
+                                <span class="text-muted">
+                                    Time
+                                </span>
+                                <span class="fw-semibold">
+                                    {{ latest_payment.created_at|date:"h:i A" }}
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Download -->
+                        <div class="d-grid mt-4">
+                            <a href="#"
+                               class="btn btn-outline-danger">
+                                <i class="fa-solid fa-download me-2 text-white"></i>
+                                Download Receipt
+                            </a>
+                        </div>
+
+                    {% else %}
+
+                        <!-- Empty State -->
+                        <div class="text-center py-5">
+
+                            <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                                <i class="fa-solid fa-receipt text-danger fs-1 "></i>
+                            </div>
+
+                            <h5 class="fw-bold">
+                                No Payment Found
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Your latest payment details will appear here.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= PAYMENT HISTORY ================= -->
+        <div class="col-12 col-lg-7">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-header bg-white border-0 py-3">
+
+                    <div class="d-flex flex-column flex-sm-row
+                                justify-content-between
+                                align-items-sm-center gap-2">
+
+                        <h5 class="fw-bold mb-0">
+                            <i class="fa-solid fa-clock-rotate-left  text-white me-2"></i>
+                            Payment History
+                        </h5>
+
+                        <span class="badge bg-light text-dark">
+                            {{ payments|length }} Transactions
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body p-0">
+
+                    {% if payments %}
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle mb-0">
+
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">
+                                            Transaction
+                                        </th>
+                                        <th>
+                                            Date
+                                        </th>
+                                        <th>
+                                            Method
+                                        </th>
+                                        <th>
+                                            Amount
+                                        </th>
+                                        <th>
+                                            Status
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    {% for payment in payments %}
+
+                                    <tr>
+
+                                        <td class="ps-3">
+                                            <div class="fw-semibold">
+                                                {{ payment.transaction_id }}
+                                            </div>
+                                            <small class="text-muted">
+                                                Booking #{{ payment.booking_id }}
+                                            </small>
+                                        </td>
+
+                                        <td>
+                                            <div>
+                                                {{ payment.created_at|date:"d M Y" }}
+                                            </div>
+                                            <small class="text-muted">
+                                                {{ payment.created_at|date:"h:i A" }}
+                                            </small>
+                                        </td>
+
+                                        <td>
+                                            {{ payment.payment_method }}
+                                        </td>
+
+                                        <td>
+                                            <span class="fw-bold">
+                                                ₹{{ payment.amount }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+
+                                            {% if payment.status == "success" %}
+
+                                                <span class="badge bg-success-subtle text-success">
+                                                    <i class="fa-solid fa-check text-white me-1"></i>
+                                                    Success
+                                                </span>
+
+                                            {% elif payment.status == "pending" %}
+
+                                                <span class="badge bg-warning-subtle text-warning-emphasis">
+                                                    <i class="fa-solid fa-clock text-white me-1"></i>
+                                                    Pending
+                                                </span>
+
+                                            {% elif payment.status == "failed" %}
+
+                                                <span class="badge bg-danger-subtle text-danger">
+                                                    <i class="fa-solid fa-xmark text-white me-1"></i>
+                                                    Failed
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="badge bg-secondary-subtle text-secondary">
+                                                    {{ payment.status }}
+                                                </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+                                    </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="text-center py-5 px-3">
+
+                            <div class="mb-3">
+                                <i class="fa-solid fa-credit-card  text-danger"
+                                   style="font-size: 50px;">
+                                </i>
+                            </div>
+
+                            <h5 class="fw-bold">
+                                No Transactions Yet
+                            </h5>
+
+                            <p class="text-muted">
+                                You haven't made any payments yet.
+                            </p>
+
+                            <a href="{% url 'booking' %}"
+                               class="btn btn-danger">
+                                <i class="fa-solid fa-car text-white me-1"></i>
+                                Book a Ride
+                            </a>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= PAYMENT SECURITY ================= -->
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-body">
+
+            <div class="row align-items-center g-3">
+
+                <div class="col-auto">
+                    <div class="bg-success bg-opacity-10 text-success
+                                rounded-circle p-3">
+                        <i class="fa-solid fa-shield-halved text-white fs-4"></i>
+                    </div>
+                </div>
+
+                <div class="col">
+
+                    <h6 class="fw-bold mb-1">
+                        Secure Payments
+                    </h6>
+
+                    <p class="text-muted mb-0 small">
+                        Your payment information is securely processed.
+                        We never store your complete card or UPI credentials.
+                    </p>
+
+                </div>
+
+                <div class="col-12 col-md-auto">
+
+                    <span class="text-success fw-semibold">
+                        <i class="fa-solid fa-lock me-1"></i>
+                        Secure & Protected
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

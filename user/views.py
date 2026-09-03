@@ -1,260 +1,1324 @@
 from django.shortcuts import render, redirect
-from django.views.generic import TemplateView, RedirectView
+from django.views.generic import TemplateView
 from django.views import View
-from user.forms import UserForm, LoginForm, profile, ForgetPassword ,ResetPassword
-from user.models import User
+from django.urls import reverse
 from django.contrib import messages
+from datetime import datetime
+from user.forms import (
+    UserForm,
+    LoginForm,
+    profile,
+    ForgetPassword,
+    ResetPassword,
+    ContactForm,
+)
+from user.models import User
 from django.contrib.auth import authenticate, login, logout
-#from django.contrib.auth.models import User
 
-BOOKING_OPTIONS = [
+
+SIDEBAR_MENU = [
     {
-        'icon': '🚕',
-        'badge': 'Available Now',
-        'badge_class': 'bg-success-subtle text-success',
-        'title': 'Quick Booking',
-        'description': (
-            'Need a ride right now? Book your Nandi Ride '
-            'instantly and reach your destination safely.'
-        ),
-        'features': [
-            'Instant ride booking',
-            'Fast driver matching',
-            'Safe & reliable rides',
-        ],
-        'button_icon': '🚕',
-        'button_text': 'Book Now',
-        'url': 'booking',
-        'button_class': 'btn-danger',
-        'icon_bg': 'bg-danger bg-opacity-10',
-        'icon_color': 'text-danger',
+        'icon': 'fa fa-dashboard',
+        'name': 'Dashboard',
+        'url': 'user-dashboard',
     },
-
     {
-        'icon': '📋',
-        'badge': 'Track Your Ride',
-        'badge_class': 'bg-warning-subtle text-warning',
-        'title': 'Booking Status',
-        'description': (
-            'Already booked a ride? Check your booking status '
-            'using your registered mobile number or booking ID.'
-        ),
-        'features': [
-            'Track booking status',
-            'View ride details',
-            'Check driver information',
-        ],
-        'button_icon': '📋',
-        'button_text': 'Check Status',
-        'url': 'booking-status',
-        'button_class': 'btn-outline-danger',
-        'icon_bg': 'bg-warning bg-opacity-10',
-        'icon_color': 'text-warning',
+        'icon': 'fa fa-user',
+        'name': 'Profile',
+        'url': 'profile',
+    },
+    {
+        'icon': 'fa fa-calendar',
+        'name': 'Bookings',
+        'url': 'booking',
+    },
+    {
+        'icon': 'fa fa-motorcycle',
+        'name': 'My Rides',
+        'url': 'myride',
+    },
+    {
+        'icon': 'fa fa-credit-card',
+        'name': 'Payments',
+        'url': 'payment',
+    },
+    {
+        'icon': 'fa fa-map-marker',
+        'name': 'Track',
+        'url': 'track',
     },
 ]
 
-SIDEBAR_MENU = [
+
+SOCIAL_LINKS = [
+    {
+        'name': 'Google',
+        'icon': 'fa-brands fa-google',
+        'url': '#',
+    },
+    {
+        'name': 'Facebook',
+        'icon': 'fa-brands fa-facebook-f',
+        'url': '#',
+    },
+    {
+        'name': 'Instagram',
+        'icon': 'fa-brands fa-instagram',
+        'url': '#',
+    },
+    {
+        'name': 'LinkedIn',
+        'icon': 'fa-brands fa-linkedin-in',
+        'url': '#',
+    },
+]
+
+
+class HomeView(TemplateView):
+    template_name = "user/home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "site_name": "NandiRide",
+            "site_tagline": "Safe, comfortable and reliable rides for every journey.",
+            "carousel_interval": 5000,
+            "carousel_height": 430,
+            "hero_slides": [
+                {
+                    "badge": "FAST • SAFE • RELIABLE",
+                    "title": "Your Journey, <br>Our Responsibility",
+                    "description": "Book comfortable and reliable rides with NandiRide and travel with confidence.",
+                    "button_text": "Book Your Ride",
+                    "button_url": reverse("booking"),
+                    "button_class": "btn-light text-danger",
+                    "button_icon": "fa-solid fa-calendar-check",
+                    "icon": "🚕",
+                    "heading": "Ride With NandiRide",
+                    "image_class": "bg-img1",
+                },
+                {
+                    "badge": "COMFORTABLE RIDES",
+                    "title": "Travel Your Way",
+                    "description": "From daily rides to long journeys, choose the ride that fits your needs.",
+                    "button_text": "Explore Rides",
+                    "button_url": reverse("booking"),
+                    "button_class": "btn-light text-danger",
+                    "button_icon": "fa-solid fa-car",
+                    "icon": "🚗",
+                    "heading": "Comfort At Every Step",
+                    "image_class": "bg-img2",
+                },
+                {
+                    "badge": "TRUSTED SERVICE",
+                    "title": "SAFE RIDES, <br>HAPPY JOURNEYS",
+                    "description": "Experience dependable transportation with professional service and transparent booking.",
+                    "button_text": "Get Started",
+                    "button_url": reverse("booking"),
+                    "button_class": "btn-light text-danger",
+                    "button_icon": "fa-solid fa-arrow-right",
+                    "icon": "🛡️",
+                    "heading": "Your Safety<br>Matters",
+                    "image_class": "bg-img3",
+                },
+            ],
+            "ride_title": "Book Your Ride",
+            "page_subtitle": "Enter your pickup and destination to get started.",
+            "pickup_label": "Pickup Location",
+            "pickup_placeholder": "Enter pickup location",
+            "drop_label": "Drop Location",
+            "drop_placeholder": "Enter destination",
+            "booking_button": {
+                "text": "Book Now",
+                "icon": "fa-solid fa-calendar-check",
+            },
+            "booking_url": reverse("booking"),
+            "book_title": "Need A Ride?",
+            "title": "Your journey starts here.",
+            "description": "Choose your preferred ride and book quickly with NandiRide. We make everyday travel simple, comfortable and reliable.",
+            "track_ride": {
+                "title": "Track Your Ride",
+                "subtitle": "Know where your ride is in real time.",
+                "placeholder": "Enter Booking ID",
+                "button": "Track Ride",
+                "button_icon": "fa-solid fa-location-crosshairs",
+                "url": reverse("myride"),
+                "icon": "fa-solid fa-map-location-dot",
+            },
+            "ride_section_title": "Choose Your Ride",
+            "ride_section_subtitle": "Select the ride that suits your journey.",
+            "ride_types": [
+                {
+                    "name": "Bike Ride",
+                    "icon": "fa-solid fa-motorcycle",
+                    "description": "Quick, affordable and convenient rides for your everyday travel.",
+                    "button": "Book Bike",
+                    "url": reverse("booking"),
+                },
+                {
+                    "name": "Car Ride",
+                    "icon": "fa-solid fa-car",
+                    "description": "Comfortable rides for individuals, families and business travel.",
+                    "button": "Book Car",
+                    "url": reverse("booking"),
+                },
+                {
+                    "name": "Premium Ride",
+                    "icon": "fa-solid fa-car-side",
+                    "description": "Enjoy a premium travel experience with extra comfort and convenience.",
+                    "button": "Book Premium",
+                    "url": reverse("booking"),
+                },
+            ],
+            "why_section": {
+                "title": "Why Choose NandiRide?",
+                "subtitle": "Everything you need for a smooth, safe and comfortable journey.",
+            },
+            "why_choose": [
+                {
+                    "title": "Safe & Secure",
+                    "description": "Your safety is our first priority on every journey.",
+                    "icon": "fa-solid fa-shield-halved",
+                },
+                {
+                    "title": "Easy Booking",
+                    "description": "Book your ride quickly with a simple and convenient process.",
+                    "icon": "fa-solid fa-calendar-check",
+                },
+                {
+                    "title": "Reliable Service",
+                    "description": "Count on NandiRide for dependable transportation whenever you need it.",
+                    "icon": "fa-solid fa-circle-check",
+                },
+                {
+                    "title": "Affordable Price",
+                    "description": "Enjoy comfortable rides at competitive and transparent prices.",
+                    "icon": "fa-solid fa-wallet",
+                },
+            ],
+            "home_stats": [
+                {
+                    "value": "24/7",
+                    "label": "Ride Availability",
+                    "icon": "fa-solid fa-clock",
+                },
+                {
+                    "value": "100%",
+                    "label": "Customer Focus",
+                    "icon": "fa-solid fa-heart",
+                },
+                {
+                    "value": "Fast",
+                    "label": "Booking Process",
+                    "icon": "fa-solid fa-bolt",
+                },
+                {
+                    "value": "Safe",
+                    "label": "Travel Experience",
+                    "icon": "fa-solid fa-shield-halved",
+                },
+            ],
+            "home_cta": {
+                "title": "Ready To Start Your Journey?",
+                "description": "Book your next ride with NandiRide and experience travel made simple.",
+                "url": reverse("booking"),
+                "icon": "fa-solid fa-car",
+                "button_text": "Book Your Ride",
+                "button_icon": "fa-solid fa-calendar-check",
+            },
+            "current_year": datetime.now().year,
+        })
+        return context
+
+
+
+class UnderConstruction(TemplateView):
+    template_name = 'user/underconstruction.html'
+
+
+class About(TemplateView):
+    template_name = 'user/about.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['site_name'] = 'NandiRide'
+        context['about_hero'] = {
+            'title': 'Ride Smarter,',
+            'highlight': 'Travel Better',
+            'description': 'NandiRide makes everyday travel simple, reliable and convenient with safe rides and a smooth booking experience.',
+            'button': 'Book Your Ride',
+            'button_icon': 'fa-solid fa-car',
+            'button_url': reverse('booking'),
+            'secondary_button': 'Contact Us',
+            'secondary_button_icon': 'fa-solid fa-headset',
+            'secondary_button_url': reverse('contact'),
+        }
+        context['about_intro'] = {
+            'small': 'WHO WE ARE',
+            'title': 'Your Journey, Our Responsibility',
+            'description': 'NandiRide is built to provide a simple, comfortable and reliable ride booking experience for everyone. From booking to payment, we focus on making every step easy.',
+        }
+        context['about_features'] = [
             {
-                'icon': 'fa fa-dashboard',
-                'name': 'Dashboard',
-                'url': 'user-dashboard',
+                'icon': 'fa-solid fa-shield-halved',
+                'title': 'Safe & Reliable',
+                'description': 'We focus on providing dependable rides and a comfortable travel experience.',
             },
             {
-                'icon': 'fa fa-user',
-                'name': 'Profile',
-                'url': 'profile',
+                'icon': 'fa-solid fa-bolt',
+                'title': 'Fast & Convenient',
+                'description': 'Book your ride quickly with a simple and convenient booking experience.',
             },
             {
-                'icon': 'fa fa-motorcycle',
-                'name': 'My Rides',
-                'url': 'myride',
+                'icon': 'fa-solid fa-mobile-screen-button',
+                'title': 'Technology Driven',
+                'description': 'Modern technology helps us deliver a smooth and connected ride experience.',
+            },
+        ]
+        context['about_stats_heading'] = {
+            'small': 'OUR JOURNEY',
+            'title': 'NandiRide At A Glance',
+            'description': 'Everything we build is focused on making travel easier.',
+        }
+        context['about_stats'] = [
+            {
+                'icon': 'fa-solid fa-car',
+                'number': '1000+',
+                'title': 'Rides',
+                'description': 'Trips completed',
             },
             {
-                'icon': 'fa fa-calendar',
-                'name': 'Bookings',
+                'icon': 'fa-solid fa-users',
+                'number': '500+',
+                'title': 'Customers',
+                'description': 'Happy riders',
+            },
+            {
+                'icon': 'fa-solid fa-location-dot',
+                'number': '50+',
+                'title': 'Locations',
+                'description': 'Service areas',
+            },
+            {
+                'icon': 'fa-solid fa-headset',
+                'number': '24/7',
+                'title': 'Support',
+                'description': 'Customer assistance',
+            },
+        ]
+        context['about_values'] = {
+            'small': 'WHAT WE BELIEVE',
+            'title': 'Our Core Values',
+            'description': 'The principles that guide everything we do at NandiRide.',
+        }
+        context['about_value_cards'] = [
+            {
+                'icon': 'fa-solid fa-shield-heart',
+                'title': 'Safety First',
+                'description': 'Safety and trust are at the heart of every journey we provide.',
+            },
+            {
+                'icon': 'fa-solid fa-heart',
+                'title': 'Customer First',
+                'description': 'We listen to our customers and continuously improve their experience.',
+            },
+            {
+                'icon': 'fa-solid fa-handshake',
+                'title': 'Trust & Respect',
+                'description': 'We believe in honest communication and respectful relationships.',
+            },
+            {
+                'icon': 'fa-solid fa-lightbulb',
+                'title': 'Innovation',
+                'description': 'We use technology and fresh ideas to create better travel solutions.',
+            },
+            {
+                'icon': 'fa-solid fa-users',
+                'title': 'Teamwork',
+                'description': 'Great experiences are created when people work together.',
+            },
+            {
+                'icon': 'fa-solid fa-star',
+                'title': 'Quality',
+                'description': 'We continuously work to deliver a dependable and enjoyable service.',
+            },
+        ]
+        context['about_highlights'] = [
+            {
+                'icon': 'fa-solid fa-route',
+                'title': 'Easy Booking',
+                'description': 'Book your ride with a simple and user-friendly experience.',
+            },
+            {
+                'icon': 'fa-solid fa-location-crosshairs',
+                'title': 'Live Ride Experience',
+                'description': 'Stay connected with your ride and journey information.',
+            },
+            {
+                'icon': 'fa-solid fa-credit-card',
+                'title': 'Simple Payments',
+                'description': 'Enjoy convenient and secure payment options after your ride.',
+            },
+        ]
+        context['about_mission'] = {
+            'icon': 'fa-solid fa-road',
+            'badge': 'OUR MISSION',
+            'title': 'Making Every Journey Better',
+            'description': 'Our mission is to make ride booking simple, convenient, reliable and accessible for everyone.',
+            'primary_button': 'Book a Ride',
+            'secondary_button': 'Contact Us',
+        }
+        context['about_cta'] = {
+            'badge': 'START YOUR JOURNEY',
+            'title': 'Ready to Ride With NandiRide?',
+            'description': 'Experience a simple, comfortable and convenient way to travel.',
+            'button': 'Book Your Ride',
+            'button_icon': 'fa-solid fa-calendar-check',
+            'button_url': reverse('booking'),
+        }
+        return context
+
+
+class ServicesView(TemplateView):
+    template_name = 'user/services.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['site_name'] = 'NandiRide'
+        context['hero'] = {
+            'badge': 'NandiRide Services',
+            'title': 'Reliable Rides',
+            'highlight': 'Made For You',
+            'description': 'From everyday city rides to long-distance journeys, NandiRide makes every trip simple, comfortable and dependable.',
+            'primary_button': 'Book a Ride',
+            'primary_icon': 'fa-solid fa-car',
+            'primary_url': 'booking',
+            'secondary_button': 'Explore Services',
+            'secondary_icon': 'fa-solid fa-arrow-down',
+            'card_icon': 'fa-solid fa-route',
+            'card_title': 'Your Journey Matters',
+            'card_description': 'Safe rides, simple booking, convenient payments and reliable support in one place.',
+        }
+        context['services_heading'] = {
+            'badge': 'OUR SERVICES',
+            'title': 'Everything You Need To Ride',
+            'description': 'Explore our range of services designed to make every NandiRide journey easier.',
+        }
+        context['services'] = [
+            {
+                'icon': 'fa-solid fa-car-side',
+                'title': 'Book a Ride',
+                'description': 'Book a comfortable and reliable ride whenever you need it.',
+                'features': ['Quick booking', 'Reliable drivers', 'Easy pickup'],
+                'button': 'Book Now',
+                'button_icon': 'fa-solid fa-arrow-right',
                 'url': 'booking',
+                'popular': True,
+                'popular_text': 'Popular',
             },
             {
-                'icon': 'fa fa-credit-card',
-                'name': 'Payments',
+                'icon': 'fa-solid fa-location-dot',
+                'title': 'Track Your Ride',
+                'description': 'Track your ride in real time and stay updated throughout your journey.',
+                'features': ['Live tracking', 'Driver location', 'Ride updates'],
+                'button': 'My Rides',
+                'button_icon': 'fa-solid fa-route',
+                'url': 'myride',
+                'popular': False,
+                'popular_text': 'Popular',
+            },
+            {
+                'icon': 'fa-solid fa-calendar-check',
+                'title': 'Schedule a Ride',
+                'description': 'Plan your journey in advance and schedule your ride according to your time.',
+                'features': ['Advance booking', 'Flexible timing', 'Easy planning'],
+                'button': 'Schedule',
+                'button_icon': 'fa-solid fa-calendar-days',
+                'url': 'booking',
+                'popular': False,
+                'popular_text': 'Popular',
+            },
+            {
+                'icon': 'fa-solid fa-credit-card',
+                'title': 'Easy Payments',
+                'description': 'Enjoy a simple and convenient payment experience after every ride.',
+                'features': ['Secure payment', 'Multiple options', 'Payment history'],
+                'button': 'View Payment',
+                'button_icon': 'fa-solid fa-wallet',
                 'url': 'payment',
+                'popular': False,
+                'popular_text': 'Popular',
             },
             {
-                'icon': 'fa fa-map-marker',
-                'name': 'Track',
-                'url': 'track',
+                'icon': 'fa-solid fa-route',
+                'title': 'Long Distance Ride',
+                'description': 'Travel comfortably between cities with convenient long-distance rides.',
+                'features': ['Comfortable travel', 'Flexible routes', 'Reliable service'],
+                'button': 'Book Ride',
+                'button_icon': 'fa-solid fa-arrow-right',
+                'url': 'booking',
+                'popular': False,
+                'popular_text': 'Popular',
+            },
+            {
+                'icon': 'fa-solid fa-headset',
+                'title': '24/7 Support',
+                'description': 'Our support team is available to help you whenever you need assistance.',
+                'features': ['Quick assistance', 'Ride support', 'Customer care'],
+                'button': 'Contact Us',
+                'button_icon': 'fa-solid fa-headset',
+                'url': 'contact',
+                'popular': False,
+                'popular_text': 'Popular',
+            },
+        ]
+        context['empty_services'] = {
+            'title': 'No Services Available',
+            'description': 'Services will be displayed here when they are available.',
+        }
+        context['cta'] = {
+            'icon': 'fa-solid fa-road',
+            'badge': 'START YOUR JOURNEY',
+            'title': 'Ready For Your Next Ride?',
+            'description': 'Book your journey with NandiRide today and enjoy a simple travel experience.',
+            'button': 'Book Now',
+            'button_icon': 'fa-solid fa-car',
+            'url': 'booking',
+        }
+        return context
+
+
+class CareerView(TemplateView):
+    template_name = 'user/career.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['site_name'] = 'NandiRide'
+        context['departments'] = [
+            'Technology',
+            'Operations',
+            'Customer Support',
+            'Marketing',
+            'Business',
+        ]
+        context['benefits'] = [
+            {
+                'icon': 'fa-solid fa-rocket',
+                'title': 'Growth & Learning',
+                'description': 'Learn new skills, take on meaningful challenges and grow your career with us.',
+            },
+            {
+                'icon': 'fa-solid fa-people-group',
+                'title': 'Great Team',
+                'description': 'Work with passionate and supportive people who care about building something meaningful.',
+            },
+            {
+                'icon': 'fa-solid fa-bullseye',
+                'title': 'Meaningful Impact',
+                'description': 'Your work helps improve everyday travel experiences for customers and drivers.',
+            },
+            {
+                'icon': 'fa-solid fa-lightbulb',
+                'title': 'Innovation',
+                'description': 'Bring your ideas to the table and help us create better solutions for modern travel.',
+            },
+            {
+                'icon': 'fa-solid fa-handshake',
+                'title': 'Collaborative Culture',
+                'description': 'We believe the best results come from teamwork, trust and open communication.',
+            },
+            {
+                'icon': 'fa-solid fa-heart',
+                'title': 'People First',
+                'description': 'We care about our people and aim to create a positive and respectful workplace.',
+            },
+        ]
+        context['jobs'] = [
+            {
+                'icon': 'fa-solid fa-code',
+                'title': 'Django Backend Developer',
+                'department': 'Technology',
+                'location': 'India',
+                'type': 'Full Time',
+                'experience': '1-3 Years',
+                'salary': 'Competitive',
+                'description': 'Build scalable backend services and APIs for the NandiRide ride booking platform.',
+                'skills': ['Python', 'Django', 'DRF', 'PostgreSQL'],
+                'url': 'contact',
+                'featured': True,
+            },
+            {
+                'icon': 'fa-solid fa-mobile-screen-button',
+                'title': 'React Native Developer',
+                'department': 'Technology',
+                'location': 'India',
+                'type': 'Full Time',
+                'experience': '1-3 Years',
+                'salary': 'Competitive',
+                'description': 'Create smooth and reliable mobile experiences for NandiRide customers and drivers.',
+                'skills': ['React Native', 'JavaScript', 'API', 'Git'],
+                'url': 'contact',
+                'featured': False,
+            },
+            {
+                'icon': 'fa-solid fa-headset',
+                'title': 'Customer Support Executive',
+                'department': 'Customer Support',
+                'location': 'India',
+                'type': 'Full Time',
+                'experience': '0-2 Years',
+                'salary': 'Competitive',
+                'description': 'Help customers with bookings, rides, payments and general NandiRide support.',
+                'skills': ['Communication', 'Customer Service', 'Problem Solving'],
+                'url': 'contact',
+                'featured': False,
+            },
+            {
+                'icon': 'fa-solid fa-gears',
+                'title': 'Operations Executive',
+                'department': 'Operations',
+                'location': 'India',
+                'type': 'Full Time',
+                'experience': '1-3 Years',
+                'salary': 'Competitive',
+                'description': 'Support daily ride operations and help maintain a reliable experience for customers and drivers.',
+                'skills': ['Operations', 'Management', 'Communication'],
+                'url': 'contact',
+                'featured': False,
+            },
+        ]
+        return context
+
+
+class BlogView(TemplateView):
+    template_name = 'user/blog.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['site_name'] = 'NandiRide'
+        context['categories'] = [
+            'Ride Guide',
+            'Travel Tips',
+            'Safety',
+            'NandiRide',
+        ]
+        context['featured_post'] = {
+            'icon': 'fa-solid fa-car-side',
+            'title': 'How to Book a Comfortable Ride with NandiRide',
+            'category': 'Ride Guide',
+            'date': '02 Sep 2026',
+            'read_time': '5 min read',
+            'author': 'NandiRide Team',
+            'description': 'Learn how to book your next ride quickly and enjoy a smooth, reliable and comfortable journey with NandiRide.',
+            'image': '',
+            'url': 'booking',
+        }
+        context['posts'] = [
+            {
+                'icon': 'fa-solid fa-car-side',
+                'title': 'How to Book a Ride with NandiRide',
+                'category': 'Ride Guide',
+                'date': '02 Sep 2026',
+                'read_time': '5 min read',
+                'description': 'A simple guide to booking your next comfortable and reliable ride.',
+                'image': '',
+                'url': 'booking',
+                'featured': True,
+            },
+            {
+                'icon': 'fa-solid fa-shield-heart',
+                'title': '5 Simple Tips for a Safer Ride',
+                'category': 'Safety',
+                'date': '01 Sep 2026',
+                'read_time': '4 min read',
+                'description': 'Follow these simple practices to make every journey safer and more comfortable.',
+                'image': '',
+                'url': '',
+                'featured': False,
+            },
+            {
+                'icon': 'fa-solid fa-route',
+                'title': 'Planning the Perfect Long Distance Journey',
+                'category': 'Travel Tips',
+                'date': '30 Aug 2026',
+                'read_time': '6 min read',
+                'description': 'Useful ideas for planning a comfortable and stress-free long-distance journey.',
+                'image': '',
+                'url': 'booking',
+                'featured': False,
+            },
+            {
+                'icon': 'fa-solid fa-location-dot',
+                'title': 'Why Real-Time Ride Tracking Matters',
+                'category': 'NandiRide',
+                'date': '28 Aug 2026',
+                'read_time': '4 min read',
+                'description': 'Understand how ride tracking helps you stay informed throughout your journey.',
+                'image': '',
+                'url': 'myride',
+                'featured': False,
+            },
+            {
+                'icon': 'fa-solid fa-credit-card',
+                'title': 'Making Your Ride Payments Easy',
+                'category': 'NandiRide',
+                'date': '25 Aug 2026',
+                'read_time': '3 min read',
+                'description': 'Learn how to manage your ride payments and keep track of your payment history.',
+                'image': '',
+                'url': 'payment',
+                'featured': False,
+            },
+            {
+                'icon': 'fa-solid fa-map-location-dot',
+                'title': 'Travel Better with NandiRide',
+                'category': 'Travel Tips',
+                'date': '22 Aug 2026',
+                'read_time': '5 min read',
+                'description': 'Explore useful travel ideas that can make your everyday journeys easier.',
+                'image': '',
+                'url': '',
+                'featured': False,
+            },
+        ]
+        return context
+
+
+class ContactView(TemplateView):
+    template_name = 'user/contact.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['site_name'] = 'NandiRide'
+        context['contact_phone'] = '+91 98765 43210'
+        context['contact_email'] = 'support@nandiride.com'
+        context['contact_hours'] = '24 Hours / 7 Days'
+        context['contact_address'] = 'India'
+        context['contact_info'] = [
+            {
+                'icon': 'fa-solid fa-phone',
+                'title': 'Call Us',
+                'description': 'Talk directly with our support team.',
+                'value': '+91 98765 43210',
+                'link': 'tel:+919876543210',
+            },
+            {
+                'icon': 'fa-solid fa-envelope',
+                'title': 'Email Us',
+                'description': 'Send us your questions anytime.',
+                'value': 'support@nandiride.com',
+                'link': 'mailto:support@nandiride.com',
+            },
+            {
+                'icon': 'fa-solid fa-clock',
+                'title': 'Support Hours',
+                'description': 'Our customer support is available.',
+                'value': '24/7 Support',
+                'link': '',
+            },
+            {
+                'icon': 'fa-solid fa-location-dot',
+                'title': 'Location',
+                'description': 'Serving customers across India.',
+                'value': 'India',
+                'link': '',
+            },
+        ]
+        context['contact_subjects'] = [
+            'Ride Support',
+            'Booking Issue',
+            'Payment Issue',
+            'Account Support',
+            'Driver Support',
+            'General Enquiry',
+            'Feedback',
+            'Other',
+        ]
+        context['faqs'] = [
+            {
+                'question': 'How can I book a NandiRide?',
+                'answer': 'You can book a ride from the booking page by entering your pickup and destination details and confirming your ride.',
+            },
+            {
+                'question': 'How can I get help with an existing ride?',
+                'answer': 'You can contact our support team using the phone number, email address or contact form available on this page.',
+            },
+            {
+                'question': 'Can I contact NandiRide about a payment issue?',
+                'answer': 'Yes. Select Payment Issue from the contact form and provide your transaction details so our team can assist you.',
+            },
+            {
+                'question': 'How quickly will I receive a response?',
+                'answer': 'Our support team aims to respond to customer enquiries as quickly as possible.',
+            },
+        ]
+        return context
+
+
+class UserBookingView(View):
+
+    def get(self, request):
+        return render(
+            request,
+            'user/profile/booking.html',
+            {
+                'sidebar_menu': SIDEBAR_MENU,
+                'site_name': 'NandiRide',
+            }
+        )
+
+    def post(self, request, *args, **kwargs):
+
+        pickup_location = request.POST.get('pickup_location')
+        destination = request.POST.get('destination')
+        ride_type = request.POST.get('ride_type')
+        ride_date = request.POST.get('ride_date')
+        ride_time = request.POST.get('ride_time')
+        passengers = request.POST.get('passengers')
+        note = request.POST.get('note')
+
+        request.session['booking_data'] = {
+
+            'pickup': pickup_location or 'Railway Station',
+            'destination': destination or 'City Mall',
+
+            'ride_type': ride_type or 'Bike',
+            'date': ride_date or '01 Sep 2026',
+            'time': ride_time or '10:30 AM',
+            'passengers': passengers or '1',
+
+            'note': note or 'No special instructions',
+
+            # Booking
+            'booking_id': 'NR10001',
+            'status': 'Confirmed',
+
+            # Driver
+            'driver_name': 'Sumit Kumar',
+            'driver_phone': '9876543210',
+            'vehicle_number': 'HW 01 AB 1234',
+
+            # Payment
+            'payment_method': 'Cash',
+            'payment_status': 'Paid',
+
+            # Fare
+            'base_fare': 50,
+            'ride_charge': 180,
+            'platform_fee': 20,
+            'total_amount': 250,
+        }
+
+        request.session.modified = True
+
+        return redirect('payment')
+
+
+class UserPaymentView(View):
+
+    def get(self, request, *args, **kwargs):
+
+        booking_data = request.session.get('booking_data')
+
+
+        if not booking_data:
+
+            booking_data = {
+                'pickup': 'Railway Station',
+                'destination': 'City Mall',
+                'ride_type': 'Bike',
+                'date': '01 Sep 2026',
+                'time': '10:30 AM',
+                'passengers': '1',
+                'note': 'No special instructions',
+
+                'booking_id': 'NR10001',
+                'status': 'Confirmed',
+
+                'driver_name': 'Raj Kumar',
+                'driver_phone': '9876543210',
+                'vehicle_number': 'DL 01 AB 1234',
+
+                'base_fare': 50,
+                'ride_charge': 180,
+                'platform_fee': 20,
+                'total_amount': 250,
+
+                'payment_method': 'Cash',
+                'payment_status': 'Paid',
+            }
+
+        else:
+
+            # Fare ensure karo
+            booking_data['base_fare'] = 50
+            booking_data['ride_charge'] = 180
+            booking_data['platform_fee'] = 20
+            booking_data['total_amount'] = 250
+
+        request.session['booking_data'] = booking_data
+        request.session.modified = True
+
+        return render(
+            request,
+            'user/profile/payment.html',
+            {
+                'sidebar_menu': SIDEBAR_MENU,
+                'site_name': 'NandiRide',
+                'booking_data': booking_data,
+            }
+        )
+
+    def post(self, request, *args, **kwargs):
+
+        booking_data = request.session.get('booking_data', {})
+
+        payment_method = request.POST.get(
+            'payment_method',
+            'Cash'
+        )
+
+        booking_data['payment_method'] = payment_method
+        booking_data['payment_status'] = 'Paid'
+        booking_data['status'] = 'Confirmed'
+
+        request.session['booking_data'] = booking_data
+        request.session.modified = True
+
+        messages.success(
+            request,
+            'Payment complete successfully!'
+        )
+
+        return redirect('myride')
+
+
+class UserMyRideView(View):
+
+    def get(self, request, *args, **kwargs):
+
+        # Session se booking data lo
+        booking_data = request.session.get('booking_data')
+
+        # Agar booking data nahi hai to dummy data create karo
+        if not booking_data:
+
+            booking_data = {
+                # Booking
+                'booking_id': 'NR10001',
+                'status': 'Confirmed',
+
+                # Route
+                'pickup': 'Railway Station',
+                'destination': 'City Mall',
+
+                # Ride
+                'ride_type': 'Bike',
+                'date': '01 Sep 2026',
+                'time': '10:30 AM',
+                'passengers': '1',
+                'note': 'No special instructions',
+
+                # Driver
+                'driver_name': 'Raj Kumar',
+                'driver_phone': '9876543210',
+                'vehicle_number': 'DL 01 AB 1234',
+
+                # Payment
+                'payment_method': 'Cash',
+                'payment_status': 'Paid',
+
+                # Fare
+                'base_fare': 50,
+                'ride_charge': 180,
+                'platform_fee': 20,
+                'total_amount': 250,
+            }
+
+            # Session mein save karo
+            request.session['booking_data'] = booking_data
+            request.session.modified = True
+
+        else:
+
+            # Existing booking mein missing values ke liye dummy defaults
+            booking_data.setdefault('booking_id', 'NR10001')
+            booking_data.setdefault('status', 'Confirmed')
+
+            booking_data.setdefault('pickup', 'Railway Station')
+            booking_data.setdefault('destination', 'City Mall')
+
+            booking_data.setdefault('ride_type', 'Bike')
+            booking_data.setdefault('date', '01 Sep 2026')
+            booking_data.setdefault('time', '10:30 AM')
+            booking_data.setdefault('passengers', '1')
+            booking_data.setdefault(
+                'note',
+                'No special instructions'
+            )
+
+            booking_data.setdefault(
+                'driver_name',
+                'Raj Kumar'
+            )
+            booking_data.setdefault(
+                'driver_phone',
+                '9876543210'
+            )
+            booking_data.setdefault(
+                'vehicle_number',
+                'DL 01 AB 1234'
+            )
+
+            booking_data.setdefault(
+                'payment_method',
+                'Cash'
+            )
+            booking_data.setdefault(
+                'payment_status',
+                'Paid'
+            )
+
+            booking_data.setdefault('base_fare', 50)
+            booking_data.setdefault('ride_charge', 180)
+            booking_data.setdefault('platform_fee', 20)
+            booking_data.setdefault('total_amount', 250)
+
+            request.session['booking_data'] = booking_data
+            request.session.modified = True
+
+        return render(
+            request,
+            'user/profile/myride.html',
+            {
+                'sidebar_menu': SIDEBAR_MENU,
+                'site_name': 'NandiRide',
+                'booking_data': booking_data,
+            }
+        )
+
+class UserDashboardView(TemplateView):
+
+    def get(self, request, *args, **kwargs):
+
+        booking_data = request.session.get('booking_data')
+
+        # -------------------------------------------------
+        # Default data - jab user ne abhi booking nahi ki
+        # -------------------------------------------------
+
+        if not booking_data:
+            booking_data = {
+                'booking_id': 'NR10001',
+                'status': 'Confirmed',
+
+                'pickup': 'Railway Station',
+                'destination': 'City Mall',
+
+                'ride_type': 'Bike',
+                'date': '01 Sep 2026',
+                'time': '10:30 AM',
+                'passengers': '1',
+                'note': 'No special instructions',
+
+                'driver_name': 'Raj Kumar',
+                'driver_phone': '9876543210',
+                'vehicle_number': 'DL 01 AB 1234',
+
+                'payment_method': 'Cash',
+                'payment_status': 'Paid',
+
+                'base_fare': 50,
+                'ride_charge': 180,
+                'platform_fee': 20,
+                'total_amount': 250,
+            }
+
+        # -------------------------------------------------
+        # Make sure all required values exist
+        # -------------------------------------------------
+
+        booking_data.setdefault('booking_id', 'NR10001')
+        booking_data.setdefault('status', 'Confirmed')
+
+        booking_data.setdefault(
+            'pickup',
+            'Railway Station'
+        )
+
+        booking_data.setdefault(
+            'destination',
+            'City Mall'
+        )
+
+        booking_data.setdefault(
+            'ride_type',
+            'Bike'
+        )
+
+        booking_data.setdefault(
+            'date',
+            '01 Sep 2026'
+        )
+
+        booking_data.setdefault(
+            'time',
+            '10:30 AM'
+        )
+
+        booking_data.setdefault(
+            'passengers',
+            '1'
+        )
+
+        booking_data.setdefault(
+            'driver_name',
+            'Sumit Kumar'
+        )
+
+        booking_data.setdefault(
+            'driver_phone',
+            '9876543210'
+        )
+
+        booking_data.setdefault(
+            'vehicle_number',
+            'DL 01 AB 1234'
+        )
+
+        booking_data.setdefault(
+            'payment_method',
+            'Cash'
+        )
+
+        booking_data.setdefault(
+            'payment_status',
+            'Paid'
+        )
+
+        booking_data.setdefault('base_fare', 50)
+        booking_data.setdefault('ride_charge', 180)
+        booking_data.setdefault('platform_fee', 20)
+        booking_data.setdefault('total_amount', 250)
+
+        # -------------------------------------------------
+        # Save updated session
+        # -------------------------------------------------
+
+        request.session['booking_data'] = booking_data
+        request.session.modified = True
+
+        # -------------------------------------------------
+        # Dashboard statistics
+        # -------------------------------------------------
+
+        dashboard_stats = {
+            'total_rides': 0,
+            'completed': 0,
+            'total_spent': 0,
+            'rating': '4.9',
+        }
+
+        # -------------------------------------------------
+        # Recent rides
+        # -------------------------------------------------
+
+        recent_rides = [
+            {
+                'booking_id': 'NR0998',
+                'pickup': 'Dehradun',
+                'destination': 'Clock Tower',
+                'date': '28 Aug 2026',
+                'vehicle': 'Bike',
+                'fare': 240,
+                'status': 'Completed',
+                'status_class': 'bg-success-subtle text-success',
+                'icon': 'fa-motorcycle',
+                'icon_class': 'bg-danger-subtle text-danger',
+            },
+            {
+                'booking_id': 'NR0995',
+                'pickup': 'ISBT',
+                'destination': 'Rajpur Road',
+                'date': '24 Aug 2026',
+                'vehicle': 'Car',
+                'fare': 450,
+                'status': 'Completed',
+                'status_class': 'bg-success-subtle text-success',
+                'icon': 'fa-car',
+                'icon_class': 'bg-primary-subtle text-primary',
+            },
+            {
+                'booking_id': 'NR0992',
+                'pickup': 'Clock Tower',
+                'destination': 'ISBT',
+                'date': '20 Aug 2026',
+                'vehicle': 'Auto',
+                'fare': 180,
+                'status': 'Completed',
+                'status_class': 'bg-success-subtle text-success',
+                'icon': 'fa-car',
+                'icon_class': 'bg-warning-subtle text-warning',
             },
         ]
 
-SOCIAL_LINKS = [
-        {
-                'name': 'Google',
-                'icon': 'fa-brands fa-google',
-                'url': '#',
-            },
+        return render(
+            request,
+            'user/dashboard.html',
             {
-                'name': 'Facebook',
-                'icon': 'fa-brands fa-facebook-f',
-                'url': '#',
-            },
-            {
-                'name': 'Instagram',
-                'icon': 'fa-brands fa-instagram',
-                'url': '#',
-            },
-            {
-                'name': 'LinkedIn',
-                'icon': 'fa-brands fa-linkedin-in',
-                'url': '#',
-            },
-    ]
+                'site_name': 'NandiRide',
+                'sidebar_menu': SIDEBAR_MENU,
 
-DASHBOARD_CARD = [
-        {
-                'name': 'Total Ride',
-                'icon': 'fa fa-motorcycle',
-                'no': '15',
-            },
-            {
-                'name': 'Completed',
-                'icon': 'fa fa-check',
-                'no': '25',
-            },
-            {
-                'name': 'Cancelled',
-                'icon': 'fa-solid fa-xmark',
-                'no': '19',
-            },
-            {
-                'name': 'Booking',
-                'icon': 'fa fa-taxi',
-                'no': '13',
-            },
-            {
-                'name': 'Payment',
-                'icon': 'fa-solid fa-money-bill',
-                'no': '1K',
-            },
-    ]
+                'booking_data': booking_data,
 
-class UserDashboardView(TemplateView):
-    def get(self, request):
-        return render(request, 'user/dashboard.html',{'sidebar_menu': SIDEBAR_MENU,'dashboard_card':DASHBOARD_CARD})
+                'dashboard_stats': dashboard_stats,
 
-class UnderConstruction(TemplateView):
-    def get(self, request):
-        return render(request, 'user/underconstruction.html',)
-
-class About(TemplateView):
-    def get(self, request):
-        return render(request, 'user/about.html',)
-
-class Contact(TemplateView):
-    def get(self, request):
-        return render(request, 'user/contact.html',)
-
-class UserHomeView(TemplateView):
-    def get(self, request):
-        return render(request, 'user/home.html',{
-                'ride_title': '📍 Book Your Ride',
-                'page_subtitle': 'Quick, easy and reliable ride booking',
-                'booking_options': BOOKING_OPTIONS,
-                'book_title': '📍 Track Your Ride',
-                'title': 'Booking Status',
-                'description': (
-                    'Already booked a ride? Check your booking status '
-                    'using your registered mobile number or booking ID.'
-                ),
-                'features': (   '✓ Track booking status\n'
-                                '✓ View ride details'
-                                '✓ Check driver information'),
-                'button_icon': '📋',
-                'button_text': 'Check Status',
-                'url': 'booking-status',
-                'button_class': 'btn-outline-danger',
-                'icon_bg': 'bg-warning bg-opacity-10',
-                'icon_color': 'text-warning',
-            })
-
-class UserBookingView(TemplateView):
-    def get(self, request):
-        return render(request, 'user/profile/booking.html',{'sidebar_menu': SIDEBAR_MENU})
-
-class UserMyRideView(TemplateView):
-    def get(self, request):
-        return render(request, 'user/profile/myride.html',{'sidebar_menu': SIDEBAR_MENU})
-
-class UserPaymentView(TemplateView):
-    def get(self, request):
-        return render(request, 'user/profile/payment.html',{'sidebar_menu': SIDEBAR_MENU})
+                'recent_rides': recent_rides,
+            }
+        )
 
 class TrackRideView(TemplateView):
-    def get(self, request):
-        return render(request, 'user/profile/track.html',{'sidebar_menu': SIDEBAR_MENU})
 
-class USerEditProfileView(TemplateView):
+    template_name = "user/profile/track.html"
+
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(**kwargs)
+
+        context["ride"] = {
+            "booking_id": "NR1001",
+            "status": "on_the_way",
+            "ride_type": "Bike",
+
+            "driver_name": "Rahul Kumar",
+            "driver_rating": "4.9",
+
+            "vehicle": "Hero Splendor",
+            "vehicle_number": "UK 07 AB 1234",
+
+            "pickup": "Dehradun Railway Station",
+            "destination": "Clock Tower, Dehradun",
+
+            "date": "31 Aug 2026",
+            "time": "06:30 PM",
+
+            "passengers": 1,
+            "distance": "10 km",
+            "fare": "₹250",
+
+            "eta": "6 min",
+            "remaining_distance": "2.4 km",
+        }
+
+        # Sidebar menu
+        context["sidebar_menu"] = SIDEBAR_MENU
+
+        return context
+
+class UserEditProfileView(TemplateView):
     def get(self, request):
         form = profile()
-        return render(request, 'user/profile/editprofile.html', {'form': form,'sidebar_menu': SIDEBAR_MENU})
-    
+        return render(
+            request,
+            'user/profile/editprofile.html',
+            {
+                'form': form,
+                'sidebar_menu': SIDEBAR_MENU,
+                'site_name': 'NandiRide',
+            }
+        )
+
+
 class UserLoginView(TemplateView):
     def get(self, request):
         form = LoginForm()
-        return render(request, 'user/login.html', {'form': form,'social_links': SOCIAL_LINKS,})
+        return render(
+            request,
+            'user/login.html',
+            {
+                'form': form,
+                'social_links': SOCIAL_LINKS,
+                'site_name': 'NandiRide',
+            }
+        )
+
 
 class UserSignupView(TemplateView):
     def get(self, request):
         form = UserForm()
-        return render(request, 'user/signup.html', {'form': form,'social_links': SOCIAL_LINKS,})
+        return render(
+            request,
+            'user/signup.html',
+            {
+                'form': form,
+                'social_links': SOCIAL_LINKS,
+                'site_name': 'NandiRide',
+            }
+        )
+
 
 class UserProfileView(TemplateView):
     def get(self, request):
         form = profile()
-        return render(request, 'user/profile/profile.html', {'form': form, 'sidebar_menu': SIDEBAR_MENU,})
+        return render(
+            request,
+            'user/profile/profile.html',
+            {
+                'form': form,
+                'sidebar_menu': SIDEBAR_MENU,
+                'site_name': 'NandiRide',
+            }
+        )
+
 
 class ForgetPasswordView(TemplateView):
     def get(self, request):
         form = ForgetPassword()
-        return render(request, 'user/profile/forgetpassword.html', {'form': form})
+        return render(
+            request,
+            'user/profile/forgetpassword.html',
+            {
+                'form': form,
+                'site_name': 'NandiRide',
+            }
+        )
+
 
 class ResetPasswordView(TemplateView):
     def get(self, request):
         form = ResetPassword()
-        return render(request, 'user/profile/resetpassword.html', {'form': form})
+        return render(
+            request,
+            'user/profile/resetpassword.html',
+            {
+                'form': form,
+                'site_name': 'NandiRide',
+                'sidebar_menu': SIDEBAR_MENU,
+            }
+        )
 
-# class UserLoginTypesView(TemplateView):
-#     def get(self, request):
-#         login_types = [
-#             {
-#                 'icon': '👤',
-#                 'title': 'Public Login',
-#                 'description': 'Login as a public user',
-#                 'url': 'loginuser',
-#                 'button_class': 'btn-primary',
-#                 'border_class': 'border-primary',
-#                 'button_text': 'Public Login',
-#                 'signup': True,
-#             },
-#             {
-#                 'icon': '🔐',
-#                 'title': 'Admin Login',
-#                 'description': 'Login to administration panel',
-#                 'url': 'loginuser',
-#                 'button_class': 'btn-dark',
-#                 'border_class': 'border-dark',
-#                 'button_text': 'Admin Login',
-#                 'signup': False,
-#             },
-#         ]
-#         return render(request,'user/logintype.html',{'login_types': login_types})
+class PaymentDetailsView(TemplateView):
+    def get(self, request):
+        return render(
+            request,
+            'user/profile/paymentdetails.html',
+            {
+                'sidebar_menu': SIDEBAR_MENU,
+            }
+        )
+    
+class PaymentReceiptView(TemplateView):
+    def get(self, request):
+        return render(
+            request,
+            'user/profile/paymentreceipt.html',
+            {
+                'sidebar_menu': SIDEBAR_MENU,
+            }
+        )
 
-# class UserListView(TemplateView):
-#     template_name = 'user/user_list.html'
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         genre = self.request.GET.get('genre')
-#         if genre:
-#             context['users'] = User.objects.filter(genre=genre).order_by('-created_at')
-#         else:
-#             context['users'] = User.objects.all().order_by('-created_at')
-#         return context
+class CancelRideView(View):
+    def post(self, request, *args, **kwargs):
+        request.session.pop('booking_data', None)
+
+        messages.success(
+            request,
+            'Ride cancelled successfully.'
+        )
+
+        return redirect('myride')

@@ -1,153 +1,262 @@
 {% extends 'user/base.html' %}
 {% load static %}
-
 {% block title %}{{ site_name }} | Home{% endblock %}
-
 {% block content %}
-
-    <div id="rideCarousel" class="carousel slide" data-bs-ride="carousel">
+<div class="container-fluid px-2 px-md-3">
+    {% if hero_slides %}
+    <div id="rideCarousel" class="carousel slide carousel-fade rounded-4 overflow-hidden shadow-lg mb-4" data-bs-ride="carousel" data-bs-interval="{{ carousel_interval }}">
         <div class="carousel-indicators">
             {% for slide in hero_slides %}
-                <button type="button" data-bs-target="#rideCarousel" data-bs-slide-to="{{ forloop.counter0 }}"
-                        class="{% if forloop.first %}active{% endif %}">
-                </button>
+            <button type="button" data-bs-target="#rideCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
             {% endfor %}
         </div>
-        <!-- SLIDES -->
         <div class="carousel-inner">
             {% for slide in hero_slides %}
-                <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <div class="{{ slide.image_class }} text-white py-5">
-                        <div class="container">
-                            <div class="row align-items-center min-vh-50">
-                                <div class="col-lg-6">
-                                    <span class="badge bg-white text-danger mb-3 px-3 py-2">{{ slide.badge }}</span>
-                                    <h1 class="display-4 fw-bold">{{ slide.title }}</h1>
-                                    <p class="lead">{{ slide.description }}</p>
-                                    <a href="{{ slide.button_url }}"class="btn {{ slide.button_class }} btn-lg rounded-pill px-5">
-                                        {{ slide.button_text }}
-                                    </a>
-                                </div>
-                                <div class="col-lg-6 text-center">
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="{{ slide.image_class }} text-white">
+                    <div class="container py-5">
+                        <div class="row align-items-center g-4" style="min-height:380px;">
+                            <div class="col-12 col-lg-7">
+                                <span class="badge bg-white text-danger rounded-pill px-3 py-2 mb-3 shadow-sm">{{ slide.badge }}</span>
+                                <h1 class="display-4 fw-bold mb-3">{{ slide.title|safe }}</h1>
+                                <p class="lead mb-4">{{ slide.description }}</p>
+                                <a href="{{ slide.button_url }}" class="btn {{ slide.button_class }} btn-lg rounded-pill px-4 fw-bold shadow-sm">
+                                    <i class="{{ slide.button_icon }} me-2"></i>
+                                    {{ slide.button_text }}
+                                </a>
+                            </div>
+                            <div class="col-12 col-lg-5 text-center">
+                                <div class="text-white">
                                     <div class="display-1">{{ slide.icon }}</div>
-                                    <h3 class="fw-bold mt-3">{{ slide.heading }}</h3>
+                                    <div class="fw-bold fs-5 mt-2">{{ slide.heading|safe }}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
             {% endfor %}
         </div>
+        {% if hero_slides|length > 1 %}
         <button class="carousel-control-prev" type="button" data-bs-target="#rideCarousel" data-bs-slide="prev">
             <span class="carousel-control-prev-icon"></span>
+            <span class="visually-hidden">Previous</span>
         </button>
         <button class="carousel-control-next" type="button" data-bs-target="#rideCarousel" data-bs-slide="next">
             <span class="carousel-control-next-icon"></span>
+            <span class="visually-hidden">Next</span>
         </button>
+        {% endif %}
     </div>
-
-    <div class="row mx-auto mt-4 g-4">
-        <div class="col-md-6">
+    {% endif %}
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-xl-8">
             <div class="card border-0 shadow-lg rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h3 class="fw-bold mb-4 text-center">{{ ride_title }}</h3>
-                    <p class="text-center text-success">{{ page_subtitle }}</p>
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:52px;height:52px;">
+                            <i class="fa-solid fa-location-dot fs-5"></i>
+                        </span>
+                        <div>
+                            <h3 class="fw-bold mb-0">{{ ride_title }}</h3>
+                            <small class="text-muted">{{ page_subtitle }}</small>
+                        </div>
+                    </div>
+                    <hr class="my-4">
                     <form method="POST" action="{{ booking_url }}">
                         {% csrf_token %}
-                        <div class="row g-3">
-                            <div class="col-md-5">
-                                <label class="form-label fw-bold">{{ pickup_label }}</label>
-                                <input type="text" name="pickup" class="form-control form-control-lg" placeholder="{{ pickup_placeholder }}">
+                        <div class="row g-3 align-items-end mt-4">
+                            <div class="col-12 col-md-4">
+                                <label for="pickup" class="form-label fw-bold">
+                                    <i class="fa-solid fa-circle-dot text-danger me-1"></i>
+                                    {{ pickup_label }}
+                                </label>
+                                <input type="text" id="pickup" name="pickup" class="form-control form-control-lg rounded-3" placeholder="{{ pickup_placeholder }}" required>
                             </div>
-                            <div class="col-md-5">
-                                <label class="form-label fw-bold">{{ drop_label }}</label>
-                                <input type="text" name="drop" class="form-control form-control-lg" placeholder="{{ drop_placeholder }}">
+                            <div class="col-12 col-md-4">
+                                <label for="drop" class="form-label fw-bold">
+                                    <i class="fa-solid fa-location-dot text-danger me-1"></i>
+                                    {{ drop_label }}
+                                </label>
+                                <input type="text" id="drop" name="drop" class="form-control form-control-lg rounded-3" placeholder="{{ drop_placeholder }}" required>
                             </div>
-                            <div class="col-md-2 d-grid">
-                                <label class="form-label">&nbsp;</label>
-                                <button type="submit" class="btn btn-danger btn-lg">{{ booking_button }}</button>
+                            <div class="col-12 col-md-4 d-grid">
+                                <button type="submit" class="btn btn-danger btn-lg rounded-3 fw-bold">
+                                    <i class="{{ booking_button.icon }} me-1"></i>
+                                    {{ booking_button.text }}
+                                </button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card border-0 shadow-lg rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h3 class="fw-bold mb-4 text-center">{{ book_title }}</h3>
-                    <p class="text-center text-success">{{ title }}</p>
-                    <div class="row g-3 align-items-center">
-                        <div class="col-md-9">
-                            <p class="font-size mb-0">{{ description }}</p>
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-lg rounded-4 h-100 bg-danger text-white">
+                <div class="card-body p-4 p-md-5 d-flex flex-column justify-content-center">
+                    <div class="mb-3">
+                        <span class="bg-white text-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width:58px;height:58px;">
+                            <i class="fa-solid fa-car fs-4"></i>
+                        </span>
+                    </div>
+                    <h3 class="fw-bold">{{ book_title }}</h3>
+                    <h5 class="fw-semibold">{{ title }}</h5>
+                    <p class="text-white-50 mb-4">{{ description }}</p>
+                    <a href="{{ booking_url }}" class="btn btn-light text-danger btn-lg rounded-pill fw-bold">
+                        <i class="fa-solid fa-calendar-check me-2"></i>
+                        {{ booking_button.text }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if track_ride %}
+    <section class="mb-5">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="row g-0">
+                <div class="col-12 col-lg-5 bg-danger text-white">
+                    <div class="p-4 p-md-5 h-100 d-flex flex-column justify-content-center">
+                        <div class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center mb-4" style="width:75px;height:75px;">
+                            <i class="{{ track_ride.icon }} fs-2"></i>
                         </div>
-                        <div class="col-md-3 d-grid">
-                            <a href="{{ booking_url }}" class="btn btn-danger btn-lg">{{ booking_button }}</a>
+                        <h2 class="fw-bold">{{ track_ride.title }}</h2>
+                        <p class="lead text-white-50 mb-0">{{ track_ride.subtitle }}</p>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-7 bg-white">
+                    <div class="p-4 p-md-5 h-100 d-flex flex-column justify-content-center">
+                        <div class="mb-3">
+                            <span class="text-danger fw-bold">
+                                <i class="fa-solid fa-location-crosshairs me-2"></i>
+                                LIVE RIDE TRACKING
+                            </span>
+                        </div>
+                        <form method="GET" action="{{ track_ride.url }}">
+                            <label for="booking_id" class="form-label fw-bold">Booking ID</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fa-solid fa-ticket text-danger"></i>
+                                </span>
+                                <input type="text" id="booking_id" name="booking_id" class="form-control border-start-0" placeholder="{{ track_ride.placeholder }}" required>
+                                <button type="submit" class="btn btn-danger px-4 fw-bold">
+                                    <i class="{{ track_ride.button_icon }} me-2"></i>
+                                    {{ track_ride.button }}
+                                </button>
+                            </div>
+                        </form>
+                        <div class="row g-3 mt-3">
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-map-location-dot text-danger fs-4"></i>
+                                    <small class="d-block text-muted mt-1">Live Location</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-car text-danger fs-4"></i>
+                                    <small class="d-block text-muted mt-1">Ride Status</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-clock text-danger fs-4"></i>
+                                    <small class="d-block text-muted mt-1">ETA</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- ================= RIDE TYPES ================= -->
-
-    <section class="py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="fw-bold">{{ ride_section_title }}</h2>
-                <p class="text-muted">{{ ride_section_subtitle }}</p>
-            </div>
-            <div class="row g-4">
-                {% for ride in ride_types %}
-                    <div class="col-md-4">
-                        <div class="card border-0 shadow-sm text-center h-100 rounded-4">
-                            <div class="card-body p-4">
-                                <div class="display-3 mb-3">
-                                    <i class="{{ ride.icon }}"></i>
-                                </div>
-                                <h4 class="fw-bold">{{ ride.name }}</h4>
-                                <p class="text-muted">{{ ride.description }}</p>
-                                <a href="{{ ride.url }}" class="btn btn-outline-danger rounded-pill px-4">{{ ride.button }}</a>
-                            </div>
+    </section>
+    {% endif %}
+    {% if ride_types %}
+    <section class="mb-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-danger text-white rounded-pill px-3 py-2 mb-2">OUR SERVICES</span>
+            <h2 class="display-6 fw-bold mb-2">{{ ride_section_title }}</h2>
+            <p class="text-muted mb-0">{{ ride_section_subtitle }}</p>
+        </div>
+        <div class="row g-4">
+            {% for ride in ride_types %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4 p-lg-5 text-center">
+                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width:90px;height:90px;">
+                            <i class="{{ ride.icon }} text-white fs-1"></i>
                         </div>
+                        <h4 class="fw-bold mb-3">{{ ride.name }}</h4>
+                        <p class="text-muted mb-4">{{ ride.description }}</p>
+                        <a href="{{ ride.url }}" class="btn btn-outline-danger rounded-pill px-4 fw-semibold">
+                            {{ ride.button }}
+                            <i class="fa-solid fa-arrow-right ms-2"></i>
+                        </a>
                     </div>
-                    {% empty %}
-                    <div class="col-12 text-center">
-                        <p class="text-muted">No rides available at the moment.</p>
-                    </div>
-                {% endfor %}
+                </div>
             </div>
+            {% endfor %}
         </div>
     </section>
-
-    <!-- ================= WHY NANDI ================= -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="fw-bold">Why Choose Nandi Ride?</h2>
-            </div>
-            <div class="row g-4 text-center">
-                {% for feature in why_choose %}
-                    <div class="col-md-3">
-                        <div class="fs-1">
-                            <i class="{{ feature.icon }}"></i>
+    {% endif %}
+    {% if why_choose %}
+    <section class="bg-light rounded-4 p-4 p-md-5 mb-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-danger text-white rounded-pill px-3 py-2 mb-2">WHY NANDIRIDE</span>
+            <h2 class="display-6 fw-bold mb-2">{{ why_section.title }}</h2>
+            <p class="text-muted mb-0">{{ why_section.subtitle }}</p>
+        </div>
+        <div class="row g-4">
+            {% for feature in why_choose %}
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px;height:70px;">
+                            <i class="{{ feature.icon }} fs-3"></i>
                         </div>
                         <h5 class="fw-bold">{{ feature.title }}</h5>
-                        <p class="text-muted">{{ feature.description }}</p>
+                        <p class="text-muted mb-0">{{ feature.description }}</p>
                     </div>
-                {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    {% if home_stats %}
+    <section class="mb-5">
+        <div class="row g-3">
+            {% for stat in home_stats %}
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="text-danger mb-2">
+                            <i class="{{ stat.icon }} fs-2"></i>
+                        </div>
+                        <h2 class="fw-bold mb-1">{{ stat.value }}</h2>
+                        <p class="text-muted mb-0">{{ stat.label }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    {% if home_cta %}
+    <section class="mb-4">
+        <div class="card border-0 bg text-white rounded-4 shadow-lg overflow-hidden">
+            <div class="card-body p-4 p-md-5 text-center">
+                <div class="bg-white text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:75px;height:75px;">
+                    <i class="{{ home_cta.icon }} fs-2"></i>
+                </div>
+                <h2 class="display-6 fw-bold">{{ home_cta.title }}</h2>
+                <p class="lead text-white-50 mb-4">{{ home_cta.description }}</p>
+                <a href="{{ home_cta.url }}" class="btn btn-light text-danger btn-lg rounded-pill px-5 fw-bold">
+                    <i class="{{ home_cta.button_icon }} me-2"></i>
+                    {{ home_cta.button_text }}
+                </a>
             </div>
         </div>
     </section>
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <span><a href="#" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
-            </div>
-        {% endfor %}
     {% endif %}
-
+</div>
 {% endblock content %}

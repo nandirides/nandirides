@@ -8,7 +8,7 @@ def site_data(request):
         'site_name': 'NandiRide',
         'site_tagline': "Thank you for choosing NandiRide. Let's travel together!",
         'phone': '+91 9410554430',
-        'phone2': '+91 2144-554430',
+        'phone2': '+91 4421-554430',
         'email': 'support@nandidride.com',
         'email2': 'nandidride@gmail.com',
         'location': 'Haridwar, India',
@@ -29,12 +29,17 @@ def site_data(request):
             },
             {
                 'name': 'Services',
-                'url': reverse('underconstruction'),
+                'url': reverse('services'),
+                'icon': 'fa fa-cogs',
+            },
+            {
+                'name': 'Blog',
+                'url': reverse('blog'),
                 'icon': 'fa fa-cogs',
             },
             {
                 'name': 'Career',
-                'url': reverse('underconstruction'),
+                'url': reverse('career'),
                 'icon': 'fa fa-briefcase',
             },
             {

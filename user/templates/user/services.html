@@ -1,0 +1,106 @@
+{% extends 'user/base.html' %}
+{% block title %}{{ site_name }} | Services{% endblock %}
+{% block content %}
+<div class="bg-light">
+    <section class="bg text-white py-5">
+        <div class="container py-5">
+            <div class="row align-items-center g-5">
+                <div class="col-12 col-lg-7 text-center text-lg-start">
+                    <span class="badge bg-white text-danger rounded-pill px-3 py-2">
+                        <i class="fa-solid fa-car-side me-2"></i>{{ hero.badge }}
+                    </span>
+                    <h1 class="display-4 fw-bold mt-4 mb-3">{{ hero.title }} <span class="text-warning">{{ hero.highlight }}</span></h1>
+                    <p class="lead text-white-50 mb-4">{{ hero.description }}</p>
+                    <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-2">
+                        <a href="{% url hero.primary_url %}" class="btn btn-light btn-lg rounded-pill px-4 fw-semibold text-danger">
+                            <i class="{{ hero.primary_icon }} me-2"></i>{{ hero.primary_button }}
+                        </a>
+                        <a href="#services" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-semibold">
+                            <i class="{{ hero.secondary_icon }} me-2"></i>{{ hero.secondary_button }}
+                        </a>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-5">
+                    <div class="card border-0 shadow-lg rounded-5 h-100">
+                        <div class="card-body p-4 p-md-5 text-center text-dark">
+                            <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex align-items-center justify-content-center p-4">
+                                <i class="{{ hero.card_icon }} display-3"></i>
+                            </div>
+                            <h3 class="fw-bold mt-4">{{ hero.card_title }}</h3>
+                            <p class="text-secondary mb-0">{{ hero.card_description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="services" class="container py-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2">{{ services_heading.badge }}</span>
+            <h2 class="display-6 fw-bold mt-3 mb-2">{{ services_heading.title }}</h2>
+            <p class="text-secondary mb-0">{{ services_heading.description }}</p>
+        </div>
+        <div class="row g-4">
+            {% for service in services %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card border-0 rounded-4 shadow-sm h-100">
+                    <div class="card-body p-4 p-lg-5 d-flex flex-column">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="bg-danger-subtle text-danger rounded-4 d-flex align-items-center justify-content-center p-3">
+                                <i class="{{ service.icon }} fs-3"></i>
+                            </div>
+                            {% if service.popular %}
+                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                                <i class="fa-solid fa-star me-1"></i>{{ service.popular_text }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <h4 class="fw-bold mt-4 mb-2">{{ service.title }}</h4>
+                        <p class="text-secondary mb-4">{{ service.description }}</p>
+                        <div class="d-flex flex-column gap-2 mb-4">
+                            {% for feature in service.features %}
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-circle-check text-danger me-2"></i>
+                                <span class="text-secondary">{{ feature }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-auto">
+                            <a href="{% url service.url %}" class="btn btn-outline-danger rounded-pill px-4">
+                                <i class="{{ service.button_icon }} me-2"></i>{{ service.button }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-light border rounded-4 text-center p-5">
+                    <i class="fa-solid fa-circle-info text-danger display-5 mb-3"></i>
+                    <h4 class="fw-bold">{{ empty_services.title }}</h4>
+                    <p class="text-secondary mb-0">{{ empty_services.description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    <section class="container pb-5">
+        <div class="bg rounded-5 p-4 p-md-5 text-white shadow">
+            <div class="row align-items-center g-4">
+                <div class="col-12 col-lg-8 text-center text-lg-start">
+                    <span class="badge bg-white text-danger rounded-pill px-3 py-2 mb-3">
+                        <i class="{{ cta.icon }} me-2"></i>{{ cta.badge }}
+                    </span>
+                    <h2 class="fw-bold mb-2">{{ cta.title }}</h2>
+                    <p class="text-white-50 mb-0">{{ cta.description }}</p>
+                </div>
+                <div class="col-12 col-lg-4 text-center text-lg-end">
+                    <a href="{% url cta.url %}" class="btn btn-light btn-lg rounded-pill px-4 fw-semibold text-danger">
+                        <i class="{{ cta.button_icon }} me-2"></i>{{ cta.button }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

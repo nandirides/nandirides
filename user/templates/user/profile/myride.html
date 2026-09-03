@@ -1,12 +1,16 @@
 {% extends 'user/dashboard_base.html' %}
+
 {% block page_heading %}
 My Rides
 {% endblock %}
-{% block title %}{{site_name}} | My Rides{% endblock %}
+
+{% block title %}
+{{ site_name|default:"NandiRide" }} | My Rides
+{% endblock %}
 
 {% block dashboard_content %}
 
-<div class="container-fluid py-4">
+<div class="container-fluid">
 
     <!-- ================================================= -->
     <!-- PAGE HEADER -->
@@ -16,7 +20,6 @@ My Rides
                 align-items-center gap-3 mb-4">
 
         <div>
-
             <h2 class="fw-bold mb-1">
 
                 <i class="fa-solid fa-route text-danger me-2"></i>
@@ -30,16 +33,11 @@ My Rides
                 View and manage all your NandiRide bookings
 
             </p>
-
         </div>
 
 
-        <!-- NEW BOOKING -->
-
-        <a
-            href="{% url 'booking' %}"
-            class="btn btn-danger rounded-pill px-4"
-        >
+        <a href="{% url 'booking' %}"
+           class="btn btn-outline-danger rounded-pill px-4">
 
             <i class="fa-solid fa-plus me-2"></i>
 
@@ -49,6 +47,37 @@ My Rides
 
     </div>
 
+
+    <!-- ================================================= -->
+    <!-- SUCCESS / ERROR MESSAGES -->
+    <!-- ================================================= -->
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="alert
+                {% if message.tags %}
+                    alert-{{ message.tags }}
+                {% else %}
+                    alert-info
+                {% endif %}
+                alert-dismissible fade show rounded-3 shadow-sm mb-4">
+
+                <i class="fa-solid fa-circle-check me-2"></i>
+
+                {{ message }}
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
 
 
     <!-- ================================================= -->
@@ -64,9 +93,8 @@ My Rides
                 <div class="col-6 col-md-3">
 
                     <button
-                        class="btn btn-danger w-100 rounded-3"
-                        type="button"
-                    >
+                        class="btn btn-outline-danger w-100 rounded-3"
+                        type="button">
 
                         <i class="fa-solid fa-list me-1"></i>
 
@@ -80,9 +108,8 @@ My Rides
                 <div class="col-6 col-md-3">
 
                     <button
-                        class="btn btn-light border w-100 rounded-3"
-                        type="button"
-                    >
+                        class="btn btn-outline-danger w-100 rounded-3"
+                        type="button">
 
                         <i class="fa-solid fa-clock me-1"></i>
 
@@ -96,9 +123,8 @@ My Rides
                 <div class="col-6 col-md-3">
 
                     <button
-                        class="btn btn-light border w-100 rounded-3"
-                        type="button"
-                    >
+                        class="btn btn-outline-danger w-100 rounded-3"
+                        type="button">
 
                         <i class="fa-solid fa-circle-check me-1"></i>
 
@@ -112,9 +138,8 @@ My Rides
                 <div class="col-6 col-md-3">
 
                     <button
-                        class="btn btn-light border w-100 rounded-3"
-                        type="button"
-                    >
+                        class="btn btn-outline-danger w-100 rounded-3"
+                        type="button">
 
                         <i class="fa-solid fa-ban me-1"></i>
 
@@ -131,9 +156,10 @@ My Rides
     </div>
 
 
+    {% if booking_data %}
 
     <!-- ================================================= -->
-    <!-- ACTIVE RIDE -->
+    <!-- ACTIVE / CURRENT RIDE -->
     <!-- ================================================= -->
 
     <div class="card border-0 shadow-sm rounded-4 mb-4">
@@ -159,7 +185,7 @@ My Rides
 
                     <h5 class="fw-bold mb-0">
 
-                        Your ride is on the way
+                        Your ride is confirmed
 
                     </h5>
 
@@ -169,7 +195,7 @@ My Rides
                 <span class="badge bg-white text-danger
                              rounded-pill px-3 py-2">
 
-                    #NR1001
+                    #{{ booking_data.booking_id|default:"NR10001" }}
 
                 </span>
 
@@ -177,6 +203,8 @@ My Rides
 
         </div>
 
+
+        <!-- BODY -->
 
         <div class="card-body p-4">
 
@@ -189,9 +217,9 @@ My Rides
 
                 <div class="col-lg-7">
 
-                    <div class="d-flex align-items-start">
+                    <!-- PICKUP -->
 
-                        <!-- PICKUP -->
+                    <div class="d-flex align-items-start">
 
                         <div class="text-center">
 
@@ -200,8 +228,7 @@ My Rides
                                        rounded-circle d-flex
                                        align-items-center
                                        justify-content-center"
-                                style="width:45px;height:45px;"
-                            >
+                                style="width:45px;height:45px;">
 
                                 <i class="fa-solid fa-location-dot"></i>
 
@@ -217,7 +244,9 @@ My Rides
                             </small>
 
                             <h6 class="fw-bold mb-0">
-                                Dehradun Railway Station
+
+                                {{ booking_data.pickup|default:"Railway Station" }}
+
                             </h6>
 
                         </div>
@@ -244,8 +273,7 @@ My Rides
                                        rounded-circle d-flex
                                        align-items-center
                                        justify-content-center"
-                                style="width:45px;height:45px;"
-                            >
+                                style="width:45px;height:45px;">
 
                                 <i class="fa-solid fa-flag-checkered"></i>
 
@@ -261,7 +289,9 @@ My Rides
                             </small>
 
                             <h6 class="fw-bold mb-0">
-                                Clock Tower, Dehradun
+
+                                {{ booking_data.destination|default:"City Mall" }}
+
                             </h6>
 
                         </div>
@@ -269,7 +299,6 @@ My Rides
                     </div>
 
                 </div>
-
 
 
                 <!-- ===================================== -->
@@ -286,8 +315,7 @@ My Rides
                                 class="bg-white border rounded-circle
                                        d-flex align-items-center
                                        justify-content-center"
-                                style="width:55px;height:55px;"
-                            >
+                                style="width:55px;height:55px;">
 
                                 <i class="fa-solid fa-user
                                           text-secondary fs-4"></i>
@@ -302,7 +330,9 @@ My Rides
                                 </small>
 
                                 <h6 class="fw-bold mb-1">
-                                    Rahul Kumar
+
+                                    {{ booking_data.driver_name|default:"Raj Kumar" }}
+
                                 </h6>
 
                                 <span class="text-warning small">
@@ -316,14 +346,14 @@ My Rides
                             </div>
 
 
-                            <button
+                            <a
+                                href="tel:{{ booking_data.driver_phone|default:'9876543210' }}"
                                 class="btn btn-success rounded-circle"
-                                style="width:42px;height:42px;"
-                            >
+                                style="width:42px;height:42px;">
 
                                 <i class="fa-solid fa-phone"></i>
 
-                            </button>
+                            </a>
 
                         </div>
 
@@ -338,9 +368,12 @@ My Rides
                             </span>
 
                             <strong>
+
                                 <i class="fa-solid fa-motorcycle
                                           text-danger me-1"></i>
+
                                 Hero Splendor
+
                             </strong>
 
                         </div>
@@ -353,7 +386,9 @@ My Rides
                             </span>
 
                             <strong>
-                                UK 07 AB 1234
+
+                                {{ booking_data.vehicle_number|default:"DL 01 AB 1234" }}
+
                             </strong>
 
                         </div>
@@ -368,12 +403,13 @@ My Rides
             <hr class="my-4">
 
 
-            <!-- ===================================== -->
-            <!-- RIDE INFO -->
-            <!-- ===================================== -->
+            <!-- ================================================= -->
+            <!-- RIDE INFORMATION -->
+            <!-- ================================================= -->
 
             <div class="row g-3 text-center">
 
+                <!-- DATE -->
 
                 <div class="col-6 col-md-3">
 
@@ -382,11 +418,15 @@ My Rides
                     </small>
 
                     <strong>
-                        31 Aug 2026
+
+                        {{ booking_data.date|default:"01 Sep 2026" }}
+
                     </strong>
 
                 </div>
 
+
+                <!-- TIME -->
 
                 <div class="col-6 col-md-3">
 
@@ -395,24 +435,35 @@ My Rides
                     </small>
 
                     <strong>
-                        06:30 PM
+
+                        {{ booking_data.time|default:"10:30 AM" }}
+
                     </strong>
 
                 </div>
 
+
+                <!-- RIDE TYPE -->
 
                 <div class="col-6 col-md-3">
 
                     <small class="text-secondary d-block">
-                        Distance
+                        Ride Type
                     </small>
 
                     <strong>
-                        10 km
+
+                        <i class="fa-solid fa-motorcycle
+                                  text-danger me-1"></i>
+
+                        {{ booking_data.ride_type|default:"Bike" }}
+
                     </strong>
 
                 </div>
 
+
+                <!-- FARE -->
 
                 <div class="col-6 col-md-3">
 
@@ -421,7 +472,9 @@ My Rides
                     </small>
 
                     <strong class="text-danger">
-                        ₹250
+
+                        ₹{{ booking_data.total_amount|default:"250" }}
+
                     </strong>
 
                 </div>
@@ -429,16 +482,80 @@ My Rides
             </div>
 
 
-            <!-- ===================================== -->
+            <hr class="my-4">
+
+
+            <!-- ================================================= -->
+            <!-- PAYMENT -->
+            <!-- ================================================= -->
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+
+                    <small class="text-secondary d-block">
+                        Payment Method
+                    </small>
+
+                    <strong>
+
+                        <i class="fa-solid fa-credit-card
+                                  text-danger me-1"></i>
+
+                        {{ booking_data.payment_method|default:"Cash"|title }}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <small class="text-secondary d-block">
+                        Payment Status
+                    </small>
+
+                    <span class="badge bg-success-subtle
+                                 text-success rounded-pill px-3 py-2">
+
+                        <i class="fa-solid fa-check me-1"></i>
+
+                        {{ booking_data.payment_status|default:"Paid" }}
+
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <small class="text-secondary d-block">
+                        Booking Status
+                    </small>
+
+                    <span class="badge bg-danger-subtle
+                                 text-danger rounded-pill px-3 py-2">
+
+                        <i class="fa-solid fa-circle-check me-1"></i>
+
+                        {{ booking_data.status|default:"Confirmed" }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
             <!-- ACTIONS -->
-            <!-- ===================================== -->
+            <!-- ================================================= -->
 
             <div class="d-flex flex-wrap gap-2 mt-4">
 
                 <a
                     href="{% url 'track' %}"
-                    class="btn btn-danger rounded-3 px-4"
-                >
+                    class="btn btn-outline-danger rounded-3 px-4">
 
                     <i class="fa-solid fa-location-crosshairs me-2"></i>
 
@@ -448,9 +565,8 @@ My Rides
 
 
                 <a
-                    href="{% url 'payment' %}"
-                    class="btn btn-outline-danger rounded-3 px-4"
-                >
+                    href="{% url 'paymentdetails' %}"
+                    class="btn btn-outline-danger rounded-3 px-4">
 
                     <i class="fa-solid fa-receipt me-2"></i>
 
@@ -459,23 +575,21 @@ My Rides
                 </a>
 
 
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary rounded-3 px-4"
-                >
+                <a
+                    href="{% url 'booking' %}"
+                    class="btn btn-outline-dager rounded-3 px-4">
 
-                    <i class="fa-solid fa-headset me-2"></i>
+                    <i class="fa-solid fa-plus me-2"></i>
 
-                    Help
+                    Book Another Ride
 
-                </button>
+                </a>
 
             </div>
 
         </div>
 
     </div>
-
 
 
     <!-- ================================================= -->
@@ -494,17 +608,15 @@ My Rides
         </h5>
 
         <span class="badge bg-danger-subtle text-danger">
+
             1 Ride
+
         </span>
 
     </div>
 
 
-
     <div class="row g-4 mb-5">
-
-
-        <!-- UPCOMING CARD -->
 
         <div class="col-lg-6">
 
@@ -512,7 +624,6 @@ My Rides
                         rounded-4 h-100">
 
                 <div class="card-body p-4">
-
 
                     <div class="d-flex justify-content-between
                                 align-items-center mb-3">
@@ -528,7 +639,9 @@ My Rides
 
 
                         <small class="text-secondary">
-                            #NR1002
+
+                            #{{ booking_data.booking_id|default:"NR10001" }}
+
                         </small>
 
                     </div>
@@ -543,8 +656,7 @@ My Rides
                                    rounded-circle d-flex
                                    align-items-center
                                    justify-content-center"
-                            style="width:40px;height:40px;"
-                        >
+                            style="width:40px;height:40px;">
 
                             <i class="fa-solid fa-location-dot"></i>
 
@@ -558,7 +670,9 @@ My Rides
                             </small>
 
                             <p class="fw-semibold mb-0">
-                                ISBT Dehradun
+
+                                {{ booking_data.pickup|default:"Railway Station" }}
+
                             </p>
 
                         </div>
@@ -579,8 +693,7 @@ My Rides
                                    rounded-circle d-flex
                                    align-items-center
                                    justify-content-center"
-                            style="width:40px;height:40px;"
-                        >
+                            style="width:40px;height:40px;">
 
                             <i class="fa-solid fa-flag-checkered"></i>
 
@@ -594,7 +707,9 @@ My Rides
                             </small>
 
                             <p class="fw-semibold mb-0">
-                                Rajpur Road, Dehradun
+
+                                {{ booking_data.destination|default:"City Mall" }}
+
                             </p>
 
                         </div>
@@ -616,7 +731,9 @@ My Rides
                             </small>
 
                             <strong>
-                                01 Sep
+
+                                {{ booking_data.date|default:"01 Sep 2026" }}
+
                             </strong>
 
                         </div>
@@ -629,7 +746,9 @@ My Rides
                             </small>
 
                             <strong>
-                                09:00 AM
+
+                                {{ booking_data.time|default:"10:30 AM" }}
+
                             </strong>
 
                         </div>
@@ -642,7 +761,9 @@ My Rides
                             </small>
 
                             <strong class="text-danger">
-                                ₹320
+
+                                ₹{{ booking_data.total_amount|default:"250" }}
+
                             </strong>
 
                         </div>
@@ -651,10 +772,9 @@ My Rides
 
 
                     <a
-                        href="{% url 'payment' %}"
+                        href="{% url 'paymentreceipt' %}"
                         class="btn btn-outline-danger w-100
-                               rounded-3 mt-4"
-                    >
+                               rounded-3 mt-4">
 
                         <i class="fa-solid fa-credit-card me-2"></i>
 
@@ -669,7 +789,6 @@ My Rides
         </div>
 
     </div>
-
 
 
     <!-- ================================================= -->
@@ -695,20 +814,15 @@ My Rides
     </div>
 
 
-
     <div class="row g-4">
 
-
-        <!-- ============================================= -->
         <!-- COMPLETED RIDE -->
-        <!-- ============================================= -->
 
         <div class="col-lg-6">
 
             <div class="card border-0 shadow-sm rounded-4">
 
                 <div class="card-body p-4">
-
 
                     <div class="d-flex justify-content-between
                                 align-items-center mb-3">
@@ -724,7 +838,9 @@ My Rides
 
 
                         <small class="text-secondary">
+
                             #NR0998
+
                         </small>
 
                     </div>
@@ -736,8 +852,7 @@ My Rides
                             class="bg-light rounded-3 d-flex
                                    align-items-center
                                    justify-content-center"
-                            style="width:45px;height:45px;"
-                        >
+                            style="width:45px;height:45px;">
 
                             <i class="fa-solid fa-motorcycle
                                       text-danger"></i>
@@ -748,11 +863,15 @@ My Rides
                         <div class="ms-3">
 
                             <h6 class="fw-bold mb-1">
-                                Dehradun → Clock Tower
+
+                                Railway Station → City Mall
+
                             </h6>
 
                             <small class="text-secondary">
+
                                 28 Aug 2026 · 07:30 PM
+
                             </small>
 
                         </div>
@@ -779,16 +898,15 @@ My Rides
                         </div>
 
 
-                        <button
-                            class="btn btn-outline-danger
-                                   rounded-3"
-                        >
+                        <a
+                            href="{% url 'paymentreceipt' %}"
+                            class="btn btn-outline-danger rounded-3">
 
                             <i class="fa-solid fa-receipt me-1"></i>
 
                             Receipt
 
-                        </button>
+                        </a>
 
                     </div>
 
@@ -799,17 +917,13 @@ My Rides
         </div>
 
 
-
-        <!-- ============================================= -->
         <!-- CANCELLED RIDE -->
-        <!-- ============================================= -->
 
         <div class="col-lg-6">
 
             <div class="card border-0 shadow-sm rounded-4">
 
                 <div class="card-body p-4">
-
 
                     <div class="d-flex justify-content-between
                                 align-items-center mb-3">
@@ -825,7 +939,9 @@ My Rides
 
 
                         <small class="text-secondary">
+
                             #NR0997
+
                         </small>
 
                     </div>
@@ -837,8 +953,7 @@ My Rides
                             class="bg-light rounded-3 d-flex
                                    align-items-center
                                    justify-content-center"
-                            style="width:45px;height:45px;"
-                        >
+                            style="width:45px;height:45px;">
 
                             <i class="fa-solid fa-ban
                                       text-danger"></i>
@@ -849,11 +964,15 @@ My Rides
                         <div class="ms-3">
 
                             <h6 class="fw-bold mb-1">
+
                                 ISBT → Mussoorie Road
+
                             </h6>
 
                             <small class="text-secondary">
+
                                 25 Aug 2026 · 05:15 PM
+
                             </small>
 
                         </div>
@@ -870,19 +989,23 @@ My Rides
                         <div>
 
                             <small class="text-secondary">
+
                                 Booking Status
+
                             </small>
 
                             <h6 class="fw-bold mb-0 text-danger">
+
                                 Cancelled by User
+
                             </h6>
 
                         </div>
 
 
                         <button
-                            class="btn btn-light border rounded-3"
-                        >
+                            type="button"
+                            class="btn btn-outline-danger rounded-3">
 
                             View Details
 
@@ -899,9 +1022,8 @@ My Rides
     </div>
 
 
-
     <!-- ================================================= -->
-    <!-- EMPTY SPACE / FOOTER INFO -->
+    <!-- BOTTOM CTA -->
     <!-- ================================================= -->
 
     <div class="text-center mt-5">
@@ -910,25 +1032,28 @@ My Rides
             class="bg-danger-subtle text-danger
                    rounded-circle d-flex align-items-center
                    justify-content-center mx-auto mb-3"
-            style="width:55px;height:55px;"
-        >
+            style="width:55px;height:55px;">
 
             <i class="fa-solid fa-motorcycle fs-5"></i>
 
         </div>
 
+
         <h6 class="fw-bold">
             Need another ride?
         </h6>
 
+
         <p class="text-secondary small">
+
             Book your next NandiRide in just a few clicks.
+
         </p>
+
 
         <a
             href="{% url 'booking' %}"
-            class="btn btn-danger rounded-pill px-4"
-        >
+            class="btn btn-outline-danger rounded-pill px-4">
 
             <i class="fa-solid fa-plus me-2"></i>
 
@@ -938,15 +1063,56 @@ My Rides
 
     </div>
 
+
+    {% else %}
+
+    <!-- ================================================= -->
+    <!-- NO RIDE -->
+    <!-- ================================================= -->
+
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-body text-center py-5">
+
+            <div
+                class="bg-danger-subtle text-danger
+                       rounded-circle d-flex align-items-center
+                       justify-content-center mx-auto mb-4"
+                style="width:90px;height:90px;">
+
+                <i class="fa-solid fa-motorcycle fs-1"></i>
+
+            </div>
+
+
+            <h4 class="fw-bold">
+                No Rides Yet
+            </h4>
+
+
+            <p class="text-secondary mb-4">
+
+                Your booked rides will appear here.
+
+            </p>
+
+
+            <a
+                href="{% url 'booking' %}"
+                class="btn btn-outline-danger rounded-pill px-4">
+
+                <i class="fa-solid fa-plus me-2"></i>
+
+                Book Your First Ride
+
+            </a>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
 </div>
 
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <span><a href="#" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
-            </div>
-        {% endfor %}
-    {% endif %}
 {% endblock %}
