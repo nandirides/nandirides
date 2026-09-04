@@ -1,1327 +1,397 @@
 {% extends 'user/dashboard_base.html' %}
-
-
-{% block dashboard_title %}
-Dashboard
-{% endblock %}
-
-
-{% block title %}
-{{ site_name }} | Dashboard
-{% endblock %}
-
-
-{% block page_heading %}
-Dashboard
-{% endblock %}
-
-
+{% block dashboard_title %}Dashboard{% endblock %}
+{% block title %}{{ site_name }} | Dashboard{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
 {% block dashboard_content %}
-
 <div class="container-fluid py-4">
-
-
-    <!-- ================================================= -->
-    <!-- WELCOME HEADER -->
-    <!-- ================================================= -->
-
     <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
-
         <div class="card-body p-4">
-
             <div class="row align-items-center g-4">
-
-
-                <!-- LEFT -->
-
                 <div class="col-lg-8">
-
                     <div class="d-flex align-items-center mb-2">
-
-                        <div
-                            class="bg-danger-subtle text-danger
-                                   rounded-circle d-flex
-                                   align-items-center justify-content-center
-                                   me-3"
-                            style="width:55px;height:55px;"
-                        >
-
+                        <div class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center me-3" style="width:55px;height:55px;">
                             <i class="fa-solid fa-user fs-5"></i>
-
                         </div>
-
-
                         <div>
-
-                            <small class="text-secondary">
-                                Welcome back
-                            </small>
-
-                            <h3 class="fw-bold mb-0">
-                                Nandi Ride User 👋
-                            </h3>
-
+                            <small class="text-secondary">Welcome back</small>
+                            <h3 class="fw-bold mb-0">Nandi Ride User 👋</h3>
                         </div>
-
                     </div>
-
-
-                    <p class="text-secondary mb-3">
-
-                        Ready for your next ride?
-
-                        Book a ride quickly and travel
-                        safely with NandiRide.
-
-                    </p>
-
-
+                    <p class="text-secondary mb-3">Ready for your next ride? Book a ride quickly and travel safely with NandiRide.</p>
                     <div class="d-flex flex-wrap gap-2">
-
-                        <a
-                            href="{% url 'booking' %}"
-                            class="btn btn-outline-danger rounded-pill px-4"
-                        >
-
+                        <a href="{% url 'booking' %}" class="btn btn-outline-danger rounded-pill px-4">
                             <i class="fa-solid fa-plus me-2"></i>
-
                             Book a Ride
-
                         </a>
-
-
-                        <a
-                            href="{% url 'myride' %}"
-                            class="btn btn-outline-danger rounded-pill px-4"
-                        >
-
+                        <a href="{% url 'myride' %}" class="btn btn-outline-danger rounded-pill px-4">
                             <i class="fa-solid fa-route me-2"></i>
-
                             My Rides
-
                         </a>
-
                     </div>
-
                 </div>
-
-
-                <!-- RIGHT -->
-
                 <div class="col-lg-4">
-
                     <div class="bg-danger-subtle rounded-4 p-4 text-center">
-
-                        <i
-                            class="fa-solid fa-motorcycle text-danger"
-                            style="font-size:65px;"
-                        ></i>
-
-                        <h6 class="fw-bold mt-3 mb-1">
-                            Ride Safe
-                        </h6>
-
-                        <small class="text-secondary">
-                            Fast • Reliable • Secure
-                        </small>
-
+                        <i class="fa-solid fa-motorcycle text-danger" style="font-size:65px;"></i>
+                        <h6 class="fw-bold mt-3 mb-1">Ride Safe</h6>
+                        <small class="text-secondary">Fast • Reliable • Secure</small>
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
-
-
-    <!-- ================================================= -->
-    <!-- STATISTICS -->
-    <!-- ================================================= -->
-
     <div class="row g-3 mb-4">
-
-
-        <!-- TOTAL RIDES -->
-
         <div class="col-6 col-lg-3">
-
             <div class="card border-0 shadow-sm rounded-4 h-100">
-
                 <div class="card-body p-4">
-
-                    <div class="d-flex justify-content-between
-                                align-items-start">
-
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
-
-                            <small class="text-secondary">
-                                Total Rides
-                            </small>
-
-                            <h3 class="fw-bold mb-0 mt-1">
-                                {{ dashboard_stats.total_rides|default:"0" }}
-                            </h3>
-
+                            <small class="text-secondary">Total Rides</small>
+                            <h3 class="fw-bold mb-0 mt-1">{{ dashboard_stats.total_rides|default:"0" }}</h3>
                         </div>
-
-
-                        <div
-                            class="bg-danger-subtle text-danger
-                                   rounded-3 d-flex align-items-center
-                                   justify-content-center"
-                            style="width:45px;height:45px;"
-                        >
-
+                        <div class="bg-danger-subtle text-danger rounded-3 d-flex align-items-center justify-content-center" style="width:45px;height:45px;">
                             <i class="fa-solid fa-route"></i>
-
                         </div>
-
                     </div>
-
-
                     <small class="text-success mt-3 d-block">
-
                         <i class="fa-solid fa-arrow-up"></i>
-
                         12% this month
-
                     </small>
-
                 </div>
-
             </div>
-
         </div>
-
-
-
-        <!-- COMPLETED -->
-
         <div class="col-6 col-lg-3">
-
             <div class="card border-0 shadow-sm rounded-4 h-100">
-
                 <div class="card-body p-4">
-
-                    <div class="d-flex justify-content-between
-                                align-items-start">
-
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
-
-                            <small class="text-secondary">
-                                Completed
-                            </small>
-
-                            <h3 class="fw-bold mb-0 mt-1">
-                                {{ dashboard_stats.completed|default:"0" }}
-                            </h3>
-
+                            <small class="text-secondary">Completed</small>
+                            <h3 class="fw-bold mb-0 mt-1">{{ dashboard_stats.completed|default:"0" }}</h3>
                         </div>
-
-
-                        <div
-                            class="bg-success-subtle text-success
-                                   rounded-3 d-flex align-items-center
-                                   justify-content-center"
-                            style="width:45px;height:45px;"
-                        >
-
+                        <div class="bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center" style="width:45px;height:45px;">
                             <i class="fa-solid fa-circle-check"></i>
-
                         </div>
-
                     </div>
-
-
-                    <small class="text-secondary mt-3 d-block">
-                        Successful rides
-                    </small>
-
+                    <small class="text-secondary mt-3 d-block">Successful rides</small>
                 </div>
-
             </div>
-
         </div>
-
-
-
-        <!-- SPENT -->
-
         <div class="col-6 col-lg-3">
-
             <div class="card border-0 shadow-sm rounded-4 h-100">
-
                 <div class="card-body p-4">
-
-                    <div class="d-flex justify-content-between
-                                align-items-start">
-
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
-
-                            <small class="text-secondary">
-                                Total Spent
-                            </small>
-
-                            <h3 class="fw-bold mb-0 mt-1">
-                                ₹{{ dashboard_stats.total_spent|default:"0" }}
-                            </h3>
-
+                            <small class="text-secondary">Total Spent</small>
+                            <h3 class="fw-bold mb-0 mt-1">₹{{ dashboard_stats.total_spent|default:"0" }}</h3>
                         </div>
-
-
-                        <div
-                            class="bg-warning-subtle text-warning
-                                   rounded-3 d-flex align-items-center
-                                   justify-content-center"
-                            style="width:45px;height:45px;"
-                        >
-
+                        <div class="bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center" style="width:45px;height:45px;">
                             <i class="fa-solid fa-wallet"></i>
-
                         </div>
-
                     </div>
-
-
-                    <small class="text-secondary mt-3 d-block">
-                        Across all rides
-                    </small>
-
+                    <small class="text-secondary mt-3 d-block">Across all rides</small>
                 </div>
-
             </div>
-
         </div>
-
-
-
-        <!-- RATING -->
-
         <div class="col-6 col-lg-3">
-
             <div class="card border-0 shadow-sm rounded-4 h-100">
-
                 <div class="card-body p-4">
-
-                    <div class="d-flex justify-content-between
-                                align-items-start">
-
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
-
-                            <small class="text-secondary">
-                                Your Rating
-                            </small>
-
-                            <h3 class="fw-bold mb-0 mt-1">
-                                {{ dashboard_stats.rating }}
-                            </h3>
-
+                            <small class="text-secondary">Your Rating</small>
+                            <h3 class="fw-bold mb-0 mt-1">{{ dashboard_stats.rating }}</h3>
                         </div>
-
-
-                        <div
-                            class="bg-warning-subtle text-warning
-                                   rounded-3 d-flex align-items-center
-                                   justify-content-center"
-                            style="width:45px;height:45px;"
-                        >
-
+                        <div class="bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center" style="width:45px;height:45px;">
                             <i class="fa-solid fa-star"></i>
-
                         </div>
-
                     </div>
-
-
-                    <small class="text-warning mt-3 d-block">
-
-                        ★ ★ ★ ★ ★
-
-                    </small>
-
+                    <small class="text-warning mt-3 d-block">★ ★ ★ ★ ★</small>
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
-
-
-    <!-- ================================================= -->
-    <!-- ACTIVE RIDE + QUICK ACTIONS -->
-    <!-- ================================================= -->
-
     <div class="row g-4 mb-4">
-
-
-        <!-- ACTIVE RIDE -->
-
         <div class="col-lg-8">
-
             <div class="card border-0 shadow-sm rounded-4 h-100">
-
                 <div class="card-body p-4">
-
-
-                    <!-- HEADER -->
-
-                    <div class="d-flex justify-content-between
-                                align-items-center mb-4">
-
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-
                             <h5 class="fw-bold mb-1">
-
-                                <i
-                                    class="fa-solid fa-location-crosshairs
-                                           text-danger me-2"
-                                ></i>
-
+                                <i class="fa-solid fa-location-crosshairs text-danger me-2"></i>
                                 Active Ride
-
                             </h5>
-
-
-                            <small class="text-secondary">
-                                Your current ride status
-                            </small>
-
+                            <small class="text-secondary">Your current ride status</small>
                         </div>
-
-
-                        <span
-                            class="badge bg-danger rounded-pill
-                                   px-3 py-2"
-                        >
-
+                        <span class="badge bg-danger rounded-pill px-3 py-2">
                             <i class="fa-solid fa-circle fa-xs me-1"></i>
-
                             {{ booking_data.status }}
-
                         </span>
-
                     </div>
-
-
-
-                    <!-- PICKUP -->
-
                     <div class="d-flex align-items-start">
-
                         <div class="text-center">
-
-                            <div
-                                class="bg-success-subtle text-success
-                                       rounded-circle d-flex
-                                       align-items-center
-                                       justify-content-center"
-                                style="width:45px;height:45px;"
-                            >
-
+                            <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center" style="width:45px;height:45px;">
                                 <i class="fa-solid fa-location-dot"></i>
-
                             </div>
-
                         </div>
-
-
                         <div class="ms-3 flex-grow-1">
-
-                            <small class="text-secondary">
-                                Pickup
-                            </small>
-
-                            <h6 class="fw-bold mb-0">
-                                {{ booking_data.pickup }}
-                            </h6>
-
+                            <small class="text-secondary">Pickup</small>
+                            <h6 class="fw-bold mb-0">{{ booking_data.pickup }}</h6>
                         </div>
-
                     </div>
-
-
-
-                    <!-- LINE -->
-
-                    <div
-                        class="border-start border-2 border-danger
-                               ms-4 my-1"
-                        style="height:35px;"
-                    ></div>
-
-
-
-                    <!-- DESTINATION -->
-
+                    <div class="border-start border-2 border-danger ms-4 my-1" style="height:35px;"></div>
                     <div class="d-flex align-items-start">
-
                         <div class="text-center">
-
-                            <div
-                                class="bg-danger-subtle text-danger
-                                       rounded-circle d-flex
-                                       align-items-center
-                                       justify-content-center"
-                                style="width:45px;height:45px;"
-                            >
-
+                            <div class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center" style="width:45px;height:45px;">
                                 <i class="fa-solid fa-flag-checkered"></i>
-
                             </div>
-
                         </div>
-
-
                         <div class="ms-3 flex-grow-1">
-
-                            <small class="text-secondary">
-                                Destination
-                            </small>
-
-                            <h6 class="fw-bold mb-0">
-                                {{ booking_data.destination }}
-                            </h6>
-
+                            <small class="text-secondary">Destination</small>
+                            <h6 class="fw-bold mb-0">{{ booking_data.destination }}</h6>
                         </div>
-
                     </div>
-
-
-
                     <hr class="my-4">
-
-
-
-                    <!-- RIDE DETAILS -->
-
                     <div class="row g-3 text-center">
-
-
                         <div class="col-6 col-md-3">
-
-                            <small class="text-secondary d-block">
-                                Driver
-                            </small>
-
-                            <strong>
-                                {{ booking_data.driver_name }}
-                            </strong>
-
+                            <small class="text-secondary d-block">Driver</small>
+                            <strong>{{ booking_data.driver_name }}</strong>
                         </div>
-
-
                         <div class="col-6 col-md-3">
-
-                            <small class="text-secondary d-block">
-                                Vehicle
-                            </small>
-
-                            <strong>
-                                {{ booking_data.ride_type }}
-                            </strong>
-
+                            <small class="text-secondary d-block">Vehicle</small>
+                            <strong>{{ booking_data.ride_type }}</strong>
                         </div>
-
-
-                        <div class="col-6 col-md-3">
-
-                            <small class="text-secondary d-block">
-                                Time
-                            </small>
-
-                            <strong class="text-danger">
-                                {{ booking_data.time }}
-                            </strong>
-
+                        <div class="col-6 col-md-2">
+                            <small class="text-secondary d-block">Passengers</small>
+                            <strong class="text-dark">{{ booking_data.passengers }}</strong>
                         </div>
-
-
-                        <div class="col-6 col-md-3">
-
-                            <small class="text-secondary d-block">
-                                Fare
-                            </small>
-
-                            <strong class="text-danger">
-                                ₹{{ booking_data.total_amount }}
-                            </strong>
-
+                        <div class="col-6 col-md-2">
+                            <small class="text-secondary d-block">Time</small>
+                            <strong class="text-dark">{{ booking_data.time }}</strong>
                         </div>
-
+                        <div class="col-6 col-md-2">
+                            <small class="text-secondary d-block">Fare</small>
+                            <strong class="text-dark">₹{{ booking_data.total_amount }}</strong>
+                        </div>
                     </div>
-
-
-
-                    <!-- BUTTONS -->
-
                     <div class="d-flex flex-wrap gap-2 mt-4">
-
-                        <a
-                            href="{% url 'track' %}"
-                            class="btn btn-outline-danger  rounded-3 px-4"
-                        >
-
-                            <i
-                                class="fa-solid fa-location-crosshairs
-                                       me-2"
-                            ></i>
-
+                        <a href="{% url 'track' %}" class="btn btn-outline-danger rounded-3 px-4">
+                            <i class="fa-solid fa-location-crosshairs me-2"></i>
                             Track Ride
-
                         </a>
-
-
-                        <a
-                            href="{% url 'myride' %}"
-                            class="btn btn-outline-danger
-                                   rounded-3 px-4"
-                        >
-
+                        <a href="{% url 'myride' %}" class="btn btn-outline-danger rounded-3 px-4">
                             <i class="fa-solid fa-route me-2"></i>
-
                             View Ride
-
                         </a>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
-
-
-        <!-- QUICK ACTIONS -->
-
         <div class="col-lg-4">
-
             <div class="card border-0 shadow-sm rounded-4 h-100">
-
                 <div class="card-body p-4">
-
-                    <h5 class="fw-bold mb-1">
-                        Quick Actions
-                    </h5>
-
-                    <small class="text-secondary">
-                        Manage your NandiRide
-                    </small>
-
-
+                    <h5 class="fw-bold mb-1">Quick Actions</h5>
+                    <small class="text-secondary">Manage your NandiRide</small>
                     <div class="row g-3 mt-3">
-
-
-                        <!-- BOOK -->
-
                         <div class="col-6">
-
-                            <a
-                                href="{% url 'booking' %}"
-                                class="quick-action text-decoration-none"
-                            >
-
-                                <div
-                                    class="quick-icon
-                                           bg-danger-subtle text-danger"
-                                >
-
+                            <a href="{% url 'booking' %}" class="quick-action text-decoration-none">
+                                <div class="quick-icon bg-danger-subtle text-danger">
                                     <i class="fa-solid fa-plus"></i>
-
                                 </div>
-
-                                <span>
-                                    Book Ride
-                                </span>
-
+                                <span>Book Ride</span>
                             </a>
-
                         </div>
-
-
-
-                        <!-- MY RIDES -->
-
                         <div class="col-6">
-
-                            <a
-                                href="{% url 'myride' %}"
-                                class="quick-action text-decoration-none"
-                            >
-
-                                <div
-                                    class="quick-icon
-                                           bg-primary-subtle text-primary"
-                                >
-
+                            <a href="{% url 'myride' %}" class="quick-action text-decoration-none">
+                                <div class="quick-icon bg-primary-subtle text-primary">
                                     <i class="fa-solid fa-route"></i>
-
                                 </div>
-
-                                <span>
-                                    My Rides
-                                </span>
-
+                                <span>My Rides</span>
                             </a>
-
                         </div>
-
-
-
-                        <!-- PAYMENT -->
-
                         <div class="col-6">
-
-                            <a
-                                href="{% url 'paymentdetails' %}"
-                                class="quick-action text-decoration-none"
-                            >
-
-                                <div
-                                    class="quick-icon
-                                           bg-warning-subtle text-warning"
-                                >
-
+                            <a href="{% url 'paymentdetails' %}" class="quick-action text-decoration-none">
+                                <div class="quick-icon bg-warning-subtle text-warning">
                                     <i class="fa-solid fa-credit-card"></i>
-
                                 </div>
-
-                                <span>
-                                    Payments
-                                </span>
-
+                                <span>Payments</span>
                             </a>
-
                         </div>
-
-
-
-                        <!-- TRACK -->
-
                         <div class="col-6">
-
-                            <a
-                                href="{% url 'track' %}"
-                                class="quick-action text-decoration-none"
-                            >
-
-                                <div
-                                    class="quick-icon
-                                           bg-success-subtle text-success"
-                                >
-
+                            <a href="{% url 'track' %}" class="quick-action text-decoration-none">
+                                <div class="quick-icon bg-success-subtle text-success">
                                     <i class="fa-solid fa-location-dot"></i>
-
                                 </div>
-
-                                <span>
-                                    Track Ride
-                                </span>
-
+                                <span>Track Ride</span>
                             </a>
-
                         </div>
-
                     </div>
-
-
-
-                    <!-- SUPPORT -->
-
-                    <div
-                        class="alert alert-light border rounded-4
-                               mt-4 mb-0"
-                    >
-
+                    <div class="alert alert-light border rounded-4 mt-4 mb-0">
                         <div class="d-flex align-items-center">
-
-                            <div
-                                class="bg-danger-subtle text-danger
-                                       rounded-circle d-flex
-                                       align-items-center
-                                       justify-content-center"
-                                style="width:40px;height:40px;"
-                            >
-
+                            <div class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
                                 <i class="fa-solid fa-headset"></i>
-
                             </div>
-
-
                             <div class="ms-3">
-
-                                <h6 class="fw-bold mb-0">
-                                    Need Help?
-                                </h6>
-
-                                <small class="text-secondary">
-                                    Contact NandiRide support
-                                </small>
-
+                                <h6 class="fw-bold mb-0">Need Help?</h6>
+                                <small class="text-secondary">Contact NandiRide support</small>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
-
-
-    <!-- ================================================= -->
-    <!-- UPCOMING + PAYMENT -->
-    <!-- ================================================= -->
-
     <div class="row g-4 mb-4">
-
-
-        <!-- UPCOMING RIDE -->
-
         <div class="col-lg-7">
-
             <div class="card border-0 shadow-sm rounded-4 h-100">
-
                 <div class="card-body p-4">
-
-
-                    <div class="d-flex justify-content-between
-                                align-items-center mb-4">
-
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-
                             <h5 class="fw-bold mb-1">
-
-                                <i
-                                    class="fa-solid fa-calendar-days
-                                           text-danger me-2"
-                                ></i>
-
+                                <i class="fa-solid fa-calendar-days text-danger me-2"></i>
                                 Upcoming Ride
-
                             </h5>
-
-
-                            <small class="text-secondary">
-                                Your next scheduled ride
-                            </small>
-
+                            <small class="text-secondary">Your next scheduled ride</small>
                         </div>
-
-
-                        <span
-                            class="badge bg-warning-subtle
-                                   text-warning rounded-pill"
-                        >
-
-                            Upcoming
-
-                        </span>
-
+                        <span class="badge bg-warning-subtle text-warning rounded-pill">Upcoming</span>
                     </div>
-
-
-
                     <div class="bg-light rounded-4 p-3">
-
-
-                        <!-- DATE -->
-
                         <div class="d-flex align-items-center mb-3">
-
-                            <div
-                                class="bg-danger text-white
-                                       rounded-3 text-center p-2"
-                                style="min-width:55px;"
-                            >
-
-                                <small class="d-block">
-                                    SEP
-                                </small>
-
-                                <h5 class="fw-bold mb-0">
-                                    01
-                                </h5>
-
+                            <div class="bg-danger text-white rounded-3 text-center p-2" style="min-width:55px;">
+                                <small class="d-block">{{booking_data.ride_date|default:"04 September 2026"}}</small>
+                                <!-- <h5 class="fw-bold mb-0">01</h5> -->
                             </div>
-
-
                             <div class="ms-3">
-
-                                <h6 class="fw-bold mb-1">
-
-                                    {{ booking_data.pickup }}
-
-                                    →
-
-                                    {{ booking_data.destination }}
-
-                                </h6>
-
-
+                                <h6 class="fw-bold mb-1">{{ booking_data.pickup }} → {{ booking_data.destination }}</h6>
                                 <small class="text-secondary">
-
                                     <i class="fa-solid fa-clock me-1"></i>
-
                                     {{ booking_data.time }}
-
-                                    <span class="mx-2">•</span>
-
-                                    {{ booking_data.ride_type }}
-
+                                    <span class="mx-2"><i class="fa-solid fa-car-side"></i></span>
+                                    Vehicle : {{ booking_data.ride_type }}
+                                    <span class="mx-2"><i class="fa-solid fa-users"></i></span>
+                                    Passengers : {{ booking_data.passengers }}
                                 </small>
-
                             </div>
-
                         </div>
-
-
                         <hr>
-
-
-                        <div class="d-flex justify-content-between
-                                    align-items-center">
-
+                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-
-                                <small class="text-secondary">
-                                    Estimated Fare
-                                </small>
-
-                                <h5 class="fw-bold text-danger mb-0">
-                                    ₹{{ booking_data.total_amount }}
-                                </h5>
-
+                                <small class="text-secondary">Estimated Fare</small>
+                                <h5 class="fw-bold text-danger mb-0">₹{{ booking_data.total_amount }}</h5>
                             </div>
-
-
-                            <a
-                                href="{% url 'myride' %}"
-                                class="btn btn-outline-danger rounded-3"
-                            >
-
-                                View Ride
-
-                            </a>
-
+                            <a href="{% url 'myride' %}" class="btn btn-outline-danger rounded-3">View Ride</a>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
-
-
-        <!-- PAYMENT -->
-
         <div class="col-lg-5">
-
             <div class="card border-0 shadow-sm rounded-4 h-100">
-
                 <div class="card-body p-4">
-
-
-                    <div class="d-flex justify-content-between
-                                align-items-center mb-4">
-
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-
                             <h5 class="fw-bold mb-1">
-
-                                <i
-                                    class="fa-solid fa-wallet
-                                           text-danger me-2"
-                                ></i>
-
+                                <i class="fa-solid fa-wallet text-danger me-2"></i>
                                 Payment
-
                             </h5>
-
-
-                            <small class="text-secondary">
-                                Latest payment
-                            </small>
-
+                            <small class="text-secondary">Latest payment</small>
                         </div>
-
-
-                        <span
-                            class="badge bg-success-subtle
-                                   text-success rounded-pill"
-                        >
-
-                            {{ booking_data.payment_status }}
-
-                        </span>
-
+                        <span class="badge bg-success-subtle text-success rounded-pill">{{ booking_data.payment_status }}</span>
                     </div>
-
-
-
                     <div class="text-center py-2">
-
-                        <div
-                            class="bg-success-subtle text-success
-                                   rounded-circle d-flex
-                                   align-items-center
-                                   justify-content-center
-                                   mx-auto mb-3"
-                            style="width:65px;height:65px;"
-                        >
-
+                        <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width:65px;height:65px;">
                             <i class="fa-solid fa-check fs-4"></i>
-
                         </div>
-
-
-                        <h3 class="fw-bold mb-1">
-
-                            ₹{{ booking_data.total_amount }}
-
-                        </h3>
-
-
-                        <small class="text-secondary">
-                            Payment completed
-                        </small>
-
+                        <h3 class="fw-bold mb-1">₹{{ booking_data.total_amount }}</h3>
+                        <small class="text-secondary">Payment completed</small>
                     </div>
-
-
                     <hr>
-
-
                     <div class="d-flex justify-content-between mb-2">
-
-                        <small class="text-secondary">
-                            Booking ID
-                        </small>
-
-                        <strong>
-                            #{{ booking_data.booking_id }}
-                        </strong>
-
+                        <small class="text-secondary">Booking ID</small>
+                        <strong>#{{ booking_data.booking_id }}</strong>
                     </div>
-
-
                     <div class="d-flex justify-content-between mb-3">
-
-                        <small class="text-secondary">
-                            Method
-                        </small>
-
-                        <strong>
-                            {{ booking_data.payment_method }}
-                        </strong>
-
+                        <small class="text-secondary">Method</small>
+                        <strong>{{ booking_data.payment_method }}</strong>
                     </div>
-
-
-                    <a
-                        href="{% url 'paymentdetails' %}"
-                        class="btn btn-outline-danger
-                               w-100 rounded-3"
-                    >
-
+                    <a href="{% url 'paymentdetails' %}" class="btn btn-outline-danger w-100 rounded-3">
                         <i class="fa-solid fa-receipt me-2"></i>
-
                         Payment Details
-
                     </a>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
-
-
-    <!-- ================================================= -->
-    <!-- RECENT RIDES -->
-    <!-- ================================================= -->
-
     <div class="card border-0 shadow-sm rounded-4">
-
         <div class="card-body p-4">
-
-
-            <div class="d-flex justify-content-between
-                        align-items-center mb-4">
-
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-
                     <h5 class="fw-bold mb-1">
-
-                        <i
-                            class="fa-solid fa-clock-rotate-left
-                                   text-danger me-2"
-                        ></i>
-
+                        <i class="fa-solid fa-clock-rotate-left text-danger me-2"></i>
                         Recent Rides
-
                     </h5>
-
-
-                    <small class="text-secondary">
-                        Your recent ride activity
-                    </small>
-
+                    <small class="text-secondary">Your recent ride activity</small>
                 </div>
-
-
-                <a
-                    href="{% url 'myride' %}"
-                    class="btn btn-sm btn-outline-danger
-                           rounded-pill px-3"
-                >
-
-                    View All
-
-                </a>
-
+                <a href="{% url 'myride' %}" class="btn btn-sm btn-outline-danger rounded-pill px-3">View All</a>
             </div>
-
-
-
-            <!-- TABLE -->
-
             <div class="table-responsive">
-
                 <table class="table align-middle mb-0">
-
                     <thead>
-
                         <tr class="text-secondary small">
-
-                            <th>
-                                Ride
-                            </th>
-
-                            <th>
-                                Date
-                            </th>
-
-                            <th>
-                                Vehicle
-                            </th>
-
-                            <th>
-                                Fare
-                            </th>
-
-                            <th>
-                                Status
-                            </th>
-
-                            <th>
-                                Action
-                            </th>
-
+                            <th>Ride</th>
+                            <th>Date</th>
+                            <th>Vehicle</th>
+                            <th>Fare</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
-
                     </thead>
-
-
                     <tbody>
-
                         {% for ride in recent_rides %}
-
                         <tr>
-
                             <td>
-
                                 <div class="d-flex align-items-center">
-
-                                    <div
-                                        class="{{ ride.icon_class }}
-                                               rounded-3 d-flex
-                                               align-items-center
-                                               justify-content-center"
-                                        style="width:40px;height:40px;"
-                                    >
-
-                                        <i
-                                            class="fa-solid {{ ride.icon }}"
-                                        ></i>
-
+                                    <div class="{{ ride.icon_class }} rounded-3 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                                        <i class="fa-solid {{ ride.icon }}"></i>
                                     </div>
-
-
                                     <div class="ms-3">
-
-                                        <strong>
-
-                                            {{ ride.pickup }}
-
-                                            →
-
-                                            {{ ride.destination }}
-
-                                        </strong>
-
-
-                                        <small
-                                            class="d-block text-secondary"
-                                        >
-
-                                            #{{ ride.booking_id }}
-
-                                        </small>
-
+                                        <strong>{{ ride.pickup }} → {{ ride.destination }}</strong>
+                                        <small class="d-block text-secondary">#{{ ride.booking_id }}</small>
                                     </div>
-
                                 </div>
-
                             </td>
-
-
+                            <td>{{ ride.date }}</td>
+                            <td>{{ ride.vehicle }}</td>
+                            <td><strong class="text-danger">₹{{ ride.fare }}</strong></td>
                             <td>
-                                {{ ride.date }}
+                                <span class="badge {{ ride.status_class }} rounded-pill">{{ ride.status }}</span>
                             </td>
-
-
                             <td>
-                                {{ ride.vehicle }}
-                            </td>
-
-
-                            <td>
-
-                                <strong class="text-danger">
-
-                                    ₹{{ ride.fare }}
-
-                                </strong>
-
-                            </td>
-
-
-                            <td>
-
-                                <span
-                                    class="badge
-                                           {{ ride.status_class }}
-                                           rounded-pill"
-                                >
-
-                                    {{ ride.status }}
-
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <a
-                                    href="{% url 'myride' %}"
-                                    class="btn btn-sm btn-light
-                                           border rounded-3"
-                                >
-
+                                <a href="{% url 'myride' %}" class="btn btn-sm btn-light border rounded-3">
                                     <i class="fa-solid fa-receipt"></i>
-
                                 </a>
-
                             </td>
-
                         </tr>
-
                         {% empty %}
-
                         <tr>
-
-                            <td colspan="6"
-                                class="text-center text-secondary py-4">
-
-                                No recent rides found.
-
-                            </td>
-
+                            <td colspan="6" class="text-center text-secondary py-4">No recent rides found.</td>
                         </tr>
-
                         {% endfor %}
-
                     </tbody>
-
                 </table>
-
             </div>
-
         </div>
-
     </div>
-
-
-
-    <!-- ================================================= -->
-    <!-- FOOTER INFO -->
-    <!-- ================================================= -->
-
     <div class="text-center mt-4 mb-2">
-
         <small class="text-secondary">
-
-            <i
-                class="fa-solid fa-shield-halved
-                       text-success me-1"
-            ></i>
-
+            <i class="fa-solid fa-shield-halved text-success me-1"></i>
             Your rides and payments are secure with NandiRide
-
         </small>
-
     </div>
-
 </div>
-
-
-
-<!-- ================================================= -->
-<!-- MESSAGES -->
-<!-- ================================================= -->
-
 {% if messages %}
-
     {% for message in messages %}
-
-        <div
-            class="alert alert-{{ message.tags }}
-                   alert-dismissible fade show"
-        >
-
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
             {{ message }}
-
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-            ></button>
-
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-
     {% endfor %}
-
 {% endif %}
-
-
 {% endblock %}

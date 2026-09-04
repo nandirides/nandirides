@@ -4,16 +4,9 @@ from django.views import View
 from django.urls import reverse
 from django.contrib import messages
 from datetime import datetime
-from user.forms import (
-    UserForm,
-    LoginForm,
-    profile,
-    ForgetPassword,
-    ResetPassword,
-    ContactForm,
-)
+from user.forms import UserForm, LoginForm, Profile, ForgetPassword, ResetPassword, Booking, Payment, MyRide, Driver
 from user.models import User
-from django.contrib.auth import authenticate, login, logout
+#from django.contrib.auth import authenticate, login, logout
 
 
 SIDEBAR_MENU = [
@@ -44,7 +37,7 @@ SIDEBAR_MENU = [
     },
     {
         'icon': 'fa fa-map-marker',
-        'name': 'Track',
+        'name': 'Track Ride',
         'url': 'track',
     },
 ]
@@ -80,9 +73,8 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            "site_name": "NandiRide",
             "site_tagline": "Safe, comfortable and reliable rides for every journey.",
-            "carousel_interval": 5000,
+            "carousel_interval": 4000,
             "carousel_height": 430,
             "hero_slides": [
                 {
@@ -684,17 +676,16 @@ class ContactView(TemplateView):
     template_name = 'user/contact.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['site_name'] = 'NandiRide'
-        context['contact_phone'] = '+91 98765 43210'
+        context['contact_phone'] = '+91 9410554430'
         context['contact_email'] = 'support@nandiride.com'
         context['contact_hours'] = '24 Hours / 7 Days'
-        context['contact_address'] = 'India'
+        context['contact_address'] = 'Haridwar, Uttrakhand (India)'
         context['contact_info'] = [
             {
                 'icon': 'fa-solid fa-phone',
                 'title': 'Call Us',
                 'description': 'Talk directly with our support team.',
-                'value': '+91 98765 43210',
+                'value': '+91 9410554430',
                 'link': 'tel:+919876543210',
             },
             {
@@ -715,19 +706,12 @@ class ContactView(TemplateView):
                 'icon': 'fa-solid fa-location-dot',
                 'title': 'Location',
                 'description': 'Serving customers across India.',
-                'value': 'India',
+                'value': 'Haridwar, Uttrakhand (India)',
                 'link': '',
             },
         ]
-        context['contact_subjects'] = [
-            'Ride Support',
-            'Booking Issue',
-            'Payment Issue',
-            'Account Support',
-            'Driver Support',
-            'General Enquiry',
-            'Feedback',
-            'Other',
+        context['contact_subjects'] = ['Ride Support', 'Booking Issue', 'Payment Issue', 'Account Support',
+                                    'Driver Support', 'General Enquiry', 'Feedback', 'Other',
         ]
         context['faqs'] = [
             {
@@ -753,473 +737,166 @@ class ContactView(TemplateView):
 class UserBookingView(View):
 
     def get(self, request):
+        form = Booking()
         return render(
             request,
             'user/profile/booking.html',
             {
+                'form': form,
                 'sidebar_menu': SIDEBAR_MENU,
-                'site_name': 'NandiRide',
             }
         )
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
+        form = Booking(request.POST)
 
-        pickup_location = request.POST.get('pickup_location')
-        destination = request.POST.get('destination')
-        ride_type = request.POST.get('ride_type')
-        ride_date = request.POST.get('ride_date')
-        ride_time = request.POST.get('ride_time')
-        passengers = request.POST.get('passengers')
-        note = request.POST.get('note')
+        if form.is_valid():
+            booking_data = {
+                'booking_id': form.cleaned_data.get('booking_id'),
+                'pickup_location': form.cleaned_data.get('pickup_location'),
+                'destination': form.cleaned_data.get('destination'),
+                'ride_type': form.cleaned_data.get('ride_type'),
+                'ride_date': form.cleaned_data.get('ride_date'),
+                'ride_time': form.cleaned_data.get('ride_time'),
+                'ride_status': 'Pending',
+                'passengers': form.cleaned_data.get('passengers'),
+                'note': form.cleaned_data.get('note'),
+                'base_fare': 50,
+                'ride_charge': 180,
+                'distance': form.cleaned_data.get('distance'),
+                'platform_fee': 20,
+                'total_amount': 250,
+                'completed_ride': 0,
+                'total_ride': 0,
+                'total_spent': 0,
+                'fare': 250,
+                'estimate_fare': 250,
+                'your_rating': '',
+                'driver_name': 'Raj Kumar',
+                'driver_phone': '9876543210',
+                'vehicle_number': 'DL 01 AB 1234',
+                'payment_type': 'Cash',
+                'payment_status': 'Pending',
+            }
 
-        request.session['booking_data'] = {
+            request.session['booking_data'] = booking_data
+            request.session.modified = True
 
-            'pickup': pickup_location or 'Railway Station',
-            'destination': destination or 'City Mall',
+            return redirect('payment')
 
-            'ride_type': ride_type or 'Bike',
-            'date': ride_date or '01 Sep 2026',
-            'time': ride_time or '10:30 AM',
-            'passengers': passengers or '1',
-
-            'note': note or 'No special instructions',
-
-            # Booking
-            'booking_id': 'NR10001',
-            'status': 'Confirmed',
-
-            # Driver
-            'driver_name': 'Sumit Kumar',
-            'driver_phone': '9876543210',
-            'vehicle_number': 'HW 01 AB 1234',
-
-            # Payment
-            'payment_method': 'Cash',
-            'payment_status': 'Paid',
-
-            # Fare
-            'base_fare': 50,
-            'ride_charge': 180,
-            'platform_fee': 20,
-            'total_amount': 250,
-        }
-
-        request.session.modified = True
-
-        return redirect('payment')
+        return render(
+            request,
+            'user/profile/booking.html',
+            {
+                'form': form,
+                'sidebar_menu': SIDEBAR_MENU,
+            }
+        )
 
 
 class UserPaymentView(View):
 
-    def get(self, request, *args, **kwargs):
-
-        booking_data = request.session.get('booking_data')
-
-
-        if not booking_data:
-
-            booking_data = {
-                'pickup': 'Railway Station',
-                'destination': 'City Mall',
-                'ride_type': 'Bike',
-                'date': '01 Sep 2026',
-                'time': '10:30 AM',
-                'passengers': '1',
-                'note': 'No special instructions',
-
-                'booking_id': 'NR10001',
-                'status': 'Confirmed',
-
-                'driver_name': 'Raj Kumar',
-                'driver_phone': '9876543210',
-                'vehicle_number': 'DL 01 AB 1234',
-
-                'base_fare': 50,
-                'ride_charge': 180,
-                'platform_fee': 20,
-                'total_amount': 250,
-
-                'payment_method': 'Cash',
-                'payment_status': 'Paid',
-            }
-
-        else:
-
-            # Fare ensure karo
-            booking_data['base_fare'] = 50
-            booking_data['ride_charge'] = 180
-            booking_data['platform_fee'] = 20
-            booking_data['total_amount'] = 250
-
-        request.session['booking_data'] = booking_data
-        request.session.modified = True
+    def get(self, request):
+        form = Payment()
+        booking_data = request.session.get('booking_data', {})
 
         return render(
             request,
             'user/profile/payment.html',
             {
+                'form': form,
                 'sidebar_menu': SIDEBAR_MENU,
-                'site_name': 'NandiRide',
                 'booking_data': booking_data,
             }
         )
 
-    def post(self, request, *args, **kwargs):
-
+    def post(self, request):
+        form = Payment(request.POST)
         booking_data = request.session.get('booking_data', {})
 
-        payment_method = request.POST.get(
-            'payment_method',
-            'Cash'
-        )
+        if form.is_valid():
+            booking_data['payment_id'] = form.cleaned_data.get('payment_id')
+            booking_data['payment_date'] = form.cleaned_data.get('payment_date')
+            booking_data['payment_time'] = form.cleaned_data.get('payment_time')
+            booking_data['payment_type'] = form.cleaned_data.get('payment_type')
+            booking_data['payment_receipt'] = form.cleaned_data.get('payment_receipt')
+            booking_data['payment_status'] = 'Paid'
+            booking_data['ride_status'] = 'Confirmed'
 
-        booking_data['payment_method'] = payment_method
-        booking_data['payment_status'] = 'Paid'
-        booking_data['status'] = 'Confirmed'
+            request.session['booking_data'] = booking_data
+            request.session.modified = True
 
-        request.session['booking_data'] = booking_data
-        request.session.modified = True
+            messages.success(
+                request,
+                'Payment complete successfully!'
+            )
 
-        messages.success(
+            return redirect('myride')
+
+        return render(
             request,
-            'Payment complete successfully!'
+            'user/profile/payment.html',
+            {
+                'form': form,
+                'sidebar_menu': SIDEBAR_MENU,
+                'booking_data': booking_data,
+            }
         )
-
-        return redirect('myride')
 
 
 class UserMyRideView(View):
 
-    def get(self, request, *args, **kwargs):
-
-        # Session se booking data lo
-        booking_data = request.session.get('booking_data')
-
-        # Agar booking data nahi hai to dummy data create karo
-        if not booking_data:
-
-            booking_data = {
-                # Booking
-                'booking_id': 'NR10001',
-                'status': 'Confirmed',
-
-                # Route
-                'pickup': 'Railway Station',
-                'destination': 'City Mall',
-
-                # Ride
-                'ride_type': 'Bike',
-                'date': '01 Sep 2026',
-                'time': '10:30 AM',
-                'passengers': '1',
-                'note': 'No special instructions',
-
-                # Driver
-                'driver_name': 'Raj Kumar',
-                'driver_phone': '9876543210',
-                'vehicle_number': 'DL 01 AB 1234',
-
-                # Payment
-                'payment_method': 'Cash',
-                'payment_status': 'Paid',
-
-                # Fare
-                'base_fare': 50,
-                'ride_charge': 180,
-                'platform_fee': 20,
-                'total_amount': 250,
-            }
-
-            # Session mein save karo
-            request.session['booking_data'] = booking_data
-            request.session.modified = True
-
-        else:
-
-            # Existing booking mein missing values ke liye dummy defaults
-            booking_data.setdefault('booking_id', 'NR10001')
-            booking_data.setdefault('status', 'Confirmed')
-
-            booking_data.setdefault('pickup', 'Railway Station')
-            booking_data.setdefault('destination', 'City Mall')
-
-            booking_data.setdefault('ride_type', 'Bike')
-            booking_data.setdefault('date', '01 Sep 2026')
-            booking_data.setdefault('time', '10:30 AM')
-            booking_data.setdefault('passengers', '1')
-            booking_data.setdefault(
-                'note',
-                'No special instructions'
-            )
-
-            booking_data.setdefault(
-                'driver_name',
-                'Raj Kumar'
-            )
-            booking_data.setdefault(
-                'driver_phone',
-                '9876543210'
-            )
-            booking_data.setdefault(
-                'vehicle_number',
-                'DL 01 AB 1234'
-            )
-
-            booking_data.setdefault(
-                'payment_method',
-                'Cash'
-            )
-            booking_data.setdefault(
-                'payment_status',
-                'Paid'
-            )
-
-            booking_data.setdefault('base_fare', 50)
-            booking_data.setdefault('ride_charge', 180)
-            booking_data.setdefault('platform_fee', 20)
-            booking_data.setdefault('total_amount', 250)
-
-            request.session['booking_data'] = booking_data
-            request.session.modified = True
+    def get(self, request):
+        booking_data = request.session.get('booking_data', {})
 
         return render(
             request,
             'user/profile/myride.html',
             {
                 'sidebar_menu': SIDEBAR_MENU,
-                'site_name': 'NandiRide',
                 'booking_data': booking_data,
             }
         )
 
-class UserDashboardView(TemplateView):
 
-    def get(self, request, *args, **kwargs):
+class UserDashboardView(View):
 
-        booking_data = request.session.get('booking_data')
-
-        # -------------------------------------------------
-        # Default data - jab user ne abhi booking nahi ki
-        # -------------------------------------------------
-
-        if not booking_data:
-            booking_data = {
-                'booking_id': 'NR10001',
-                'status': 'Confirmed',
-
-                'pickup': 'Railway Station',
-                'destination': 'City Mall',
-
-                'ride_type': 'Bike',
-                'date': '01 Sep 2026',
-                'time': '10:30 AM',
-                'passengers': '1',
-                'note': 'No special instructions',
-
-                'driver_name': 'Raj Kumar',
-                'driver_phone': '9876543210',
-                'vehicle_number': 'DL 01 AB 1234',
-
-                'payment_method': 'Cash',
-                'payment_status': 'Paid',
-
-                'base_fare': 50,
-                'ride_charge': 180,
-                'platform_fee': 20,
-                'total_amount': 250,
-            }
-
-        # -------------------------------------------------
-        # Make sure all required values exist
-        # -------------------------------------------------
-
-        booking_data.setdefault('booking_id', 'NR10001')
-        booking_data.setdefault('status', 'Confirmed')
-
-        booking_data.setdefault(
-            'pickup',
-            'Railway Station'
-        )
-
-        booking_data.setdefault(
-            'destination',
-            'City Mall'
-        )
-
-        booking_data.setdefault(
-            'ride_type',
-            'Bike'
-        )
-
-        booking_data.setdefault(
-            'date',
-            '01 Sep 2026'
-        )
-
-        booking_data.setdefault(
-            'time',
-            '10:30 AM'
-        )
-
-        booking_data.setdefault(
-            'passengers',
-            '1'
-        )
-
-        booking_data.setdefault(
-            'driver_name',
-            'Sumit Kumar'
-        )
-
-        booking_data.setdefault(
-            'driver_phone',
-            '9876543210'
-        )
-
-        booking_data.setdefault(
-            'vehicle_number',
-            'DL 01 AB 1234'
-        )
-
-        booking_data.setdefault(
-            'payment_method',
-            'Cash'
-        )
-
-        booking_data.setdefault(
-            'payment_status',
-            'Paid'
-        )
-
-        booking_data.setdefault('base_fare', 50)
-        booking_data.setdefault('ride_charge', 180)
-        booking_data.setdefault('platform_fee', 20)
-        booking_data.setdefault('total_amount', 250)
-
-        # -------------------------------------------------
-        # Save updated session
-        # -------------------------------------------------
-
-        request.session['booking_data'] = booking_data
-        request.session.modified = True
-
-        # -------------------------------------------------
-        # Dashboard statistics
-        # -------------------------------------------------
-
-        dashboard_stats = {
-            'total_rides': 0,
-            'completed': 0,
-            'total_spent': 0,
-            'rating': '4.9',
-        }
-
-        # -------------------------------------------------
-        # Recent rides
-        # -------------------------------------------------
-
-        recent_rides = [
-            {
-                'booking_id': 'NR0998',
-                'pickup': 'Dehradun',
-                'destination': 'Clock Tower',
-                'date': '28 Aug 2026',
-                'vehicle': 'Bike',
-                'fare': 240,
-                'status': 'Completed',
-                'status_class': 'bg-success-subtle text-success',
-                'icon': 'fa-motorcycle',
-                'icon_class': 'bg-danger-subtle text-danger',
-            },
-            {
-                'booking_id': 'NR0995',
-                'pickup': 'ISBT',
-                'destination': 'Rajpur Road',
-                'date': '24 Aug 2026',
-                'vehicle': 'Car',
-                'fare': 450,
-                'status': 'Completed',
-                'status_class': 'bg-success-subtle text-success',
-                'icon': 'fa-car',
-                'icon_class': 'bg-primary-subtle text-primary',
-            },
-            {
-                'booking_id': 'NR0992',
-                'pickup': 'Clock Tower',
-                'destination': 'ISBT',
-                'date': '20 Aug 2026',
-                'vehicle': 'Auto',
-                'fare': 180,
-                'status': 'Completed',
-                'status_class': 'bg-success-subtle text-success',
-                'icon': 'fa-car',
-                'icon_class': 'bg-warning-subtle text-warning',
-            },
-        ]
+    def get(self, request):
+        booking_data = request.session.get('booking_data', {})
 
         return render(
             request,
             'user/dashboard.html',
             {
-                'site_name': 'NandiRide',
                 'sidebar_menu': SIDEBAR_MENU,
-
                 'booking_data': booking_data,
-
-                'dashboard_stats': dashboard_stats,
-
-                'recent_rides': recent_rides,
             }
         )
 
-class TrackRideView(TemplateView):
 
-    template_name = "user/profile/track.html"
+class TrackRideView(View):
 
-    def get_context_data(self, **kwargs):
+    def get(self, request):
+        booking_data = request.session.get('booking_data', {})
 
-        context = super().get_context_data(**kwargs)
-
-        context["ride"] = {
-            "booking_id": "NR1001",
-            "status": "on_the_way",
-            "ride_type": "Bike",
-
-            "driver_name": "Rahul Kumar",
-            "driver_rating": "4.9",
-
-            "vehicle": "Hero Splendor",
-            "vehicle_number": "UK 07 AB 1234",
-
-            "pickup": "Dehradun Railway Station",
-            "destination": "Clock Tower, Dehradun",
-
-            "date": "31 Aug 2026",
-            "time": "06:30 PM",
-
-            "passengers": 1,
-            "distance": "10 km",
-            "fare": "₹250",
-
-            "eta": "6 min",
-            "remaining_distance": "2.4 km",
-        }
-
-        # Sidebar menu
-        context["sidebar_menu"] = SIDEBAR_MENU
-
-        return context
+        return render(
+            request,
+            'user/profile/track.html',
+            {
+                'sidebar_menu': SIDEBAR_MENU,
+                'booking_data': booking_data,
+            }
+        )
 
 class UserEditProfileView(TemplateView):
     def get(self, request):
-        form = profile()
+        form = Profile()
         return render(
             request,
             'user/profile/editprofile.html',
             {
                 'form': form,
                 'sidebar_menu': SIDEBAR_MENU,
-                'site_name': 'NandiRide',
             }
         )
 
@@ -1233,7 +910,6 @@ class UserLoginView(TemplateView):
             {
                 'form': form,
                 'social_links': SOCIAL_LINKS,
-                'site_name': 'NandiRide',
             }
         )
 
@@ -1247,21 +923,19 @@ class UserSignupView(TemplateView):
             {
                 'form': form,
                 'social_links': SOCIAL_LINKS,
-                'site_name': 'NandiRide',
             }
         )
 
 
 class UserProfileView(TemplateView):
     def get(self, request):
-        form = profile()
+        form = Profile()
         return render(
             request,
             'user/profile/profile.html',
             {
                 'form': form,
                 'sidebar_menu': SIDEBAR_MENU,
-                'site_name': 'NandiRide',
             }
         )
 
@@ -1274,7 +948,7 @@ class ForgetPasswordView(TemplateView):
             'user/profile/forgetpassword.html',
             {
                 'form': form,
-                'site_name': 'NandiRide',
+                'sidebar_menu': SIDEBAR_MENU,
             }
         )
 
@@ -1287,33 +961,36 @@ class ResetPasswordView(TemplateView):
             'user/profile/resetpassword.html',
             {
                 'form': form,
-                'site_name': 'NandiRide',
                 'sidebar_menu': SIDEBAR_MENU,
             }
         )
 
 class PaymentDetailsView(TemplateView):
     def get(self, request):
+        form = Payment()
         return render(
             request,
             'user/profile/paymentdetails.html',
             {
                 'sidebar_menu': SIDEBAR_MENU,
+                'form': form,
             }
         )
     
 class PaymentReceiptView(TemplateView):
     def get(self, request):
+        form = Payment()
         return render(
             request,
             'user/profile/paymentreceipt.html',
             {
                 'sidebar_menu': SIDEBAR_MENU,
+                'form': form,
             }
         )
 
 class CancelRideView(View):
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         request.session.pop('booking_data', None)
 
         messages.success(

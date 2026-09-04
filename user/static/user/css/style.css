@@ -8,10 +8,6 @@ body {
     padding: 0;
 }
 
-.navbar {
-    margin-left: 1rem ;
-    margin-right: 1rem ;
-}
 
 .navbar-brand span {
     letter-spacing: -0.5px;
@@ -368,10 +364,10 @@ main {
 }
 
 @media (max-width: 991.98px) {
-    .navbar {
+    /* .navbar {
         margin-left: 0.75rem ;
         margin-right: 0.75rem;
-    }
+    } */
 
     .navbar-nav {
         width: 100%;
@@ -391,11 +387,11 @@ main {
         border-radius: 8px !important;
     }
 
-    .navbar-nav .nav-link i {
+    /* .navbar-nav .nav-link i {
         width: 22px;
         text-align: center;
         margin-right: 8px !important;
-    }
+    } */
 
     .navbar-collapse {
         padding-bottom: 8px;
@@ -414,8 +410,8 @@ main {
 
 @media (max-width: 767px) {
     .container-fluid {
-        padding-left: 15px !important;
-        padding-right: 15px !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
     }
 
     .card-body {
@@ -447,8 +443,8 @@ main {
 
 @media (max-width: 575.98px) {
     .navbar {
-        margin-left: 0.5rem !important;
-        margin-right: 0.5rem !important;
+        margin-left: 0.5rem ;
+        margin-right: 0.5rem ;
         margin-top: 0.5rem !important;
         border-radius: 0.75rem !important;
     }
@@ -502,8 +498,149 @@ main {
     rgba(202, 51, 24, 0.9) 40%,
     rgba(231, 61, 19, 0.25) 100%
 );
-} 
+}
 
+.edit-header {
+    background: linear-gradient(
+        135deg,
+        #dc3545,
+        #b02a37
+    );
+}
+.header-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    background: rgba(255,255,255,.18);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+.profile-image-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.profile-avatar,
+.profile-placeholder {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+}
+.profile-avatar {
+    object-fit: cover;
+    border: 5px solid white;
+    box-shadow: 0 .25rem .75rem rgba(0,0,0,.15);
+}
+.profile-placeholder {
+    background: #dc3545;
+    border: 5px solid white;
+    box-shadow: 0 .25rem .75rem rgba(0,0,0,.15);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 45px;
+}
+.camera-btn {
+    position: absolute;
+    right: 2px;
+    bottom: 4px;
+    width: 43px;
+    height: 43px;
+    border-radius: 50%;
+    background: #dc3545;
+    color: white;
+    border: 3px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: .2s ease;
+}
+.camera-btn:hover {
+    background: #b02a37;
+    transform: scale(1.08);
+}
+.edit-section {
+    background: #fff;
+    border: 1px solid #edf0f2;
+    border-radius: 16px;
+    padding: 22px;
+}
+.section-title {
+    display: flex;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #edf0f2;
+}
+.section-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    background: #f8d7da;
+    color: #dc3545;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+.profile-field label {
+    color: #343a40;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+.profile-field .input-group-text {
+    width: 45px;
+    justify-content: center;
+    background: #f8f9fa;
+    color: #dc3545;
+    border-color: #dee2e6;
+}
+.profile-field .form-control,
+.profile-field .form-select {
+    min-height: 45px;
+    border-color: #dee2e6;
+    box-shadow: none;
+}
+.profile-field .form-control:focus,
+.profile-field .form-select:focus {
+    border-color: #dc3545;
+    box-shadow:
+        0 0 0 .15rem rgba(220,53,69,.12);
+}
+.btn-danger {
+    transition: .2s ease;
+}
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 .4rem .8rem rgba(220,53,69,.25);
+}
+@media (max-width: 767px) {
+    .edit-section {
+        padding: 16px;
+    }
+    .profile-avatar,
+    .profile-placeholder {
+        width: 115px;
+        height: 115px;
+    }
+    .profile-placeholder {
+        font-size: 38px;
+    }
+    .section-title {
+        align-items: flex-start;
+    }
+    .d-flex.justify-content-end {
+        flex-direction: column;
+    }
+    .d-flex.justify-content-end .btn {
+        width: 100%;
+    }
+}
 /*
 .contact-icon {
     width: 180px;

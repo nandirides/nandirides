@@ -133,7 +133,258 @@ class ResetPassword(forms.Form):
             })
             )
 
-class profile(forms.Form):
+class Booking(forms.Form):
+    booking_id = forms.CharField(
+        widget=forms.HiddenInput(attrs={
+            'class': 'form-control',
+        })
+        )
+
+    pickup_location = forms.CharField(
+            widget=forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Pickup Location'
+            })
+        )
+
+    destination = forms.CharField(
+            widget=forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Destination'
+            })
+        )
+
+    ride_type = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    ride_date = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    ride_time = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    ride_status = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    passengers = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    note = forms.CharField(
+            widget=forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Note'
+            })
+        )
+
+    base_fare = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    ride_charge = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    distance = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    platform_fee = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    total_amount = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    completed_ride = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    total_ride = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    total_spent = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    fare = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    estimate_fare = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+    your_rating = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+class Driver(forms.Form):
+    driver_id = forms.CharField(
+        widget=forms.HiddenInput(attrs={
+        })
+        )
+
+
+    driver_name = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    driver_phone = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    driver_email = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    driver_registration = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    driver_status = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    driver_arrival = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    dl_number = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    vehicle_number = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    vehicle_insurance = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    vehicle_pollution = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    vehicle_type = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    documnet_upload = forms.FileField(
+                        widget=forms.ClearableFileInput(attrs={
+                        })
+                    )   
+    
+
+class MyRide(forms.Form):
+    ride_id = forms.CharField(
+        widget=forms.HiddenInput(attrs={
+        })
+        )
+
+
+    ride_date = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    ride_time = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    ride_type = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+    ride_track = forms.CharField(
+            widget=forms.TextInput(attrs={
+            })
+        )
+
+
+
+class Payment(forms.Form):
+    payment_id = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False
+    )
+    payment_date = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control'
+        })
+    )
+    payment_time = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control'
+        })
+    )
+    payment_type = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Cash / UPI / Card'
+        })
+    )
+    payment_receipt = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter Payment Receipt'
+        })
+    )
+
+
+class Profile(forms.Form):
 
     profileimage = forms.ImageField(
                 widget=forms.ClearableFileInput(attrs={
