@@ -1,7 +1,11 @@
 from django.urls import path
-from . import views
+from dashboard import views
+
+# app_name = "admindashboard" 
 
 urlpatterns = [
+
+   
     path(
         "",
         views.dashboard,
@@ -31,6 +35,13 @@ urlpatterns = [
         views.ride_gallery,
         name="ride_gallery",
     ),
+
+    path(
+            "gallery/<int:pk>/delete/",
+            views.gallery_delete,
+            name="gallery_delete",
+        ),
+
     path(
         "users/",
         views.user_list,
@@ -42,4 +53,17 @@ urlpatterns = [
         views.user_create,
         name="user_create",
     ),
-]
+
+    path(
+        "users/<int:pk>/delete/",
+        views.user_delete,
+        name="user_delete",
+    ),
+
+     # Update
+    path(
+        "<int:pk>/edit/",
+        views.user_create,
+        name="user_update",
+    ),
+] 
