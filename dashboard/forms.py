@@ -5,6 +5,7 @@ from dashboard.models import Gallery
 
 
 class UserCreateForm(UserCreationForm):
+
     email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={
@@ -57,6 +58,23 @@ class UserCreateForm(UserCreationForm):
             "class": "form-control",
             "placeholder": "Confirm password",
         })
+
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+
+        qs = User.objects.filter(username=username)
+
+        # UPDATE:
+        # Don't consider the current user as a duplicate.
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise forms.ValidationError(
+                "A user with that username already exists."
+            )
+
+        return username
 
 
 class GalleryForm(forms.ModelForm):

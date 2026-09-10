@@ -42,12 +42,12 @@ def user_create(request, pk=None):
             if user_obj:
                 messages.success(
                     request,
-                    f"User '{user.username}' updated successfully."
+                    f"{user.username} updated successfully."
                 )
             else:
                 messages.success(
                     request,
-                    f"User '{user.username}' created successfully."
+                    f"{user.username} created successfully."
                 )
 
             return redirect("user_list")
