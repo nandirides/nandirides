@@ -1,810 +1,335 @@
 {% extends 'user/dashboard_base.html' %}
-
-{% block page_heading %}
-Track Ride
-{% endblock %}
-
-{% block title %}
-{{ site_name }} | Track Ride
-{% endblock %}
-
+{% block page_heading %}Track Ride{% endblock %}
+{% block title %}{{ site_name|default:"NandiRide" }} | Track Ride{% endblock %}
 {% block dashboard_content %}
-
 <div class="container-fluid">
-
-    <!-- ================================================= -->
     <!-- PAGE HEADER -->
-    <!-- ================================================= -->
-
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-
         <div>
             <h2 class="fw-bold mb-1">
                 <i class="fa-solid fa-location-crosshairs text-danger me-2"></i>
                 Track Ride
             </h2>
-
-            <p class="text-secondary mb-0">
-                Track your NandiRide and driver details
-            </p>
+            <p class="text-secondary mb-0">Track your NandiRide and driver details</p>
         </div>
-
-        <span class="badge bg-success rounded-pill px-3 py-2">
+        <span class="badge {% if ride.status == 'Cancelled' %}bg-secondary{% elif ride.status == 'Completed' %}bg-success{% else %}bg-success{% endif %} rounded-pill px-3 py-2">
             <i class="fa-solid fa-circle fa-xs me-1"></i>
-            Ride Active
+            {{ ride.status|default:"Active" }}
         </span>
-
     </div>
-
-
+    {% if ride %}
     <div class="row g-4">
-
-        <!-- ================================================= -->
         <!-- LEFT COLUMN -->
-        <!-- ================================================= -->
-
         <div class="col-12 col-xl-8">
-
-            <!-- ================================================= -->
             <!-- LIVE TRACKING CARD -->
-            <!-- ================================================= -->
-
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-
-                <!-- HEADER -->
-
                 <div class="card-header bg-white border-0 p-3 p-md-4">
-
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-
                         <div>
-
                             <h5 class="fw-bold mb-1">
                                 <i class="fa-solid fa-location-crosshairs text-danger me-2"></i>
                                 Live Ride Tracking
                             </h5>
-
                             <p class="text-secondary small mb-0">
-                                Driver is on the way to your pickup location
+                                {% if ride.status == "Cancelled" %}
+                                    This ride has been cancelled
+                                {% elif ride.status == "Completed" %}
+                                    This ride has been completed
+                                {% else %}
+                                    Driver is on the way to your pickup location
+                                {% endif %}
                             </p>
-
                         </div>
-
-                        <button
-                            type="button"
-                            class="btn btn-danger rounded-pill px-4"
-                            onclick="window.location.reload();"
-                        >
+                        <button type="button" class="btn btn-danger rounded-pill px-4" onclick="window.location.reload();">
                             <i class="fa-solid fa-location-arrow me-2"></i>
                             Refresh
                         </button>
-
                     </div>
-
                 </div>
-
-
-                <!-- ================================================= -->
                 <!-- MAP AREA -->
-                <!-- ================================================= -->
-
-                <div
-                    class="position-relative bg-light overflow-hidden"
-                    style="
-                        height:380px;
-                        min-height:320px;
-                    "
-                >
-
-                    <!-- ================================================= -->
-                    <!-- MAP BACKGROUND -->
-                    <!-- ================================================= -->
-
+                <div class="position-relative bg-light overflow-hidden" style="height:380px;min-height:320px;">
                     <div class="position-absolute top-0 start-0 w-100 h-100">
-
-                        <!-- Horizontal Road -->
-
-                        <div
-                            class="position-absolute start-0 w-100 bg-white border-top border-bottom"
-                            style="
-                                top:50%;
-                                height:48px;
-                                transform:translateY(-50%);
-                            "
-                        ></div>
-
-
-                        <!-- Vertical Road -->
-
-                        <div
-                            class="position-absolute top-0 h-100 bg-white border-start border-end"
-                            style="
-                                left:50%;
-                                width:44px;
-                                transform:translateX(-50%);
-                            "
-                        ></div>
-
-
-                        <!-- Diagonal Road -->
-
-                        <div
-                            class="position-absolute bg-white border-top border-bottom"
-                            style="
-                                width:65%;
-                                height:38px;
-                                top:42%;
-                                left:18%;
-                                transform:rotate(25deg);
-                                opacity:.9;
-                            "
-                        ></div>
-
-                   </div>
-
-
-                    <!-- ================================================= -->
-                    <!-- ROUTE LINE -->
-                    <!-- ================================================= -->
-
-                    <div
-                        class="position-absolute bg-danger rounded-pill"
-                        style="
-                            width:60%;
-                            height:4px;
-                            top:20%;
-                            left:22%;
-                            transform:rotate(25deg);
-                            transform-origin:left center;
-                            z-index:0;
-                        "
-                    ></div>
-
-
-                    <!-- ================================================= -->
+                        <div class="position-absolute start-0 w-100 bg-white border-top border-bottom" style="top:50%;height:48px;transform:translateY(-50%);"></div>
+                        <div class="position-absolute top-0 h-100 bg-white border-start border-end" style="left:50%;width:44px;transform:translateX(-50%);"></div>
+                        <div class="position-absolute bg-white border-top border-bottom" style="width:65%;height:38px;top:42%;left:18%;transform:rotate(25deg);opacity:.9;"></div>
+                    </div>
+                    <div class="position-absolute bg-danger rounded-pill" style="width:60%;height:4px;top:20%;left:22%;transform:rotate(25deg);transform-origin:left center;z-index:0;"></div>
                     <!-- PICKUP -->
-                    <!-- ================================================= -->
-
-                    <div
-                        class="position-absolute text-center"
-                        style="
-                            top:16%;
-                            left:25%;
-                            transform:translateX(-50%);
-                            z-index:10;
-                        "
-                    >
-
-                        <div
-                            class="bg-success text-white rounded-circle shadow d-flex align-items-center justify-content-center mx-auto"
-                            style="
-                                width:48px;
-                                height:48px;
-                            "
-                        >
+                    <div class="position-absolute text-center" style="top:16%;left:25%;transform:translateX(-50%);z-index:10;">
+                        <div class="bg-success text-white rounded-circle shadow d-flex align-items-center justify-content-center mx-auto" style="width:48px;height:48px;">
                             <i class="fa-solid fa-location-dot"></i>
                         </div>
-
-                        <span class="badge bg-success mt-2">
-                            Pickup
-                        </span>
-
+                        <span class="badge bg-success mt-2">Pickup</span>
                     </div>
-
-
-                    <!-- ================================================= -->
                     <!-- DRIVER -->
-                    <!-- ================================================= -->
-
-                    <div
-                        class="position-absolute text-center"
-                        style="
-                            top:48%;
-                            left:50%;
-                            transform:translate(-50%,-50%);
-                            z-index:20;
-                        "
-                    >
-
-                        <!-- Pulse -->
-
-                        <div
-                            class="position-absolute rounded-circle border border-danger"
-                            style="
-                                width:78px;
-                                height:78px;
-                                top:-10px;
-                                left:-10px;
-                                opacity:.35;
-                            "
-                        ></div>
-
-
-                        <!-- Driver Circle -->
-
-                        <div
-                            class="bg-danger text-white rounded-circle shadow d-flex align-items-center justify-content-center position-relative mx-auto"
-                            style="
-                                width:58px;
-                                height:58px;
-                            "
-                        >
+                    <div class="position-absolute text-center" style="top:48%;left:50%;transform:translate(-50%,-50%);z-index:20;">
+                        <div class="position-absolute rounded-circle border border-danger" style="width:78px;height:78px;top:-10px;left:-10px;opacity:.35;"></div>
+                        <div class="bg-danger text-white rounded-circle shadow d-flex align-items-center justify-content-center position-relative mx-auto" style="width:58px;height:58px;">
                             <i class="fa-solid fa-motorcycle fs-5"></i>
                         </div>
-
-
-                        <span class="badge bg-danger mt-2">
-                            Driver
-                        </span>
-
+                        <span class="badge bg-danger mt-2">Driver</span>
                     </div>
-
-
-                    <!-- ================================================= -->
                     <!-- DESTINATION -->
-                    <!-- ================================================= -->
-
-                    <div
-                        class="position-absolute text-center"
-                        style="
-                            top:68%;
-                            right:22%;
-                            transform:translateX(50%);
-                            z-index:10;
-                        "
-                    >
-
-                        <div
-                            class="bg-dark text-white rounded-circle shadow d-flex align-items-center justify-content-center mx-auto"
-                            style="
-                                width:48px;
-                                height:48px;
-                            "
-                        >
+                    <div class="position-absolute text-center" style="top:68%;right:22%;transform:translateX(50%);z-index:10;">
+                        <div class="bg-dark text-white rounded-circle shadow d-flex align-items-center justify-content-center mx-auto" style="width:48px;height:48px;">
                             <i class="fa-solid fa-flag-checkered"></i>
                         </div>
-
-                        <span class="badge bg-dark mt-2">
-                            Destination
-                        </span>
-
+                        <span class="badge bg-dark mt-2">Destination</span>
                     </div>
-
                 </div>
-
-
-                <!-- ================================================= -->
-                <!-- MAP SUMMARY - OUTSIDE MAP -->
-                <!-- ================================================= -->
-
+                <!-- MAP SUMMARY -->
                 <div class="p-2 p-md-3 bg-white">
-
                     <div class="card border shadow-sm rounded-3">
-
                         <div class="card-body py-3 px-2">
-
                             <div class="row g-0 text-center">
-
-                                <!-- ETA -->
-
                                 <div class="col-4 border-end">
-
-                                    <small class="text-secondary d-block">
-                                        Driver Arrival
-                                    </small>
-
-                                    <h5 class="fw-bold text-danger mb-0">
-                                        {{ ride.eta }}
-                                    </h5>
-
+                                    <small class="text-secondary d-block">Driver Arrival</small>
+                                    <h5 class="fw-bold text-danger mb-0">{{ ride.eta|default:"6 min" }}</h5>
                                 </div>
-
-
-                                <!-- DISTANCE -->
-
                                 <div class="col-4 border-end">
-
-                                    <small class="text-secondary d-block">
-                                        Distance
-                                    </small>
-
-                                    <h5 class="fw-bold mb-0">
-                                        {{ ride.remaining_distance }}
-                                    </h5>
-
+                                    <small class="text-secondary d-block">Distance</small>
+                                    <h5 class="fw-bold mb-0">{{ ride.remaining_distance|default:"2.4 km" }}</h5>
                                 </div>
-
-
-                                <!-- STATUS -->
-
                                 <div class="col-4">
-
-                                    <small class="text-secondary d-block">
-                                        Ride Status
-                                    </small>
-
-                                    <h6 class="fw-bold text-success mb-0">
-                                        On The Way
-                                    </h6>
-
+                                    <small class="text-secondary d-block">Ride Status</small>
+                                    <h6 class="fw-bold text-success mb-0">{{ ride.status|default:"Pending" }}</h6>
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
-
-            <!-- ================================================= -->
             <!-- RIDE PROGRESS -->
-            <!-- ================================================= -->
-
             <div class="card border-0 shadow-sm rounded-4 mt-4">
-
                 <div class="card-body p-3 p-md-4">
-
                     <h5 class="fw-bold mb-4">
                         <i class="fa-solid fa-route text-danger me-2"></i>
                         Ride Progress
                     </h5>
-
-
                     <div class="row g-4">
-
-                        <!-- BOOKED -->
-
                         <div class="col-6 col-md-3">
-
                             <div class="text-center">
-
-                                <div
-                                    class="bg-success text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                                    style="width:50px;height:50px;"
-                                >
+                                <div class="bg-success text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
                                     <i class="fa-solid fa-check"></i>
                                 </div>
-
-                                <h6 class="fw-bold mb-1">
-                                    Booked
-                                </h6>
-
-                                <small class="text-secondary">
-                                    {{ ride.time }}
-                                </small>
-
+                                <h6 class="fw-bold mb-1">Booked</h6>
+                                <small class="text-secondary">{{ ride.time }}</small>
                             </div>
-
                         </div>
-
-
-                        <!-- DRIVER -->
-
                         <div class="col-6 col-md-3">
-
                             <div class="text-center">
-
-                                <div
-                                    class="bg-danger text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                                    style="width:50px;height:50px;"
-                                >
+                                <div class="bg-danger text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
                                     <i class="fa-solid fa-motorcycle"></i>
                                 </div>
-
-                                <h6 class="fw-bold mb-1">
-                                    Driver On Way
-                                </h6>
-
+                                <h6 class="fw-bold mb-1">Driver On Way</h6>
                                 <small class="text-danger fw-semibold">
-                                    Current
+                                    {% if ride.status == "Cancelled" %}
+                                        Cancelled
+                                    {% elif ride.status == "Completed" %}
+                                        Completed
+                                    {% else %}
+                                        Current
+                                    {% endif %}
                                 </small>
-
                             </div>
-
                         </div>
-
-
-                        <!-- START -->
-
                         <div class="col-6 col-md-3">
-
                             <div class="text-center">
-
-                                <div
-                                    class="bg-light border text-secondary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                                    style="width:50px;height:50px;"
-                                >
+                                <div class="bg-light border text-secondary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
                                     <i class="fa-solid fa-person"></i>
                                 </div>
-
-                                <h6 class="fw-bold mb-1">
-                                    Ride Started
-                                </h6>
-
+                                <h6 class="fw-bold mb-1">Ride Started</h6>
                                 <small class="text-secondary">
-                                    Waiting
+                                    {% if ride.status == "Completed" %}
+                                        Completed
+                                    {% else %}
+                                        Waiting
+                                    {% endif %}
                                 </small>
-
                             </div>
-
                         </div>
-
-
-                        <!-- COMPLETE -->
-
                         <div class="col-6 col-md-3">
-
                             <div class="text-center">
-
-                                <div
-                                    class="bg-light border text-secondary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center"
-                                    style="width:50px;height:50px;"
-                                >
+                                <div class="bg-light border text-secondary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
                                     <i class="fa-solid fa-flag-checkered"></i>
                                 </div>
-
-                                <h6 class="fw-bold mb-1">
-                                    Completed
-                                </h6>
-
+                                <h6 class="fw-bold mb-1">Completed</h6>
                                 <small class="text-secondary">
-                                    Pending
+                                    {% if ride.status == "Completed" %}
+                                        Done
+                                    {% else %}
+                                        Pending
+                                    {% endif %}
                                 </small>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
-
-            <!-- ================================================= -->
             <!-- ROUTE DETAILS -->
-            <!-- ================================================= -->
-
             <div class="card border-0 shadow-sm rounded-4 mt-4">
-
                 <div class="card-body p-3 p-md-4">
-
                     <h5 class="fw-bold mb-4">
                         <i class="fa-solid fa-location-dot text-danger me-2"></i>
                         Route Details
                     </h5>
-
-
                     <div class="row g-4">
-
-                        <!-- PICKUP -->
-
                         <div class="col-12 col-md-6">
-
                             <div class="d-flex align-items-start">
-
-                                <div
-                                    class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                                    style="width:45px;height:45px;"
-                                >
+                                <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:45px;height:45px;">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
-
                                 <div class="ms-3">
-
-                                    <small class="text-secondary">
-                                        Pickup Location
-                                    </small>
-
-                                    <h6 class="fw-bold mb-0">
-                                        {{ ride.pickup }}
-                                    </h6>
-
+                                    <small class="text-secondary">Pickup Location</small>
+                                    <h6 class="fw-bold mb-0">{{ ride.pickup|default:"Not selected" }}</h6>
                                 </div>
-
                             </div>
-
                         </div>
-
-
-                        <!-- DESTINATION -->
-
                         <div class="col-12 col-md-6">
-
                             <div class="d-flex align-items-start">
-
-                                <div
-                                    class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                                    style="width:45px;height:45px;"
-                                >
+                                <div class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:45px;height:45px;">
                                     <i class="fa-solid fa-flag-checkered"></i>
                                 </div>
-
                                 <div class="ms-3">
-
-                                    <small class="text-secondary">
-                                        Destination
-                                    </small>
-
-                                    <h6 class="fw-bold mb-0">
-                                        {{ ride.destination }}
-                                    </h6>
-
+                                    <small class="text-secondary">Destination</small>
+                                    <h6 class="fw-bold mb-0">{{ ride.destination|default:"Not selected" }}</h6>
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
-
-        <!-- ================================================= -->
         <!-- RIGHT COLUMN -->
-        <!-- ================================================= -->
-
         <div class="col-12 col-xl-4">
-
-
-            <!-- ================================================= -->
             <!-- DRIVER CARD -->
-            <!-- ================================================= -->
-
             <div class="card border-0 shadow-sm rounded-4">
-
                 <div class="card-body p-3 p-md-4">
-
                     <div class="d-flex justify-content-between align-items-center mb-4">
-
-                        <h5 class="fw-bold mb-0">
-                            Driver Details
-                        </h5>
-
-                        <span class="badge bg-success">
-                            Online
+                        <h5 class="fw-bold mb-0">Driver Details</h5>
+                        <span class="badge {% if ride.status == 'Cancelled' %}bg-secondary{% else %}bg-success{% endif %}">
+                            {% if ride.status == "Cancelled" %}Offline{% else %}Online{% endif %}
                         </span>
-
                     </div>
-
-
                     <div class="d-flex align-items-center">
-
-                        <div
-                            class="bg-light border rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                            style="width:65px;height:65px;"
-                        >
+                        <div class="bg-light border rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:65px;height:65px;">
                             <i class="fa-solid fa-user text-secondary fs-3"></i>
                         </div>
-
-
                         <div class="ms-3 flex-grow-1">
-
-                            <h5 class="fw-bold mb-1">
-                                {{ ride.driver_name }}
-                            </h5>
-
+                            <h5 class="fw-bold mb-1">{{ ride.driver_name|default:"Assigning Driver" }}</h5>
                             <div class="text-warning">
-
                                 <i class="fa-solid fa-star"></i>
                                 <i class="fa-solid fa-star"></i>
                                 <i class="fa-solid fa-star"></i>
                                 <i class="fa-solid fa-star"></i>
                                 <i class="fa-solid fa-star"></i>
-
-                                <small class="text-secondary ms-1">
-                                    {{ ride.driver_rating }}
-                                </small>
-
+                                <small class="text-secondary ms-1">{{ ride.driver_rating|default:"4.9" }}</small>
                             </div>
-
                         </div>
-
-
-                        <a
-                            href="tel:+919876543210"
-                            class="btn btn-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                            style="width:45px;height:45px;"
-                        >
+                        {% if ride.driver_phone %}
+                        <a href="tel:{{ ride.driver_phone }}" class="btn btn-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:45px;height:45px;">
                             <i class="fa-solid fa-phone"></i>
                         </a>
-
+                        {% endif %}
                     </div>
-
-
                     <hr class="my-4">
-
-
-                    <!-- VEHICLE -->
-
                     <div class="d-flex align-items-center">
-
-                        <div
-                            class="bg-danger-subtle text-danger rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
-                            style="width:48px;height:48px;"
-                        >
+                        <div class="bg-danger-subtle text-danger rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
                             <i class="fa-solid fa-motorcycle"></i>
                         </div>
-
-
                         <div class="ms-3">
-
-                            <small class="text-secondary">
-                                Vehicle
-                            </small>
-
-                            <h6 class="fw-bold mb-0">
-                                {{ ride.vehicle }}
-                            </h6>
-
+                            <small class="text-secondary">Vehicle</small>
+                            <h6 class="fw-bold mb-0">{{ ride.vehicle|default:ride.ride_type }}</h6>
                         </div>
-
                     </div>
-
-
                     <div class="bg-light rounded-3 text-center fw-bold py-2 mt-3">
-                        {{ ride.vehicle_number }}
+                        {{ ride.vehicle_number|default:"Not assigned" }}
                     </div>
-
                 </div>
-
             </div>
-
-
-            <!-- ================================================= -->
             <!-- TRIP DETAILS -->
-            <!-- ================================================= -->
-
             <div class="card border-0 shadow-sm rounded-4 mt-4">
-
                 <div class="card-body p-3 p-md-4">
-
                     <h5 class="fw-bold mb-4">
                         <i class="fa-solid fa-receipt text-danger me-2"></i>
                         Trip Details
                     </h5>
-
-
                     <div class="d-flex justify-content-between mb-3 gap-3">
                         <span class="text-secondary">Booking ID</span>
                         <strong>#{{ ride.booking_id }}</strong>
                     </div>
-
-
                     <div class="d-flex justify-content-between mb-3 gap-3">
                         <span class="text-secondary">Ride Type</span>
-
                         <strong>
-                            <i class="fa-solid fa-motorcycle me-1"></i>
+                            <i class="fa-solid fa-motorcycle me-1 text-danger"></i>
                             {{ ride.ride_type }}
                         </strong>
                     </div>
-
-
                     <div class="d-flex justify-content-between mb-3 gap-3">
                         <span class="text-secondary">Date</span>
                         <strong>{{ ride.date }}</strong>
                     </div>
-
-
                     <div class="d-flex justify-content-between mb-3 gap-3">
                         <span class="text-secondary">Time</span>
                         <strong>{{ ride.time }}</strong>
                     </div>
-
-
                     <div class="d-flex justify-content-between mb-3 gap-3">
                         <span class="text-secondary">Passengers</span>
                         <strong>{{ ride.passengers }}</strong>
                     </div>
-
-
                     <div class="d-flex justify-content-between mb-3 gap-3">
                         <span class="text-secondary">Distance</span>
                         <strong>{{ ride.distance }}</strong>
                     </div>
-
-
                     <hr>
-
-
                     <div class="d-flex justify-content-between align-items-center">
-
-                        <span class="fw-bold">
-                            Total Fare
-                        </span>
-
-                        <strong class="text-danger fs-5">
-                            {{ ride.fare }}
-                        </strong>
-
+                        <span class="fw-bold">Total Fare</span>
+                        <strong class="text-danger fs-5">₹{{ ride.fare }}</strong>
                     </div>
-
                 </div>
-
             </div>
-
-
-            <!-- ================================================= -->
             <!-- ACTIONS -->
-            <!-- ================================================= -->
-
             <div class="row g-2 mt-3">
-
                 <div class="col-6">
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger w-100"
-                    >
-                        <i class="fa-solid fa-xmark me-1"></i>
-                        Cancel
-                    </button>
-
+                    {% if ride.status != "Cancelled" and ride.status != "Completed" %}
+                    <form method="POST" action="{% url 'cancel-ride' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="booking_token" value="{{ booking_token }}">
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="fa-solid fa-xmark me-1"></i>
+                            Cancel
+                        </button>
+                    </form>
+                    {% else %}
+                    <a href="{% url 'myride' %}?token={{ booking_token }}" class="btn btn-outline-danger w-100">
+                        <i class="fa-solid fa-route me-1"></i>
+                        My Ride
+                    </a>
+                    {% endif %}
                 </div>
-
-
                 <div class="col-6">
-
-                    <button
-                        type="button"
-                        class="btn btn-danger w-100"
-                    >
-                        <i class="fa-solid fa-headset me-1"></i>
-                        Help
-                    </button>
-
+                    <a href="{% url 'booking' %}" class="btn btn-danger w-100">
+                        <i class="fa-solid fa-plus me-1"></i>
+                        Book Again
+                    </a>
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
-</div>
-
-
-<!-- ================================================= -->
-<!-- MESSAGES -->
-<!-- ================================================= -->
-
-{% if messages %}
-
-<div class="container-fluid">
-
-    {% for message in messages %}
-
-        <div
-            class="alert alert-{{ message.tags }} alert-dismissible fade show"
-            role="alert"
-        >
-
-            {{ message }}
-
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-            ></button>
-
+    {% else %}
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body text-center py-5">
+            <div class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width:90px;height:90px;">
+                <i class="fa-solid fa-location-crosshairs fs-1"></i>
+            </div>
+            <h4 class="fw-bold">No Active Ride</h4>
+            <p class="text-secondary">Please create a booking first to track your ride.</p>
+            <a href="{% url 'booking' %}" class="btn btn-danger rounded-pill px-4">
+                <i class="fa-solid fa-car me-2"></i>
+                Book a Ride
+            </a>
         </div>
-
-    {% endfor %}
-
+    </div>
+    {% endif %}
 </div>
-
-{% endif %}
-
 {% endblock %}

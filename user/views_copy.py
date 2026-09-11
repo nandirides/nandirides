@@ -7,7 +7,7 @@ from datetime import datetime
 from urllib.parse import urlencode
 from django.utils import timezone
 from django.core import signing
-from user.forms import UserForm, LoginForm, Profile, ForgetPassword, ResetPassword, Booking, Payment, MyRide, Driver
+from user.forms import SignUp, LoginForm, UserProfileForm, ForgetPassword, ResetPassword, Booking, Payment, MyRide, Driver
 from user.models import User
 #from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
@@ -772,7 +772,7 @@ class ContactView(TemplateView):
                 'answer': 'Our support team aims to respond to customer enquiries as quickly as possible.',
             },
         ]
-        return context   
+        return context
 
 # ==================== BOOKING ====================
 
@@ -1065,7 +1065,7 @@ class TrackRideView(View):
 
 class UserEditProfileView(TemplateView):
     def get(self, request):
-        form = Profile()
+        form = UserProfileForm()
         return render(
             request,
             'user/profile/editprofile.html',
@@ -1091,7 +1091,7 @@ class UserLoginView(TemplateView):
 
 class UserSignupView(TemplateView):
     def get(self, request):
-        form = UserForm()
+        form = SignUp()
         return render(
             request,
             'user/signup.html',
@@ -1104,7 +1104,7 @@ class UserSignupView(TemplateView):
 
 class UserProfileView(TemplateView):
     def get(self, request):
-        form = Profile()
+        form = UserProfileForm()
         return render(
             request,
             'user/profile/profile.html',

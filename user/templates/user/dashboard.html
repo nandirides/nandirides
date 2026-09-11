@@ -1,6 +1,6 @@
 {% extends 'user/dashboard_base.html' %}
 {% block dashboard_title %}Dashboard{% endblock %}
-{% block title %}{{ site_name }} | Dashboard{% endblock %}
+{% block title %}{{ site_name|default:"NandiRide" }} | Dashboard{% endblock %}
 {% block page_heading %}Dashboard{% endblock %}
 {% block dashboard_content %}
 <div class="container-fluid py-4">
@@ -23,7 +23,7 @@
                             <i class="fa-solid fa-plus me-2"></i>
                             Book a Ride
                         </a>
-                        <a href="{% url 'myride' %}" class="btn btn-outline-danger rounded-pill px-4">
+                        <a href="{% url 'myride' %}{% if booking_token %}?token={{ booking_token }}{% endif %}" class="btn btn-outline-danger rounded-pill px-4">
                             <i class="fa-solid fa-route me-2"></i>
                             My Rides
                         </a>
@@ -54,7 +54,7 @@
                     </div>
                     <small class="text-success mt-3 d-block">
                         <i class="fa-solid fa-arrow-up"></i>
-                        12% this month
+                        Current booking
                     </small>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                             <i class="fa-solid fa-wallet"></i>
                         </div>
                     </div>
-                    <small class="text-secondary mt-3 d-block">Across all rides</small>
+                    <small class="text-secondary mt-3 d-block">Across current rides</small>
                 </div>
             </div>
         </div>
@@ -97,7 +97,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <small class="text-secondary">Your Rating</small>
-                            <h3 class="fw-bold mb-0 mt-1">{{ dashboard_stats.rating }}</h3>
+                            <h3 class="fw-bold mb-0 mt-1">{{ dashboard_stats.rating|default:"4.9" }}</h3>
                         </div>
                         <div class="bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center" style="width:45px;height:45px;">
                             <i class="fa-solid fa-star"></i>
@@ -108,6 +108,7 @@
             </div>
         </div>
     </div>
+    {% if booking_data %}
     <div class="row g-4 mb-4">
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 h-100">
@@ -120,9 +121,9 @@
                             </h5>
                             <small class="text-secondary">Your current ride status</small>
                         </div>
-                        <span class="badge bg-danger rounded-pill px-3 py-2">
+                        <span class="badge {% if booking_data.status == 'Cancelled' %}bg-secondary{% elif booking_data.status == 'Completed' %}bg-success{% else %}bg-danger{% endif %} rounded-pill px-3 py-2">
                             <i class="fa-solid fa-circle fa-xs me-1"></i>
-                            {{ booking_data.status }}
+                            {{ booking_data.status|default:"Pending" }}
                         </span>
                     </div>
                     <div class="d-flex align-items-start">
@@ -133,7 +134,7 @@
                         </div>
                         <div class="ms-3 flex-grow-1">
                             <small class="text-secondary">Pickup</small>
-                            <h6 class="fw-bold mb-0">{{ booking_data.pickup }}</h6>
+                            <h6 class="fw-bold mb-0">{{ booking_data.pickup_location|default:"Not selected" }}</h6>
                         </div>
                     </div>
                     <div class="border-start border-2 border-danger ms-4 my-1" style="height:35px;"></div>
@@ -145,38 +146,38 @@
                         </div>
                         <div class="ms-3 flex-grow-1">
                             <small class="text-secondary">Destination</small>
-                            <h6 class="fw-bold mb-0">{{ booking_data.destination }}</h6>
+                            <h6 class="fw-bold mb-0">{{ booking_data.destination|default:"Not selected" }}</h6>
                         </div>
                     </div>
                     <hr class="my-4">
                     <div class="row g-3 text-center">
                         <div class="col-6 col-md-3">
                             <small class="text-secondary d-block">Driver</small>
-                            <strong>{{ booking_data.driver_name }}</strong>
+                            <strong>{{ booking_data.driver_name|default:"Assigning Driver" }}</strong>
                         </div>
                         <div class="col-6 col-md-3">
                             <small class="text-secondary d-block">Vehicle</small>
-                            <strong>{{ booking_data.ride_type }}</strong>
+                            <strong>{{ booking_data.ride_type|default:"Not selected" }}</strong>
                         </div>
                         <div class="col-6 col-md-2">
                             <small class="text-secondary d-block">Passengers</small>
-                            <strong class="text-dark">{{ booking_data.passengers }}</strong>
+                            <strong class="text-dark">{{ booking_data.passengers|default:"1" }}</strong>
                         </div>
                         <div class="col-6 col-md-2">
                             <small class="text-secondary d-block">Time</small>
-                            <strong class="text-dark">{{ booking_data.time }}</strong>
+                            <strong class="text-dark">{{ booking_data.ride_time|default:"Not selected" }}</strong>
                         </div>
                         <div class="col-6 col-md-2">
                             <small class="text-secondary d-block">Fare</small>
-                            <strong class="text-dark">₹{{ booking_data.total_amount }}</strong>
+                            <strong class="text-dark">₹{{ booking_data.total_amount|default:"0" }}</strong>
                         </div>
                     </div>
                     <div class="d-flex flex-wrap gap-2 mt-4">
-                        <a href="{% url 'track' %}" class="btn btn-outline-danger rounded-3 px-4">
+                        <a href="{% url 'track' %}{% if booking_token %}?token={{ booking_token }}{% endif %}" class="btn btn-outline-danger rounded-3 px-4">
                             <i class="fa-solid fa-location-crosshairs me-2"></i>
                             Track Ride
                         </a>
-                        <a href="{% url 'myride' %}" class="btn btn-outline-danger rounded-3 px-4">
+                        <a href="{% url 'myride' %}{% if booking_token %}?token={{ booking_token }}{% endif %}" class="btn btn-outline-danger rounded-3 px-4">
                             <i class="fa-solid fa-route me-2"></i>
                             View Ride
                         </a>
@@ -199,15 +200,15 @@
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="{% url 'myride' %}" class="quick-action text-decoration-none">
-                                <div class="quick-icon bg-primary-subtle text-primary">
+                            <a href="{% url 'myride' %}{% if booking_token %}?token={{ booking_token }}{% endif %}" class="quick-action text-decoration-none">
+                                <div class="quick-icon bg-danger-subtle text-danger">
                                     <i class="fa-solid fa-route"></i>
                                 </div>
                                 <span>My Rides</span>
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="{% url 'paymentdetails' %}" class="quick-action text-decoration-none">
+                            <a href="{% url 'payment' %}{% if booking_token %}?token={{ booking_token }}{% endif %}" class="quick-action text-decoration-none">
                                 <div class="quick-icon bg-warning-subtle text-warning">
                                     <i class="fa-solid fa-credit-card"></i>
                                 </div>
@@ -215,7 +216,7 @@
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="{% url 'track' %}" class="quick-action text-decoration-none">
+                            <a href="{% url 'track' %}{% if booking_token %}?token={{ booking_token }}{% endif %}" class="quick-action text-decoration-none">
                                 <div class="quick-icon bg-success-subtle text-success">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
@@ -254,19 +255,18 @@
                     </div>
                     <div class="bg-light rounded-4 p-3">
                         <div class="d-flex align-items-center mb-3">
-                            <div class="bg-danger text-white rounded-3 text-center p-2" style="min-width:55px;">
-                                <small class="d-block">{{booking_data.ride_date|default:"04 September 2026"}}</small>
-                                <!-- <h5 class="fw-bold mb-0">01</h5> -->
+                            <div class="bg-danger text-white rounded-3 text-center p-2" style="min-width:70px;">
+                                <small class="d-block">{{ booking_data.ride_date|default:"Not selected" }}</small>
                             </div>
                             <div class="ms-3">
-                                <h6 class="fw-bold mb-1">{{ booking_data.pickup }} → {{ booking_data.destination }}</h6>
+                                <h6 class="fw-bold mb-1">{{ booking_data.pickup_location|default:"Not selected" }} → {{ booking_data.destination|default:"Not selected" }}</h6>
                                 <small class="text-secondary">
                                     <i class="fa-solid fa-clock me-1"></i>
-                                    {{ booking_data.time }}
+                                    {{ booking_data.ride_time|default:"Not selected" }}
                                     <span class="mx-2"><i class="fa-solid fa-car-side"></i></span>
-                                    Vehicle : {{ booking_data.ride_type }}
+                                    Vehicle : {{ booking_data.ride_type|default:"Not selected" }}
                                     <span class="mx-2"><i class="fa-solid fa-users"></i></span>
-                                    Passengers : {{ booking_data.passengers }}
+                                    Passengers : {{ booking_data.passengers|default:"1" }}
                                 </small>
                             </div>
                         </div>
@@ -274,9 +274,9 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <small class="text-secondary">Estimated Fare</small>
-                                <h5 class="fw-bold text-danger mb-0">₹{{ booking_data.total_amount }}</h5>
+                                <h5 class="fw-bold text-danger mb-0">₹{{ booking_data.total_amount|default:"0" }}</h5>
                             </div>
-                            <a href="{% url 'myride' %}" class="btn btn-outline-danger rounded-3">View Ride</a>
+                            <a href="{% url 'myride' %}{% if booking_token %}?token={{ booking_token }}{% endif %}" class="btn btn-outline-danger rounded-3">View Ride</a>
                         </div>
                     </div>
                 </div>
@@ -293,14 +293,26 @@
                             </h5>
                             <small class="text-secondary">Latest payment</small>
                         </div>
-                        <span class="badge bg-success-subtle text-success rounded-pill">{{ booking_data.payment_status }}</span>
+                        <span class="badge {% if booking_data.payment_status == 'Paid' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %} rounded-pill">
+                            {{ booking_data.payment_status|default:"Pending" }}
+                        </span>
                     </div>
                     <div class="text-center py-2">
-                        <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width:65px;height:65px;">
-                            <i class="fa-solid fa-check fs-4"></i>
+                        <div class="{% if booking_data.payment_status == 'Paid' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %} rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width:65px;height:65px;">
+                            {% if booking_data.payment_status == "Paid" %}
+                                <i class="fa-solid fa-check fs-4"></i>
+                            {% else %}
+                                <i class="fa-solid fa-clock fs-4"></i>
+                            {% endif %}
                         </div>
-                        <h3 class="fw-bold mb-1">₹{{ booking_data.total_amount }}</h3>
-                        <small class="text-secondary">Payment completed</small>
+                        <h3 class="fw-bold mb-1">₹{{ booking_data.total_amount|default:"0" }}</h3>
+                        <small class="text-secondary">
+                            {% if booking_data.payment_status == "Paid" %}
+                                Payment completed
+                            {% else %}
+                                Payment pending
+                            {% endif %}
+                        </small>
                     </div>
                     <hr>
                     <div class="d-flex justify-content-between mb-2">
@@ -309,9 +321,9 @@
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <small class="text-secondary">Method</small>
-                        <strong>{{ booking_data.payment_method }}</strong>
+                        <strong>{{ booking_data.payment_type|default:"Pending" }}</strong>
                     </div>
-                    <a href="{% url 'paymentdetails' %}" class="btn btn-outline-danger w-100 rounded-3">
+                    <a href="{% url 'payment' %}{% if booking_token %}?token={{ booking_token }}{% endif %}" class="btn btn-outline-danger w-100 rounded-3">
                         <i class="fa-solid fa-receipt me-2"></i>
                         Payment Details
                     </a>
@@ -327,9 +339,9 @@
                         <i class="fa-solid fa-clock-rotate-left text-danger me-2"></i>
                         Recent Rides
                     </h5>
-                    <small class="text-secondary">Your recent ride activity</small>
+                    <small class="text-secondary">Your current ride activity</small>
                 </div>
-                <a href="{% url 'myride' %}" class="btn btn-sm btn-outline-danger rounded-pill px-3">View All</a>
+                <a href="{% url 'myride' %}{% if booking_token %}?token={{ booking_token }}{% endif %}" class="btn btn-sm btn-outline-danger rounded-pill px-3">View All</a>
             </div>
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
@@ -344,41 +356,58 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for ride in recent_rides %}
+                        {% if booking_data %}
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <div class="{{ ride.icon_class }} rounded-3 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
-                                        <i class="fa-solid {{ ride.icon }}"></i>
+                                    <div class="bg-danger-subtle text-danger rounded-3 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                                        <i class="fa-solid fa-motorcycle"></i>
                                     </div>
                                     <div class="ms-3">
-                                        <strong>{{ ride.pickup }} → {{ ride.destination }}</strong>
-                                        <small class="d-block text-secondary">#{{ ride.booking_id }}</small>
+                                        <strong>{{ booking_data.pickup_location }} → {{ booking_data.destination }}</strong>
+                                        <small class="d-block text-secondary">#{{ booking_data.booking_id }}</small>
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ ride.date }}</td>
-                            <td>{{ ride.vehicle }}</td>
-                            <td><strong class="text-danger">₹{{ ride.fare }}</strong></td>
+                            <td>{{ booking_data.ride_date }}</td>
+                            <td>{{ booking_data.ride_type }}</td>
+                            <td><strong class="text-danger">₹{{ booking_data.total_amount }}</strong></td>
                             <td>
-                                <span class="badge {{ ride.status_class }} rounded-pill">{{ ride.status }}</span>
+                                <span class="badge {% if booking_data.status == 'Cancelled' %}bg-danger-subtle text-danger{% elif booking_data.status == 'Completed' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %} rounded-pill">
+                                    {{ booking_data.status|default:"Pending" }}
+                                </span>
                             </td>
                             <td>
-                                <a href="{% url 'myride' %}" class="btn btn-sm btn-light border rounded-3">
+                                <a href="{% url 'myride' %}{% if booking_token %}?token={{ booking_token }}{% endif %}" class="btn btn-sm btn-light border rounded-3">
                                     <i class="fa-solid fa-receipt"></i>
                                 </a>
                             </td>
                         </tr>
-                        {% empty %}
+                        {% else %}
                         <tr>
                             <td colspan="6" class="text-center text-secondary py-4">No recent rides found.</td>
                         </tr>
-                        {% endfor %}
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+    {% else %}
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body text-center py-5">
+            <div class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width:90px;height:90px;">
+                <i class="fa-solid fa-motorcycle fs-1"></i>
+            </div>
+            <h4 class="fw-bold">No Active Ride</h4>
+            <p class="text-secondary">Book your first NandiRide to see your ride details here.</p>
+            <a href="{% url 'booking' %}" class="btn btn-danger rounded-pill px-4">
+                <i class="fa-solid fa-plus me-2"></i>
+                Book a Ride
+            </a>
+        </div>
+    </div>
+    {% endif %}
     <div class="text-center mt-4 mb-2">
         <small class="text-secondary">
             <i class="fa-solid fa-shield-halved text-success me-1"></i>
@@ -388,7 +417,7 @@
 </div>
 {% if messages %}
     {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>

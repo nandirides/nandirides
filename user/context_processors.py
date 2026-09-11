@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from django.urls import reverse
 
@@ -74,4 +73,27 @@ def site_data(request):
                 'url': reverse('underconstruction'),
             },
         ],
+
+        'social_links' : [
+            {
+                'name': 'Google',
+                'icon': 'fa-brands fa-google',
+                'url': '#',
+            },
+            {
+                'name': 'Facebook',
+                'icon': 'fa-brands fa-facebook-f',
+                'url': '#',
+            },
+            {
+                'name': 'Instagram',
+                'icon': 'fa-brands fa-instagram',
+                'url': '#',
+            },
+            {
+                'name': 'LinkedIn',
+                'icon': 'fa-brands fa-linkedin-in',
+                'url': '#',
+            },
+        ]
     }

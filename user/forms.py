@@ -135,111 +135,109 @@ class ResetPassword(forms.Form):
 
 class Booking(forms.Form):
     booking_id = forms.CharField(
+        required=False,
         widget=forms.HiddenInput(attrs={
-            'class': 'form-control',
+            'value': '1'
         })
-        )
-
+    )
     pickup_location = forms.CharField(
-            widget=forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter Pickup Location'
-            })
-        )
-
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'id': 'pickup_location',
+            'placeholder': 'Enter pickup location',
+            'required': True
+        })
+    )
     destination = forms.CharField(
-            widget=forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter Destination'
-            })
-        )
-
-    ride_type = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'id': 'destination',
+            'placeholder': 'Enter destination',
+            'required': True
+        })
+    )
+    ride_type = forms.ChoiceField(
+        choices=[
+            ('Bike', 'Bike'),
+            ('Auto', 'Auto'),
+            ('Sedan', 'Sedan')
+        ],
+        required=True
+    )
     ride_date = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'id': 'ride_date',
+            'type': 'date',
+            'required': True
+        })
+    )
     ride_time = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
+        widget=forms.TimeInput(attrs={
+            'class': 'form-control',
+            'id': 'ride_time',
+            'type': 'time',
+            'required': True
+        })
+    )
     ride_status = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    passengers = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    passengers = forms.IntegerField(
+        min_value=1,
+        max_value=6,
+        initial=1,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'id': 'passengers',
+            'min': '1',
+            'max': '6',
+            'required': True
+        })
+    )
     note = forms.CharField(
-            widget=forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter Note'
-            })
-        )
-
-    base_fare = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    ride_charge = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    distance = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    platform_fee = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    total_amount = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    completed_ride = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    total_ride = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    total_spent = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    fare = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    estimate_fare = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
-
-    your_rating = forms.CharField(
-            widget=forms.TextInput(attrs={
-            })
-        )
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'id': 'note',
+            'placeholder': 'Any special request?',
+            'rows': 3
+        })
+    )
+    base_fare = forms.CharField(required=False, widget=forms.HiddenInput())
+    ride_charge = forms.CharField(required=False, widget=forms.HiddenInput())
+    distance = forms.CharField(required=False, widget=forms.HiddenInput())
+    platform_fee = forms.CharField(required=False, widget=forms.HiddenInput())
+    total_amount = forms.CharField(required=False, widget=forms.HiddenInput())
+    completed_ride = forms.CharField(required=False, widget=forms.HiddenInput())
+    total_ride = forms.CharField(required=False, widget=forms.HiddenInput())
+    total_spent = forms.CharField(required=False, widget=forms.HiddenInput())
+    fare = forms.CharField(required=False, widget=forms.HiddenInput())
+    estimate_fare = forms.CharField(required=False, widget=forms.HiddenInput())
+    your_rating = forms.CharField(required=False, widget=forms.HiddenInput())
+    
+class Payment(forms.Form):
+    payment_id = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    payment_type = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    payment_date = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    payment_time = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+    payment_receipt = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
 
 class Driver(forms.Form):
     driver_id = forms.CharField(
@@ -350,38 +348,6 @@ class MyRide(forms.Form):
             })
         )
 
-
-
-class Payment(forms.Form):
-    payment_id = forms.CharField(
-        widget=forms.HiddenInput(),
-        required=False
-    )
-    payment_date = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control'
-        })
-    )
-    payment_time = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control'
-        })
-    )
-    payment_type = forms.CharField(
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Cash / UPI / Card'
-        })
-    )
-    payment_receipt = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter Payment Receipt'
-        })
-    )
 
 
 class Profile(forms.Form):

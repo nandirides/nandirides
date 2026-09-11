@@ -24,6 +24,7 @@ urlpatterns = [
     path('services/', views.ServicesView.as_view(), name='services'),
     path('paymentdetails/', views.PaymentDetailsView.as_view(), name='paymentdetails'),
     path('paymentreceipt/', views.PaymentReceiptView.as_view(), name='paymentreceipt'),
+    path('help-chatbot/', views.HelpChatbotView.as_view(), name='help-chatbot'),
     # path('', views.UserListView.as_view(), name='user-list'),
     # path('users/<int:pk>/', views.usersDetailView.as_view(), name='users-detail'),
     # path('users/new/', views.usersCreateView.as_view(), name='users-create'),
