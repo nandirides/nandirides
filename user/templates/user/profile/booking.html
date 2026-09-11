@@ -3,358 +3,184 @@
 My Booking
 {% endblock %}
 {% block title %}NandiRide | Booking{% endblock %}
-
 {% block dashboard_content %}
-
 <div class="container-fluid">
-
-    <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">
-                <i class="fa-solid fa-car-side me-2"></i>
-                Book a Ride
-            </h2>
-            <p class="text-muted mb-0">
-                Enter your pickup and destination details
-            </p>
+            <h2 class="fw-bold mb-1">My Booking</h2>
+            <p class="text-muted mb-0">Book your ride quickly and safely</p>
         </div>
-
-        <span class="badge bg-success px-3 py-2">
-            <i class="fa-solid fa-circle me-1 small"></i>
-            Available
+        <span class="badge bg-danger rounded-pill px-3 py-2">
+            <i class="fa fa-circle me-1"></i> Available
         </span>
     </div>
-
-
     <div class="row g-4">
-
-        <!-- Booking Form -->
         <div class="col-lg-7">
-
             <div class="card border-0 shadow-sm rounded-4">
-
-                <div class="card-header bg-white border-0 pt-4 px-4">
-                    <h5 class="fw-bold mb-1">
-                        <i class="fa-solid fa-location-dot text-danger me-2"></i>
-                        Trip Details
-                    </h5>
-                    <p class="text-muted small mb-0">
-                        Where would you like to go?
-                    </p>
-                </div>
-
                 <div class="card-body p-4">
-
-<form method="POST" action="{% url 'booking' %}">
-    {% csrf_token %}
-
-    <div class="mb-3">
-        <label class="form-label fw-semibold">Pickup Location</label>
-        <input type="text"
-               name="pickup_location"
-               class="form-control"
-               placeholder="Enter pickup location"
-               required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label fw-semibold">Destination</label>
-        <input type="text"
-               name="destination"
-               class="form-control"
-               placeholder="Enter destination"
-               required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label fw-semibold">Select Ride</label>
-
-        <div class="row g-3">
-            <div class="col-md-4">
-                <input type="radio"
-                       class="btn-check"
-                       name="ride_type"
-                       id="bike"
-                       value="Bike"
-                       autocomplete="off"
-                       required>
-
-                <label class="btn btn-outline-danger w-100 p-3"
-                       for="bike">
-                    <i class="fa fa-motorcycle fs-3 d-block mb-2"></i>
-                    Bike
-                </label>
-            </div>
-
-            <div class="col-md-4">
-                <input type="radio"
-                       class="btn-check"
-                       name="ride_type"
-                       id="auto"
-                       value="Auto"
-                       autocomplete="off">
-
-                <label class="btn btn-outline-danger w-100 p-3"
-                       for="auto">
-                    <i class="fa fa-car fs-3 d-block mb-2"></i>
-                    Auto
-                </label>
-            </div>
-
-            <div class="col-md-4">
-                <input type="radio"
-                       class="btn-check"
-                       name="ride_type"
-                       id="sedan"
-                       value="Sedan"
-                       autocomplete="off">
-
-                <label class="btn btn-outline-danger w-100 p-3"
-                       for="sedan">
-                    <i class="fa fa-car-side fs-3 d-block mb-2"></i>
-                    Sedan
-                </label>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3">
-        <div class="col-md-6">
-            <label class="form-label fw-semibold">Ride Date</label>
-            <input type="date"
-                   name="ride_date"
-                   class="form-control"
-                   required>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label fw-semibold">Ride Time</label>
-            <input type="time"
-                   name="ride_time"
-                   class="form-control"
-                   required>
-        </div>
-    </div>
-
-    <div class="mb-3 mt-3">
-        <label class="form-label fw-semibold">Passengers</label>
-        <input type="number"
-               name="passengers"
-               class="form-control"
-               min="1"
-               max="6"
-               value="1"
-               required>
-    </div>
-
-    <div class="mb-4">
-        <label class="form-label fw-semibold">Note</label>
-        <textarea name="note"
-                  class="form-control"
-                  rows="3"
-                  placeholder="Any special request?"></textarea>
-    </div>
-
-    <button type="submit"
-            class="btn btn-danger w-100 rounded-pill py-3 fw-bold">
-        <i class="fa fa-arrow-right me-2"></i>
-        Confirm Booking & Continue Payment
-    </button>
-</form>
-
+                    <h5 class="fw-bold mb-1">Trip Details</h5>
+                    <p class="text-muted small mb-4">Enter your ride details below</p>
+                    <form method="POST" action="{% url 'booking' %}">
+                        {% csrf_token %}
+                        {{ form.booking_id }}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Pickup Location</label>
+                            {{ form.pickup_location }}
+                            {% if form.pickup_location.errors %}
+                                <div class="text-danger small mt-1">{{ form.pickup_location.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Destination</label>
+                            {{ form.destination }}
+                            {% if form.destination.errors %}
+                                <div class="text-danger small mt-1">{{ form.destination.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Ride</label>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <input type="radio" class="btn-check" name="ride_type" id="bike" value="Bike" autocomplete="off" required>
+                                    <label class="btn btn-outline-danger w-100 p-3" for="bike">
+                                        <i class="fa fa-motorcycle fs-3 d-block mb-2"></i>
+                                        Bike
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="radio" class="btn-check" name="ride_type" id="auto" value="Auto" autocomplete="off">
+                                    <label class="btn btn-outline-danger w-100 p-3" for="auto">
+                                        <i class="fa fa-car fs-3 d-block mb-2"></i>
+                                        Auto
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="radio" class="btn-check" name="ride_type" id="sedan" value="Sedan" autocomplete="off">
+                                    <label class="btn btn-outline-danger w-100 p-3" for="sedan">
+                                        <i class="fa fa-car-side fs-3 d-block mb-2"></i>
+                                        Sedan
+                                    </label>
+                                </div>
+                            </div>
+                            {% if form.ride_type.errors %}
+                                <div class="text-danger small mt-2">{{ form.ride_type.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ride Date</label>
+                                {{ form.ride_date }}
+                                {% if form.ride_date.errors %}
+                                    <div class="text-danger small mt-1">{{ form.ride_date.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ride Time</label>
+                                {{ form.ride_time }}
+                                {% if form.ride_time.errors %}
+                                    <div class="text-danger small mt-1">{{ form.ride_time.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mb-3 mt-3">
+                            <label class="form-label fw-semibold">Passengers</label>
+                            {{ form.passengers }}
+                            {% if form.passengers.errors %}
+                                <div class="text-danger small mt-1">{{ form.passengers.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Note</label>
+                            {{ form.note }}
+                            {% if form.note.errors %}
+                                <div class="text-danger small mt-1">{{ form.note.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100 rounded-pill py-3 fw-bold">
+                            <i class="fa fa-arrow-right me-2"></i>
+                            Confirm Booking & Continue Payment
+                        </button>
+                    </form>
                 </div>
             </div>
-
         </div>
-
-
-        <!-- Right Side -->
         <div class="col-lg-5">
-
-            <!-- Estimated Fare -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
-
                     <h5 class="fw-bold mb-4">
-                        <i class="fa-solid fa-receipt me-2"></i>
+                        <i class="fa fa-receipt text-danger me-2"></i>
                         Booking Summary
                     </h5>
-
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">
-                            Base Fare
-                        </span>
-                        <span class="fw-semibold">
-                            ₹{{ booking_data.base_fare }}
-                        </span>
+                        <span class="text-muted">Base Fare</span>
+                        <strong>₹{{ booking_data.base_fare|default:"50" }}</strong>
                     </div>
-
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">
-                            Distance
-                        </span>
-                        <span class="fw-semibold">
-                            -- km
-                        </span>
+                        <span class="text-muted">Ride Charge</span>
+                        <strong>₹{{ booking_data.ride_charge|default:"180" }}</strong>
                     </div>
-
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">
-                            Ride Charge
-                        </span>
-                        <span class="fw-semibold">
-                            ₹{{ booking_data.ride_charge }}
-                        </span>
+                        <span class="text-muted">Distance</span>
+                        <strong>{{ booking_data.distance|default:"--" }} km</strong>
                     </div>
-
                     <hr>
-
-                    <div class="d-flex justify-content-between">
-                        <span class="fw-bold">
-                            Estimated Fare
-                        </span>
-
-                        <span class="fw-bold fs-5 text-danger">
-                            ₹--
-                        </span>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Estimated Fare</span>
+                        <strong class="fs-4 text-danger">₹{{ booking_data.estimate_fare|default:"--" }}</strong>
                     </div>
-
-                    <small class="text-muted d-block mt-2">
-                        * Final fare may vary depending on distance,
-                        traffic and waiting time.
-                    </small>
-
                 </div>
             </div>
-
-
-            <!-- How It Works -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-
+            <div class="card border-0 shadow-sm rounded-4 mt-4">
                 <div class="card-body p-4">
-
-                    <h5 class="fw-bold mb-4">
-                        How Nandi Ride Works
-                    </h5>
-
-                    <div class="d-flex mb-4">
-
-                        <div
-                            class="rounded-circle bg-light d-flex
-                            align-items-center justify-content-center
-                            me-3"
-                            style="width:45px;height:45px;"
-                        >
-                            <i class="fa-solid fa-location-dot text-danger"></i>
+                    <h6 class="fw-bold mb-3">
+                        <i class="fa fa-circle-info text-danger me-2"></i>
+                        How NandiRide Works
+                    </h6>
+                    <div class="d-flex mb-3">
+                        <div class="rounded-circle bg-danger text-white px-3 py-2 fw-bold">1</div>
+                        <div class="ms-3">
+                            <strong>Enter Trip Details</strong>
+                            <p class="text-muted small mb-0">Choose pickup and destination.</p>
                         </div>
-
-                        <div>
-                            <h6 class="fw-semibold mb-1">
-                                Enter Locations
-                            </h6>
-
-                            <small class="text-muted">
-                                Select your pickup and destination.
-                            </small>
-                        </div>
-
                     </div>
-
-
-                    <div class="d-flex mb-4">
-
-                        <div
-                            class="rounded-circle bg-light d-flex
-                            align-items-center justify-content-center
-                            me-3"
-                            style="width:45px;height:45px;"
-                        >
-                            <i class="fa-solid fa-car text-danger"></i>
+                    <div class="d-flex mb-3">
+                        <div class="rounded-circle bg-danger text-white px-3 py-2 fw-bold">2</div>
+                        <div class="ms-3">
+                            <strong>Select Your Ride</strong>
+                            <p class="text-muted small mb-0">Choose Bike, Auto or Sedan.</p>
                         </div>
-
-                        <div>
-                            <h6 class="fw-semibold mb-1">
-                                Choose Your Ride
-                            </h6>
-
-                            <small class="text-muted">
-                                Select Bike, Auto or Cab.
-                            </small>
-                        </div>
-
                     </div>
-
-
                     <div class="d-flex">
-
-                        <div
-                            class="rounded-circle bg-light d-flex
-                            align-items-center justify-content-center
-                            me-3"
-                            style="width:45px;height:45px;"
-                        >
-                            <i class="fa-solid fa-circle-check text-success"></i>
+                        <div class="rounded-circle bg-danger text-white px-3 py-2 fw-bold">3</div>
+                        <div class="ms-3">
+                            <strong>Complete Payment</strong>
+                            <p class="text-muted small mb-0">Confirm your booking securely.</p>
                         </div>
-
-                        <div>
-                            <h6 class="fw-semibold mb-1">
-                                Confirm Booking
-                            </h6>
-
-                            <small class="text-muted">
-                                Confirm your ride and get a driver.
-                            </small>
-                        </div>
-
                     </div>
-
                 </div>
             </div>
-
-
-            <!-- Support -->
-            <div class="card border-0 shadow-sm rounded-4">
-
+            <div class="card border-0 shadow-sm rounded-4 mt-4">
                 <div class="card-body p-4">
-
                     <div class="d-flex align-items-center">
-
-                        <div
-                            class="rounded-circle bg-danger bg-opacity-10
-                            p-3 me-3"
-                        >
-                            <i class="fa-solid fa-headset text-danger fs-4 text-white"></i>
+                        <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3">
+                            <i class="fa fa-headset text-white"></i>
                         </div>
-
-                        <div>
-                            <h6 class="fw-bold mb-1">
-                                Need Help?
-                            </h6>
-
-                            <small class="text-white">
-                                Contact Nandi Ride Support
-                            </small>
+                        <div class="ms-3">
+                            <h6 class="fw-bold mb-1">Need Help?</h6>
+                            <small class="text-muted">Contact NandiRide support for any booking related issue.</small>
                         </div>
-
                     </div>
-
                 </div>
             </div>
-
         </div>
-
     </div>
-
-</div>
-
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-4">
                 {{ message }}
-                <span><a href="#" class="lbtn btn-primary rounded-pill fw-bold">Login</a></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         {% endfor %}
     {% endif %}
+</div>
 {% endblock %}

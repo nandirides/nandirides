@@ -30,8 +30,22 @@ Payment
                         <p class="text-muted small mb-4">Choose how you want to pay for your ride</p>
                         <form method="POST" action="{% url 'payment' %}">
                             {% csrf_token %}
+                            <input type="hidden" name="booking_token" value="{{ booking_token }}">
+                            <input type="hidden" name="booking_id" value="{{ booking_data.booking_id }}">
+                            <input type="hidden" name="pickup_location" value="{{ booking_data.pickup_location }}">
+                            <input type="hidden" name="destination" value="{{ booking_data.destination }}">
+                            <input type="hidden" name="ride_type" value="{{ booking_data.ride_type }}">
+                            <input type="hidden" name="ride_date" value="{{ booking_data.ride_date }}">
+                            <input type="hidden" name="ride_time" value="{{ booking_data.ride_time }}">
+                            <input type="hidden" name="passengers" value="{{ booking_data.passengers }}">
+                            <input type="hidden" name="note" value="{{ booking_data.note }}">
+                            <input type="hidden" name="base_fare" value="{{ booking_data.base_fare }}">
+                            <input type="hidden" name="ride_charge" value="{{ booking_data.ride_charge }}">
+                            <input type="hidden" name="distance" value="{{ booking_data.distance }}">
+                            <input type="hidden" name="platform_fee" value="{{ booking_data.platform_fee }}">
+                            <input type="hidden" name="total_amount" value="{{ booking_data.total_amount }}">
                             <div class="mb-3">
-                                <input type="radio" class="btn-check" name="payment_method" id="upi" value="upi" autocomplete="off" checked>
+                                <input type="radio" class="btn-check" name="payment_type" id="upi" value="upi" autocomplete="off" checked>
                                 <label for="upi" class="btn btn-outline-danger w-100 text-start p-3 rounded-4">
                                     <div class="d-flex align-items-center">
                                         <div class="bg-light text-danger rounded-3 p-3">
@@ -46,7 +60,7 @@ Payment
                                 </label>
                             </div>
                             <div class="mb-3">
-                                <input type="radio" class="btn-check" name="payment_method" id="card" value="card" autocomplete="off">
+                                <input type="radio" class="btn-check" name="payment_type" id="card" value="card" autocomplete="off">
                                 <label for="card" class="btn btn-outline-danger w-100 text-start p-3 rounded-4">
                                     <div class="d-flex align-items-center">
                                         <div class="bg-light text-danger rounded-3 p-3">
@@ -61,7 +75,7 @@ Payment
                                 </label>
                             </div>
                             <div class="mb-3">
-                                <input type="radio" class="btn-check" name="payment_method" id="netbanking" value="netbanking" autocomplete="off">
+                                <input type="radio" class="btn-check" name="payment_type" id="netbanking" value="netbanking" autocomplete="off">
                                 <label for="netbanking" class="btn btn-outline-danger w-100 text-start p-3 rounded-4">
                                     <div class="d-flex align-items-center">
                                         <div class="bg-light text-danger rounded-3 p-3">
@@ -76,7 +90,7 @@ Payment
                                 </label>
                             </div>
                             <div class="mb-3">
-                                <input type="radio" class="btn-check" name="payment_method" id="cash" value="cash" autocomplete="off">
+                                <input type="radio" class="btn-check" name="payment_type" id="cash" value="cash" autocomplete="off">
                                 <label for="cash" class="btn btn-outline-danger w-100 text-start p-3 rounded-4">
                                     <div class="d-flex align-items-center">
                                         <div class="bg-light text-danger rounded-3 p-3">
@@ -120,7 +134,7 @@ Payment
                         </h5>
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="text-muted">Booking ID</span>
-                            <strong>#NR{{ request.session.session_key|slice:":6"|upper }}</strong>
+                            <strong>#{{ booking_data.booking_id }}</strong>
                         </div>
                         <div class="d-flex align-items-center my-3">
                             <div class="rounded-circle bg-success bg-opacity-10 text-success p-3">
@@ -128,7 +142,7 @@ Payment
                             </div>
                             <div class="ms-3">
                                 <small class="text-muted">Pickup</small>
-                                <h6 class="fw-semibold mb-0">{{ booking_data.pickup|default:"Not selected" }}</h6>
+                                <h6 class="fw-semibold mb-0">{{ booking_data.pickup_location|default:"Not selected" }}</h6>
                             </div>
                         </div>
                         <div class="border-start border-2 ms-4 py-2"></div>
@@ -159,17 +173,11 @@ Payment
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="text-muted">Date</span>
-                            <strong>
-                                {% if booking_data.month %}
-                                    {{ booking_data.date }} {{ booking_data.month }} {{ booking_data.year }}
-                                {% else %}
-                                    {{ booking_data.date|default:"Not selected" }}
-                                {% endif %}
-                            </strong>
+                            <strong>{{ booking_data.ride_date|default:"Not selected" }}</strong>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="text-muted">Time</span>
-                            <strong>{{ booking_data.time|default:"Not selected" }}</strong>
+                            <strong>{{ booking_data.ride_time|default:"Not selected" }}</strong>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="text-muted">Passengers</span>

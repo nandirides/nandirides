@@ -97,7 +97,7 @@
                         </span>
                     </div>
 
-                    <p class="text-white-50 mb-0">
+                    <p class="text-white mb-0">
                         {{ site_tagline }}
                     </p>
                 </div>
@@ -265,6 +265,24 @@
         </div>
     {% endif %}
 
+        <!-- NandiRide Help Chatbot -->
+    <div id="chatbotButton" class="position-fixed bottom-0 end-0 m-3" style="z-index:1055;">
+        <button type="button" class="btn btn-danger rounded-circle shadow-lg d-flex align-items-center justify-content-center" id="openChatbot" style="width:60px;height:60px;">
+            <i class="fa-solid fa-comments fs-4"></i>
+        </button>
+    </div>
+    <script>
+        const chatbotUrls = {
+            booking: "{% url 'booking' %}",
+            track: "{% url 'track' %}",
+            cancel: "{% url 'cancel-ride' %}",
+            myride: "{% url 'myride' %}",
+            payment: "{% url 'payment' %}",
+            paymentdetails: "{% url 'paymentdetails' %}",
+            paymentreceipt: "{% url 'paymentreceipt' %}"
+        };
+    </script>
+    {% include 'user/chatbot.html' %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'user/js/scripts.js' %}"></script>
 </body>

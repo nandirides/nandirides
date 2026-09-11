@@ -62,8 +62,8 @@ class UserCreateForm(UserCreationForm):
          # UPDATE MODE
         if self.instance and self.instance.pk:
             self.fields["username"].disabled = True
-            self.fields["password1"].required = False
-            self.fields["password2"].required = False
+            self.fields["password1"].required = True
+            self.fields["password2"].required = True
             # self.fields.pop("password1")
             # self.fields.pop("password2")
 
