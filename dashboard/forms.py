@@ -59,6 +59,18 @@ class UserCreateForm(UserCreationForm):
             "placeholder": "Confirm password",
         })
 
+         # UPDATE MODE
+        if self.instance and self.instance.pk:
+            self.fields["username"].disabled = True
+            self.fields["password1"].required = False
+            self.fields["password2"].required = False
+            # self.fields.pop("password1")
+            # self.fields.pop("password2")
+
+            self.fields["password1"].help_text = (
+                "Leave blank to keep the current password."
+            )
+
     def clean_username(self):
         username = self.cleaned_data.get("username")
 
