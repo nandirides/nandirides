@@ -1,184 +1,139 @@
 {% load static %}
 {% load navigation %}
 
-
 <aside
-    class="app-sidebar bg-body-secondary shadow"
-    data-bs-theme="dark"
+    class="app-sidebar bg-body-secondary border-end shadow-sm"
 >
-
-
     <!-- Brand -->
-
-    <div class="sidebar-brand">
-
+    <div class="sidebar-brand border-bottom">
         <a
             href="{% url 'dashboard' %}"
-            class="brand-link"
+            class="brand-link text-decoration-none d-flex align-items-center px-3 py-3"
         >
-
             <img
-                src="{% static 'adminlte/img/AdminLTELogo.png' %}"
+                src="{% static 'adminlte/img/logo.png' %}"
                 alt="Nandi Rides"
-                class="brand-image opacity-75 shadow"
+                class="brand-image rounded shadow-sm me-2"
+                width="38"
+                height="38"
             >
-
-            <span class="brand-text fw-light">
-                Nandi Rides
+            <span class="brand-text fw-semibold text-body">
+                NandiRides
             </span>
-
         </a>
-
     </div>
-
-            <!--begin::Sidebar Search-->
-        <div class="sidebar-search" role="search">
-          <label for="sidebar-search-input" class="visually-hidden">Filter menu</label>
-          <input
-            type="search"
-            id="sidebar-search-input"
-            class="form-control form-control-sm"
-            placeholder="Filter menu…"
-            autocomplete="off"
-            data-lte-toggle="sidebar-search"
-            data-lte-target="#navigation"
-          />
-          <p class="fs-7 text-secondary mt-2 mb-0" data-lte-search-empty role="status" hidden>
-            No matching pages.
-          </p>
+    <!-- Sidebar Search -->
+    <div class="px-3 pt-3">
+        <div
+            class="position-relative"
+            role="search"
+        >
+            <label
+                for="sidebar-search-input"
+                class="visually-hidden"
+            >
+                Filter menu
+            </label>
+            <input
+                type="search"
+                id="sidebar-search-input"
+                class="form-control form-control-sm rounded-pill bg-body border shadow-sm pe-5"
+                placeholder="Filter menu..."
+                autocomplete="off"
+                data-lte-toggle="sidebar-search"
+                data-lte-target="#navigation"
+                aria-label="Filter menu"
+            >
+            <span
+                class="position-absolute top-50 end-0 translate-middle-y me-3 text-body-secondary"
+            >
+                <i class="bi bi-search"></i>
+            </span>
         </div>
-        <!--end::Sidebar Search-->
-
-    <!-- Sidebar -->
-
-    <div class="sidebar-wrapper">
-
-        <nav class="mt-2">
-
+        <p
+            class="small text-body-secondary mt-2 mb-0 px-1"
+            data-lte-search-empty
+            role="status"
+            hidden
+        >
+            No matching pages.
+        </p>
+    </div>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar-wrapper mt-2">
+        <nav>
             <ul
-                class="nav sidebar-menu flex-column"
+                id="navigation"
+                class="nav sidebar-menu flex-column px-2 pb-3"
                 data-lte-toggle="treeview"
                 role="menu"
                 data-accordion="false"
             >
-
-
                 {% get_navigation as navigation %}
-
-
                 {% for item in navigation %}
-
-
                     {% if item.children %}
-
                         <!-- Parent Menu -->
-
-                        <li
-                            class="nav-item
-                            {% if item.open %}
-                                menu-open
-                            {% endif %}"
-                        >
-
+                        <li class="nav-item mb-1">
                             <a
                                 href="#"
-                                class="nav-link
+                                class="nav-link rounded-3 d-flex align-items-center py-2 px-3
                                 {% if item.active %}
                                     active
                                 {% endif %}"
                             >
-
                                 <i
-                                    class="nav-icon bi {{ item.icon }}"
+                                    class="nav-icon bi {{ item.icon }} fs-5 me-2"
                                 ></i>
-
-
-                                <p>
-
+                                <p class="mb-0 flex-grow-1">
                                     {{ item.title }}
-
-                                    <i
-                                        class="nav-arrow bi bi-chevron-right"
-                                    ></i>
-
                                 </p>
-
+                                <i
+                                    class="nav-arrow bi bi-chevron-right small"
+                                ></i>
                             </a>
-
-
                             <!-- Children -->
-
-                            <ul class="nav nav-treeview">
-
-
+                            <ul class="nav nav-treeview ms-2 mt-1">
                                 {% for child in item.children %}
-
-                                    <li class="nav-item">
-
+                                    <li class="nav-item mb-1">
                                         <a
                                             href="{% url child.url %}"
-                                            class="nav-link
+                                            class="nav-link rounded-3 d-flex align-items-center py-2 px-3
                                             {% if child.active %}
                                                 active
                                             {% endif %}"
                                         >
-
                                             <i
-                                                class="nav-icon bi {{ child.icon }}"
+                                                class="nav-icon bi {{ child.icon }} me-2"
                                             ></i>
-
-                                            <p>
+                                            <p class="mb-0">
                                                 {{ child.title }}
                                             </p>
-
                                         </a>
-
                                     </li>
-
                                 {% endfor %}
-
-
                             </ul>
-
                         </li>
-
-
                     {% else %}
-
                         <!-- Single Menu -->
-
-                        <li class="nav-item">
-
+                        <li class="nav-item mb-1">
                             <a
                                 href="{% url item.url %}"
-                                class="nav-link
+                                class="nav-link rounded-3 d-flex align-items-center py-2 px-3
                                 {% if item.active %}
                                     active
                                 {% endif %}"
                             >
-
                                 <i
-                                    class="nav-icon bi {{ item.icon }}"
+                                    class="nav-icon bi {{ item.icon }} fs-5 me-2"
                                 ></i>
-
-                                <p>
+                                <p class="mb-0">
                                     {{ item.title }}
                                 </p>
-
                             </a>
-
                         </li>
-
                     {% endif %}
-
-
                 {% endfor %}
-
-
             </ul>
-
         </nav>
-
     </div>
-
 </aside>

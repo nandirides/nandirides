@@ -355,7 +355,7 @@ class MyRide(forms.Form):
 class UserProfileForm(forms.Form):
     class Meta:
             model = User #UserProfile, UserAddress
-            fields = ['username','first_name', 'last_name']
+            fields = ['username','first_name', 'last_name', 'phone']
             # fields = ['profile_image','firstname', 'lastname', 'email', 'password','phone',
             #           'date_of_birth', 'gender', 'address', 'emergency_contact_name', 'emergency_contact_phone',
             #           'address_type', 'label', 'address_line1', 'address_line2', 'landmark', 'city', 'postal_code',

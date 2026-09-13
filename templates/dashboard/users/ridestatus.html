@@ -1,597 +1,502 @@
 {% extends "base.html" %}
-
-
 {% block title %}
     User Ride Status
 {% endblock %}
-
-
 {% block content %}
-
-<div class="card">
-
-    <div class="card-header">
-
-        <h3 class="card-title">
-            Users Ride Status
-        </h3>
-
-    </div>
-
-
-    <div class="card-body">
-
-        <div class="app-content">
-          <div class="container-fluid">
-            <!-- Summary cards -->
-            <div class="row g-3 mb-3">
-              <div class="col-md-3 col-6">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <p class="text-secondary small mb-1">Active Ride</p>
-                    <h3 class="mb-0 fw-bold">6</h3>
-                  </div>
+<div class="container-fluid py-3">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-2 p-md-3">
+            <!-- ================= PAGE HEADER ================= -->
+            <div class="bg-body-tertiary border rounded-3 p-3 mb-3">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-2">
+                            <i class="bi bi-geo-alt-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Users Ride Status</h5>
+                            <small class="text-body-secondary">Monitor and manage all active user rides</small>
+                        </div>
+                    </div>
+                    <span class="badge text-bg-primary rounded-pill px-3 py-2">
+                        <i class="bi bi-broadcast me-1"></i>
+                        Live Ride Monitoring
+                    </span>
                 </div>
-              </div>
-              <div class="col-md-3 col-6">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <p class="text-secondary small mb-1">On track</p>
-                    <h3 class="mb-0 fw-bold text-success">3</h3>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-6">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <p class="text-secondary small mb-1">At risk / delayed</p>
-                    <h3 class="mb-0 fw-bold text-warning">2</h3>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-6">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <p class="text-secondary small mb-1">Completed</p>
-                    <h3 class="mb-0 fw-bold text-secondary">1</h3>
-                  </div>
-                </div>
-              </div>
             </div>
-
-            <!-- Toolbar -->
-            <div class="card">
-              <div class="card-header d-flex flex-wrap gap-2 align-items-center">
-                <h3 class="card-title mb-0 me-auto">All Users</h3>
-                <div class="input-group input-group-sm" style="width: 16rem">
-                  <span class="input-group-text">
-                    <i class="bi bi-search" aria-hidden="true"></i>
-                  </span>
-                  <input
-                    type="search"
-                    class="form-control"
-                    placeholder="Search projects&hellip;"
-                    aria-label="Search projects"
-                  />
+            <!-- ================= STATISTICS ================= -->
+            <div class="row g-2 mb-3">
+                <div class="col-6 col-lg-3">
+                    <div class="card border-0 bg-primary bg-opacity-10 h-100 rounded-3">
+                        <div class="card-body p-2 p-md-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-body-secondary d-block">Active Rides</small>
+                                    <h5 class="fw-bold text-primary mb-1">6</h5>
+                                    <small class="text-primary">
+                                        <i class="bi bi-circle-fill small"></i>
+                                        Currently running
+                                    </small>
+                                </div>
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;">
+                                    <i class="bi bi-car-front-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <select
-                  class="form-select form-select-sm"
-                  style="width: 10rem"
-                  aria-label="Filter by status"
-                >
-                  <option value="">All statuses</option>
-                  <option>On track</option>
-                  <option>At risk</option>
-                  <option>Delayed</option>
-                  <option>Completed</option>
-                </select>
-                <button class="btn btn-primary btn-sm" type="button">
-                  <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
-                  New users
-                </button>
-              </div>
-              <div class="card-body p-0">
-                <div class="table-responsive">
-                  <table class="table align-middle mb-0">
-                    <thead>
-                      <tr>
-                        <th>Project</th>
-                        <th>Status</th>
-                        <th>Progress</th>
-                        <th>Team</th>
-                        <th>Budget</th>
-                        <th>Due</th>
-                        <th>Priority</th>
-                        <th class="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <a href="#" class="fw-semibold text-decoration-none">
-                            AdminLTE 4 Release
-                          </a>
-                          <div class="small text-secondary">Internal</div>
-                        </td>
-                        <td>
-                          <span class="badge text-bg-success"> On track </span>
-                        </td>
-                        <td style="min-width: 8rem">
-                          <div class="d-flex align-items-center gap-2">
-                            <div class="progress flex-grow-1" style="height: 6px">
-                              <div
-                                class="progress-bar bg-primary"
-                                role="progressbar"
-                                style="width: 78%"
-                                aria-valuenow="78"
-                                aria-valuemin="0"
-                                aria-valuemax="100"
-                              ></div>
+                <div class="col-6 col-lg-3">
+                    <div class="card border-0 bg-success bg-opacity-10 h-100 rounded-3">
+                        <div class="card-body p-2 p-md-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-body-secondary d-block">On Track</small>
+                                    <h5 class="fw-bold text-success mb-1">3</h5>
+                                    <small class="text-success">
+                                        <i class="bi bi-circle-fill small"></i>
+                                        Running smoothly
+                                    </small>
+                                </div>
+                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                </div>
                             </div>
-                            <small class="text-secondary" style="min-width: 2.25rem"> 78% </small>
-                          </div>
-                        </td>
-                        <td>
-                          <div class="d-inline-flex">
-                            <span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: 0;
-                              "
-                              title="JD"
-                            >
-                              JD </span
-                            ><span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-info-subtle text-info fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: -0.5rem;
-                              "
-                              title="OB"
-                            >
-                              OB </span
-                            ><span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-success-subtle text-success fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: -0.5rem;
-                              "
-                              title="DM"
-                            >
-                              DM
-                            </span>
-                          </div>
-                        </td>
-                        <td class="text-nowrap">$24,500</td>
-                        <td class="text-nowrap">Jun 14, 2026</td>
-                        <td>
-                          <span class="badge text-bg-danger"> High </span>
-                        </td>
-                        <td class="text-end">
-                          <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" type="button" title="View">
-                              <i class="bi bi-eye" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="Edit">
-                              <i class="bi bi-pencil" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="More">
-                              <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <a href="#" class="fw-semibold text-decoration-none">
-                            Marketing Site Redesign
-                          </a>
-                          <div class="small text-secondary">Acme Corp</div>
-                        </td>
-                        <td>
-                          <span class="badge text-bg-warning"> At risk </span>
-                        </td>
-                        <td style="min-width: 8rem">
-                          <div class="d-flex align-items-center gap-2">
-                            <div class="progress flex-grow-1" style="height: 6px">
-                              <div
-                                class="progress-bar bg-info"
-                                role="progressbar"
-                                style="width: 42%"
-                                aria-valuenow="42"
-                                aria-valuemin="0"
-                                aria-valuemax="100"
-                              ></div>
-                            </div>
-                            <small class="text-secondary" style="min-width: 2.25rem"> 42% </small>
-                          </div>
-                        </td>
-                        <td>
-                          <div class="d-inline-flex">
-                            <span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-info-subtle text-info fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: 0;
-                              "
-                              title="OB"
-                            >
-                              OB </span
-                            ><span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-warning-subtle text-warning fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: -0.5rem;
-                              "
-                              title="MR"
-                            >
-                              MR
-                            </span>
-                          </div>
-                        </td>
-                        <td class="text-nowrap">$48,000</td>
-                        <td class="text-nowrap">Jul 02, 2026</td>
-                        <td>
-                          <span class="badge text-bg-danger"> High </span>
-                        </td>
-                        <td class="text-end">
-                          <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" type="button" title="View">
-                              <i class="bi bi-eye" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="Edit">
-                              <i class="bi bi-pencil" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="More">
-                              <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <a href="#" class="fw-semibold text-decoration-none"> Mobile App v2 </a>
-                          <div class="small text-secondary">Nimbus Labs</div>
-                        </td>
-                        <td>
-                          <span class="badge text-bg-success"> On track </span>
-                        </td>
-                        <td style="min-width: 8rem">
-                          <div class="d-flex align-items-center gap-2">
-                            <div class="progress flex-grow-1" style="height: 6px">
-                              <div
-                                class="progress-bar bg-primary"
-                                role="progressbar"
-                                style="width: 61%"
-                                aria-valuenow="61"
-                                aria-valuemin="0"
-                                aria-valuemax="100"
-                              ></div>
-                            </div>
-                            <small class="text-secondary" style="min-width: 2.25rem"> 61% </small>
-                          </div>
-                        </td>
-                        <td>
-                          <div class="d-inline-flex">
-                            <span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: 0;
-                              "
-                              title="LC"
-                            >
-                              LC </span
-                            ><span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-danger-subtle text-danger fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: -0.5rem;
-                              "
-                              title="ED"
-                            >
-                              ED </span
-                            ><span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-secondary-subtle text-secondary fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: -0.5rem;
-                              "
-                              title="AF"
-                            >
-                              AF </span
-                            ><span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-info-subtle text-info fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: -0.5rem;
-                              "
-                              title="SK"
-                            >
-                              SK
-                            </span>
-                          </div>
-                        </td>
-                        <td class="text-nowrap">$92,500</td>
-                        <td class="text-nowrap">Aug 18, 2026</td>
-                        <td>
-                          <span class="badge text-bg-info"> Medium </span>
-                        </td>
-                        <td class="text-end">
-                          <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" type="button" title="View">
-                              <i class="bi bi-eye" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="Edit">
-                              <i class="bi bi-pencil" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="More">
-                              <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <a href="#" class="fw-semibold text-decoration-none">
-                            Analytics Pipeline
-                          </a>
-                          <div class="small text-secondary">Internal</div>
-                        </td>
-                        <td>
-                          <span class="badge text-bg-danger"> Delayed </span>
-                        </td>
-                        <td style="min-width: 8rem">
-                          <div class="d-flex align-items-center gap-2">
-                            <div class="progress flex-grow-1" style="height: 6px">
-                              <div
-                                class="progress-bar bg-warning"
-                                role="progressbar"
-                                style="width: 22%"
-                                aria-valuenow="22"
-                                aria-valuemin="0"
-                                aria-valuemax="100"
-                              ></div>
-                            </div>
-                            <small class="text-secondary" style="min-width: 2.25rem"> 22% </small>
-                          </div>
-                        </td>
-                        <td>
-                          <div class="d-inline-flex">
-                            <span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-success-subtle text-success fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: 0;
-                              "
-                              title="DM"
-                            >
-                              DM
-                            </span>
-                          </div>
-                        </td>
-                        <td class="text-nowrap">$12,000</td>
-                        <td class="text-nowrap">May 30, 2026</td>
-                        <td>
-                          <span class="badge text-bg-info"> Medium </span>
-                        </td>
-                        <td class="text-end">
-                          <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" type="button" title="View">
-                              <i class="bi bi-eye" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="Edit">
-                              <i class="bi bi-pencil" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="More">
-                              <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <a href="#" class="fw-semibold text-decoration-none">
-                            Brand Style Guide
-                          </a>
-                          <div class="small text-secondary">Riverhaus</div>
-                        </td>
-                        <td>
-                          <span class="badge text-bg-secondary"> Completed </span>
-                        </td>
-                        <td style="min-width: 8rem">
-                          <div class="d-flex align-items-center gap-2">
-                            <div class="progress flex-grow-1" style="height: 6px">
-                              <div
-                                class="progress-bar bg-success"
-                                role="progressbar"
-                                style="width: 100%"
-                                aria-valuenow="100"
-                                aria-valuemin="0"
-                                aria-valuemax="100"
-                              ></div>
-                            </div>
-                            <small class="text-secondary" style="min-width: 2.25rem"> 100% </small>
-                          </div>
-                        </td>
-                        <td>
-                          <div class="d-inline-flex">
-                            <span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-info-subtle text-info fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: 0;
-                              "
-                              title="OB"
-                            >
-                              OB </span
-                            ><span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-danger-subtle text-danger fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: -0.5rem;
-                              "
-                              title="ED"
-                            >
-                              ED
-                            </span>
-                          </div>
-                        </td>
-                        <td class="text-nowrap">$8,200</td>
-                        <td class="text-nowrap">May 09, 2026</td>
-                        <td>
-                          <span class="badge text-bg-secondary"> Low </span>
-                        </td>
-                        <td class="text-end">
-                          <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" type="button" title="View">
-                              <i class="bi bi-eye" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="Edit">
-                              <i class="bi bi-pencil" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="More">
-                              <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <a href="#" class="fw-semibold text-decoration-none">
-                            Onboarding Email Flow
-                          </a>
-                          <div class="small text-secondary">Acme Corp</div>
-                        </td>
-                        <td>
-                          <span class="badge text-bg-success"> On track </span>
-                        </td>
-                        <td style="min-width: 8rem">
-                          <div class="d-flex align-items-center gap-2">
-                            <div class="progress flex-grow-1" style="height: 6px">
-                              <div
-                                class="progress-bar bg-info"
-                                role="progressbar"
-                                style="width: 55%"
-                                aria-valuenow="55"
-                                aria-valuemin="0"
-                                aria-valuemax="100"
-                              ></div>
-                            </div>
-                            <small class="text-secondary" style="min-width: 2.25rem"> 55% </small>
-                          </div>
-                        </td>
-                        <td>
-                          <div class="d-inline-flex">
-                            <span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-warning-subtle text-warning fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: 0;
-                              "
-                              title="MR"
-                            >
-                              MR </span
-                            ><span
-                              class="rounded-circle d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary fw-semibold"
-                              style="
-                                width: 1.75rem;
-                                height: 1.75rem;
-                                font-size: 0.7rem;
-                                border: 2px solid var(--bs-body-bg);
-                                margin-left: -0.5rem;
-                              "
-                              title="JD"
-                            >
-                              JD
-                            </span>
-                          </div>
-                        </td>
-                        <td class="text-nowrap">$6,800</td>
-                        <td class="text-nowrap">Jun 22, 2026</td>
-                        <td>
-                          <span class="badge text-bg-secondary"> Low </span>
-                        </td>
-                        <td class="text-end">
-                          <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" type="button" title="View">
-                              <i class="bi bi-eye" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="Edit">
-                              <i class="bi bi-pencil" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" title="More">
-                              <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="card-footer d-flex justify-content-between align-items-center">
-                <small class="text-secondary"> Showing 6 of 6 </small>
-                <nav aria-label="Pagination">
-                  <ul class="pagination pagination-sm mb-0">
-                    <li class="page-item disabled">
-                      <a class="page-link" href="#">Previous</a>
-                    </li>
-                    <li class="page-item active">
-                      <a class="page-link" href="#">1</a>
-                    </li>
-                    <li class="page-item disabled">
-                      <a class="page-link" href="#">Next</a>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card border-0 bg-warning bg-opacity-10 h-100 rounded-3">
+                        <div class="card-body p-2 p-md-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-body-secondary d-block">Delayed</small>
+                                    <h5 class="fw-bold text-warning mb-1">2</h5>
+                                    <small class="text-warning">
+                                        <i class="bi bi-exclamation-circle-fill small"></i>
+                                        Need attention
+                                    </small>
+                                </div>
+                                <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;">
+                                    <i class="bi bi-clock-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card border-0 bg-secondary bg-opacity-10 h-100 rounded-3">
+                        <div class="card-body p-2 p-md-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-body-secondary d-block">Completed</small>
+                                    <h5 class="fw-bold text-secondary mb-1">1</h5>
+                                    <small class="text-secondary">
+                                        <i class="bi bi-check-circle-fill small"></i>
+                                        Successfully completed
+                                    </small>
+                                </div>
+                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;">
+                                    <i class="bi bi-flag-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+            <!-- ================= RIDE TABLE ================= -->
+            <div class="card border rounded-3 shadow-sm">
+                <div class="card-header bg-body border-0 p-2 p-md-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <h6 class="fw-bold mb-0">
+                                <i class="bi bi-list-ul text-primary me-1"></i>
+                                All User Rides
+                            </h6>
+                            <span class="badge text-bg-primary rounded-pill">5</span>
+                        </div>
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-body">
+                                    <i class="bi bi-search text-body-secondary"></i>
+                                </span>
+                                <input type="search" id="rideSearch" class="form-control" placeholder="Search ride...">
+                            </div>
+                            <select id="statusFilter" class="form-select form-select-sm">
+                                <option value="all">All Statuses</option>
+                                <option value="on track">On Track</option>
+                                <option value="delayed">Delayed</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                            <button type="button" class="btn btn-sm btn-primary text-nowrap" id="refreshRides">
+                                <i class="bi bi-arrow-clockwise me-1"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0" id="rideTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-nowrap ps-3">Ride ID</th>
+                                    <th class="text-nowrap">User</th>
+                                    <th class="text-nowrap d-none d-md-table-cell">Pickup</th>
+                                    <th class="text-nowrap d-none d-md-table-cell">Destination</th>
+                                    <th class="text-nowrap">Type</th>
+                                    <th class="text-nowrap d-none d-lg-table-cell">Progress</th>
+                                    <th class="text-nowrap">Status</th>
+                                    <th class="text-nowrap text-center pe-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="ps-3">
+                                        <span class="fw-bold text-primary small">NR10001</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px;height:28px;">
+                                                <small class="fw-bold">AS</small>
+                                            </div>
+                                            <div class="min-width-0">
+                                                <div class="fw-semibold small text-truncate">Sadhna Sharma</div>
+                                                <small class="text-body-secondary d-block">Customer</small>
+                                                <small class="text-body-secondary d-md-none text-truncate d-block">Railway Station → City Mall</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>
+                                            <i class="bi bi-geo-alt-fill text-primary me-1"></i>
+                                            Railway Station
+                                        </small>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>
+                                            <i class="bi bi-geo-fill text-success me-1"></i>
+                                            City Mall
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">
+                                            <i class="bi bi-bicycle me-1"></i>
+                                            Bike
+                                        </span>
+                                    </td>
+                                    <td class="d-none d-lg-table-cell">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height:5px;min-width:45px;">
+                                                <div class="progress-bar bg-success" style="width:78%;"></div>
+                                            </div>
+                                            <small class="fw-semibold">78%</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-success rounded-pill d-none d-sm-inline">On Track</span>
+                                        <span class="badge text-bg-success rounded-pill d-sm-none">Track</span>
+                                    </td>
+                                    <td class="text-center pe-3">
+                                        <a
+                                        href="{% url 'ride_details' %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="View User"
+                                    >
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3">
+                                        <span class="fw-bold text-primary small">NR10002</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px;height:28px;">
+                                                <small class="fw-bold">RK</small>
+                                            </div>
+                                            <div class="min-width-0">
+                                                <div class="fw-semibold small text-truncate">Km Tulsi</div>
+                                                <small class="text-body-secondary d-block">Customer</small>
+                                                <small class="text-body-secondary d-md-none text-truncate d-block">Civil Lines → Airport</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>
+                                            <i class="bi bi-geo-alt-fill text-primary me-1"></i>
+                                            Civil Lines
+                                        </small>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>
+                                            <i class="bi bi-geo-fill text-success me-1"></i>
+                                            Airport
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill">
+                                            <i class="bi bi-car-front-fill me-1"></i>
+                                            Sedan
+                                        </span>
+                                    </td>
+                                    <td class="d-none d-lg-table-cell">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height:5px;min-width:45px;">
+                                                <div class="progress-bar bg-warning" style="width:42%;"></div>
+                                            </div>
+                                            <small class="fw-semibold">42%</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-warning rounded-pill d-none d-sm-inline">Delayed</span>
+                                        <span class="badge text-bg-warning rounded-pill d-sm-none">Delay</span>
+                                    </td>
+                                    <td class="text-center pe-3">
+                                        <a
+                                        href="{% url 'ride_details' %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="View User"
+                                    >
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3">
+                                        <span class="fw-bold text-primary small">NR10003</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px;height:28px;">
+                                                <small class="fw-bold">PS</small>
+                                            </div>
+                                            <div class="min-width-0">
+                                                <div class="fw-semibold small text-truncate">Priya Singh</div>
+                                                <small class="text-body-secondary d-block">Customer</small>
+                                                <small class="text-body-secondary d-md-none text-truncate d-block">Mall Road → Bus Stand</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>
+                                            <i class="bi bi-geo-alt-fill text-primary me-1"></i>
+                                            Mall Road
+                                        </small>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>
+                                            <i class="bi bi-geo-fill text-success me-1"></i>
+                                            Bus Stand
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill">
+                                            <i class="bi bi-bicycle me-1"></i>
+                                            Bike
+                                        </span>
+                                    </td>
+                                    <td class="d-none d-lg-table-cell">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height:5px;min-width:45px;">
+                                                <div class="progress-bar bg-success" style="width:61%;"></div>
+                                            </div>
+                                            <small class="fw-semibold">61%</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-success rounded-pill d-none d-sm-inline">On Track</span>
+                                        <span class="badge text-bg-success rounded-pill d-sm-none">Track</span>
+                                    </td>
+                                    <td class="text-center pe-3">
+                                        <a
+                                        href="{% url 'ride_details' %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="View User"
+                                    >
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3">
+                                        <span class="fw-bold text-primary small">NR10004</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px;height:28px;">
+                                                <small class="fw-bold">VK</small>
+                                            </div>
+                                            <div class="min-width-0">
+                                                <div class="fw-semibold small text-truncate">Vikas Kumar</div>
+                                                <small class="text-body-secondary d-block">Customer</small>
+                                                <small class="text-body-secondary d-md-none text-truncate d-block">Kanpur Central → Swaroop Nagar</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>
+                                            <i class="bi bi-geo-alt-fill text-primary me-1"></i>
+                                            Kanpur Central
+                                        </small>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>
+                                            <i class="bi bi-geo-fill text-success me-1"></i>
+                                            Swaroop Nagar
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill">
+                                            <i class="bi bi-bicycle me-1"></i>
+                                            Auto
+                                        </span>
+                                    </td>
+                                    <td class="d-none d-lg-table-cell">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height:5px;min-width:45px;">
+                                                <div class="progress-bar bg-warning" style="width:22%;"></div>
+                                            </div>
+                                            <small class="fw-semibold">22%</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-warning rounded-pill d-none d-sm-inline">Delayed</span>
+                                        <span class="badge text-bg-warning rounded-pill d-sm-none">Delay</span>
+                                    </td>
+                                    <td class="text-center pe-3">
+                                        <a
+                                        href="{% url 'ride_details' %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="View User"
+                                    >
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3">
+                                        <span class="fw-bold text-primary small">NR10005</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:28px;height:28px;">
+                                                <small class="fw-bold">AS</small>
+                                            </div>
+                                            <div class="min-width-0">
+                                                <div class="fw-semibold small text-truncate">Anjali Sharma</div>
+                                                <small class="text-body-secondary d-block">Customer</small>
+                                                <small class="text-body-secondary d-md-none text-truncate d-block">City Mall → Railway Station</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>
+                                            <i class="bi bi-geo-alt-fill text-primary me-1"></i>
+                                            City Mall
+                                        </small>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">
+                                        <small>
+                                            <i class="bi bi-geo-fill text-success me-1"></i>
+                                            Railway Station
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info bg-opacity-10 text-info rounded-pill">
+                                            <i class="bi bi-car-front-fill me-1"></i>
+                                            Sedan
+                                        </span>
+                                    </td>
+                                    <td class="d-none d-lg-table-cell">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height:5px;min-width:45px;">
+                                                <div class="progress-bar bg-success" style="width:100%;"></div>
+                                            </div>
+                                            <small class="fw-semibold">100%</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-secondary rounded-pill d-none d-sm-inline">Completed</span>
+                                        <span class="badge text-bg-secondary rounded-pill d-sm-none">Done</span>
+                                    </td>
+                                    <td class="text-center pe-3">
+                                        <a
+                                        href="{% url 'ride_details' %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="View User"
+                                    >
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- ================= PAGINATION ================= -->
+                <div class="card-footer bg-body border-0 px-2 px-md-3 py-2">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                        <small class="text-body-secondary">Showing 5 rides</small>
+                        <nav aria-label="Ride pagination">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" aria-label="Previous">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">1</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">3</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" aria-label="Next">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
         </div>
-
     </div>
-
 </div>
-
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("rideSearch");
+    const statusFilter = document.getElementById("statusFilter");
+    const refreshButton = document.getElementById("refreshRides");
+    const rows = document.querySelectorAll("#rideTable tbody tr");
+    function filterRides() {
+        const searchValue = searchInput.value.toLowerCase().trim();
+        const statusValue = statusFilter.value.toLowerCase();
+        rows.forEach(function (row) {
+            const rowText = row.innerText.toLowerCase();
+            const statusCell = row.querySelector("td:nth-child(7)");
+            const rowStatus = statusCell ? statusCell.innerText.toLowerCase().trim() : "";
+            const searchMatch = rowText.includes(searchValue);
+            const statusMatch = statusValue === "all" || rowStatus.includes(statusValue);
+            row.style.display = searchMatch && statusMatch ? "" : "none";
+        });
+    }
+    searchInput.addEventListener("input", filterRides);
+    statusFilter.addEventListener("change", filterRides);
+    refreshButton.addEventListener("click", function () {
+        const icon = refreshButton.querySelector("i");
+        icon.classList.add("bi-arrow-repeat");
+        refreshButton.disabled = true;
+        setTimeout(function () {
+            icon.classList.remove("bi-arrow-repeat");
+            refreshButton.disabled = false;
+            filterRides();
+        }, 700);
+    });
+});
+</script>
 {% endblock %}

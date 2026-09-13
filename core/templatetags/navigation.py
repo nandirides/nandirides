@@ -15,7 +15,7 @@ NAVIGATION = [
     {
             "title": "Admin Profile",
             "icon": "bi-person",
-            "url": "user_profile",
+            "url": "admin_profile",
             "permission": 'auth.user_profile',
     },
 
@@ -27,7 +27,7 @@ NAVIGATION = [
     },
 
     {
-            "title": "User Ride Status",
+            "title": "Ride Status",
             "icon": "bi-scooter",
             "url": "user_ridestatus",
             "permission": 'auth.user_ridestatus',

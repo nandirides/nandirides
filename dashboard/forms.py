@@ -7,12 +7,23 @@ from dashboard.models import Gallery
 class UserCreateForm(UserCreationForm):
 
     email = forms.EmailField(
-        required=True,
-        widget=forms.EmailInput(attrs={
-            "class": "form-control",
-            "placeholder": "Email address",
-        })
-    )
+            required=True,
+            widget=forms.EmailInput(attrs={
+                "class": "form-control",
+                "placeholder": "Email address",
+            })
+        )
+
+
+    # phone = forms.CharField(
+    #     required=True,
+    #     widget=forms.NumberInput(
+    #         attrs={
+    #             "class": "form-control",
+    #             "placeholder": "Mobile Number",
+    #         })
+    #     )
+
 
     first_name = forms.CharField(
         required=False,
@@ -36,6 +47,7 @@ class UserCreateForm(UserCreationForm):
             "username",
             "first_name",
             "last_name",
+            # "phone",
             "email",
             "password1",
             "password2",

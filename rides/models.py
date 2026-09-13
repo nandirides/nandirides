@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-
 from core.models import TimeStampedModel
 from drivers.models import Driver
 from locations.models import Location
