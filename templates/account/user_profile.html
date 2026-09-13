@@ -1,0 +1,528 @@
+{% extends "base.html" %}
+{% block title %}
+NandiRide | User Profile
+{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb px-3 py-2 mb-0">
+        <li class="breadcrumb-item">
+            <a href="{% url 'user-dashboard' %}" class="text-decoration-none">
+                <i class="bi bi-house-door-fill me-1"></i>
+                Dashboard
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            Users
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            User Profile
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="container-fluid py-3 py-md-4">
+    <!-- ===================== PAGE HEADER ===================== -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        User Profile
+                    </h2>
+                    <p class="text-body-secondary mb-0">
+                        View and manage NandiRide user information
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a
+                        href="{% url 'user_list' %}"
+                        class="btn btn-outline-primary"
+                    >
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Back to Users
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ===================== PROFILE HEADER ===================== -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="bg-primary bg-gradient" style="height: 120px;"></div>
+                <div class="card-body p-4 pt-0">
+                    <div class="row align-items-end">
+                        <div class="col-12 col-md-auto text-center text-md-start">
+                            <div class="position-relative d-inline-block">
+                                {% if user.profile_image %}
+                                    <img
+                                        src="{{ user.profile_image.url }}"
+                                        alt="{{ user.get_username }}"
+                                        class="rounded-circle border border-5 border-body shadow"
+                                        style="width: 130px; height: 130px; object-fit: cover; margin-top: -65px;"
+                                    >
+                                {% else %}
+                                    <div
+                                        class="rounded-circle border border-5 border-body shadow bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+                                        style="width: 130px; height: 130px; margin-top: -65px;"
+                                    >
+                                        <i class="bi bi-person-fill display-3"></i>
+                                    </div>
+                                {% endif %}
+                                <span
+                                    class="position-absolute bottom-0 end-0 bg-success border border-3 border-body rounded-circle"
+                                    style="width: 22px; height: 22px;"
+                                ></span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md pt-3 pt-md-0 text-center text-md-start">
+                            <div class="d-flex flex-column flex-lg-row align-items-center align-items-lg-end justify-content-between gap-3">
+                                <div>
+                                    <h3 class="fw-bold mb-1">
+                                        {% if user.get_full_name %}
+                                            {{ user.get_full_name }}
+                                        {% else %}
+                                            {{ user.get_username }}
+                                        {% endif %}
+                                    </h3>
+                                    <p class="text-body-secondary mb-2">
+                                        <i class="bi bi-person-circle me-1"></i>
+                                        @{{ user.get_username }}
+                                    </p>
+                                    {% if user.is_active %}
+                                        <span class="badge text-bg-success px-3 py-2">
+                                            <i class="bi bi-check-circle-fill me-1"></i>
+                                            Active Account
+                                        </span>
+                                    {% else %}
+                                        <span class="badge text-bg-secondary px-3 py-2">
+                                            <i class="bi bi-pause-circle-fill me-1"></i>
+                                            Inactive Account
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-center text-lg-end">
+                                    <small class="text-body-secondary d-block">
+                                        Member Since
+                                    </small>
+                                    <strong>
+                                        {{ user.date_joined|date:"d M Y" }}
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ===================== MAIN PROFILE INFORMATION ===================== -->
+    <div class="row g-3 g-lg-4">
+        <!-- ===================== PERSONAL INFORMATION ===================== -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-body border-0 p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-primary-subtle text-primary rounded-3 p-2">
+                            <i class="bi bi-person-vcard-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Personal Information
+                            </h5>
+                            <small class="text-body-secondary">
+                                Basic user details
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <small class="text-body-secondary d-block mb-1">
+                                First Name
+                            </small>
+                            <span class="fw-semibold">
+                                {{ user.first_name|default:"Rahul" }}
+                            </span>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <small class="text-body-secondary d-block mb-1">
+                                Last Name
+                            </small>
+                            <span class="fw-semibold">
+                                {{ user.last_name|default:"Sharma" }}
+                            </span>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <small class="text-body-secondary d-block mb-1">
+                                Date of Birth
+                            </small>
+                            <span class="fw-semibold">
+                                {% if user.date_of_birth %}
+                                    {{ user.date_of_birth|date:"d M Y" }}
+                                {% else %}
+                                    Not provided
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <small class="text-body-secondary d-block mb-1">
+                                Gender
+                            </small>
+                            <span class="fw-semibold">
+                                {{ user.gender|default:"Not provided" }}
+                            </span>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-body-secondary d-block mb-1">
+                                User ID
+                            </small>
+                            <span class="fw-semibold">
+                                #{{ user.id }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ===================== CONTACT INFORMATION ===================== -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-body border-0 p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-info-subtle text-info rounded-3 p-2">
+                            <i class="bi bi-person-lines-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Contact Information
+                            </h5>
+                            <small class="text-body-secondary">
+                                Email and contact details
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <small class="text-body-secondary d-block mb-1">
+                                Email Address
+                            </small>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-envelope-fill text-primary"></i>
+                                <span class="fw-semibold text-break">
+                                    {{ user.email|default:"Not provided" }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-body-secondary d-block mb-1">
+                                Mobile Number
+                            </small>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-phone-fill text-primary"></i>
+                                <span class="fw-semibold">
+                                    {{ user.mobilenumber|default:"Not provided" }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-body-secondary d-block mb-1">
+                                Emergency Contact
+                            </small>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-telephone-fill text-warning"></i>
+                                <span class="fw-semibold">
+                                    {{ user.emergency_contact_phone|default:"Not provided" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ===================== ADDRESS INFORMATION ===================== -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-body border-0 p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-warning-subtle text-warning rounded-3 p-2">
+                            <i class="bi bi-geo-alt-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Address Information
+                            </h5>
+                            <small class="text-body-secondary">
+                                User's saved address
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex gap-3">
+                        <div class="bg-primary-subtle text-primary rounded-circle p-3 flex-shrink-0">
+                            <i class="bi bi-house-fill fs-5"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h6 class="fw-bold mb-2">
+                                Home Address
+                            </h6>
+                            <p class="text-body-secondary mb-1 text-break">
+                                {{ user.address|default:"Address not provided" }}
+                            </p>
+                            <p class="text-body-secondary mb-1">
+                                {{ user.city|default:"City not provided" }}
+                            </p>
+                            <p class="text-body-secondary mb-0">
+                                {{ user.postal_code|default:"Postal code not provided" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ===================== ACCOUNT STATUS ===================== -->
+        <div class="col-12 col-xl-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-body border-0 p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-success-subtle text-success rounded-3 p-2">
+                            <i class="bi bi-shield-check fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Account Status
+                            </h5>
+                            <small class="text-body-secondary">
+                                Account security and activity
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3 gap-3">
+                        <div>
+                            <span class="text-body-secondary">
+                                Account Status
+                            </span>
+                        </div>
+                        {% if user.is_active %}
+                            <span class="badge text-bg-success">
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="badge text-bg-secondary">
+                                Inactive
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3 gap-3">
+                        <div>
+                            <span class="text-body-secondary">
+                                Email Verification
+                            </span>
+                        </div>
+                        <span class="badge text-bg-success">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Verified
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3 gap-3">
+                        <div>
+                            <span class="text-body-secondary">
+                                Phone Verification
+                            </span>
+                        </div>
+                        <span class="badge text-bg-success">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Verified
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center gap-3">
+                        <div>
+                            <span class="text-body-secondary">
+                                Last Login
+                            </span>
+                        </div>
+                        <span class="fw-semibold">
+                            {% if user.last_login %}
+                                {{ user.last_login|date:"d M Y, h:i A" }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ===================== PROFILE ACTIONS ===================== -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                        <div>
+                            <h6 class="fw-bold mb-1">
+                                Profile Management
+                            </h6>
+                            <small class="text-body-secondary">
+                                Manage this user's account
+                            </small>
+                        </div>
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            <a
+                                href="#"
+                                class="btn btn-outline-primary"
+                            >
+                                <i class="bi bi-pencil-square me-1"></i>
+                                Edit Profile
+                            </a>
+                            {% if user.is_active %}
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-warning"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deactivateUserModal"
+                                >
+                                    <i class="bi bi-person-dash me-1"></i>
+                                    Deactivate
+                                </button>
+                            {% else %}
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-success"
+                                >
+                                    <i class="bi bi-person-check me-1"></i>
+                                    Activate
+                                </button>
+                            {% endif %}
+                            <button
+                                type="button"
+                                class="btn btn-outline-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteUserModal"
+                            >
+                                <i class="bi bi-trash3 me-1"></i>
+                                Delete User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ===================== DEACTIVATE MODAL ===================== -->
+<div
+    class="modal fade"
+    id="deactivateUserModal"
+    tabindex="-1"
+    aria-labelledby="deactivateUserModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="deactivateUserModalLabel">
+                    Deactivate User
+                </h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-3">
+                    <div
+                        class="bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                        style="width: 70px; height: 70px;"
+                    >
+                        <i class="bi bi-person-dash-fill fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold">
+                        Deactivate this account?
+                    </h5>
+                    <p class="text-body-secondary mb-0">
+                        The user will no longer be able to access the NandiRide platform.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-light border"
+                    data-bs-dismiss="modal"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-warning"
+                >
+                    Deactivate User
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ===================== DELETE MODAL ===================== -->
+<div
+    class="modal fade"
+    id="deleteUserModal"
+    tabindex="-1"
+    aria-labelledby="deleteUserModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="deleteUserModalLabel">
+                    Delete User
+                </h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-3">
+                    <div
+                        class="bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                        style="width: 70px; height: 70px;"
+                    >
+                        <i class="bi bi-trash3-fill fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold">
+                        Delete this user permanently?
+                    </h5>
+                    <p class="text-body-secondary mb-0">
+                        This action cannot be undone. All user-related data may be permanently removed.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-light border"
+                    data-bs-dismiss="modal"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                >
+                    Delete User
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

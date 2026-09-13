@@ -1,186 +1,262 @@
 {% extends "base.html" %}
-
-{% block title %}Add User{% endblock %}
-
+{% block title %}
+    {% if user_obj %}
+        Update User
+    {% else %}
+        Add User
+    {% endif %}
+{% endblock %}
 {% block content %}
-
-<div class="container-fluid">
-    <!-- Form Card -->
-    <div class="card card-primary">
-
-        <div class="card-header">
-            <h3 class="card-title">
-                {% if user_obj %}
-                    <i class="bi bi-pencil"></i>
-                    Edit User
-                {% else %}
-                    <i class="bi bi-person-plus"></i>
-                    Add User
-                {% endif %}
-            </h3>
-        </div>
-
-        <form method="post" novalidate>
-
-            {% csrf_token %}
-
-            <div class="card-body">
-
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {{ form.non_field_errors }}
-                    </div>
-                {% endif %}
-
-
-                <div class="row">
-
-                    <!-- Username -->
-                    <div class="col-md-6 mb-3">
-
-                        <label for="{{ form.username.id_for_label }}"
-                               class="form-label">
-                            Username
-                        </label>
-
-                        {{ form.username }}
-
-                        {% if form.username.errors %}
-                            <div class="text-danger small">
-                                {{ form.username.errors }}
+<div class="container-fluid py-3 py-md-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10 col-xxl-9">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <!-- ===================== CARD HEADER ===================== -->
+                <div class="card-header bg-body border-bottom p-3 p-md-4">
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div
+                                class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                style="width:52px;height:52px;"
+                            >
+                                <i class="bi bi-person-vcard-fill fs-4"></i>
                             </div>
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- Email -->
-                    <div class="col-md-6 mb-3">
-
-                        <label for="{{ form.email.id_for_label }}"
-                               class="form-label">
-                            Email
-                        </label>
-
-                        {{ form.email }}
-
-                        {% if form.email.errors %}
-                            <div class="text-danger small">
-                                {{ form.email.errors }}
+                            <div>
+                                <h4 class="fw-bold mb-1">
+                                    {% if user_obj %}
+                                        Update User
+                                    {% else %}
+                                        Add User
+                                    {% endif %}
+                                </h4>
+                                <p class="text-body-secondary mb-0 small">
+                                    {% if user_obj %}
+                                        Update account information and security details
+                                    {% else %}
+                                        Create a new user account
+                                    {% endif %}
+                                </p>
                             </div>
-                        {% endif %}
-
+                        </div>
+                        <a
+                            href="{% url 'user_list' %}"
+                            class="btn btn-outline-secondary btn-sm px-3 align-self-start align-self-sm-center"
+                        >
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Back to Users
+                        </a>
                     </div>
-
-
-                    <!-- First Name -->
-                    <div class="col-md-6 mb-3">
-
-                        <label for="{{ form.first_name.id_for_label }}"
-                               class="form-label">
-                            First Name
-                        </label>
-
-                        {{ form.first_name }}
-
-                        {% if form.first_name.errors %}
-                            <div class="text-danger small">
-                                {{ form.first_name.errors }}
-                            </div>
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- Last Name -->
-                    <div class="col-md-6 mb-3">
-
-                        <label for="{{ form.last_name.id_for_label }}"
-                               class="form-label">
-                            Last Name
-                        </label>
-
-                        {{ form.last_name }}
-
-                        {% if form.last_name.errors %}
-                            <div class="text-danger small">
-                                {{ form.last_name.errors }}
-                            </div>
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- Password -->
-                    <div class="col-md-6 mb-3">
-
-                        <label for="{{ form.password1.id_for_label }}"
-                               class="form-label">
-                            Password
-                        </label>
-
-                        {{ form.password1 }}
-
-                        {% if form.password1.errors %}
-                            <div class="text-danger small">
-                                {{ form.password1.errors }}
-                            </div>
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- Confirm Password -->
-                    <div class="col-md-6 mb-3">
-
-                        <label for="{{ form.password2.id_for_label }}"
-                               class="form-label">
-                            Confirm Password
-                        </label>
-
-                        {{ form.password2 }}
-
-                        {% if form.password2.errors %}
-                            <div class="text-danger small">
-                                {{ form.password2.errors }}
-                            </div>
-                        {% endif %}
-
-                    </div>
-
                 </div>
-
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="card-body p-3 p-md-4 p-lg-5">
+                        {% if form.non_field_errors %}
+                        <div
+                            class="alert alert-danger d-flex align-items-start gap-2 rounded-3 shadow-sm"
+                            role="alert"
+                        >
+                            <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+                            <div>
+                                {{ form.non_field_errors }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <!-- ===================== ACCOUNT INFORMATION ===================== -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 border-bottom pb-3 mb-4">
+                                <div
+                                    class="bg-primary-subtle text-primary rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                                    style="width:38px;height:38px;"
+                                >
+                                    <i class="bi bi-person-vcard-fill"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-0">
+                                        Account Information
+                                    </h5>
+                                    <small class="text-body-secondary">
+                                        Basic account details
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row g-3 g-md-4">
+                                <div class="col-12 col-md-6">
+                                    <label
+                                        for="{{ form.username.id_for_label }}"
+                                        class="form-label fw-semibold"
+                                    >
+                                        <i class="bi bi-person me-1 text-primary"></i>
+                                        Username
+                                    </label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        {{ form.username.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label
+                                        for="{{ form.email.id_for_label }}"
+                                        class="form-label fw-semibold"
+                                    >
+                                        <i class="bi bi-envelope me-1 text-primary"></i>
+                                        Email
+                                    </label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        {{ form.email.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ===================== PERSONAL INFORMATION ===================== -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 border-bottom pb-3 mb-4">
+                                <div
+                                    class="bg-info-subtle text-info rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                                    style="width:38px;height:38px;"
+                                >
+                                    <i class="bi bi-person-lines-fill"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-0">
+                                        Personal Information
+                                    </h5>
+                                    <small class="text-body-secondary">
+                                        User's personal details
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row g-3 g-md-4">
+                                <div class="col-12 col-md-6">
+                                    <label
+                                        for="{{ form.first_name.id_for_label }}"
+                                        class="form-label fw-semibold"
+                                    >
+                                        <i class="bi bi-person me-1 text-info"></i>
+                                        First Name
+                                    </label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        {{ form.first_name.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label
+                                        for="{{ form.last_name.id_for_label }}"
+                                        class="form-label fw-semibold"
+                                    >
+                                        <i class="bi bi-person me-1 text-info"></i>
+                                        Last Name
+                                    </label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        {{ form.last_name.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ===================== SECURITY ===================== -->
+                        <div>
+                            <div class="d-flex align-items-center gap-2 border-bottom pb-3 mb-4">
+                                <div
+                                    class="bg-warning-subtle text-warning-emphasis rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                                    style="width:38px;height:38px;"
+                                >
+                                    <i class="bi bi-shield-lock-fill"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-0">
+                                        Security
+                                    </h5>
+                                    <small class="text-body-secondary">
+                                        Set account password securely
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row g-3 g-md-4">
+                                <div class="col-12 col-md-6">
+                                    <label
+                                        for="{{ form.password1.id_for_label }}"
+                                        class="form-label fw-semibold"
+                                    >
+                                        <i class="bi bi-key me-1 text-warning-emphasis"></i>
+                                        Password
+                                    </label>
+                                    {{ form.password1 }}
+                                    {% if form.password1.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        {{ form.password1.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label
+                                        for="{{ form.password2.id_for_label }}"
+                                        class="form-label fw-semibold"
+                                    >
+                                        <i class="bi bi-key-fill me-1 text-warning-emphasis"></i>
+                                        Confirm Password
+                                    </label>
+                                    {{ form.password2 }}
+                                    {% if form.password2.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        {{ form.password2.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ===================== FORM ACTIONS ===================== -->
+                    <div class="card-footer bg-body-tertiary border-top p-3 p-md-4">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-2">
+                            <a
+                                href="{% url 'user_list' %}"
+                                class="btn btn-outline-secondary px-4"
+                            >
+                                <i class="bi bi-x-circle me-1"></i>
+                                Cancel
+                            </a>
+                            <div class="d-flex flex-column flex-sm-row gap-2">
+                                <button
+                                    type="reset"
+                                    class="btn btn-outline-secondary px-4"
+                                >
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>
+                                    Reset
+                                </button>
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary px-4"
+                                >
+                                    {% if user_obj %}
+                                        <i class="bi bi-check-circle-fill me-1"></i>
+                                        Update User
+                                    {% else %}
+                                        <i class="bi bi-person-plus-fill me-1"></i>
+                                        Create User
+                                    {% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
-
-
-            <!-- Footer -->
-            <div class="card-footer">
-
-                <button type="submit"
-                        class="btn btn-primary">
-                    {% if user_obj %}
-                    Update
-                    {% else %}
-                    <i class="bi bi-person-plus"></i>
-                    Create User
-                    {% endif %}
-
-                </button>
-
-                <a href="{% url 'user_list' %}"
-                   class="btn btn-secondary">
-
-                    <i class="bi bi-arrow-left"></i>
-                    Cancel
-
-                </a>
-
-            </div>
-
-        </form>
-
+        </div>
     </div>
-
 </div>
-
 {% endblock %}

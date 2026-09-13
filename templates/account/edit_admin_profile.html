@@ -1,0 +1,667 @@
+{% extends "base.html" %}
+{% block title %}
+    Edit Admin Profile
+{% endblock %}
+{% block breadcrumb %}
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-sm-6">
+                <h3 class="mb-0 fw-bold">
+                    <i class="bi bi-person-gear text-primary me-2"></i>
+                    Edit Admin Profile
+                </h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'admin_profile' %}" class="text-decoration-none">
+                            Admin Profile
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        <a href="{% url 'edit_admin_profile' %}" class="text-decoration-none">
+                            Edit Profile
+                        </a>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="container-fluid py-3 py-md-4">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-4">
+            <!-- ===================== LEFT COLUMN ===================== -->
+            <div class="col-12 col-xl-4">
+                <!-- Profile Card -->
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                    <div class="bg-primary bg-gradient text-white text-center p-4">
+                        <div class="position-relative d-inline-block mb-3">
+                            {% if user.profile_image %}
+                                <img
+                                    src="{{ user.profile_image.url }}"
+                                    alt="Admin Profile"
+                                    class="rounded-circle border border-4 border-white shadow"
+                                    style="width:140px;height:140px;object-fit:cover;"
+                                >
+                            {% elif user.profileimage %}
+                                <img
+                                    src="{{ user.profileimage.url }}"
+                                    alt="Admin Profile"
+                                    class="rounded-circle border border-4 border-white shadow"
+                                    style="width:140px;height:140px;object-fit:cover;"
+                                >
+                            {% else %}
+                                <div
+                                    class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center border border-4 border-white shadow mx-auto"
+                                    style="width:140px;height:140px;"
+                                >
+                                    <i class="bi bi-person-fill display-4"></i>
+                                </div>
+                            {% endif %}
+                            <span class="position-absolute bottom-0 end-0 bg-success border border-3 border-white rounded-circle p-2"></span>
+                        </div>
+                        <h4 class="fw-bold mb-1">
+                            {{ user.get_full_name|default:user.username|default:"NandiRide Admin" }}
+                        </h4>
+                        <p class="mb-0 opacity-75">
+                            <i class="bi bi-shield-check me-1"></i>
+                            Administrator
+                        </p>
+                    </div>
+                    <div class="card-body p-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-camera-fill text-primary me-1"></i>
+                            Profile Picture
+                        </label>
+                        <input
+                            type="file"
+                            name="profileimage"
+                            class="form-control"
+                            accept="image/*"
+                        >
+                        <div class="form-text">
+                            JPG, JPEG or PNG. Recommended square image.
+                        </div>
+                        {% if user.profile_image or user.profileimage %}
+                            <div class="mt-3">
+                                <div class="form-check">
+                                    <input
+                                        type="checkbox"
+                                        name="remove_profile_image"
+                                        class="form-check-input"
+                                        id="removeProfileImage"
+                                    >
+                                    <label class="form-check-label text-body-secondary" for="removeProfileImage">
+                                        Remove current profile picture
+                                    </label>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Account Information -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 p-4 pb-2">
+                        <h5 class="fw-bold mb-1">
+                            <i class="bi bi-shield-lock-fill text-primary me-2"></i>
+                            Account Information
+                        </h5>
+                        <p class="text-body-secondary small mb-0">
+                            Administrator account details
+                        </p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Username
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person-badge"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    class="form-control"
+                                    value="{{ user.username|default:'' }}"
+                                    placeholder="Enter username"
+                                >
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                User ID
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-hash"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="{{ user.id|default:'' }}"
+                                    readonly
+                                >
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label fw-semibold">
+                                Account Status
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-check-circle"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="{% if user.is_active %}Active{% else %}Inactive{% endif %}"
+                                    readonly
+                                >
+                                <span class="input-group-text {% if user.is_active %}text-success{% else %}text-secondary{% endif %}">
+                                    <i class="bi bi-circle-fill"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Security Card -->
+                <div class="card border-0 shadow-sm rounded-4 bg-dark text-white overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-shield-lock-fill fs-2 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-2">
+                                    Account Security
+                                </h6>
+                                <p class="small text-white-50 mb-3">
+                                    Keep your administrator information and password secure.
+                                </p>
+                                <button
+                                    type="button"
+                                    class="btn btn-light btn-sm text-dark fw-semibold rounded-3"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#changePasswordModal"
+                                >
+                                    <i class="bi bi-key me-1"></i>
+                                    Change Password
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ===================== RIGHT COLUMN ===================== -->
+            <div class="col-12 col-xl-8">
+                <!-- Personal Information -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 p-4 pb-2">
+                        <div class="d-flex align-items-center justify-content-between gap-3">
+                            <div>
+                                <h5 class="fw-bold mb-1">
+                                    <i class="bi bi-person-vcard text-primary me-2"></i>
+                                    Personal Information
+                                </h5>
+                                <p class="text-body-secondary small mb-0">
+                                    Update your personal information
+                                </p>
+                            </div>
+                            <span class="badge text-bg-primary rounded-pill px-3 py-2">
+                                Personal
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    First Name
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        name="firstname"
+                                        class="form-control"
+                                        value="{{ user.firstname|default:user.first_name|default:'' }}"
+                                        placeholder="Enter first name"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Last Name
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        name="lastname"
+                                        class="form-control"
+                                        value="{{ user.lastname|default:user.last_name|default:'' }}"
+                                        placeholder="Enter last name"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Gender
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-gender-ambiguous"></i>
+                                    </span>
+                                    <select name="gender" class="form-select">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male" {% if user.gender == "Male" %}selected{% endif %}>
+                                            Male
+                                        </option>
+                                        <option value="Female" {% if user.gender == "Female" %}selected{% endif %}>
+                                            Female
+                                        </option>
+                                        <option value="Other" {% if user.gender == "Other" %}selected{% endif %}>
+                                            Other
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Date of Birth
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </span>
+                                    <input
+                                        type="date"
+                                        name="date_of_birth"
+                                        class="form-control"
+                                        value="{% if user.date_of_birth %}{{ user.date_of_birth|date:'Y-m-d' }}{% endif %}"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Contact Information -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 p-4 pb-2">
+                        <h5 class="fw-bold mb-1">
+                            <i class="bi bi-person-lines-fill text-info me-2"></i>
+                            Contact Information
+                        </h5>
+                        <p class="text-body-secondary small mb-0">
+                            Update administrator contact details
+                        </p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Email Address
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-envelope"></i>
+                                    </span>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        class="form-control"
+                                        value="{{ user.email|default:'' }}"
+                                        placeholder="admin@example.com"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Mobile Number
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-telephone"></i>
+                                    </span>
+                                    <input
+                                        type="tel"
+                                        name="mobilenumber"
+                                        class="form-control"
+                                        value="{{ user.mobilenumber|default:'' }}"
+                                        placeholder="Enter mobile number"
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Emergency Contact Name
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person-heart"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        name="emergency_contact_name"
+                                        class="form-control"
+                                        value="{{ user.emergency_contact_name|default:'' }}"
+                                        placeholder="Emergency contact name"
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Emergency Contact Phone
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-telephone-plus"></i>
+                                    </span>
+                                    <input
+                                        type="tel"
+                                        name="emergency_contact_phone"
+                                        class="form-control"
+                                        value="{{ user.emergency_contact_phone|default:'' }}"
+                                        placeholder="Emergency contact phone"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Address Information -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 p-4 pb-2">
+                        <h5 class="fw-bold mb-1">
+                            <i class="bi bi-geo-alt-fill text-success me-2"></i>
+                            Address Information
+                        </h5>
+                        <p class="text-body-secondary small mb-0">
+                            Update your address and location details
+                        </p>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">
+                                    Address
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-house"></i>
+                                    </span>
+                                    <textarea
+                                        name="address"
+                                        class="form-control"
+                                        rows="3"
+                                        placeholder="Enter complete address"
+                                    >{{ user.address|default:'' }}</textarea>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Address Type
+                                </label>
+                                <select name="address_type" class="form-select">
+                                    <option value="">Select Address Type</option>
+                                    <option value="Home" {% if user.address_type == "Home" %}selected{% endif %}>
+                                        Home
+                                    </option>
+                                    <option value="Office" {% if user.address_type == "Office" %}selected{% endif %}>
+                                        Office
+                                    </option>
+                                    <option value="Other" {% if user.address_type == "Other" %}selected{% endif %}>
+                                        Other
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Label
+                                </label>
+                                <input
+                                    type="text"
+                                    name="label"
+                                    class="form-control"
+                                    value="{{ user.label|default:'' }}"
+                                    placeholder="e.g. Main Office"
+                                >
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Address Line 1
+                                </label>
+                                <input
+                                    type="text"
+                                    name="address_line1"
+                                    class="form-control"
+                                    value="{{ user.address_line1|default:'' }}"
+                                    placeholder="House / Building / Street"
+                                >
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Address Line 2
+                                </label>
+                                <input
+                                    type="text"
+                                    name="address_line2"
+                                    class="form-control"
+                                    value="{{ user.address_line2|default:'' }}"
+                                    placeholder="Area / Locality"
+                                >
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold">
+                                    Landmark
+                                </label>
+                                <input
+                                    type="text"
+                                    name="landmark"
+                                    class="form-control"
+                                    value="{{ user.landmark|default:'' }}"
+                                    placeholder="Nearby landmark"
+                                >
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold">
+                                    City
+                                </label>
+                                <input
+                                    type="text"
+                                    name="city"
+                                    class="form-control"
+                                    value="{{ user.city|default:'' }}"
+                                    placeholder="Enter city"
+                                >
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold">
+                                    Postal Code
+                                </label>
+                                <input
+                                    type="text"
+                                    name="postal_code"
+                                    class="form-control"
+                                    value="{{ user.postal_code|default:'' }}"
+                                    placeholder="Postal code"
+                                >
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Latitude
+                                </label>
+                                <input
+                                    type="text"
+                                    name="latitude"
+                                    class="form-control"
+                                    value="{{ user.latitude|default:'' }}"
+                                    placeholder="Latitude"
+                                >
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Longitude
+                                </label>
+                                <input
+                                    type="text"
+                                    name="longitude"
+                                    class="form-control"
+                                    value="{{ user.longitude|default:'' }}"
+                                    placeholder="Longitude"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Form Actions -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-2">
+                            <a
+                                href="{% url 'admin_profile' %}"
+                                class="btn btn-outline-secondary rounded-3 px-4"
+                            >
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Cancel
+                            </a>
+                            <div class="d-flex flex-column flex-sm-row gap-2">
+                                <button
+                                    type="reset"
+                                    class="btn btn-light border rounded-3 px-4"
+                                >
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>
+                                    Reset
+                                </button>
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary rounded-3 px-4 fw-semibold"
+                                >
+                                    <i class="bi bi-check2-circle me-1"></i>
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<!-- ===================== CHANGE PASSWORD MODAL ===================== -->
+<div
+    class="modal fade"
+    id="changePasswordModal"
+    tabindex="-1"
+    aria-labelledby="changePasswordModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="changePasswordModalLabel">
+                    <i class="bi bi-key-fill text-primary me-2"></i>
+                    Change Password
+                </h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Current Password
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input
+                                type="password"
+                                name="current_password"
+                                class="form-control"
+                                placeholder="Enter current password"
+                                required
+                            >
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            New Password
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock-fill"></i>
+                            </span>
+                            <input
+                                type="password"
+                                name="new_password"
+                                class="form-control"
+                                placeholder="Enter new password"
+                                required
+                            >
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">
+                            Confirm Password
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-shield-lock"></i>
+                            </span>
+                            <input
+                                type="password"
+                                name="confirm_password"
+                                class="form-control"
+                                placeholder="Confirm new password"
+                                required
+                            >
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button
+                        type="button"
+                        class="btn btn-light rounded-3"
+                        data-bs-dismiss="modal"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="btn btn-primary rounded-3 px-4"
+                    >
+                        <i class="bi bi-check2-circle me-1"></i>
+                        Update Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1145 @@
+{% extends "base.html" %}
+{% block title %}
+NandiRide | Ride Details
+{% endblock %}
+{% block breadcrumb %}
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-sm-6">
+                <h3 class="mb-0 fw-bold">
+                    <i class="bi bi-car-front-fill me-2"></i>
+                    Ride Details
+                </h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}" class="text-decoration-none">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        Users
+                    </li>
+                    <li class="breadcrumb-item active">
+                        Ride Details
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="card border-0 shadow-sm overflow-hidden mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-center g-4">
+                <div class="col-12 col-xl-7">
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width:64px;height:64px;">
+                            <i class="bi bi-car-front-fill fs-2"></i>
+                        </div>
+                        <div>
+                            <span class="badge text-bg-success rounded-pill px-3 py-2 mb-2">
+                                <i class="bi bi-check-circle-fill me-1"></i>
+                                Completed
+                            </span>
+                            <h2 class="fw-bold mb-1">
+                                Ride #NR-RIDE-10025
+                            </h2>
+                            <p class="text-body-secondary mb-0">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                Sunday, 13 September 2026
+                                <span class="mx-2">•</span>
+                                <i class="bi bi-clock me-1"></i>
+                                10:30 AM
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-xl-5">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="bg-body-tertiary rounded-4 p-3 h-100">
+                                <div class="text-body-secondary small mb-1">
+                                    Ride Number
+                                </div>
+                                <div class="fw-bold text-truncate">
+                                    NR-RIDE-10025
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-body-tertiary rounded-4 p-3 h-100">
+                                <div class="text-body-secondary small mb-1">
+                                    Request Number
+                                </div>
+                                <div class="fw-bold text-truncate">
+                                    NR-REQ-10025
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-body-tertiary rounded-4 p-3 h-100">
+                                <div class="text-body-secondary small mb-1">
+                                    Status
+                                </div>
+                                <div class="fw-bold text-success">
+                                    Completed
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-body-tertiary rounded-4 p-3 h-100">
+                                <div class="text-body-secondary small mb-1">
+                                    Vehicle Type
+                                </div>
+                                <div class="fw-bold">
+                                    Sedan
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-xl-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 p-4 pb-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                <i class="bi bi-person-vcard-fill text-primary me-2"></i>
+                                Passenger & Driver
+                            </h5>
+                            <p class="text-body-secondary small mb-0">
+                                Ride participants and vehicle information
+                            </p>
+                        </div>
+                        <span class="badge text-bg-light border rounded-pill">
+                            Ride Participants
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-12 col-md-6">
+                            <div class="border rounded-4 p-4 h-100">
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width:52px;height:52px;">
+                                        <i class="bi bi-person-fill fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small text-body-secondary">
+                                            Passenger
+                                        </div>
+                                        <h6 class="fw-bold mb-0">
+                                            Rahul Sharma
+                                        </h6>
+                                    </div>
+                                </div>
+                                <div class="vstack gap-3">
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <span class="text-body-secondary">Username</span>
+                                        <span class="fw-semibold text-end">rahul.sharma</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <span class="text-body-secondary">Email</span>
+                                        <span class="fw-semibold text-end text-break">rahul@example.com</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <span class="text-body-secondary">Phone</span>
+                                        <span class="fw-semibold text-end">+91 98765 43210</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="border rounded-4 p-4 h-100">
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width:52px;height:52px;">
+                                        <i class="bi bi-person-badge-fill fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small text-body-secondary">
+                                            Driver
+                                        </div>
+                                        <h6 class="fw-bold mb-0">
+                                            Amit Verma
+                                        </h6>
+                                    </div>
+                                </div>
+                                <div class="vstack gap-3">
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <span class="text-body-secondary">Driver ID</span>
+                                        <span class="fw-semibold">DRV-1025</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <span class="text-body-secondary">Phone</span>
+                                        <span class="fw-semibold">+91 91234 56789</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <span class="text-body-secondary">Rating</span>
+                                        <span class="fw-semibold text-warning">
+                                            <i class="bi bi-star-fill"></i>
+                                            4.8 / 5
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="bg-body-tertiary rounded-4 p-4">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-4">
+                                        <div class="small text-body-secondary mb-1">
+                                            Vehicle
+                                        </div>
+                                        <div class="fw-bold">
+                                            Hyundai Verna
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <div class="small text-body-secondary mb-1">
+                                            Vehicle Type
+                                        </div>
+                                        <div class="fw-bold">
+                                            Sedan
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <div class="small text-body-secondary mb-1">
+                                            Registration Number
+                                        </div>
+                                        <div class="fw-bold">
+                                            UP32 AB 4521
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 p-4 pb-2">
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-receipt-cutoff text-primary me-2"></i>
+                        Fare Summary
+                    </h5>
+                    <p class="text-body-secondary small mb-0">
+                        Ride request estimated fare
+                    </p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="bg-primary bg-opacity-10 rounded-4 text-center p-4 mb-4">
+                        <div class="small text-body-secondary mb-1">
+                            Estimated Fare
+                        </div>
+                        <div class="display-6 fw-bold text-primary">
+                            ₹450.00
+                        </div>
+                    </div>
+                    <div class="vstack gap-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-body-secondary">Base Fare</span>
+                            <span class="fw-semibold">₹100.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-body-secondary">Ride Charge</span>
+                            <span class="fw-semibold">₹320.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-body-secondary">Platform Fee</span>
+                            <span class="fw-semibold">₹30.00</span>
+                        </div>
+                        <hr class="my-1">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">Total Fare</span>
+                            <span class="fw-bold text-primary">₹450.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-signpost-2-fill text-primary me-2"></i>
+                        Route & Journey
+                    </h5>
+                    <p class="text-body-secondary small mb-0">
+                        Pickup, destination and complete ride timeline
+                    </p>
+                </div>
+                <span class="badge text-bg-success rounded-pill px-3 py-2">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Journey Completed
+                </span>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-12 col-lg-7">
+                    <div class="position-relative">
+                        <div class="d-flex gap-3 mb-4">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:42px;height:42px;">
+                                <i class="bi bi-geo-alt-fill"></i>
+                            </div>
+                            <div>
+                                <div class="small text-body-secondary">
+                                    Pickup Location
+                                </div>
+                                <h6 class="fw-bold mb-1">
+                                    Hazratganj Metro Station
+                                </h6>
+                                <p class="text-body-secondary small mb-0">
+                                    Hazratganj, Lucknow, Uttar Pradesh
+                                </p>
+                            </div>
+                        </div>
+                        <div class="border-start ms-3 ps-5 mb-4">
+                            <div class="small text-body-secondary">
+                                Route
+                            </div>
+                            <div class="fw-semibold">
+                                14.80 km
+                            </div>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:42px;height:42px;">
+                                <i class="bi bi-flag-fill"></i>
+                            </div>
+                            <div>
+                                <div class="small text-body-secondary">
+                                    Drop Location
+                                </div>
+                                <h6 class="fw-bold mb-1">
+                                    Lucknow Airport
+                                </h6>
+                                <p class="text-body-secondary small mb-0">
+                                    Amausi, Lucknow, Uttar Pradesh
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-5">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="border rounded-4 p-3 h-100">
+                                <div class="small text-body-secondary mb-1">
+                                    Scheduled At
+                                </div>
+                                <div class="fw-semibold">
+                                    10:30 AM
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded-4 p-3 h-100">
+                                <div class="small text-body-secondary mb-1">
+                                    Requested At
+                                </div>
+                                <div class="fw-semibold">
+                                    10:15 AM
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded-4 p-3 h-100">
+                                <div class="small text-body-secondary mb-1">
+                                    Started At
+                                </div>
+                                <div class="fw-semibold">
+                                    10:34 AM
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded-4 p-3 h-100">
+                                <div class="small text-body-secondary mb-1">
+                                    Arrived At
+                                </div>
+                                <div class="fw-semibold">
+                                    10:31 AM
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="border rounded-4 p-3">
+                                <div class="small text-body-secondary mb-1">
+                                    Completed At
+                                </div>
+                                <div class="fw-bold text-success">
+                                    11:12 AM
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="bg-primary bg-opacity-10 text-primary rounded-3 p-2">
+                            <i class="bi bi-signpost-fill fs-5"></i>
+                        </span>
+                        <span class="small text-body-secondary">Distance</span>
+                    </div>
+                    <h3 class="fw-bold mb-1">14.80 km</h3>
+                    <small class="text-body-secondary">
+                        Estimated: 15.20 km
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="bg-info bg-opacity-10 text-info rounded-3 p-2">
+                            <i class="bi bi-stopwatch-fill fs-5"></i>
+                        </span>
+                        <span class="small text-body-secondary">Duration</span>
+                    </div>
+                    <h3 class="fw-bold mb-1">38 min</h3>
+                    <small class="text-body-secondary">
+                        Estimated: 42 min
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="bg-warning bg-opacity-10 text-warning rounded-3 p-2">
+                            <i class="bi bi-cash-coin fs-5"></i>
+                        </span>
+                        <span class="small text-body-secondary">Fare</span>
+                    </div>
+                    <h3 class="fw-bold mb-1">₹450</h3>
+                    <small class="text-body-secondary">
+                        Estimated fare: ₹475
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="bg-success bg-opacity-10 text-success rounded-3 p-2">
+                            <i class="bi bi-speedometer2 fs-5"></i>
+                        </span>
+                        <span class="small text-body-secondary">Avg. Speed</span>
+                    </div>
+                    <h3 class="fw-bold mb-1">23.4 km/h</h3>
+                    <small class="text-body-secondary">
+                        Tracking accuracy: 4.2 m
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-signpost-split-fill text-primary me-2"></i>
+                    Ride Stops
+                </h5>
+                <p class="text-body-secondary small mb-0">
+                    All intermediate stops associated with this ride
+                </p>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4 text-nowrap">#</th>
+                            <th class="text-nowrap">Location</th>
+                            <th class="text-nowrap">Arrival Time</th>
+                            <th class="text-nowrap">Departure Time</th>
+                            <th class="text-nowrap">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="px-4 fw-bold">1</td>
+                            <td>
+                                <div class="fw-semibold">Hazratganj Metro Station</div>
+                                <small class="text-body-secondary">Pickup Point</small>
+                            </td>
+                            <td class="text-nowrap">10:31 AM</td>
+                            <td class="text-nowrap">10:34 AM</td>
+                            <td>
+                                <span class="badge text-bg-success rounded-pill">
+                                    Completed
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 fw-bold">2</td>
+                            <td>
+                                <div class="fw-semibold">Alambagh</div>
+                                <small class="text-body-secondary">Intermediate Stop</small>
+                            </td>
+                            <td class="text-nowrap">10:51 AM</td>
+                            <td class="text-nowrap">10:54 AM</td>
+                            <td>
+                                <span class="badge text-bg-success rounded-pill">
+                                    Completed
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 fw-bold">3</td>
+                            <td>
+                                <div class="fw-semibold">Lucknow Airport</div>
+                                <small class="text-body-secondary">Drop Point</small>
+                            </td>
+                            <td class="text-nowrap">11:12 AM</td>
+                            <td class="text-nowrap">11:12 AM</td>
+                            <td>
+                                <span class="badge text-bg-success rounded-pill">
+                                    Completed
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-person-check-fill text-primary me-2"></i>
+                    Driver Assignments
+                </h5>
+                <p class="text-body-secondary small mb-0">
+                    Driver assignment and acceptance history
+                </p>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4 text-nowrap">Driver</th>
+                            <th class="text-nowrap">Assigned At</th>
+                            <th class="text-nowrap">Accepted At</th>
+                            <th class="text-nowrap">Rejected At</th>
+                            <th class="text-nowrap">Status</th>
+                            <th class="text-nowrap">Rejection Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="px-4">
+                                <div class="fw-semibold">Amit Verma</div>
+                                <small class="text-body-secondary">DRV-1025</small>
+                            </td>
+                            <td class="text-nowrap">10:20 AM</td>
+                            <td class="text-nowrap">10:22 AM</td>
+                            <td class="text-nowrap">—</td>
+                            <td>
+                                <span class="badge text-bg-success rounded-pill">
+                                    Accepted
+                                </span>
+                            </td>
+                            <td class="text-body-secondary">
+                                —
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4">
+                                <div class="fw-semibold">Rohit Singh</div>
+                                <small class="text-body-secondary">DRV-1018</small>
+                            </td>
+                            <td class="text-nowrap">10:17 AM</td>
+                            <td class="text-nowrap">—</td>
+                            <td class="text-nowrap">10:19 AM</td>
+                            <td>
+                                <span class="badge text-bg-danger rounded-pill">
+                                    Rejected
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-body-secondary">
+                                    Driver unavailable
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4">
+                                <div class="fw-semibold">Vikas Yadav</div>
+                                <small class="text-body-secondary">DRV-1007</small>
+                            </td>
+                            <td class="text-nowrap">10:15 AM</td>
+                            <td class="text-nowrap">—</td>
+                            <td class="text-nowrap">10:16 AM</td>
+                            <td>
+                                <span class="badge text-bg-danger rounded-pill">
+                                    Rejected
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-body-secondary">
+                                    Too far from pickup
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                    Ride Tracking History
+                </h5>
+                <p class="text-body-secondary small mb-0">
+                    GPS location, speed, heading and accuracy history
+                </p>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4 text-nowrap">Recorded At</th>
+                            <th class="text-nowrap">Latitude</th>
+                            <th class="text-nowrap">Longitude</th>
+                            <th class="text-nowrap">Speed</th>
+                            <th class="text-nowrap">Heading</th>
+                            <th class="text-nowrap">Accuracy</th>
+                            <th class="text-nowrap">Driver</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="px-4 text-nowrap">10:34:15 AM</td>
+                            <td class="text-nowrap">26.846694</td>
+                            <td class="text-nowrap">80.946166</td>
+                            <td class="text-nowrap">12.50 km/h</td>
+                            <td class="text-nowrap">90.00°</td>
+                            <td class="text-nowrap">4.20 m</td>
+                            <td class="text-nowrap">Amit Verma</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 text-nowrap">10:45:30 AM</td>
+                            <td class="text-nowrap">26.831500</td>
+                            <td class="text-nowrap">80.925400</td>
+                            <td class="text-nowrap">27.80 km/h</td>
+                            <td class="text-nowrap">112.50°</td>
+                            <td class="text-nowrap">3.80 m</td>
+                            <td class="text-nowrap">Amit Verma</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 text-nowrap">10:58:42 AM</td>
+                            <td class="text-nowrap">26.812100</td>
+                            <td class="text-nowrap">80.905200</td>
+                            <td class="text-nowrap">31.40 km/h</td>
+                            <td class="text-nowrap">128.20°</td>
+                            <td class="text-nowrap">4.60 m</td>
+                            <td class="text-nowrap">Amit Verma</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 text-nowrap">11:12:05 AM</td>
+                            <td class="text-nowrap">26.760600</td>
+                            <td class="text-nowrap">80.889300</td>
+                            <td class="text-nowrap">8.20 km/h</td>
+                            <td class="text-nowrap">145.00°</td>
+                            <td class="text-nowrap">3.90 m</td>
+                            <td class="text-nowrap">Amit Verma</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 p-4 pb-2">
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-star-fill text-warning me-2"></i>
+                        Ratings & Reviews
+                    </h5>
+                    <p class="text-body-secondary small mb-0">
+                        Passenger and driver feedback
+                    </p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="border rounded-4 p-4 mb-3">
+                        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                            <div>
+                                <div class="fw-bold">Rahul Sharma</div>
+                                <small class="text-body-secondary">
+                                    Passenger → Driver
+                                </small>
+                            </div>
+                            <span class="badge text-bg-warning rounded-pill px-3 py-2">
+                                <i class="bi bi-star-fill me-1"></i>
+                                5/5
+                            </span>
+                        </div>
+                        <p class="mb-0 text-body-secondary">
+                            Excellent ride. Driver was polite, professional and reached the pickup point on time.
+                        </p>
+                    </div>
+                    <div class="border rounded-4 p-4">
+                        <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                            <div>
+                                <div class="fw-bold">Amit Verma</div>
+                                <small class="text-body-secondary">
+                                    Driver → Passenger
+                                </small>
+                            </div>
+                            <span class="badge text-bg-warning rounded-pill px-3 py-2">
+                                <i class="bi bi-star-fill me-1"></i>
+                                5/5
+                            </span>
+                        </div>
+                        <p class="mb-0 text-body-secondary">
+                            Passenger was cooperative and the trip was completed smoothly.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 p-4 pb-2">
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-x-octagon-fill text-danger me-2"></i>
+                        Cancellation Details
+                    </h5>
+                    <p class="text-body-secondary small mb-0">
+                        Cancellation information for this ride
+                    </p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="bg-success bg-opacity-10 rounded-4 p-4 text-center h-100 d-flex flex-column justify-content-center align-items-center">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:58px;height:58px;">
+                            <i class="bi bi-check-lg fs-3"></i>
+                        </div>
+                        <h5 class="fw-bold text-success">
+                            No Cancellation
+                        </h5>
+                        <p class="text-body-secondary mb-0">
+                            This ride was completed successfully and no cancellation record exists.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-database-check text-primary me-2"></i>
+                    Complete Ride Request Information
+                </h5>
+                <p class="text-body-secondary small mb-0">
+                    All RideRequest model fields
+                </p>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">request_number</div>
+                        <div class="fw-bold">NR-REQ-10025</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">passenger</div>
+                        <div class="fw-bold">Rahul Sharma</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">pickup_location</div>
+                        <div class="fw-bold">Hazratganj Metro Station</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">drop_location</div>
+                        <div class="fw-bold">Lucknow Airport</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">vehicle_type</div>
+                        <div class="fw-bold">Sedan</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">requested_at</div>
+                        <div class="fw-bold">13 Sep 2026, 10:15 AM</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">scheduled_at</div>
+                        <div class="fw-bold">13 Sep 2026, 10:30 AM</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">estimated_distance</div>
+                        <div class="fw-bold">15.20 km</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">estimated_duration</div>
+                        <div class="fw-bold">42 minutes</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">estimated_fare</div>
+                        <div class="fw-bold">₹475.00</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">status</div>
+                        <div class="fw-bold text-success">Completed</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">created_at / updated_at</div>
+                        <div class="fw-bold">13 Sep 2026</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-info-square-fill text-primary me-2"></i>
+                    Complete Ride Information
+                </h5>
+                <p class="text-body-secondary small mb-0">
+                    All Ride model fields
+                </p>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">ride_number</div>
+                        <div class="fw-bold">NR-RIDE-10025</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">ride_request</div>
+                        <div class="fw-bold">NR-REQ-10025</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">passenger</div>
+                        <div class="fw-bold">Rahul Sharma</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">driver</div>
+                        <div class="fw-bold">Amit Verma</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">vehicle</div>
+                        <div class="fw-bold">Hyundai Verna</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">pickup_location</div>
+                        <div class="fw-bold">Hazratganj Metro Station</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">drop_location</div>
+                        <div class="fw-bold">Lucknow Airport</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">scheduled_at</div>
+                        <div class="fw-bold">10:30 AM</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">started_at</div>
+                        <div class="fw-bold">10:34 AM</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">arrived_at</div>
+                        <div class="fw-bold">10:31 AM</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">completed_at</div>
+                        <div class="fw-bold">11:12 AM</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">distance_km</div>
+                        <div class="fw-bold">14.80 km</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">duration_minutes</div>
+                        <div class="fw-bold">38 minutes</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">status</div>
+                        <div class="fw-bold text-success">Completed</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">created_at</div>
+                        <div class="fw-bold">13 Sep 2026, 10:15 AM</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-body-secondary">updated_at</div>
+                        <div class="fw-bold">13 Sep 2026, 11:12 AM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-slash-circle-fill text-danger me-2"></i>
+                    Cancellation Reason Information
+                </h5>
+                <p class="text-body-secondary small mb-0">
+                    CancellationReason model fields
+                </p>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">type</div>
+                        <div class="fw-bold">Passenger</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">reason</div>
+                        <div class="fw-bold">Changed travel plan</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">charge_applicable</div>
+                        <div class="fw-bold text-success">No</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">charge_amount</div>
+                        <div class="fw-bold">₹0.00</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">is_active</div>
+                        <div class="fw-bold text-success">
+                            Active
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="bg-body-tertiary rounded-4 p-3">
+                        <div class="small text-body-secondary">created_at / updated_at</div>
+                        <div class="fw-bold">13 Sep 2026</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-x-circle-fill text-danger me-2"></i>
+                    Ride Cancellation Record
+                </h5>
+                <p class="text-body-secondary small mb-0">
+                    RideCancellation model fields
+                </p>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="alert alert-success border-0 rounded-4 mb-0 d-flex align-items-center gap-3">
+                <i class="bi bi-check-circle-fill fs-3"></i>
+                <div>
+                    <div class="fw-bold">
+                        No cancellation record
+                    </div>
+                    <div class="small">
+                        This ride was completed successfully.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 p-4 pb-2">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-star-half text-warning me-2"></i>
+                    Ride Rating Records
+                </h5>
+                <p class="text-body-secondary small mb-0">
+                    RideRating model fields
+                </p>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4 text-nowrap">Ride</th>
+                            <th class="text-nowrap">From User</th>
+                            <th class="text-nowrap">To User</th>
+                            <th class="text-nowrap">Rating</th>
+                            <th>Review</th>
+                            <th class="text-nowrap">Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="px-4 text-nowrap">NR-RIDE-10025</td>
+                            <td class="text-nowrap">Rahul Sharma</td>
+                            <td class="text-nowrap">Amit Verma</td>
+                            <td>
+                                <span class="badge text-bg-warning rounded-pill">
+                                    <i class="bi bi-star-fill me-1"></i>
+                                    5/5
+                                </span>
+                            </td>
+                            <td class="text-body-secondary">
+                                Excellent ride and professional driver.
+                            </td>
+                            <td class="text-nowrap">11:15 AM</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 text-nowrap">NR-RIDE-10025</td>
+                            <td class="text-nowrap">Amit Verma</td>
+                            <td class="text-nowrap">Rahul Sharma</td>
+                            <td>
+                                <span class="badge text-bg-warning rounded-pill">
+                                    <i class="bi bi-star-fill me-1"></i>
+                                    5/5
+                                </span>
+                            </td>
+                            <td class="text-body-secondary">
+                                Friendly and cooperative passenger.
+                            </td>
+                            <td class="text-nowrap">11:16 AM</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-center g-3">
+                <div class="col-12 col-md-7">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                            <i class="bi bi-shield-check fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">
+                                Ride record verified
+                            </h6>
+                            <p class="text-body-secondary small mb-0">
+                                All displayed information is sample static data for the admin ride details interface.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-5">
+                    <div class="d-flex flex-wrap justify-content-md-end gap-2">
+                        <a
+                            href="{% url 'user_ridestatus' %}"
+                            class="btn btn-outline-secondary rounded-pill px-4"
+                        >
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Back to Rides
+                        </a>
+                        <button
+                            type="button"
+                            class="btn btn-primary rounded-pill px-4"
+                            onclick="window.print()"
+                        >
+                            <i class="bi bi-printer me-1"></i>
+                            Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
