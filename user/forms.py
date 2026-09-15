@@ -1,5 +1,162 @@
 from django import forms
 from user.models import User 
+from django.contrib.auth.models import User as Usrinfo
+from dashboard.models import UserProfile, UserAddress
+from django.contrib.auth.forms import UserCreationForm
+
+
+class CustomerCreateForm(UserCreationForm):
+
+    email = forms.EmailField(
+            required=True,
+            widget=forms.EmailInput(attrs={
+                "class": "form-control",
+                "placeholder": "Email address",
+            })
+        )
+
+    first_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "First name",
+        })
+    )
+
+    last_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Last name",
+        })
+    )
+
+    class Meta:
+        model = Usrinfo
+        fields = [
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["username"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": "Username",
+        })
+
+        self.fields["password1"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": "Password",
+        })
+
+        self.fields["password2"].widget.attrs.update({
+            "class": "form-control",
+            "placeholder": "Confirm password",
+        })
+
+         # UPDATE MODE
+        if self.instance and self.instance.pk:
+            self.fields["username"].disabled = True
+            self.fields["password1"].required = True
+            self.fields["password2"].required = True
+            # self.fields.pop("password1")
+            # self.fields.pop("password2")
+            
+            # self.fields.pop("password1", None)
+            # self.fields.pop("password2", None)
+
+
+
+# ============================================================
+# USER PROFILE
+# ============================================================
+
+class UserProfileForm(forms.ModelForm):
+
+    class Meta:
+        model = UserProfile
+
+        exclude = [
+            "user",
+            "address",
+            "city",
+            "created_at",
+            "updated_at",
+        ]
+
+        widgets = {
+            "phone": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Phone number",
+            }),
+
+            "date_of_birth": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date",
+            }),
+
+            "gender": forms.Select(attrs={
+                "class": "form-select",
+            }),
+
+            "profile_image": forms.ClearableFileInput(attrs={
+                "class": "form-control",
+            }),
+        }
+
+
+# ============================================================
+# USER ADDRESS
+# ============================================================
+
+class UserAddressForm(forms.ModelForm):
+
+    class Meta:
+        model = UserAddress
+
+        exclude = [
+            "user",
+            "created_at",
+            "updated_at",
+        ]
+
+        widgets = {
+            "address_line1": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Address line 1",
+            }),
+
+            "address_line2": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Address line 2",
+            }),
+
+            "city": forms.Select(attrs={
+                "class": "form-select",
+            }),
+
+            "state": forms.Select(attrs={
+                "class": "form-select",
+            }),
+
+            "postal_code": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Postal code",
+            }),
+
+            "address_type": forms.Select(attrs={
+                "class": "form-select",
+            }),
+
+            "is_default": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+        }
+
 
 class ContactForm(forms.Form):
 

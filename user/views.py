@@ -7,10 +7,11 @@ from datetime import datetime
 from urllib.parse import urlencode
 from django.utils import timezone
 from django.core import signing
-from user.forms import UserForm, LoginForm, Profile, ForgetPassword, ResetPassword, Booking, Payment, MyRide, Driver
+from user.forms import UserForm, LoginForm, Profile, ForgetPassword, ResetPassword, Booking, Payment, MyRide, Driver, UserProfileForm, UserAddressForm, CustomerCreateForm
 from user.models import User
 #from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
+from drivers.forms import DriverForm, DriverDocumentForm, DriverBankAccountForm
 
 BOOKING_TOKEN_MAX_AGE = 86400
 
@@ -1105,11 +1106,23 @@ class UserSignupView(TemplateView):
 class UserProfileView(TemplateView):
     def get(self, request):
         form = Profile()
+        UserProfile = UserProfileForm()
+        UserAddress = UserAddressForm()
+        CustomerForm = CustomerCreateForm()
+        Driver = DriverForm()
+        DriverDocument = DriverDocumentForm()
+        DriverBankAccount = DriverBankAccountForm()
         return render(
             request,
             'user/profile/profile.html',
             {
-                'form': form,
+                # 'form': form,
+                'CustomerForm': CustomerForm,
+                'UserProfile': UserProfile,
+                'UserAddress': UserAddress,
+                'Driver': Driver,
+                'DriverDocument': DriverDocument,
+                'DriverBankAccount': DriverBankAccount,
                 'sidebar_menu': SIDEBAR_MENU,
             }
         )
