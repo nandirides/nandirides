@@ -50,22 +50,23 @@ NandiRide | User Profile
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm overflow-hidden">
-                <div class="bg-primary bg-gradient" style="height: 120px;"></div>
                 <div class="card-body p-4 pt-0">
                     <div class="row align-items-end">
                         <div class="col-12 col-md-auto text-center text-md-start">
-                            <div class="position-relative d-inline-block">
-                                {% if user.profile_image %}
+                            <div
+                                class="position-relative d-inline-flex rounded-circle overflow-hidden border border-5 border-body shadow mt-4 bg-body-secondary align-items-center justify-content-center"
+                                style="width: 130px; height: 130px; margin-top: -65px;"
+                            >
+                                {% if profile and profile.profile_image %}
                                     <img
-                                        src="{{ user.profile_image.url }}"
+                                        src="{{ profile.profile_image.url }}"
                                         alt="{{ user.get_username }}"
-                                        class="rounded-circle border border-5 border-body shadow"
-                                        style="width: 130px; height: 130px; object-fit: cover; margin-top: -65px;"
+                                        class="w-100 h-100 d-block"
+                                        style="width: 130px; height: 130px; object-fit: cover; object-position: center;"
                                     >
                                 {% else %}
                                     <div
-                                        class="rounded-circle border border-5 border-body shadow bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
-                                        style="width: 130px; height: 130px; margin-top: -65px;"
+                                        class="w-100 h-100 d-flex align-items-center justify-content-center bg-primary-subtle text-primary"
                                     >
                                         <i class="bi bi-person-fill display-3"></i>
                                     </div>
@@ -78,7 +79,7 @@ NandiRide | User Profile
                         </div>
                         <div class="col-12 col-md pt-3 pt-md-0 text-center text-md-start">
                             <div class="d-flex flex-column flex-lg-row align-items-center align-items-lg-end justify-content-between gap-3">
-                                <div>
+                                <div class="col-md-6">
                                     <h3 class="fw-bold mb-1">
                                         {% if user.get_full_name %}
                                             {{ user.get_full_name }}
@@ -101,6 +102,24 @@ NandiRide | User Profile
                                             Inactive Account
                                         </span>
                                     {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {% if user.is_superuser %}
+                                <span class="badge rounded-pill text-bg-dark px-3 py-2">
+                                    <i class="bi bi-shield-fill-check me-1"></i>
+                                    Administrator
+                                </span>
+                                {% elif user.is_staff %}
+                                <span class="badge rounded-pill text-bg-primary px-3 py-2">
+                                    <i class="bi bi-person-badge-fill me-1"></i>
+                                    Staff
+                                </span>
+                                {% else %}
+                                <span class="badge rounded-pill text-bg-secondary px-3 py-2">
+                                    <i class="bi bi-person-fill me-1"></i>
+                                    User
+                                </span>
+                                {% endif %}
                                 </div>
                                 <div class="text-center text-lg-end">
                                     <small class="text-body-secondary d-block">
@@ -144,7 +163,7 @@ NandiRide | User Profile
                                 First Name
                             </small>
                             <span class="fw-semibold">
-                                {{ user.first_name|default:"Rahul" }}
+                                {{ user.first_name|default:"Not provided" }}
                             </span>
                         </div>
                         <div class="col-12 col-sm-6">
@@ -152,7 +171,7 @@ NandiRide | User Profile
                                 Last Name
                             </small>
                             <span class="fw-semibold">
-                                {{ user.last_name|default:"Sharma" }}
+                                {{ user.last_name|default:"Not provided" }}
                             </span>
                         </div>
                         <div class="col-12 col-sm-6">
@@ -160,8 +179,8 @@ NandiRide | User Profile
                                 Date of Birth
                             </small>
                             <span class="fw-semibold">
-                                {% if user.date_of_birth %}
-                                    {{ user.date_of_birth|date:"d M Y" }}
+                                {% if profile and profile.date_of_birth %}
+                                    {{ profile.date_of_birth|date:"d M Y" }}
                                 {% else %}
                                     Not provided
                                 {% endif %}
@@ -172,7 +191,11 @@ NandiRide | User Profile
                                 Gender
                             </small>
                             <span class="fw-semibold">
-                                {{ user.gender|default:"Not provided" }}
+                                {% if profile and profile.gender %}
+                                    {{ profile.get_gender_display }}
+                                {% else %}
+                                    Not provided
+                                {% endif %}
                             </span>
                         </div>
                         <div class="col-12">
@@ -225,7 +248,11 @@ NandiRide | User Profile
                             <div class="d-flex align-items-center gap-2">
                                 <i class="bi bi-phone-fill text-primary"></i>
                                 <span class="fw-semibold">
-                                    {{ user.mobilenumber|default:"Not provided" }}
+                                    {% if profile and profile.phone %}
+                                        {{ profile.phone }}
+                                    {% else %}
+                                        Not provided
+                                    {% endif %}
                                 </span>
                             </div>
                         </div>
@@ -236,7 +263,26 @@ NandiRide | User Profile
                             <div class="d-flex align-items-center gap-2">
                                 <i class="bi bi-telephone-fill text-warning"></i>
                                 <span class="fw-semibold">
-                                    {{ user.emergency_contact_phone|default:"Not provided" }}
+                                    {% if profile and profile.emergency_contact_phone %}
+                                        {{ profile.emergency_contact_phone }}
+                                    {% else %}
+                                        Not provided
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-body-secondary d-block mb-1">
+                                Emergency Contact Name
+                            </small>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-person-fill text-warning"></i>
+                                <span class="fw-semibold">
+                                    {% if profile and profile.emergency_contact_name %}
+                                        {{ profile.emergency_contact_name }}
+                                    {% else %}
+                                        Not provided
+                                    {% endif %}
                                 </span>
                             </div>
                         </div>
@@ -263,25 +309,81 @@ NandiRide | User Profile
                     </div>
                 </div>
                 <div class="card-body p-4">
-                    <div class="d-flex gap-3">
-                        <div class="bg-primary-subtle text-primary rounded-circle p-3 flex-shrink-0">
-                            <i class="bi bi-house-fill fs-5"></i>
+                    {% if address %}
+                        <div class="d-flex gap-3">
+                            <div class="bg-primary-subtle text-primary rounded-circle p-3 flex-shrink-0">
+                                {% if address.address_type == "home" %}
+                                    <i class="bi bi-house-fill fs-5"></i>
+                                {% elif address.address_type == "office" %}
+                                    <i class="bi bi-building-fill fs-5"></i>
+                                {% else %}
+                                    <i class="bi bi-geo-alt-fill fs-5"></i>
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0">
+                                <h6 class="fw-bold mb-2">
+                                    {{ address.label|default:address.get_address_type_display }}
+                                </h6>
+                                <p class="text-body-secondary mb-1 text-break">
+                                    {{ address.address_line1|default:"Address not provided" }}
+                                </p>
+                                {% if address.address_line2 %}
+                                    <p class="text-body-secondary mb-1 text-break">
+                                        {{ address.address_line2 }}
+                                    </p>
+                                {% endif %}
+                                {% if address.landmark %}
+                                    <p class="text-body-secondary mb-1 text-break">
+                                        <strong>Landmark:</strong>
+                                        {{ address.landmark }}
+                                    </p>
+                                {% endif %}
+                                <p class="text-body-secondary mb-1">
+                                    {% if address.city %}
+                                        {{ address.city.name }}
+                                    {% else %}
+                                        City not provided
+                                    {% endif %}
+                                </p>
+                                <p class="text-body-secondary mb-0">
+                                    {{ address.postal_code|default:"Postal code not provided" }}
+                                </p>
+                            </div>
                         </div>
-                        <div class="min-w-0">
-                            <h6 class="fw-bold mb-2">
-                                Home Address
+                    {% elif profile and profile.address %}
+                        <div class="d-flex gap-3">
+                            <div class="bg-primary-subtle text-primary rounded-circle p-3 flex-shrink-0">
+                                <i class="bi bi-house-fill fs-5"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <h6 class="fw-bold mb-2">
+                                    Address
+                                </h6>
+                                <p class="text-body-secondary mb-1 text-break">
+                                    {{ profile.address }}
+                                </p>
+                                <p class="text-body-secondary mb-0">
+                                    {% if profile.city %}
+                                        {{ profile.city.name }}
+                                    {% else %}
+                                        City not provided
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <div class="bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 65px; height: 65px;">
+                                <i class="bi bi-geo-alt fs-3"></i>
+                            </div>
+                            <h6 class="fw-bold">
+                                Address Not Available
                             </h6>
-                            <p class="text-body-secondary mb-1 text-break">
-                                {{ user.address|default:"Address not provided" }}
-                            </p>
-                            <p class="text-body-secondary mb-1">
-                                {{ user.city|default:"City not provided" }}
-                            </p>
                             <p class="text-body-secondary mb-0">
-                                {{ user.postal_code|default:"Postal code not provided" }}
+                                User has not provided an address yet.
                             </p>
                         </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -326,10 +428,16 @@ NandiRide | User Profile
                                 Email Verification
                             </span>
                         </div>
-                        <span class="badge text-bg-success">
-                            <i class="bi bi-check-lg me-1"></i>
-                            Verified
-                        </span>
+                        {% if user.email %}
+                            <span class="badge text-bg-success">
+                                <i class="bi bi-check-lg me-1"></i>
+                                Available
+                            </span>
+                        {% else %}
+                            <span class="badge text-bg-secondary">
+                                Not Provided
+                            </span>
+                        {% endif %}
                     </div>
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3 gap-3">
                         <div>
@@ -337,10 +445,16 @@ NandiRide | User Profile
                                 Phone Verification
                             </span>
                         </div>
-                        <span class="badge text-bg-success">
-                            <i class="bi bi-check-lg me-1"></i>
-                            Verified
-                        </span>
+                        {% if profile and profile.phone %}
+                            <span class="badge text-bg-success">
+                                <i class="bi bi-check-lg me-1"></i>
+                                Available
+                            </span>
+                        {% else %}
+                            <span class="badge text-bg-secondary">
+                                Not Provided
+                            </span>
+                        {% endif %}
                     </div>
                     <div class="d-flex justify-content-between align-items-center gap-3">
                         <div>
@@ -348,7 +462,7 @@ NandiRide | User Profile
                                 Last Login
                             </span>
                         </div>
-                        <span class="fw-semibold">
+                        <span class="fw-semibold text-end">
                             {% if user.last_login %}
                                 {{ user.last_login|date:"d M Y, h:i A" }}
                             {% else %}
@@ -374,7 +488,7 @@ NandiRide | User Profile
                         </div>
                         <div class="d-flex flex-column flex-sm-row gap-2">
                             <a
-                                href="#"
+                                href="{% url 'user_update' user.pk %}"
                                 class="btn btn-outline-primary"
                             >
                                 <i class="bi bi-pencil-square me-1"></i>
@@ -394,6 +508,8 @@ NandiRide | User Profile
                                 <button
                                     type="button"
                                     class="btn btn-outline-success"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#activateUserModal"
                                 >
                                     <i class="bi bi-person-check me-1"></i>
                                     Activate
@@ -460,12 +576,93 @@ NandiRide | User Profile
                 >
                     Cancel
                 </button>
+                <form
+                    method="POST"
+                    action="{% url 'user_update' user.pk %}"
+                    class="d-inline"
+                >
+                    {% csrf_token %}
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="toggle_status"
+                    >
+                    <button
+                        type="submit"
+                        class="btn btn-warning"
+                    >
+                        <i class="bi bi-person-dash me-1"></i>
+                        Deactivate User
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ===================== ACTIVATE MODAL ===================== -->
+<div
+    class="modal fade"
+    id="activateUserModal"
+    tabindex="-1"
+    aria-labelledby="activateUserModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="activateUserModalLabel">
+                    Activate User
+                </h5>
                 <button
                     type="button"
-                    class="btn btn-warning"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-3">
+                    <div
+                        class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                        style="width: 70px; height: 70px;"
+                    >
+                        <i class="bi bi-person-check-fill fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold">
+                        Activate this account?
+                    </h5>
+                    <p class="text-body-secondary mb-0">
+                        The user will be able to access the NandiRide platform again.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-light border"
+                    data-bs-dismiss="modal"
                 >
-                    Deactivate User
+                    Cancel
                 </button>
+                <form
+                    method="POST"
+                    action="{% url 'user_update' user.pk %}"
+                    class="d-inline"
+                >
+                    {% csrf_token %}
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="toggle_status"
+                    >
+                    <button
+                        type="submit"
+                        class="btn btn-success"
+                    >
+                        <i class="bi bi-person-check me-1"></i>
+                        Activate User
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -515,12 +712,20 @@ NandiRide | User Profile
                 >
                     Cancel
                 </button>
-                <button
-                    type="button"
-                    class="btn btn-danger"
+                <form
+                    method="POST"
+                    action="{% url 'user_delete' user.pk %}"
+                    class="d-inline"
                 >
-                    Delete User
-                </button>
+                    {% csrf_token %}
+                    <button
+                        type="submit"
+                        class="btn btn-danger"
+                    >
+                        <i class="bi bi-trash3 me-1"></i>
+                        Delete User
+                    </button>
+                </form>
             </div>
         </div>
     </div>

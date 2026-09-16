@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}Ride Stops | {{ ride.ride_number }} | NandiRide{% endblock %}
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-map-signs mr-2"></i>
+                    Ride Stops
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_list' %}">Rides</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_details' ride.pk %}">
+                            {{ ride.ride_number }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        Stops
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                    <i class="fas fa-info-circle mr-2"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-4 col-lg-3">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-car mr-2"></i>
+                            Ride Summary
+                        </h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <small class="text-muted d-block">Ride Number</small>
+                                <strong>{{ ride.ride_number }}</strong>
+                            </li>
+                            <li class="list-group-item">
+                                <small class="text-muted d-block">Passenger</small>
+                                <strong>{{ ride.passenger }}</strong>
+                            </li>
+                            <li class="list-group-item">
+                                <small class="text-muted d-block">Driver</small>
+                                <strong>{{ ride.driver }}</strong>
+                            </li>
+                            <li class="list-group-item">
+                                <small class="text-muted d-block">Pickup</small>
+                                <span>
+                                    <i class="fas fa-circle text-success mr-1"></i>
+                                    {{ ride.pickup_location }}
+                                </span>
+                            </li>
+                            <li class="list-group-item">
+                                <small class="text-muted d-block">Destination</small>
+                                <span>
+                                    <i class="fas fa-map-marker-alt text-danger mr-1"></i>
+                                    {{ ride.drop_location }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{% url 'ride_details' ride.pk %}"
+                           class="btn btn-default btn-block">
+                            <i class="fas fa-arrow-left mr-1"></i>
+                            Back to Ride
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card card-info card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Stop Information
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <strong>Total Stops:</strong>
+                            {{ stops|length }}
+                        </p>
+                        <p class="mb-0 text-muted">
+                            Stops are displayed according to their configured
+                            stop order.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8 col-lg-9">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-route mr-2"></i>
+                            Stop Management
+                        </h3>
+                        <div class="card-tools">
+                            <a href="{% url 'ride_stop_add' ride.pk %}"
+                               class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus mr-1"></i>
+                                Add Stop
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        {% if stops %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped mb-0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th style="width: 80px;">Order</th>
+                                            <th>Location</th>
+                                            <th>Status</th>
+                                            <th>Arrival</th>
+                                            <th>Departure</th>
+                                            <th class="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for stop in stops %}
+                                            <tr>
+                                                <td>
+                                                    <span class="badge badge-primary p-2">
+                                                        #{{ stop.stop_order }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <strong>
+                                                        <i class="fas fa-map-marker-alt mr-1"></i>
+                                                        {{ stop.location }}
+                                                    </strong>
+                                                </td>
+                                                <td>
+                                                    {% if stop.status == "completed" %}
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-check mr-1"></i>
+                                                            Completed
+                                                        </span>
+                                                    {% elif stop.status == "arrived" %}
+                                                        <span class="badge badge-info">
+                                                            <i class="fas fa-map-pin mr-1"></i>
+                                                            Arrived
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge badge-secondary">
+                                                            <i class="fas fa-clock mr-1"></i>
+                                                            Pending
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if stop.arrival_time %}
+                                                        <span>
+                                                            {{ stop.arrival_time|date:"d M Y" }}
+                                                        </span>
+                                                        <small class="d-block text-muted">
+                                                            {{ stop.arrival_time|date:"h:i A" }}
+                                                        </small>
+                                                    {% else %}
+                                                        <span class="text-muted">—</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if stop.departure_time %}
+                                                        <span>
+                                                            {{ stop.departure_time|date:"d M Y" }}
+                                                        </span>
+                                                        <small class="d-block text-muted">
+                                                            {{ stop.departure_time|date:"h:i A" }}
+                                                        </small>
+                                                    {% else %}
+                                                        <span class="text-muted">—</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-right">
+                                                    <div class="btn-group">
+                                                        <a href="{% url 'ride_stop_edit' stop.pk %}"
+                                                           class="btn btn-sm btn-info"
+                                                           title="Edit Stop">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a href="{% url 'ride_stop_delete' stop.pk %}"
+                                                           class="btn btn-sm btn-danger"
+                                                           title="Delete Stop">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-map-signs fa-3x text-muted mb-3"></i>
+                                <h5>No Ride Stops Found</h5>
+                                <p class="text-muted">
+                                    This ride does not have any intermediate stops.
+                                </p>
+                                <a href="{% url 'ride_stop_add' ride.pk %}"
+                                   class="btn btn-primary">
+                                    <i class="fas fa-plus mr-1"></i>
+                                    Add First Stop
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-footer">
+                        <a href="{% url 'ride_details' ride.pk %}"
+                           class="btn btn-default">
+                            <i class="fas fa-arrow-left mr-1"></i>
+                            Back
+                        </a>
+                        <a href="{% url 'ride_stop_add' ride.pk %}"
+                           class="btn btn-primary float-right">
+                            <i class="fas fa-plus mr-1"></i>
+                            Add Stop
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

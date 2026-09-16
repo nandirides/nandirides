@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h3 class="mb-1">
+                <i class="bi bi-lightning-charge me-2"></i>{{ form_title }}
+            </h3>
+            <p class="text-body-secondary mb-0">
+                Configure temporary surge pricing for a city and vehicle type.
+            </p>
+        </div>
+        <a href="{% url 'surge_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Surge Pricing
+        </a>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-sliders me-2"></i>Surge Pricing Configuration
+            </h5>
+        </div>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="card-body">
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label for="{{ form.city.id_for_label }}" class="form-label">
+                            City <span class="text-danger">*</span>
+                        </label>
+                        {{ form.city }}
+                        {% for error in form.city.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="{{ form.vehicle_type.id_for_label }}" class="form-label">
+                            Vehicle Type <span class="text-danger">*</span>
+                        </label>
+                        {{ form.vehicle_type }}
+                        {% for error in form.vehicle_type.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-12">
+                        <hr class="my-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-graph-up-arrow me-1"></i>Surge Configuration
+                        </h6>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="{{ form.multiplier.id_for_label }}" class="form-label">
+                            Surge Multiplier <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            {{ form.multiplier }}
+                            <span class="input-group-text">x</span>
+                        </div>
+                        <div class="form-text">
+                            Example: 1.50 means 50% higher fare.
+                        </div>
+                        {% for error in form.multiplier.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="{{ form.start_time.id_for_label }}" class="form-label">
+                            Start Time <span class="text-danger">*</span>
+                        </label>
+                        {{ form.start_time }}
+                        {% for error in form.start_time.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="{{ form.end_time.id_for_label }}" class="form-label">
+                            End Time <span class="text-danger">*</span>
+                        </label>
+                        {{ form.end_time }}
+                        {% for error in form.end_time.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-12">
+                        <label for="{{ form.reason.id_for_label }}" class="form-label">
+                            Reason
+                        </label>
+                        {{ form.reason }}
+                        {% for error in form.reason.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                Active Surge Pricing
+                            </label>
+                        </div>
+                        {% for error in form.is_active.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer d-flex flex-wrap justify-content-end gap-2">
+                <a href="{% url 'surge_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    {% if surge %}
+                        <i class="bi bi-check-lg me-1"></i>Update Surge Pricing
+                    {% else %}
+                        <i class="bi bi-plus-lg me-1"></i>Create Surge Pricing
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+{% block title %}Ride Status | NandiRide{% endblock %}
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-tasks mr-2"></i>
+                    Ride Status
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        Ride Status
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                    <i class="fas fa-info-circle mr-2"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-secondary">
+                    <div class="inner">
+                        <h3>{{ status_counts.driver_assigned|default:0 }}</h3>
+                        <p>Driver Assigned</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ status_counts.driver_arriving|default:0 }}</h3>
+                        <p>Driver Arriving</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-primary">
+                    <div class="inner">
+                        <h3>{{ status_counts.driver_arrived|default:0 }}</h3>
+                        <p>Driver Arrived</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>{{ status_counts.started|default:0 }}</h3>
+                        <p>Started</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ status_counts.completed|default:0 }}</h3>
+                        <p>Completed</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>{{ status_counts.cancelled|default:0 }}</h3>
+                        <p>Cancelled</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-dark">
+                    <div class="inner">
+                        <h3>{{ active_count|default:0 }}</h3>
+                        <p>Active Rides</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-road"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-light">
+                    <div class="inner">
+                        <h3>{{ total_count|default:0 }}</h3>
+                        <p>Total Rides</p>
+                    </div>
+                    <div class="icon text-muted">
+                        <i class="fas fa-list"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-filter mr-2"></i>
+                    Ride Status Filter
+                </h3>
+            </div>
+
+            <form method="get">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group mb-md-0">
+                                <label for="q">
+                                    <i class="fas fa-search mr-1"></i>
+                                    Search Ride
+                                </label>
+                                <input type="text"
+                                       name="q"
+                                       id="q"
+                                       class="form-control"
+                                       value="{{ request.GET.q }}"
+                                       placeholder="Ride number, passenger, driver...">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group mb-md-0">
+                                <label for="status">
+                                    <i class="fas fa-tasks mr-1"></i>
+                                    Status
+                                </label>
+                                <select name="status"
+                                        id="status"
+                                        class="form-control">
+                                    <option value="">All Statuses</option>
+                                    {% for value, label in status_choices %}
+                                        <option value="{{ value }}"
+                                            {% if request.GET.status == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end">
+                            <div class="form-group mb-0 w-100">
+                                <button type="submit"
+                                        class="btn btn-primary">
+                                    <i class="fas fa-search mr-1"></i>
+                                    Filter
+                                </button>
+                                <a href="{% url 'user_ridestatus' %}"
+                                   class="btn btn-default">
+                                    <i class="fas fa-redo mr-1"></i>
+                                    Reset
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-stream mr-2"></i>
+                    Ride Status Management
+                </h3>
+
+                <div class="card-tools">
+                    <a href="{% url 'ride_list' %}"
+                       class="btn btn-sm btn-primary">
+                        <i class="fas fa-list mr-1"></i>
+                        All Rides
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                {% if rides %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Ride</th>
+                                    <th>Passenger</th>
+                                    <th>Driver</th>
+                                    <th>Route</th>
+                                    <th>Scheduled</th>
+                                    <th>Status</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for ride in rides %}
+                                    <tr>
+                                        <td>
+                                            {{ forloop.counter }}
+                                        </td>
+
+                                        <td>
+                                            <a href="{% url 'ride_details' ride.pk %}"
+                                               class="font-weight-bold">
+                                                {{ ride.ride_number }}
+                                            </a>
+                                            <small class="d-block text-muted">
+                                                {{ ride.created_at|date:"d M Y, h:i A" }}
+                                            </small>
+                                        </td>
+
+                                        <td>
+                                            <i class="fas fa-user mr-1 text-muted"></i>
+                                            {{ ride.passenger }}
+                                        </td>
+
+                                        <td>
+                                            <i class="fas fa-user-tie mr-1 text-muted"></i>
+                                            {{ ride.driver }}
+                                        </td>
+
+                                        <td>
+                                            <div>
+                                                <i class="fas fa-circle text-success mr-1"></i>
+                                                {{ ride.pickup_location }}
+                                            </div>
+                                            <div class="mt-1">
+                                                <i class="fas fa-map-marker-alt text-danger mr-1"></i>
+                                                {{ ride.drop_location }}
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            {% if ride.scheduled_at %}
+                                                {{ ride.scheduled_at|date:"d M Y" }}
+                                                <small class="d-block text-muted">
+                                                    {{ ride.scheduled_at|date:"h:i A" }}
+                                                </small>
+                                            {% else %}
+                                                <span class="text-muted">
+                                                    Immediate
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            {% if ride.status == "driver_assigned" %}
+                                                <span class="badge badge-secondary">
+                                                    <i class="fas fa-user-tie mr-1"></i>
+                                                    Driver Assigned
+                                                </span>
+                                            {% elif ride.status == "driver_arriving" %}
+                                                <span class="badge badge-info">
+                                                    <i class="fas fa-car mr-1"></i>
+                                                    Driver Arriving
+                                                </span>
+                                            {% elif ride.status == "driver_arrived" %}
+                                                <span class="badge badge-primary">
+                                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                                    Driver Arrived
+                                                </span>
+                                            {% elif ride.status == "started" %}
+                                                <span class="badge badge-warning">
+                                                    <i class="fas fa-play mr-1"></i>
+                                                    Started
+                                                </span>
+                                            {% elif ride.status == "completed" %}
+                                                <span class="badge badge-success">
+                                                    <i class="fas fa-check mr-1"></i>
+                                                    Completed
+                                                </span>
+                                            {% elif ride.status == "cancelled" %}
+                                                <span class="badge badge-danger">
+                                                    <i class="fas fa-times mr-1"></i>
+                                                    Cancelled
+                                                </span>
+                                            {% else %}
+                                                <span class="badge badge-secondary">
+                                                    {{ ride.get_status_display }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-right">
+                                            <div class="btn-group">
+                                                <a href="{% url 'ride_details' ride.pk %}"
+                                                   class="btn btn-sm btn-info"
+                                                   title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+
+                                                {% if ride.status != "completed" and ride.status != "cancelled" %}
+                                                    <a href="{% url 'ride_status_update' ride.pk %}"
+                                                       class="btn btn-sm btn-warning"
+                                                       title="Update Status">
+                                                        <i class="fas fa-sync-alt"></i>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5>No rides found</h5>
+                        <p class="text-muted mb-3">
+                            No rides match the selected status or search criteria.
+                        </p>
+                        <a href="{% url 'user_ridestatus' %}"
+                           class="btn btn-primary">
+                            <i class="fas fa-redo mr-1"></i>
+                            Clear Filters
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if page_obj.has_other_pages %}
+                <div class="card-footer">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <span class="text-muted">
+                                Showing page {{ page_obj.number }}
+                                of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <ul class="pagination pagination-sm m-0 float-right">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status|urlencode }}{% endif %}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </span>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status|urlencode }}{% endif %}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status|urlencode }}{% endif %}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </span>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

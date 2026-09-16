@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h3 class="mb-1">
+                <i class="bi bi-receipt me-2"></i>Fare Breakdowns
+            </h3>
+            <p class="text-body-secondary mb-0">
+                View detailed fare calculations for completed and active rides.
+            </p>
+        </div>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-primary-subtle text-primary rounded p-3 me-3">
+                        <i class="bi bi-receipt fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-body-secondary small">Total Breakdowns</div>
+                        <div class="fs-4 fw-bold">{{ total_breakdowns }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input
+                            type="search"
+                            id="fareBreakdownSearch"
+                            class="form-control"
+                            placeholder="Search by ride ID or fare amount..."
+                        >
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <span class="text-body-secondary small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Fare breakdowns are read-only records.
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if fare_breakdowns %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="fareBreakdownTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Ride</th>
+                                <th>Base Fare</th>
+                                <th>Distance Fare</th>
+                                <th>Time Fare</th>
+                                <th>Waiting</th>
+                                <th>Surge</th>
+                                <th>Discount</th>
+                                <th>Tax</th>
+                                <th>Total</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for breakdown in fare_breakdowns %}
+                                <tr
+                                    data-search="{{ breakdown.ride|lower }} {{ breakdown.total }} {{ breakdown.base_fare }}"
+                                >
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <span class="fw-semibold">
+                                            #{{ breakdown.ride.pk }}
+                                        </span>
+                                    </td>
+                                    <td>₹{{ breakdown.base_fare }}</td>
+                                    <td>₹{{ breakdown.distance_fare }}</td>
+                                    <td>₹{{ breakdown.time_fare }}</td>
+                                    <td>₹{{ breakdown.waiting_fare }}</td>
+                                    <td>
+                                        {% if breakdown.surge_fare %}
+                                            <span class="text-warning-emphasis">
+                                                ₹{{ breakdown.surge_fare }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-body-secondary">₹0.00</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if breakdown.discount %}
+                                            <span class="text-success">
+                                                -₹{{ breakdown.discount }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-body-secondary">₹0.00</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>₹{{ breakdown.tax }}</td>
+                                    <td>
+                                        <span class="fw-bold">
+                                            ₹{{ breakdown.total }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-end">
+                                            <a
+                                                href="{% url 'fare_breakdown_detail' breakdown.pk %}"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="View Details"
+                                            >
+                                                <i class="bi bi-eye me-1"></i>View
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="noFareBreakdownResult" class="text-center py-5 d-none">
+                    <i class="bi bi-search fs-1 text-body-secondary"></i>
+                    <h5 class="mt-3">No Matching Records</h5>
+                    <p class="text-body-secondary mb-0">
+                        Try another search term.
+                    </p>
+                </div>
+            {% else %}
+                <div class="text-center py-5 px-3">
+                    <i class="bi bi-receipt fs-1 text-body-secondary"></i>
+                    <h5 class="mt-3">No Fare Breakdowns Found</h5>
+                    <p class="text-body-secondary mb-0">
+                        Fare breakdown records will appear here when rides have fare calculations.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("fareBreakdownSearch");
+    const table = document.getElementById("fareBreakdownTable");
+    const noResult = document.getElementById("noFareBreakdownResult");
+    if (!searchInput || !table) {
+        return;
+    }
+    const rows = table.querySelectorAll("tbody tr");
+    function filterRows() {
+        const searchValue = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        rows.forEach(function (row) {
+            const rowSearch = row.dataset.search || "";
+            const visible = rowSearch.includes(searchValue);
+            row.classList.toggle("d-none", !visible);
+            if (visible) {
+                visibleCount++;
+            }
+        });
+        if (noResult) {
+            noResult.classList.toggle("d-none", visibleCount !== 0);
+        }
+    }
+    searchInput.addEventListener("input", filterRows);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title|default:"Assign Driver" }} | NandiRide{% endblock %}
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">{{ page_title|default:"Assign Driver" }}</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_list' %}">Rides</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_details' ride.pk %}">{{ ride.ride_number }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        {{ page_title|default:"Assign Driver" }}
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-car mr-2"></i>
+                            Ride Summary
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <div class="mb-3">
+                                <span class="d-inline-flex align-items-center justify-content-center bg-primary rounded-circle"
+                                      style="width:70px;height:70px;">
+                                    <i class="fas fa-car text-white fa-2x"></i>
+                                </span>
+                            </div>
+                            <h4 class="font-weight-bold mb-2">{{ ride.ride_number }}</h4>
+                            <span class="badge badge-primary px-3 py-2">
+                                {{ ride.get_status_display }}
+                            </span>
+                        </div>
+
+                        <div class="card card-light">
+                            <div class="card-body">
+                                <div class="d-flex">
+                                    <div class="mr-3 pt-1">
+                                        <i class="fas fa-circle text-success"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Pickup Location</small>
+                                        <strong>{{ ride.pickup_location }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="ml-1 border-left my-2" style="height:25px;"></div>
+
+                                <div class="d-flex">
+                                    <div class="mr-3 pt-1">
+                                        <i class="fas fa-map-marker-alt text-danger"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Drop Location</small>
+                                        <strong>{{ ride.drop_location }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5 text-muted">
+                                <i class="fas fa-user mr-1"></i>
+                                Passenger
+                            </dt>
+                            <dd class="col-sm-7">
+                                {% firstof ride.passenger.get_full_name ride.passenger.username %}
+                            </dd>
+
+                            <dt class="col-sm-5 text-muted">
+                                <i class="fas fa-road mr-1"></i>
+                                Distance
+                            </dt>
+                            <dd class="col-sm-7">
+                                {{ ride.distance_km }} km
+                            </dd>
+
+                            <dt class="col-sm-5 text-muted">
+                                <i class="fas fa-clock mr-1"></i>
+                                Duration
+                            </dt>
+                            <dd class="col-sm-7">
+                                {{ ride.duration_minutes }} min
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Driver Assignment
+                        </h3>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="card-body">
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.ride.id_for_label }}">
+                                            <i class="fas fa-car mr-1"></i>
+                                            Ride
+                                        </label>
+                                        {{ form.ride }}
+                                        {% for error in form.ride.errors %}
+                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.driver.id_for_label }}">
+                                            <i class="fas fa-user-tie mr-1"></i>
+                                            Driver
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.driver }}
+                                        {% for error in form.driver.errors %}
+                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.status.id_for_label }}">
+                                            <i class="fas fa-tasks mr-1"></i>
+                                            Assignment Status
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.status }}
+                                        {% for error in form.status.errors %}
+                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.accepted_at.id_for_label }}">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Accepted At
+                                        </label>
+                                        {{ form.accepted_at }}
+                                        {% for error in form.accepted_at.errors %}
+                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.rejected_at.id_for_label }}">
+                                            <i class="fas fa-times-circle mr-1"></i>
+                                            Rejected At
+                                        </label>
+                                        {{ form.rejected_at }}
+                                        {% for error in form.rejected_at.errors %}
+                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="{{ form.rejection_reason.id_for_label }}">
+                                            <i class="fas fa-comment-alt mr-1"></i>
+                                            Rejection Reason
+                                        </label>
+                                        {{ form.rejection_reason }}
+                                        {% for error in form.rejection_reason.errors %}
+                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="callout callout-info mb-0">
+                                <h5>
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Assignment Information
+                                </h5>
+                                <p class="mb-0">
+                                    Select a driver and set the appropriate assignment status.
+                                    The assigned driver can be changed later from the Ride Details page.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="{% url 'ride_details' ride.pk %}" class="btn btn-default">
+                                <i class="fas fa-arrow-left mr-1"></i>
+                                Back to Ride
+                            </a>
+                            <button type="submit" class="btn btn-primary float-right">
+                                <i class="fas fa-save mr-1"></i>
+                                {{ submit_text|default:"Save Assignment" }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

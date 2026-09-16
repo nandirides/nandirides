@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+{% block title %}Tracking History | {{ ride.ride_number }} | NandiRide{% endblock %}
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-map-marked-alt mr-2"></i>
+                    Tracking History
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_list' %}">Rides</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_details' ride.pk %}">
+                            {{ ride.ride_number }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">Tracking</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<section class="content">
+    <div class="container-fluid">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                    <i class="fas fa-info-circle mr-2"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="row">
+            <div class="col-lg-4 col-md-5">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-car mr-2"></i>
+                            Ride Summary
+                        </h3>
+                        <div class="card-tools">
+                            <span class="badge badge-primary">
+                                {{ ride.ride_number }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            {% if ride.status == "completed" %}
+                                <span class="badge badge-success p-2">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% elif ride.status == "cancelled" %}
+                                <span class="badge badge-danger p-2">
+                                    <i class="fas fa-times-circle mr-1"></i>
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% elif ride.status == "started" %}
+                                <span class="badge badge-warning p-2">
+                                    <i class="fas fa-road mr-1"></i>
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% else %}
+                                <span class="badge badge-info p-2">
+                                    <i class="fas fa-car-side mr-1"></i>
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5">Passenger</dt>
+                            <dd class="col-sm-7">
+                                {{ ride.passenger }}
+                            </dd>
+                            <dt class="col-sm-5">Driver</dt>
+                            <dd class="col-sm-7">
+                                {{ ride.driver }}
+                            </dd>
+                            <dt class="col-sm-5">Vehicle</dt>
+                            <dd class="col-sm-7">
+                                {{ ride.vehicle }}
+                            </dd>
+                            <dt class="col-sm-5">Pickup</dt>
+                            <dd class="col-sm-7">
+                                {{ ride.pickup_location }}
+                            </dd>
+                            <dt class="col-sm-5">Destination</dt>
+                            <dd class="col-sm-7">
+                                {{ ride.drop_location }}
+                            </dd>
+                            <dt class="col-sm-5">Distance</dt>
+                            <dd class="col-sm-7">
+                                {{ ride.distance_km }} km
+                            </dd>
+                            <dt class="col-sm-5">Duration</dt>
+                            <dd class="col-sm-7">
+                                {{ ride.duration_minutes }} min
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="card-footer">
+                        {% if ride.status != "completed" and ride.status != "cancelled" %}
+                            <a href="{% url 'ride_tracking_add' ride.pk %}" class="btn btn-primary btn-block">
+                                <i class="fas fa-location-arrow mr-1"></i>
+                                Add Tracking Point
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'ride_details' ride.pk %}" class="btn btn-default btn-block mb-0">
+                            <i class="fas fa-arrow-left mr-1"></i>
+                            Back to Ride
+                        </a>
+                    </div>
+                </div>
+                <div class="card card-success card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-crosshairs mr-2"></i>
+                            Latest Location
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        {% if latest_tracking %}
+                            <div class="callout callout-success">
+                                <h5>
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    Current GPS Location
+                                </h5>
+                                <p class="mb-1">
+                                    <strong>Latitude:</strong>
+                                    {{ latest_tracking.latitude }}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Longitude:</strong>
+                                    {{ latest_tracking.longitude }}
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Recorded:</strong>
+                                    {{ latest_tracking.recorded_at|date:"d M Y, h:i A" }}
+                                </p>
+                            </div>
+                            <div class="row">
+                                <div class="col-4 text-center">
+                                    <div class="border-right">
+                                        <strong>
+                                            {{ latest_tracking.speed|default:"-" }}
+                                        </strong>
+                                        <small class="d-block text-muted">
+                                            Speed
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <div class="border-right">
+                                        <strong>
+                                            {{ latest_tracking.heading|default:"-" }}
+                                        </strong>
+                                        <small class="d-block text-muted">
+                                            Heading
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <strong>
+                                        {{ latest_tracking.accuracy|default:"-" }}
+                                    </strong>
+                                    <small class="d-block text-muted">
+                                        Accuracy
+                                    </small>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+                                <h5>No Tracking Data</h5>
+                                <p class="mb-0">
+                                    No GPS location has been recorded yet.
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 col-md-7">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-history mr-2"></i>
+                            GPS Tracking Points
+                        </h3>
+                        <div class="card-tools">
+                            <span class="badge badge-primary">
+                                {{ page_obj.paginator.count }} Points
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if tracking_points %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped mb-0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Driver</th>
+                                            <th>Latitude</th>
+                                            <th>Longitude</th>
+                                            <th>Speed</th>
+                                            <th>Heading</th>
+                                            <th>Accuracy</th>
+                                            <th>Recorded At</th>
+                                            <th class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for point in tracking_points %}
+                                            <tr>
+                                                <td>
+                                                    {{ forloop.counter }}
+                                                </td>
+                                                <td>
+                                                    <i class="fas fa-user-tie mr-1"></i>
+                                                    {{ point.driver }}
+                                                </td>
+                                                <td>
+                                                    <code>
+                                                        {{ point.latitude }}
+                                                    </code>
+                                                </td>
+                                                <td>
+                                                    <code>
+                                                        {{ point.longitude }}
+                                                    </code>
+                                                </td>
+                                                <td>
+                                                    {% if point.speed %}
+                                                        {{ point.speed }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if point.heading %}
+                                                        {{ point.heading }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if point.accuracy %}
+                                                        {{ point.accuracy }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <small>
+                                                        {{ point.recorded_at|date:"d M Y" }}<br>
+                                                        {{ point.recorded_at|date:"h:i A" }}
+                                                    </small>
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if ride.status != "completed" and ride.status != "cancelled" %}
+                                                        <form method="post" action="{% url 'ride_tracking_delete' point.pk %}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this tracking point?');">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-sm btn-danger" title="Delete Tracking Point">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    {% else %}
+                                                        <span class="text-muted">
+                                                            <i class="fas fa-lock"></i>
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-map-marked-alt fa-4x text-muted mb-3"></i>
+                                <h4>No Tracking Points</h4>
+                                <p class="text-muted">
+                                    GPS tracking data has not been recorded for this ride.
+                                </p>
+                                {% if ride.status != "completed" and ride.status != "cancelled" %}
+                                    <a href="{% url 'ride_tracking_add' ride.pk %}" class="btn btn-primary">
+                                        <i class="fas fa-plus mr-1"></i>
+                                        Add First Tracking Point
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if page_obj.has_other_pages %}
+                        <div class="card-footer clearfix">
+                            <ul class="pagination pagination-sm m-0 float-right">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            &laquo;
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">
+                                                {{ num }}
+                                            </span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            &raquo;
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

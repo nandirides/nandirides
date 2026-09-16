@@ -11,18 +11,31 @@ from core.models import TimeStampedModel
     #     return self.name
         
 class Gallery(models.Model):
-    profile_image = models.ImageField(upload_to='profileimg', blank=True,
-                                      help_text='Optional: Upload a profile image')
-    my_file = models.FileField(upload_to = 'doc', blank=True)
-    date = models.DateTimeField(auto_now_add = True)
-
+    class Category(models.TextChoices):
+        PROFILE = "profile", "Profile"
+        VEHICLE = "vehicle", "Vehicle"
+        RIDE = "ride", "Ride"
+        DRIVER = "driver", "Driver"
+        OTHER = "other", "Other"
+    profile_image = models.ImageField(
+        upload_to="profileimg/",
+        blank=False,
+        null=False,
+        help_text="Required: Upload a gallery image",
+    )
+    category = models.CharField(
+        max_length=20,
+        choices=Category.choices,
+        default=Category.OTHER,
+    )
+    date = models.DateTimeField(auto_now_add=True)
     def delete(self, *args, **kwargs):
         if self.profile_image:
             self.profile_image.delete(save=False)
-
         super().delete(*args, **kwargs)
-
-
+    def __str__(self):
+        return f"{self.get_category_display()} - {self.profile_image.name}"
+    
 class UserProfile(TimeStampedModel):
 
     class Gender(models.TextChoices):

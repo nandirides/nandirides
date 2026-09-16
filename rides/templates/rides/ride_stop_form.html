@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | NandiRide Admin{% endblock %}
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-map-marker-alt mr-2"></i>{{ page_title }}
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_list' %}">Rides</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_details' ride.pk %}">{{ ride.ride_number }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ page_title }}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<section class="content">
+    <div class="container-fluid">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            Stop Information
+                        </h3>
+                    </div>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="card-body">
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% for field in form %}
+                                {% if field.name != "ride" %}
+                                    <div class="form-group">
+                                        <label for="{{ field.id_for_label }}">
+                                            {{ field.label }}
+                                            {% if field.field.required %}
+                                                <span class="text-danger">*</span>
+                                            {% endif %}
+                                        </label>
+                                        {{ field }}
+                                        {% if field.help_text %}
+                                            <small class="form-text text-muted">
+                                                {{ field.help_text }}
+                                            </small>
+                                        {% endif %}
+                                        {% for error in field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'ride_stop_list' ride.pk %}" class="btn btn-default">
+                                <i class="fas fa-arrow-left mr-1"></i>
+                                Back
+                            </a>
+                            <button type="submit" class="btn btn-primary float-right">
+                                <i class="fas fa-save mr-1"></i>
+                                {{ submit_text }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card card-info card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-route mr-2"></i>
+                            Ride Information
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Ride Number</small>
+                            <strong>{{ ride.ride_number }}</strong>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Passenger</small>
+                            <strong>
+                                {{ ride.passenger.get_full_name|default:ride.passenger.username }}
+                            </strong>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Pickup</small>
+                            <span>
+                                {{ ride.pickup_location }}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Destination</small>
+                            <span>
+                                {{ ride.drop_location }}
+                            </span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Current Status</small>
+                            {% if ride.status == "completed" %}
+                                <span class="badge badge-success">
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% elif ride.status == "cancelled" %}
+                                <span class="badge badge-danger">
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% elif ride.status == "started" %}
+                                <span class="badge badge-primary">
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% else %}
+                                <span class="badge badge-warning">
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="callout callout-info">
+                    <h5>
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Ride Stop
+                    </h5>
+                    <p class="mb-0">
+                        Add intermediate locations or stops for this ride.
+                        Stop order determines the sequence in which locations
+                        are visited.
+                    </p>
+                </div>
+                <div class="card card-secondary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Guidelines
+                        </h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success mr-2"></i>
+                                Use a unique stop order for this ride.
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check text-success mr-2"></i>
+                                Select the correct location.
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-clock text-info mr-2"></i>
+                                Arrival and departure times are optional.
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-sync-alt text-warning mr-2"></i>
+                                Update the status as the ride progresses.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

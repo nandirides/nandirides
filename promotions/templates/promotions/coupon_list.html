@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                    <h3 class="mb-1">{{ page_title }}</h3>
+                    <p class="text-body-secondary mb-0">Manage discount coupons and promotional offers.</p>
+                </div>
+                {% if perms.promotions.add_coupon %}
+                <a href="{% url 'coupon_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Add Coupon
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Total Coupons</p>
+                            <h3 class="mb-0">{{ total_coupons }}</h3>
+                        </div>
+                        <div class="fs-2 text-primary">
+                            <i class="bi bi-ticket-perforated"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Active Coupons</p>
+                            <h3 class="mb-0">{{ active_coupons }}</h3>
+                        </div>
+                        <div class="fs-2 text-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Inactive Coupons</p>
+                            <h3 class="mb-0">{{ inactive_coupons }}</h3>
+                        </div>
+                        <div class="fs-2 text-secondary">
+                            <i class="bi bi-pause-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Available Now</p>
+                            <h3 class="mb-0" id="availableCoupons">0</h3>
+                        </div>
+                        <div class="fs-2 text-info">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-md-6">
+                    <h5 class="mb-0">
+                        <i class="bi bi-ticket-perforated me-1"></i>Coupon List
+                    </h5>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="couponSearch" class="form-control" placeholder="Search coupon...">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="couponTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Discount</th>
+                            <th>Min Fare</th>
+                            <th>Validity</th>
+                            <th>Usage Limit</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for coupon in coupons %}
+                        <tr data-valid-from="{{ coupon.valid_from|date:'Y-m-d H:i:s' }}" data-valid-to="{{ coupon.valid_to|date:'Y-m-d H:i:s' }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <span class="badge text-bg-dark">{{ coupon.code }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ coupon.name }}</strong>
+                            </td>
+                            <td>
+                                {% if coupon.discount_type == "percentage" %}
+                                {{ coupon.discount_value }}%
+                                {% else %}
+                                ₹{{ coupon.discount_value }}
+                                {% endif %}
+                                {% if coupon.maximum_discount %}
+                                <small class="d-block text-body-secondary">
+                                    Max ₹{{ coupon.maximum_discount }}
+                                </small>
+                                {% endif %}
+                            </td>
+                            <td>₹{{ coupon.minimum_fare }}</td>
+                            <td>
+                                <small class="d-block">
+                                    <strong>From:</strong> {{ coupon.valid_from|date:"d M Y, h:i A" }}
+                                </small>
+                                <small class="d-block">
+                                    <strong>To:</strong> {{ coupon.valid_to|date:"d M Y, h:i A" }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if coupon.usage_limit %}
+                                {{ coupon.usages.count }} / {{ coupon.usage_limit }}
+                                {% else %}
+                                <span class="text-body-secondary">Unlimited</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if coupon.is_active %}
+                                <span class="badge text-bg-success">Active</span>
+                                {% else %}
+                                <span class="badge text-bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'coupon_detail' coupon.pk %}" class="btn btn-outline-primary" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    {% if perms.promotions.change_coupon %}
+                                    <a href="{% url 'coupon_edit' coupon.pk %}" class="btn btn-outline-secondary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'coupon_toggle' coupon.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-warning" title="{% if coupon.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                            {% if coupon.is_active %}
+                                            <i class="bi bi-pause-circle"></i>
+                                            {% else %}
+                                            <i class="bi bi-play-circle"></i>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr id="emptyCouponRow">
+                            <td colspan="9" class="text-center py-5">
+                                <div class="fs-1 text-body-secondary mb-2">
+                                    <i class="bi bi-ticket-perforated"></i>
+                                </div>
+                                <h5>No Coupons Found</h5>
+                                <p class="text-body-secondary mb-3">No promotional coupons have been created yet.</p>
+                                {% if perms.promotions.add_coupon %}
+                                <a href="{% url 'coupon_create' %}" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle me-1"></i>Create Coupon
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="noSearchResults" class="text-center py-4 d-none">
+                <i class="bi bi-search fs-2 text-body-secondary"></i>
+                <p class="text-body-secondary mb-0 mt-2">No coupons match your search.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("couponSearch");
+    const table = document.getElementById("couponTable");
+    const rows = table ? table.querySelectorAll("tbody tr:not(#emptyCouponRow)") : [];
+    const noResults = document.getElementById("noSearchResults");
+    const availableCoupons = document.getElementById("availableCoupons");
+    let availableCount = 0;
+    const now = new Date();
+    rows.forEach(function (row) {
+        const from = row.dataset.validFrom ? new Date(row.dataset.validFrom) : null;
+        const to = row.dataset.validTo ? new Date(row.dataset.validTo) : null;
+        if (from && to && now >= from && now <= to) {
+            availableCount++;
+        }
+    });
+    if (availableCoupons) {
+        availableCoupons.textContent = availableCount;
+    }
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const searchValue = this.value.toLowerCase().trim();
+            let visibleCount = 0;
+            rows.forEach(function (row) {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchValue)) {
+                    row.classList.remove("d-none");
+                    visibleCount++;
+                } else {
+                    row.classList.add("d-none");
+                }
+            });
+            if (noResults) {
+                noResults.classList.toggle("d-none", visibleCount !== 0);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

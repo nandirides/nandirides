@@ -1,9 +1,6 @@
 {% load static %}
 {% load navigation %}
-
-<aside
-    class="app-sidebar bg-body-secondary border-end shadow-sm"
->
+<aside class="app-sidebar bg-body-secondary border-end shadow-sm">
     <!-- Brand -->
     <div class="sidebar-brand border-bottom">
         <a
@@ -24,10 +21,7 @@
     </div>
     <!-- Sidebar Search -->
     <div class="px-3 pt-3">
-        <div
-            class="position-relative"
-            role="search"
-        >
+        <div class="position-relative" role="search">
             <label
                 for="sidebar-search-input"
                 class="visually-hidden"
@@ -73,7 +67,12 @@
                 {% for item in navigation %}
                     {% if item.children %}
                         <!-- Parent Menu -->
-                        <li class="nav-item mb-1">
+                        <li
+                            class="nav-item mb-1
+                            {% if item.open %}
+                                menu-open
+                            {% endif %}"
+                        >
                             <a
                                 href="#"
                                 class="nav-link rounded-3 d-flex align-items-center py-2 px-3
@@ -81,15 +80,11 @@
                                     active
                                 {% endif %}"
                             >
-                                <i
-                                    class="nav-icon bi {{ item.icon }} fs-5 me-2"
-                                ></i>
+                                <i class="nav-icon bi {{ item.icon }} fs-5 me-2"></i>
                                 <p class="mb-0 flex-grow-1">
                                     {{ item.title }}
                                 </p>
-                                <i
-                                    class="nav-arrow bi bi-chevron-right small"
-                                ></i>
+                                <i class="nav-arrow bi bi-chevron-right small"></i>
                             </a>
                             <!-- Children -->
                             <ul class="nav nav-treeview ms-2 mt-1">
@@ -102,9 +97,7 @@
                                                 active
                                             {% endif %}"
                                         >
-                                            <i
-                                                class="nav-icon bi {{ child.icon }} me-2"
-                                            ></i>
+                                            <i class="nav-icon bi {{ child.icon }} me-2"></i>
                                             <p class="mb-0">
                                                 {{ child.title }}
                                             </p>
@@ -117,15 +110,13 @@
                         <!-- Single Menu -->
                         <li class="nav-item mb-1">
                             <a
-                                href="{% url item.url %}"
+                                href="{% url item.url %}{{ item.query|default:'' }}"
                                 class="nav-link rounded-3 d-flex align-items-center py-2 px-3
                                 {% if item.active %}
                                     active
                                 {% endif %}"
                             >
-                                <i
-                                    class="nav-icon bi {{ item.icon }} fs-5 me-2"
-                                ></i>
+                                <i class="nav-icon bi {{ item.icon }} fs-5 me-2"></i>
                                 <p class="mb-0">
                                     {{ item.title }}
                                 </p>

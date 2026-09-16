@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h3 class="mb-1">
+                <i class="bi bi-receipt me-2"></i>Fare Breakdown Details
+            </h3>
+            <p class="text-body-secondary mb-0">
+                Detailed fare calculation for Ride #{{ fare_breakdown.ride.pk }}.
+            </p>
+        </div>
+        <a href="{% url 'fare_breakdown_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Fare Breakdowns
+        </a>
+    </div>
+    <div class="row g-3">
+        <div class="col-12 col-xl-8">
+            <div class="card">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-calculator me-2"></i>Fare Calculation
+                    </h5>
+                    <span class="badge text-bg-primary">
+                        Ride #{{ fare_breakdown.ride.pk }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-cash me-2"></i>
+                                <span>Base Fare</span>
+                            </div>
+                            <span class="fw-semibold">
+                                ₹{{ fare_breakdown.base_fare }}
+                            </span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-signpost-2 me-2"></i>
+                                <span>Distance Fare</span>
+                            </div>
+                            <span class="fw-semibold">
+                                ₹{{ fare_breakdown.distance_fare }}
+                            </span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-clock me-2"></i>
+                                <span>Time Fare</span>
+                            </div>
+                            <span class="fw-semibold">
+                                ₹{{ fare_breakdown.time_fare }}
+                            </span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-hourglass-split me-2"></i>
+                                <span>Waiting Fare</span>
+                            </div>
+                            <span class="fw-semibold">
+                                ₹{{ fare_breakdown.waiting_fare }}
+                            </span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-lightning-charge me-2"></i>
+                                <span>Surge Fare</span>
+                            </div>
+                            <span class="fw-semibold {% if fare_breakdown.surge_fare %}text-warning-emphasis{% endif %}">
+                                ₹{{ fare_breakdown.surge_fare }}
+                            </span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-signpost me-2"></i>
+                                <span>Toll Charge</span>
+                            </div>
+                            <span class="fw-semibold">
+                                ₹{{ fare_breakdown.toll_charge }}
+                            </span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-p-circle me-2"></i>
+                                <span>Parking Charge</span>
+                            </div>
+                            <span class="fw-semibold">
+                                ₹{{ fare_breakdown.parking_charge }}
+                            </span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-tag me-2"></i>
+                                <span>Discount</span>
+                            </div>
+                            <span class="fw-semibold text-success">
+                                -₹{{ fare_breakdown.discount }}
+                            </span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-percent me-2"></i>
+                                <span>Tax</span>
+                            </div>
+                            <span class="fw-semibold">
+                                ₹{{ fare_breakdown.tax }}
+                            </span>
+                        </div>
+                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-heart me-2"></i>
+                                <span>Tip</span>
+                            </div>
+                            <span class="fw-semibold">
+                                ₹{{ fare_breakdown.tip }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="border-top mt-3 pt-3">
+                        <div class="bg-primary-subtle rounded p-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-body-secondary small">Final Fare</div>
+                                <div class="fs-5 fw-bold">Total Amount</div>
+                            </div>
+                            <div class="fs-3 fw-bold">
+                                ₹{{ fare_breakdown.total }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Ride Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                        <span class="text-body-secondary">Ride ID</span>
+                        <span class="fw-semibold">
+                            #{{ fare_breakdown.ride.pk }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-body-secondary">Fare Record</span>
+                        <span class="fw-semibold">
+                            #{{ fare_breakdown.pk }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clock-history me-2"></i>Record Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                        <span class="text-body-secondary">Created</span>
+                        <span class="fw-semibold">
+                            {{ fare_breakdown.created_at|date:"d M Y, h:i A" }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-body-secondary">Updated</span>
+                        <span class="fw-semibold">
+                            {{ fare_breakdown.updated_at|date:"d M Y, h:i A" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

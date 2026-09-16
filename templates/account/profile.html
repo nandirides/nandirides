@@ -10,16 +10,9 @@
             <div class="row align-items-center g-4">
                 <div class="col-12 col-md-auto text-center text-md-start">
                     <div class="position-relative d-inline-block">
-                        {% if user.profile_image %}
+                        {% if profile and profile.profile_image %}
                             <img
-                                src="{{ user.profile_image.url }}"
-                                alt="Admin Profile"
-                                class="rounded-circle border border-4 border-primary shadow"
-                                style="width:120px;height:120px;object-fit:cover;"
-                            >
-                        {% elif user.profileimage %}
-                            <img
-                                src="{{ user.profileimage.url }}"
+                                src="{{ profile.profile_image.url }}"
                                 alt="Admin Profile"
                                 class="rounded-circle border border-4 border-primary shadow"
                                 style="width:120px;height:120px;object-fit:cover;"
@@ -138,8 +131,8 @@
                                 </div>
                                 <div>
                                     <small class="text-body-secondary d-block">Gender</small>
-                                    <span class="fw-semibold">
-                                        {{ user.gender|default:"-" }}
+                                    <span class="fw-semibold text-capitalize">
+                                        {{ profile.gender|default:"-" }}
                                     </span>
                                 </div>
                             </div>
@@ -152,8 +145,8 @@
                                 <div>
                                     <small class="text-body-secondary d-block">Date of Birth</small>
                                     <span class="fw-semibold">
-                                        {% if user.date_of_birth %}
-                                            {{ user.date_of_birth|date:"d M Y" }}
+                                        {% if profile.date_of_birth %}
+                                            {{ profile.date_of_birth|date:"d M Y" }}
                                         {% else %}
                                             -
                                         {% endif %}
@@ -211,7 +204,7 @@
                                 <div>
                                     <small class="text-body-secondary d-block">Mobile Number</small>
                                     <span class="fw-semibold">
-                                        {{ user.mobilenumber|default:"-" }}
+                                        {{ profile.phone|default:"-" }}
                                     </span>
                                 </div>
                             </div>
@@ -224,7 +217,7 @@
                                 <div>
                                     <small class="text-body-secondary d-block">Emergency Contact</small>
                                     <span class="fw-semibold">
-                                        {{ user.emergency_contact_name|default:"-" }}
+                                        {{ profile.emergency_contact_name|default:"-" }}
                                     </span>
                                 </div>
                             </div>
@@ -237,7 +230,7 @@
                                 <div>
                                     <small class="text-body-secondary d-block">Emergency Phone</small>
                                     <span class="fw-semibold">
-                                        {{ user.emergency_contact_phone|default:"-" }}
+                                        {{ profile.emergency_contact_phone|default:"-" }}
                                     </span>
                                 </div>
                             </div>
@@ -264,9 +257,78 @@
                                     <i class="bi bi-house"></i>
                                 </div>
                                 <div>
-                                    <small class="text-body-secondary d-block">Address</small>
+                                    <small class="text-body-secondary d-block">Profile Address</small>
+                                    <span class="fw-semibold text-break">
+                                        {{ profile.address|default:"-" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-secondary-subtle text-secondary rounded-3 p-2 me-3 flex-shrink-0">
+                                    <i class="bi bi-tag"></i>
+                                </div>
+                                <div>
+                                    <small class="text-body-secondary d-block">Address Type</small>
                                     <span class="fw-semibold">
-                                        {{ user.address|default:"-" }}
+                                        {% if address %}
+                                            {{ address.get_address_type_display }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-secondary-subtle text-secondary rounded-3 p-2 me-3 flex-shrink-0">
+                                    <i class="bi bi-bookmark"></i>
+                                </div>
+                                <div>
+                                    <small class="text-body-secondary d-block">Address Label</small>
+                                    <span class="fw-semibold">
+                                        {{ address.label|default:"-" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-info-subtle text-info rounded-3 p-2 me-3 flex-shrink-0">
+                                    <i class="bi bi-signpost-2"></i>
+                                </div>
+                                <div>
+                                    <small class="text-body-secondary d-block">Address Line 1</small>
+                                    <span class="fw-semibold text-break">
+                                        {{ address.address_line1|default:"-" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-info-subtle text-info rounded-3 p-2 me-3 flex-shrink-0">
+                                    <i class="bi bi-signpost"></i>
+                                </div>
+                                <div>
+                                    <small class="text-body-secondary d-block">Address Line 2</small>
+                                    <span class="fw-semibold text-break">
+                                        {{ address.address_line2|default:"-" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-warning-subtle text-warning rounded-3 p-2 me-3 flex-shrink-0">
+                                    <i class="bi bi-geo-alt"></i>
+                                </div>
+                                <div>
+                                    <small class="text-body-secondary d-block">Landmark</small>
+                                    <span class="fw-semibold text-break">
+                                        {{ address.landmark|default:"-" }}
                                     </span>
                                 </div>
                             </div>
@@ -279,7 +341,11 @@
                                 <div>
                                     <small class="text-body-secondary d-block">City</small>
                                     <span class="fw-semibold">
-                                        {{ user.city|default:"-" }}
+                                        {% if address and address.city %}
+                                            {{ address.city.name }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
                                     </span>
                                 </div>
                             </div>
@@ -292,8 +358,27 @@
                                 <div>
                                     <small class="text-body-secondary d-block">Postal Code</small>
                                     <span class="fw-semibold">
-                                        {{ user.postal_code|default:"-" }}
+                                        {{ address.postal_code|default:"-" }}
                                     </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-success-subtle text-success rounded-3 p-2 me-3 flex-shrink-0">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div>
+                                    <small class="text-body-secondary d-block">Default Address</small>
+                                    {% if address and address.is_default %}
+                                        <span class="badge text-bg-success rounded-pill">
+                                            Yes
+                                        </span>
+                                    {% else %}
+                                        <span class="badge text-bg-secondary rounded-pill">
+                                            No
+                                        </span>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -320,19 +405,31 @@
                             <span class="fw-semibold d-block">Account Status</span>
                             <small class="text-body-secondary">Current account state</small>
                         </div>
-                        <span class="badge text-bg-success rounded-pill px-3 py-2">
-                            Active
-                        </span>
+                        {% if user.is_active %}
+                            <span class="badge text-bg-success rounded-pill px-3 py-2">
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="badge text-bg-danger rounded-pill px-3 py-2">
+                                Inactive
+                            </span>
+                        {% endif %}
                     </div>
                     <div class="d-flex align-items-center justify-content-between py-3 border-bottom gap-3">
                         <div>
                             <span class="fw-semibold d-block">Email Verification</span>
                             <small class="text-body-secondary">Email status</small>
                         </div>
-                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 text-nowrap">
-                            <i class="bi bi-check-circle me-1"></i>
-                            Verified
-                        </span>
+                        {% if user.is_active %}
+                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 text-nowrap">
+                                <i class="bi bi-check-circle me-1"></i>
+                                Verified
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2 text-nowrap">
+                                Not Verified
+                            </span>
+                        {% endif %}
                     </div>
                     <div class="d-flex align-items-center justify-content-between py-3 border-bottom gap-3">
                         <div>
@@ -434,8 +531,13 @@
                     aria-label="Close"
                 ></button>
             </div>
-            <form method="POST">
+            <form method="POST" action="{% url 'edit_admin_profile' %}">
                 {% csrf_token %}
+                <input
+                    type="hidden"
+                    name="action"
+                    value="change_password"
+                >
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">
@@ -450,6 +552,7 @@
                                 name="current_password"
                                 class="form-control"
                                 placeholder="Enter current password"
+                                autocomplete="current-password"
                                 required
                             >
                         </div>
@@ -467,9 +570,14 @@
                                 name="new_password"
                                 class="form-control"
                                 placeholder="Enter new password"
+                                autocomplete="new-password"
+                                minlength="8"
                                 required
                             >
                         </div>
+                        <small class="text-body-secondary">
+                            Password must contain at least 8 characters.
+                        </small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">
@@ -484,6 +592,8 @@
                                 name="confirm_password"
                                 class="form-control"
                                 placeholder="Confirm new password"
+                                autocomplete="new-password"
+                                minlength="8"
                                 required
                             >
                         </div>
