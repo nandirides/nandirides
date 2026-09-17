@@ -28,17 +28,6 @@
             </a>
         </div>
     </div>
-    {% if messages %}
-        <div class="mb-4">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show border-0 shadow-sm" role="alert">
-                    <i class="fa-solid fa-circle-info me-2"></i>
-                    {{ message }}
-                    <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
     <div class="row g-4">
         <div class="col-12 col-xl-8">
             <div class="card border-0 shadow-sm overflow-hidden">

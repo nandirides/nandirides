@@ -1,187 +1,251 @@
 {% load static %}
 
-<nav class="app-header navbar navbar-expand bg-body border-bottom shadow-sm">
-    <div class="container-fluid">
-        <!-- Left Navbar -->
+<nav class="app-header navbar navbar-expand bg-body border-bottom shadow-sm {% if request.resolver_match.url_name == 'login' %}app-header-login{% else %}app-header-dashboard{% endif %}" style="position:fixed!important;top:0;right:0;z-index:1030!important;">
+    <div class="container-fluid position-relative">
         <ul class="navbar-nav align-items-center">
-            <!-- Theme Toggle -->
             <li class="nav-item">
-                <button
-                    type="button"
-                    class="nav-link border-0 bg-transparent rounded-circle"
-                    id="theme-toggle"
-                    aria-label="Toggle theme"
-                    title="Toggle theme"
-                >
-                    <i
-                        class="bi bi-moon-fill"
-                        id="theme-icon"
-                    ></i>
+                <button type="button" class="nav-link border-0 bg-transparent rounded-circle" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+                    <i class="bi bi-moon-fill" id="theme-icon"></i>
                 </button>
             </li>
-            <!-- Sidebar Toggle -->
+            {% if request.resolver_match.url_name != 'login' %}
             <li class="nav-item">
-                <a
-                    class="nav-link rounded"
-                    data-lte-toggle="sidebar"
-                    href="#"
-                    role="button"
-                    aria-label="Toggle sidebar"
-                    title="Toggle sidebar"
-                >
+                <a class="nav-link rounded" data-lte-toggle="sidebar" href="#" role="button" aria-label="Toggle sidebar" title="Toggle sidebar">
                     <i class="bi bi-list fs-5"></i>
                 </a>
             </li>
-            <!-- Home -->
             <li class="nav-item d-none d-md-block">
-                <a
-                    href="{% url 'dashboard' %}"
-                    class="nav-link fw-medium"
-                >
+                <a href="{% url 'dashboard' %}" class="nav-link fw-medium">
                     <i class="bi bi-house-door me-1"></i>
                     Home
                 </a>
             </li>
+            {% endif %}
         </ul>
-        <!-- Navbar Search -->
-        <form
-            class="d-none d-md-flex ms-3"
-            role="search"
-            action="search-results.html"
-        >
-            <label
-                for="navbar-search-input"
-                class="visually-hidden"
-            >
-                Search
-            </label>
+        {% if request.resolver_match.url_name == 'login' %}
+        <div class="position-absolute top-50 start-50 translate-middle d-flex align-items-center gap-3 text-nowrap">
+            <img src="{% static 'user/images/logo.png' %}" alt="NandiRide Logo" width="42" height="42" class="rounded-3 shadow-sm">
+            <div class="lh-sm">
+                <div class="fw-bold fs-5 text-body">
+                    Welcome to the Nandi<small class="text-warning">Ride</small>
+                    <span class="fs-5 text-body fw-sbold">Administration Portal</span>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <form class="d-none d-md-flex ms-3" role="search" method="get" action="#">
+            <label for="navbar-search-input" class="visually-hidden">Search</label>
             <div class="input-group input-group-sm">
                 <span class="input-group-text bg-body border-end-0">
                     <i class="bi bi-search text-body-secondary"></i>
                 </span>
-                <input
-                    type="search"
-                    id="navbar-search-input"
-                    name="q"
-                    class="form-control border-start-0 shadow-none"
-                    placeholder="Search..."
-                    autocomplete="off"
-                >
+                <input type="search" id="navbar-search-input" name="q" class="form-control border-start-0 shadow-none" placeholder="Search..." autocomplete="off" value="{{ request.GET.q|default:'' }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                </button>
             </div>
         </form>
-        <!-- Right Navbar -->
+        {% endif %}
         <ul class="navbar-nav ms-auto align-items-center">
-            <!-- Search on Small Screens -->
+            {% if request.resolver_match.url_name != 'login' %}
             <li class="nav-item d-md-none">
-                <a
-                    class="nav-link rounded-circle"
-                    href="search-results.html"
-                    aria-label="Search"
-                    title="Search"
-                >
+                <a class="nav-link rounded-circle" href="#" aria-label="Search" title="Search">
                     <i class="bi bi-search"></i>
                 </a>
             </li>
+            {% endif %}
             {% if user.is_authenticated %}
-                <!-- User Menu -->
-                <li class="nav-item dropdown">
-                    <a
-                        class="nav-link dropdown-toggle d-flex align-items-center px-2"
-                        href="#"
-                        role="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                    >
-                        <img
-                            src="{% static 'adminlte/img/user1-128x128.jpg' %}"
-                            class="rounded-circle shadow-sm border me-2"
-                            width="34"
-                            height="34"
-                            alt="User profile"
-                        >
-                        <span class="d-none d-md-inline fw-medium">
-                            {{ user.get_username }}
-                        </span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 overflow-hidden">
-                        <!-- User Header -->
-                        <li>
-                            <div class="bg-primary-subtle text-primary p-3">
-                                <div class="text-center">
-                                    <img
-                                        src="{% static 'adminlte/img/user1-128x128.jpg' %}"
-                                        class="rounded-circle shadow-sm border border-2"
-                                        width="70"
-                                        height="70"
-                                        alt="User profile"
-                                    >
-                                    <p class="mb-0 mt-2 fw-semibold text-body">
-                                        {{ user.get_username }}
-                                    </p>
-                                    {% if user.is_staff %}
-                                        <small class="text-body-secondary">
-                                            <i class="bi bi-shield-check me-1"></i>
-                                            Administrator
-                                        </small>
-                                    {% endif %}
+            <li class="nav-item dropdown">
+                <a class="nav-link position-relative rounded-circle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications" title="Notifications">
+                    <i class="bi bi-bell fs-5"></i>
+                    {% if unread_notifications_count %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ unread_notifications_count }}
+                        <span class="visually-hidden">unread notifications</span>
+                    </span>
+                    {% else %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notification-badge">0</span>
+                    {% endif %}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 overflow-hidden" style="min-width:320px;">
+                    <li class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold">Notifications</span>
+                        <a href="{% url 'notification_list' %}#" class="small text-decoration-none">View All</a>
+                    </li>
+                    <li id="notification-list">
+                        {% if notifications %}
+                        {% for notification in notifications %}
+                        <a href="{{ notification.url|default:'#' }}" class="dropdown-item py-3 border-bottom">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-bell-fill text-primary me-3 mt-1"></i>
+                                <div>
+                                    <div class="fw-semibold">{{ notification.title }}</div>
+                                    <small class="text-body-secondary">{{ notification.message }}</small>
                                 </div>
                             </div>
-                        </li>
-                        <!-- Profile -->
-                        <li>
-                            <a
-                                href="{% url 'admin_profile' %}"
-                                class="dropdown-item py-2"
-                            >
-                                <i class="bi bi-person text-primary me-2"></i>
-                                Profile
+                        </a>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center py-4 text-body-secondary">
+                            <i class="bi bi-bell-slash fs-3 d-block mb-2"></i>
+                            No new notifications
+                        </div>
+                        {% endif %}
+                    </li>
+                    <li class="text-center border-top">
+                        <a href="{% url 'notification_list' %}" class="dropdown-item py-2 text-primary">View all notifications</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown ms-1">
+                <a class="nav-link dropdown-toggle d-flex align-items-center px-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if user.profile.profile_image %}
+                    <img src="{{ user.profile.profile_image.url }}" class="rounded-circle shadow-sm border me-2 object-fit-cover" width="34" height="34" alt="User profile">
+                    {% else %}
+                    <span class="rounded-circle shadow-sm border me-2 bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width:34px;height:34px;">
+                        <i class="bi bi-person-fill"></i>
+                    </span>
+                    {% endif %}
+                    <span class="d-none d-md-inline fw-medium">{{ user.get_username }}</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0 rounded-3 overflow-hidden" style="width:320px;">
+                    <div class="bg-primary text-white text-center p-3">
+                        {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image.url }}" class="rounded-circle border border-3 border-white shadow-sm bg-white object-fit-cover" width="90" height="90" alt="User profile">
+                        {% else %}
+                        <div class="rounded-circle border border-3 border-white shadow-sm bg-white text-primary d-inline-flex align-items-center justify-content-center" style="width:90px;height:90px;">
+                            <i class="bi bi-person-fill fs-1"></i>
+                        </div>
+                        {% endif %}
+                        <h6 class="mb-1 mt-2 fw-semibold">{{ user.get_full_name|default:user.get_username }}</h6>
+                        <p class="mb-1 small fw-medium">
+                            {% if user.is_superuser %}
+                            Super Administrator
+                            {% elif user.is_staff %}
+                            Administrator
+                            {% else %}
+                            Web User
+                            {% endif %}
+                        </p>
+                        <small class="opacity-75">Member since {{ user.date_joined|date:"M. Y" }}</small>
+                    </div>
+                    <div class="p-3 bg-body">
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'user_setting' %}" class="btn btn-outline-primary btn-sm flex-fill">
+                                <i class="bi bi-gear me-1"></i>
+                                Admin Setting
                             </a>
-                        </li>
-                        <!-- Settings -->
-                        <li>
-                            <a
-                                href="{% url 'user_setting' %}"
-                                class="dropdown-item py-2"
-                            >
-                                <i class="bi bi-gear text-secondary me-2"></i>
-                                Settings
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider my-1">
-                        </li>
-                        <!-- Logout -->
-                        <li>
-                            <form
-                                method="post"
-                                action="{% url 'logout' %}"
-                            >
-                                {% csrf_token %}
-                                <button
-                                    type="submit"
-                                    class="dropdown-item py-2 text-secondary"
-                                >
-                                    <i class="bi bi-box-arrow-right me-2"></i>
-                                    Logout
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </li>
+                            <button type="button" class="btn btn-outline-danger btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#signOutModal">
+                                <i class="bi bi-box-arrow-right me-1"></i>
+                                Sign out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </li>
             {% else %}
-                <!-- Login -->
-                <li class="nav-item">
-                    <a
-                        href="{% url 'login' %}"
-                        class="nav-link d-flex align-items-center"
-                    >
-                        <i class="bi bi-box-arrow-in-right text-primary me-1"></i>
-                        <span class="d-none d-sm-inline">
-                            Public Login
-                        </span>
-                    </a>
-                </li>
+            <li class="nav-item">
+                <a href="{% url 'login' %}" class="nav-link d-flex align-items-center">
+                    <i class="bi bi-box-arrow-in-right text-primary me-1"></i>
+                    <span class="d-none d-sm-inline">Public Login</span>
+                </a>
+            </li>
             {% endif %}
         </ul>
     </div>
 </nav>
+<div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <i class="bi bi-box-arrow-right text-danger fs-1"></i>
+                </div>
+                <h5 class="fw-semibold mb-2" id="signOutModalLabel">Sign out?</h5>
+                <p class="text-body-secondary mb-4">Are you sure you want to sign out?</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" action="{% url 'logout' %}" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger px-4">Sign out</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const navbar = document.querySelector(".app-header");
+    const sidebarToggle = document.querySelector('[data-lte-toggle="sidebar"]');
+    const isLoginPage = document.body.classList.contains("login-page") || navbar.classList.contains("app-header-login");
+    function updateNavbar() {
+        if (!navbar || isLoginPage) {
+            if (navbar && isLoginPage) {
+                navbar.style.left = "0px";
+                navbar.style.width = "100%";
+            }
+            return;
+        }
+        if (window.innerWidth <= 991.98) {
+            navbar.style.left = "0px";
+            navbar.style.width = "100%";
+            return;
+        }
+        const sidebar = document.querySelector(".app-sidebar");
+        const body = document.body;
+        const sidebarCollapsed = body.classList.contains("sidebar-collapse");
+        if (sidebarCollapsed) {
+            navbar.style.left = "0px";
+            navbar.style.width = "100%";
+            return;
+        }
+        if (sidebar) {
+            const width = sidebar.getBoundingClientRect().width;
+            if (width > 0) {
+                navbar.style.left = width + "px";
+                navbar.style.width = "calc(100% - " + width + "px)";
+                return;
+            }
+        }
+        navbar.style.left = "0px";
+        navbar.style.width = "100%";
+    }
+    updateNavbar();
+    window.addEventListener("resize", updateNavbar);
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener("click", function () {
+            setTimeout(updateNavbar, 50);
+            setTimeout(updateNavbar, 150);
+            setTimeout(updateNavbar, 300);
+            setTimeout(updateNavbar, 500);
+        });
+    }
+    const sidebar = document.querySelector(".app-sidebar");
+    if (sidebar) {
+        const observer = new MutationObserver(function () {
+            updateNavbar();
+        });
+        observer.observe(document.body, {
+            attributes: true,
+            attributeFilter: ["class"]
+        });
+        observer.observe(sidebar, {
+            attributes: true,
+            attributeFilter: ["class", "style"]
+        });
+    }
+    const searchInput = document.getElementById("navbar-search-input");
+    if (searchInput) {
+        searchInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                const form = searchInput.closest("form");
+                if (searchInput.value.trim() && form) {
+                    form.submit();
+                }
+            }
+        });
+    }
+});
+</script>

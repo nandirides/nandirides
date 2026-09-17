@@ -98,7 +98,7 @@ def vehicle_dashboard(request):
     }
     return render(
         request,
-        "vehicle/dashboard.html",
+        "vehicle/vehicle_dashboard.html",
         context,
     )
 

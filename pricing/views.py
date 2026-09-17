@@ -9,11 +9,45 @@ from .models import FareBreakdown, FareRule, SurgePricing
 
 @login_required
 @permission_required("pricing.view_farerule", raise_exception=True)
+def pricing_dashboard(request):
+    total_rules = FareRule.objects.count()
+    active_rules = FareRule.objects.filter(is_active=True).count()
+    inactive_rules = FareRule.objects.filter(is_active=False).count()
+    total_surge = SurgePricing.objects.count()
+    active_surge = SurgePricing.objects.filter(is_active=True).count()
+    inactive_surge = SurgePricing.objects.filter(is_active=False).count()
+    total_breakdowns = FareBreakdown.objects.count()
+
+    context = {
+        "page_title": "Pricing Dashboard | NandiRide",
+        "total_rules": total_rules,
+        "active_rules": active_rules,
+        "inactive_rules": inactive_rules,
+        "total_surge": total_surge,
+        "active_surge": active_surge,
+        "inactive_surge": inactive_surge,
+        "total_breakdowns": total_breakdowns,
+    }
+
+    return render(
+        request,
+        "pricing/pricing_dashboard.html",
+        context,
+    )
+
+
+@login_required
+@permission_required("pricing.view_farerule", raise_exception=True)
 def fare_rule_list(request):
-    fare_rules = FareRule.objects.select_related(
-        "city",
-        "vehicle_type",
-    ).all().order_by("-id")
+    fare_rules = (
+        FareRule.objects.select_related(
+            "city",
+            "vehicle_type",
+        )
+        .all()
+        .order_by("-id")
+    )
+
     context = {
         "fare_rules": fare_rules,
         "page_title": "Fare Rules",
@@ -21,6 +55,7 @@ def fare_rule_list(request):
         "active_rules": fare_rules.filter(is_active=True).count(),
         "inactive_rules": fare_rules.filter(is_active=False).count(),
     }
+
     return render(
         request,
         "pricing/fare_rule_list.html",
@@ -33,21 +68,27 @@ def fare_rule_list(request):
 def fare_rule_create(request):
     if request.method == "POST":
         form = FareRuleForm(request.POST)
+
         if form.is_valid():
             with transaction.atomic():
                 fare_rule = form.save()
+
             messages.success(
                 request,
-                f"Fare rule for {fare_rule.city} - {fare_rule.vehicle_type} created successfully.",
+                f"Fare rule for {fare_rule.city} - "
+                f"{fare_rule.vehicle_type} created successfully.",
             )
+
             return redirect("fare_rule_list")
     else:
         form = FareRuleForm()
+
     context = {
         "form": form,
         "page_title": "Add Fare Rule",
         "form_title": "Create Fare Rule",
     }
+
     return render(
         request,
         "pricing/fare_rule_form.html",
@@ -62,18 +103,22 @@ def fare_rule_edit(request, pk):
         FareRule,
         pk=pk,
     )
+
     if request.method == "POST":
         form = FareRuleForm(
             request.POST,
             instance=fare_rule,
         )
+
         if form.is_valid():
             with transaction.atomic():
                 fare_rule = form.save()
+
             messages.success(
                 request,
                 "Fare rule updated successfully.",
             )
+
             return redirect(
                 "fare_rule_detail",
                 pk=fare_rule.pk,
@@ -82,12 +127,14 @@ def fare_rule_edit(request, pk):
         form = FareRuleForm(
             instance=fare_rule,
         )
+
     context = {
         "form": form,
         "fare_rule": fare_rule,
         "page_title": "Edit Fare Rule",
         "form_title": "Update Fare Rule",
     }
+
     return render(
         request,
         "pricing/fare_rule_form.html",
@@ -105,10 +152,12 @@ def fare_rule_detail(request, pk):
         ),
         pk=pk,
     )
+
     context = {
         "fare_rule": fare_rule,
         "page_title": "Fare Rule Details",
     }
+
     return render(
         request,
         "pricing/fare_rule_detail.html",
@@ -124,17 +173,21 @@ def fare_rule_toggle(request, pk):
             "fare_rule_detail",
             pk=pk,
         )
+
     fare_rule = get_object_or_404(
         FareRule,
         pk=pk,
     )
+
     fare_rule.is_active = not fare_rule.is_active
+
     fare_rule.save(
         update_fields=[
             "is_active",
             "updated_at",
         ]
     )
+
     if fare_rule.is_active:
         messages.success(
             request,
@@ -145,6 +198,7 @@ def fare_rule_toggle(request, pk):
             request,
             "Fare rule deactivated successfully.",
         )
+
     return redirect(
         "fare_rule_detail",
         pk=fare_rule.pk,
@@ -154,10 +208,15 @@ def fare_rule_toggle(request, pk):
 @login_required
 @permission_required("pricing.view_surgepricing", raise_exception=True)
 def surge_list(request):
-    surge_pricing = SurgePricing.objects.select_related(
-        "city",
-        "vehicle_type",
-    ).all().order_by("-id")
+    surge_pricing = (
+        SurgePricing.objects.select_related(
+            "city",
+            "vehicle_type",
+        )
+        .all()
+        .order_by("-id")
+    )
+
     context = {
         "surge_pricing": surge_pricing,
         "page_title": "Surge Pricing",
@@ -165,6 +224,7 @@ def surge_list(request):
         "active_surge": surge_pricing.filter(is_active=True).count(),
         "inactive_surge": surge_pricing.filter(is_active=False).count(),
     }
+
     return render(
         request,
         "pricing/surge_list.html",
@@ -177,24 +237,29 @@ def surge_list(request):
 def surge_create(request):
     if request.method == "POST":
         form = SurgePricingForm(request.POST)
+
         if form.is_valid():
             with transaction.atomic():
                 surge = form.save()
+
             messages.success(
                 request,
                 "Surge pricing created successfully.",
             )
+
             return redirect(
                 "surge_detail",
                 pk=surge.pk,
             )
     else:
         form = SurgePricingForm()
+
     context = {
         "form": form,
         "page_title": "Add Surge Pricing",
         "form_title": "Create Surge Pricing",
     }
+
     return render(
         request,
         "pricing/surge_form.html",
@@ -209,18 +274,22 @@ def surge_edit(request, pk):
         SurgePricing,
         pk=pk,
     )
+
     if request.method == "POST":
         form = SurgePricingForm(
             request.POST,
             instance=surge,
         )
+
         if form.is_valid():
             with transaction.atomic():
                 surge = form.save()
+
             messages.success(
                 request,
                 "Surge pricing updated successfully.",
             )
+
             return redirect(
                 "surge_detail",
                 pk=surge.pk,
@@ -229,12 +298,14 @@ def surge_edit(request, pk):
         form = SurgePricingForm(
             instance=surge,
         )
+
     context = {
         "form": form,
         "surge": surge,
         "page_title": "Edit Surge Pricing",
         "form_title": "Update Surge Pricing",
     }
+
     return render(
         request,
         "pricing/surge_form.html",
@@ -252,10 +323,12 @@ def surge_detail(request, pk):
         ),
         pk=pk,
     )
+
     context = {
         "surge": surge,
         "page_title": "Surge Pricing Details",
     }
+
     return render(
         request,
         "pricing/surge_detail.html",
@@ -271,17 +344,21 @@ def surge_toggle(request, pk):
             "surge_detail",
             pk=pk,
         )
+
     surge = get_object_or_404(
         SurgePricing,
         pk=pk,
     )
+
     surge.is_active = not surge.is_active
+
     surge.save(
         update_fields=[
             "is_active",
             "updated_at",
         ]
     )
+
     if surge.is_active:
         messages.success(
             request,
@@ -292,6 +369,7 @@ def surge_toggle(request, pk):
             request,
             "Surge pricing deactivated successfully.",
         )
+
     return redirect(
         "surge_detail",
         pk=surge.pk,
@@ -301,14 +379,20 @@ def surge_toggle(request, pk):
 @login_required
 @permission_required("pricing.view_farebreakdown", raise_exception=True)
 def fare_breakdown_list(request):
-    fare_breakdowns = FareBreakdown.objects.select_related(
-        "ride",
-    ).all().order_by("-id")
+    fare_breakdowns = (
+        FareBreakdown.objects.select_related(
+            "ride",
+        )
+        .all()
+        .order_by("-id")
+    )
+
     context = {
         "fare_breakdowns": fare_breakdowns,
         "page_title": "Fare Breakdowns",
         "total_breakdowns": fare_breakdowns.count(),
     }
+
     return render(
         request,
         "pricing/fare_breakdown_list.html",
@@ -325,10 +409,12 @@ def fare_breakdown_detail(request, pk):
         ),
         pk=pk,
     )
+
     context = {
         "fare_breakdown": fare_breakdown,
         "page_title": "Fare Breakdown Details",
     }
+
     return render(
         request,
         "pricing/fare_breakdown_detail.html",
