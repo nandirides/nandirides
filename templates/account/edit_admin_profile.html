@@ -25,9 +25,7 @@
                         </a>
                     </li>
                     <li class="breadcrumb-item active">
-                        <a href="{% url 'edit_admin_profile' %}" class="text-decoration-none">
-                            Edit Profile
-                        </a>
+                        Edit Profile
                     </li>
                 </ol>
             </div>
@@ -46,23 +44,18 @@
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                     <div class="bg-primary bg-gradient text-white text-center p-4">
                         <div class="position-relative d-inline-block mb-3">
-                            {% if user.profile_image %}
+                            {% if profile.profile_image %}
                                 <img
-                                    src="{{ user.profile_image.url }}"
+                                    src="{{ profile.profile_image.url }}"
                                     alt="Admin Profile"
                                     class="rounded-circle border border-4 border-white shadow"
-                                    style="width:140px;height:140px;object-fit:cover;"
-                                >
-                            {% elif user.profileimage %}
-                                <img
-                                    src="{{ user.profileimage.url }}"
-                                    alt="Admin Profile"
-                                    class="rounded-circle border border-4 border-white shadow"
+                                    id="profilePreview"
                                     style="width:140px;height:140px;object-fit:cover;"
                                 >
                             {% else %}
                                 <div
                                     class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center border border-4 border-white shadow mx-auto"
+                                    id="profilePreviewPlaceholder"
                                     style="width:140px;height:140px;"
                                 >
                                     <i class="bi bi-person-fill display-4"></i>
@@ -83,16 +76,26 @@
                             <i class="bi bi-camera-fill text-primary me-1"></i>
                             Profile Picture
                         </label>
+                        <div class="d-grid">
+                            <label
+                                for="profileImageInput"
+                                class="btn btn-primary rounded-3 fw-semibold"
+                            >
+                                <i class="bi bi-camera me-1"></i>
+                                Select Photo
+                            </label>
+                        </div>
                         <input
                             type="file"
                             name="profileimage"
-                            class="form-control"
-                            accept="image/*"
+                            id="profileImageInput"
+                            class="d-none"
+                            accept="image/jpeg,image/png,image/jpg,image/webp"
                         >
-                        <div class="form-text">
-                            JPG, JPEG or PNG. Recommended square image.
+                        <div class="form-text mt-2">
+                            Select a JPG, JPEG, PNG or WEBP image. Photo will be updated automatically.
                         </div>
-                        {% if user.profile_image or user.profileimage %}
+                        {% if profile.profile_image %}
                             <div class="mt-3">
                                 <div class="form-check">
                                     <input
@@ -101,7 +104,10 @@
                                         class="form-check-input"
                                         id="removeProfileImage"
                                     >
-                                    <label class="form-check-label text-body-secondary" for="removeProfileImage">
+                                    <label
+                                        class="form-check-label text-body-secondary"
+                                        for="removeProfileImage"
+                                    >
                                         Remove current profile picture
                                     </label>
                                 </div>
@@ -135,6 +141,7 @@
                                     class="form-control"
                                     value="{{ user.username|default:'' }}"
                                     placeholder="Enter username"
+                                    required
                                 >
                             </div>
                         </div>
@@ -236,7 +243,7 @@
                                         type="text"
                                         name="firstname"
                                         class="form-control"
-                                        value="{{ user.firstname|default:user.first_name|default:'' }}"
+                                        value="{{ user.first_name|default:'' }}"
                                         placeholder="Enter first name"
                                         required
                                     >
@@ -255,7 +262,7 @@
                                         type="text"
                                         name="lastname"
                                         class="form-control"
-                                        value="{{ user.lastname|default:user.last_name|default:'' }}"
+                                        value="{{ user.last_name|default:'' }}"
                                         placeholder="Enter last name"
                                         required
                                     >
@@ -269,15 +276,29 @@
                                     <span class="input-group-text">
                                         <i class="bi bi-gender-ambiguous"></i>
                                     </span>
-                                    <select name="gender" class="form-select">
-                                        <option value="">Select Gender</option>
-                                        <option value="Male" {% if user.gender == "Male" %}selected{% endif %}>
+                                    <select
+                                        name="gender"
+                                        class="form-select"
+                                    >
+                                        <option value="">
+                                            Select Gender
+                                        </option>
+                                        <option
+                                            value="male"
+                                            {% if profile.gender == "male" %}selected{% endif %}
+                                        >
                                             Male
                                         </option>
-                                        <option value="Female" {% if user.gender == "Female" %}selected{% endif %}>
+                                        <option
+                                            value="female"
+                                            {% if profile.gender == "female" %}selected{% endif %}
+                                        >
                                             Female
                                         </option>
-                                        <option value="Other" {% if user.gender == "Other" %}selected{% endif %}>
+                                        <option
+                                            value="other"
+                                            {% if profile.gender == "other" %}selected{% endif %}
+                                        >
                                             Other
                                         </option>
                                     </select>
@@ -295,7 +316,7 @@
                                         type="date"
                                         name="date_of_birth"
                                         class="form-control"
-                                        value="{% if user.date_of_birth %}{{ user.date_of_birth|date:'Y-m-d' }}{% endif %}"
+                                        value="{% if profile.date_of_birth %}{{ profile.date_of_birth|date:'Y-m-d' }}{% endif %}"
                                     >
                                 </div>
                             </div>
@@ -346,7 +367,7 @@
                                         type="tel"
                                         name="mobilenumber"
                                         class="form-control"
-                                        value="{{ user.mobilenumber|default:'' }}"
+                                        value="{{ profile.phone|default:'' }}"
                                         placeholder="Enter mobile number"
                                     >
                                 </div>
@@ -363,7 +384,7 @@
                                         type="text"
                                         name="emergency_contact_name"
                                         class="form-control"
-                                        value="{{ user.emergency_contact_name|default:'' }}"
+                                        value="{{ profile.emergency_contact_name|default:'' }}"
                                         placeholder="Emergency contact name"
                                     >
                                 </div>
@@ -380,7 +401,7 @@
                                         type="tel"
                                         name="emergency_contact_phone"
                                         class="form-control"
-                                        value="{{ user.emergency_contact_phone|default:'' }}"
+                                        value="{{ profile.emergency_contact_phone|default:'' }}"
                                         placeholder="Emergency contact phone"
                                     >
                                 </div>
@@ -396,7 +417,7 @@
                             Address Information
                         </h5>
                         <p class="text-body-secondary small mb-0">
-                            Update your address and location details
+                            Update your address details
                         </p>
                     </div>
                     <div class="card-body p-4">
@@ -414,22 +435,37 @@
                                         class="form-control"
                                         rows="3"
                                         placeholder="Enter complete address"
-                                    >{{ user.address|default:'' }}</textarea>
+                                    >{{ profile.address|default:'' }}</textarea>
                                 </div>
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">
                                     Address Type
                                 </label>
-                                <select name="address_type" class="form-select">
-                                    <option value="">Select Address Type</option>
-                                    <option value="Home" {% if user.address_type == "Home" %}selected{% endif %}>
+                                <select
+                                    name="address_type"
+                                    id="addressType"
+                                    class="form-select"
+                                >
+                                    <option value="">
+                                        Select Address Type
+                                    </option>
+                                    <option
+                                        value="home"
+                                        {% if address and address.address_type == "home" %}selected{% endif %}
+                                    >
                                         Home
                                     </option>
-                                    <option value="Office" {% if user.address_type == "Office" %}selected{% endif %}>
+                                    <option
+                                        value="office"
+                                        {% if address and address.address_type == "office" %}selected{% endif %}
+                                    >
                                         Office
                                     </option>
-                                    <option value="Other" {% if user.address_type == "Other" %}selected{% endif %}>
+                                    <option
+                                        value="other"
+                                        {% if address and address.address_type == "other" %}selected{% endif %}
+                                    >
                                         Other
                                     </option>
                                 </select>
@@ -441,8 +477,9 @@
                                 <input
                                     type="text"
                                     name="label"
+                                    id="addressLabel"
                                     class="form-control"
-                                    value="{{ user.label|default:'' }}"
+                                    value="{{ address.label|default:'' }}"
                                     placeholder="e.g. Main Office"
                                 >
                             </div>
@@ -454,7 +491,7 @@
                                     type="text"
                                     name="address_line1"
                                     class="form-control"
-                                    value="{{ user.address_line1|default:'' }}"
+                                    value="{{ address.address_line1|default:'' }}"
                                     placeholder="House / Building / Street"
                                 >
                             </div>
@@ -466,7 +503,7 @@
                                     type="text"
                                     name="address_line2"
                                     class="form-control"
-                                    value="{{ user.address_line2|default:'' }}"
+                                    value="{{ address.address_line2|default:'' }}"
                                     placeholder="Area / Locality"
                                 >
                             </div>
@@ -478,7 +515,7 @@
                                     type="text"
                                     name="landmark"
                                     class="form-control"
-                                    value="{{ user.landmark|default:'' }}"
+                                    value="{{ address.landmark|default:'' }}"
                                     placeholder="Nearby landmark"
                                 >
                             </div>
@@ -486,13 +523,22 @@
                                 <label class="form-label fw-semibold">
                                     City
                                 </label>
-                                <input
-                                    type="text"
+                                <select
                                     name="city"
-                                    class="form-control"
-                                    value="{{ user.city|default:'' }}"
-                                    placeholder="Enter city"
+                                    class="form-select"
                                 >
+                                    <option value="">
+                                        Select City
+                                    </option>
+                                    {% for city in cities %}
+                                        <option
+                                            value="{{ city.pk }}"
+                                            {% if profile.city and profile.city.pk == city.pk %}selected{% elif address.city and address.city.pk == city.pk %}selected{% endif %}
+                                        >
+                                            {{ city.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
                             </div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-semibold">
@@ -502,32 +548,8 @@
                                     type="text"
                                     name="postal_code"
                                     class="form-control"
-                                    value="{{ user.postal_code|default:'' }}"
+                                    value="{{ address.postal_code|default:'' }}"
                                     placeholder="Postal code"
-                                >
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold">
-                                    Latitude
-                                </label>
-                                <input
-                                    type="text"
-                                    name="latitude"
-                                    class="form-control"
-                                    value="{{ user.latitude|default:'' }}"
-                                    placeholder="Latitude"
-                                >
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold">
-                                    Longitude
-                                </label>
-                                <input
-                                    type="text"
-                                    name="longitude"
-                                    class="form-control"
-                                    value="{{ user.longitude|default:'' }}"
-                                    placeholder="Longitude"
                                 >
                             </div>
                         </div>
@@ -578,7 +600,10 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="changePasswordModalLabel">
+                <h5
+                    class="modal-title fw-bold"
+                    id="changePasswordModalLabel"
+                >
                     <i class="bi bi-key-fill text-primary me-2"></i>
                     Change Password
                 </h5>
@@ -589,8 +614,16 @@
                     aria-label="Close"
                 ></button>
             </div>
-            <form method="POST">
+            <form
+                method="POST"
+                action="{% url 'edit_admin_profile' %}"
+            >
                 {% csrf_token %}
+                <input
+                    type="hidden"
+                    name="action"
+                    value="change_password"
+                >
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">
@@ -605,6 +638,7 @@
                                 name="current_password"
                                 class="form-control"
                                 placeholder="Enter current password"
+                                autocomplete="current-password"
                                 required
                             >
                         </div>
@@ -622,8 +656,13 @@
                                 name="new_password"
                                 class="form-control"
                                 placeholder="Enter new password"
+                                autocomplete="new-password"
+                                minlength="8"
                                 required
                             >
+                        </div>
+                        <div class="form-text">
+                            Password must contain at least 8 characters.
                         </div>
                     </div>
                     <div>
@@ -639,6 +678,8 @@
                                 name="confirm_password"
                                 class="form-control"
                                 placeholder="Confirm new password"
+                                autocomplete="new-password"
+                                minlength="8"
                                 required
                             >
                         </div>
@@ -664,4 +705,81 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const profileImageInput = document.getElementById("profileImageInput");
+    const addressType = document.getElementById("addressType");
+    const addressLabel = document.getElementById("addressLabel");
+    const labelMap = {
+        home: "Home",
+        office: "Office",
+        other: "Other"
+    };
+    if (profileImageInput) {
+        profileImageInput.addEventListener("change", function () {
+            if (this.files && this.files.length > 0) {
+                const selectedFile = this.files[0];
+                const allowedTypes = [
+                    "image/jpeg",
+                    "image/jpg",
+                    "image/png",
+                    "image/webp"
+                ];
+                if (!allowedTypes.includes(selectedFile.type)) {
+                    alert("Please select a JPG, JPEG, PNG or WEBP image.");
+                    this.value = "";
+                    return;
+                }
+                const maxSize = 5 * 1024 * 1024;
+                if (selectedFile.size > maxSize) {
+                    alert("Profile image size must be less than 5 MB.");
+                    this.value = "";
+                    return;
+                }
+                const formData = new FormData();
+                formData.append(
+                    "profileimage",
+                    selectedFile
+                );
+                formData.append(
+                    "action",
+                    "update_profile_image"
+                );
+                formData.append(
+                    "csrfmiddlewaretoken",
+                    document.querySelector(
+                        "[name=csrfmiddlewaretoken]"
+                    ).value
+                );
+                fetch(
+                    "{% url 'edit_admin_profile' %}",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                )
+                .then(function (response) {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch(function () {
+                    alert("Unable to update profile photo. Please try again.");
+                });
+            }
+        });
+    }
+    if (addressType && addressLabel) {
+        addressType.addEventListener("change", function () {
+            if (labelMap[this.value]) {
+                addressLabel.value = labelMap[this.value];
+            } else {
+                addressLabel.value = "";
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

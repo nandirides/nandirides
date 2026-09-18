@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                    <h3 class="mb-1">{{ page_title }}</h3>
+                    <p class="text-body-secondary mb-0">
+                        {% if coupon %}
+                        Update coupon details and promotional settings.
+                        {% else %}
+                        Create a new promotional coupon.
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'coupon_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Coupons
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-ticket-perforated me-1"></i>{{ form_title }}
+                    </h5>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="card-body">
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.code.id_for_label }}" class="form-label">
+                                    Coupon Code <span class="text-danger">*</span>
+                                </label>
+                                {{ form.code }}
+                                {% for error in form.code.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">
+                                    Coupon Name <span class="text-danger">*</span>
+                                </label>
+                                {{ form.name }}
+                                {% for error in form.name.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label for="{{ form.discount_type.id_for_label }}" class="form-label">
+                                    Discount Type <span class="text-danger">*</span>
+                                </label>
+                                {{ form.discount_type }}
+                                {% for error in form.discount_type.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label for="{{ form.discount_value.id_for_label }}" class="form-label">
+                                    Discount Value <span class="text-danger">*</span>
+                                </label>
+                                {{ form.discount_value }}
+                                <div id="discountHelp" class="form-text">
+                                    Percentage or fixed amount based on discount type.
+                                </div>
+                                {% for error in form.discount_value.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label for="{{ form.maximum_discount.id_for_label }}" class="form-label">
+                                    Maximum Discount
+                                </label>
+                                {{ form.maximum_discount }}
+                                <div class="form-text">Leave blank for no maximum.</div>
+                                {% for error in form.maximum_discount.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label for="{{ form.minimum_fare.id_for_label }}" class="form-label">
+                                    Minimum Fare
+                                </label>
+                                {{ form.minimum_fare }}
+                                {% for error in form.minimum_fare.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label for="{{ form.usage_limit.id_for_label }}" class="form-label">
+                                    Usage Limit
+                                </label>
+                                {{ form.usage_limit }}
+                                <div class="form-text">Leave blank for unlimited usage.</div>
+                                {% for error in form.usage_limit.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label for="{{ form.per_user_limit.id_for_label }}" class="form-label">
+                                    Per User Limit <span class="text-danger">*</span>
+                                </label>
+                                {{ form.per_user_limit }}
+                                {% for error in form.per_user_limit.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.valid_from.id_for_label }}" class="form-label">
+                                    Valid From <span class="text-danger">*</span>
+                                </label>
+                                {{ form.valid_from }}
+                                {% for error in form.valid_from.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.valid_to.id_for_label }}" class="form-label">
+                                    Valid To <span class="text-danger">*</span>
+                                </label>
+                                {{ form.valid_to }}
+                                {% for error in form.valid_to.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                        Active Coupon
+                                    </label>
+                                </div>
+                                {% for error in form.is_active.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex flex-column flex-sm-row justify-content-end gap-2">
+                        <a href="{% url 'coupon_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if coupon %}
+                            <i class="bi bi-check-circle me-1"></i>Update Coupon
+                            {% else %}
+                            <i class="bi bi-plus-circle me-1"></i>Create Coupon
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const discountType = document.getElementById("id_discount_type");
+    const discountValue = document.getElementById("id_discount_value");
+    const maximumDiscount = document.getElementById("id_maximum_discount");
+    const discountHelp = document.getElementById("discountHelp");
+    function updateDiscountFields() {
+        if (!discountType) {
+            return;
+        }
+        if (discountType.value === "percentage") {
+            if (discountValue) {
+                discountValue.setAttribute("max", "100");
+            }
+            if (maximumDiscount) {
+                maximumDiscount.disabled = false;
+            }
+            if (discountHelp) {
+                discountHelp.textContent = "Enter percentage between 0 and 100.";
+            }
+        } else {
+            if (discountValue) {
+                discountValue.removeAttribute("max");
+            }
+            if (maximumDiscount) {
+                maximumDiscount.disabled = true;
+                maximumDiscount.value = "";
+            }
+            if (discountHelp) {
+                discountHelp.textContent = "Enter the fixed discount amount in rupees.";
+            }
+        }
+    }
+    if (discountType) {
+        discountType.addEventListener("change", updateDiscountFields);
+        updateDiscountFields();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+            <h3 class="mb-1">
+                <i class="bi bi-credit-card me-2"></i>{{ page_title }}
+            </h3>
+            <p class="text-body-secondary mb-0">View all customer payments and transactions.</p>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Total Payments</p>
+                            <h3 class="mb-0">{{ total_payments }}</h3>
+                        </div>
+                        <div class="fs-1 text-primary">
+                            <i class="bi bi-credit-card"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Successful</p>
+                            <h3 class="mb-0">{{ successful_payments }}</h3>
+                        </div>
+                        <div class="fs-1 text-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Pending</p>
+                            <h3 class="mb-0">{{ pending_payments }}</h3>
+                        </div>
+                        <div class="fs-1 text-warning">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Refunded</p>
+                            <h3 class="mb-0">{{ refunded_payments }}</h3>
+                        </div>
+                        <div class="fs-1 text-info">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-md">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul me-2"></i>Payment Records
+                    </h5>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="search" id="paymentSearch" class="form-control" placeholder="Search payments...">
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <select id="statusFilter" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="success">Success</option>
+                        <option value="failed">Failed</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="paymentTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-nowrap">#</th>
+                            <th class="text-nowrap">Payment Number</th>
+                            <th>User</th>
+                            <th>Ride</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Paid At</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                            <tr data-status="{{ payment.status|lower }}">
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <span class="fw-semibold">{{ payment.payment_number }}</span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">
+                                        {% if payment.user.get_full_name %}
+                                            {{ payment.user.get_full_name }}
+                                        {% else %}
+                                            {{ payment.user.username }}
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-body-secondary">
+                                        {{ payment.user.email }}
+                                    </small>
+                                </td>
+                                <td>
+                                    {% if payment.ride %}
+                                        <span class="badge text-bg-light">
+                                            Ride #{{ payment.ride.pk }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-body-secondary">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-semibold text-nowrap">
+                                    ₹{{ payment.amount }}
+                                </td>
+                                <td class="text-nowrap">
+                                    {{ payment.get_payment_method_display }}
+                                </td>
+                                <td>
+                                    {% if payment.status == "success" %}
+                                        <span class="badge text-bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Success
+                                        </span>
+                                    {% elif payment.status == "pending" %}
+                                        <span class="badge text-bg-warning">
+                                            <i class="bi bi-clock me-1"></i>Pending
+                                        </span>
+                                    {% elif payment.status == "failed" %}
+                                        <span class="badge text-bg-danger">
+                                            <i class="bi bi-x-circle me-1"></i>Failed
+                                        </span>
+                                    {% elif payment.status == "refunded" %}
+                                        <span class="badge text-bg-info">
+                                            <i class="bi bi-arrow-counterclockwise me-1"></i>Refunded
+                                        </span>
+                                    {% else %}
+                                        <span class="badge text-bg-secondary">
+                                            {{ payment.get_status_display }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-nowrap">
+                                    {% if payment.paid_at %}
+                                        {{ payment.paid_at|date:"d M Y, h:i A" }}
+                                    {% else %}
+                                        <span class="text-body-secondary">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end text-nowrap">
+                                    <a href="{% url 'payment_detail' payment.pk %}" class="btn btn-sm btn-outline-primary" title="View Payment">
+                                        <i class="bi bi-eye me-1"></i>View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <div class="fs-1 text-body-secondary mb-2">
+                                        <i class="bi bi-credit-card"></i>
+                                    </div>
+                                    <h5>No payments found</h5>
+                                    <p class="text-body-secondary mb-0">
+                                        There are no payment records available.
+                                    </p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if payments %}
+            <div class="card-footer text-body-secondary">
+                Showing <span id="visiblePaymentCount">{{ payments|length }}</span> payment(s)
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("paymentSearch");
+    const statusFilter = document.getElementById("statusFilter");
+    const tableRows = document.querySelectorAll("#paymentTable tbody tr[data-status]");
+    const visibleCount = document.getElementById("visiblePaymentCount");
+    function filterPayments() {
+        const search = searchInput.value.toLowerCase().trim();
+        const status = statusFilter.value.toLowerCase();
+        let count = 0;
+        tableRows.forEach(function (row) {
+            const text = row.textContent.toLowerCase();
+            const rowStatus = row.dataset.status;
+            const searchMatch = !search || text.includes(search);
+            const statusMatch = !status || rowStatus === status;
+            if (searchMatch && statusMatch) {
+                row.classList.remove("d-none");
+                count++;
+            } else {
+                row.classList.add("d-none");
+            }
+        });
+        if (visibleCount) {
+            visibleCount.textContent = count;
+        }
+    }
+    searchInput.addEventListener("input", filterPayments);
+    statusFilter.addEventListener("change", filterPayments);
+});
+</script>
+{% endblock %}

@@ -1,238 +1,107 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="description"
-        content="{% block meta_description %}Django AdminLTE Application{% endblock %}"
-    >
-
-    <title>
-        {% block title %}Dashboard{% endblock %}
-        | My Django App
-    </title>
-
-
-    <!-- Bootstrap Icons -->
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    >
-    <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-
-    <!-- AdminLTE CSS -->
-    <link
-        rel="stylesheet"
-        href="{% static 'adminlte/css/adminlte.min.css' %}"
-    >
-
-
-    <!-- Application CSS -->
-    <link
-        rel="stylesheet"
-        href="{% static 'css/custom.css' %}"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Django AdminLTE Application{% endblock %}">
+    <title>{% block title %}Dashboard{% endblock %} | NandiRide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'adminlte/css/adminlte.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <script>
-
-(function () {
-
-    const theme =
-        localStorage.getItem("theme") || "light";
-
-    document.documentElement.setAttribute(
-        "data-bs-theme",
-        theme
-    );
-
-})();
-
-</script>
-<script>
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    const html = document.documentElement;
-
-    const toggle = document.getElementById("theme-toggle");
-
-    const icon = document.getElementById("theme-icon");
-
-
-    if (!toggle) {
-        return;
-    }
-
-
-    // Get saved theme
-    let theme = localStorage.getItem("theme");
-
-
-    // Default theme
-    if (!theme) {
-        theme = "light";
-    }
-
-
-    applyTheme(theme);
-
-
-    toggle.addEventListener("click", function () {
-
-        const currentTheme =
-            html.getAttribute("data-bs-theme") || "light";
-
-
-        const newTheme =
-            currentTheme === "dark"
-                ? "light"
-                : "dark";
-
-
-        applyTheme(newTheme);
-
-
-        localStorage.setItem(
-            "theme",
-            newTheme
-        );
-
-    });
-
-
-    function applyTheme(theme) {
-
-        html.setAttribute(
-            "data-bs-theme",
-            theme
-        );
-
-
-        if (theme === "dark") {
-
-            icon.classList.remove(
-                "bi-moon-fill"
-            );
-
-            icon.classList.add(
-                "bi-sun-fill"
-            );
-
-        } else {
-
-            icon.classList.remove(
-                "bi-sun-fill"
-            );
-
-            icon.classList.add(
-                "bi-moon-fill"
-            );
-
-        }
-
-    }
-
-});
-
-</script>
-
-    {% block extra_css %}
-    {% endblock %}
-
+        (function () {
+            const theme = localStorage.getItem("theme") || "light";
+            document.documentElement.setAttribute("data-bs-theme", theme);
+        })();
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const html = document.documentElement;
+            const toggle = document.getElementById("theme-toggle");
+            const icon = document.getElementById("theme-icon");
+            if (!toggle) {
+                return;
+            }
+            let theme = localStorage.getItem("theme");
+            if (!theme) {
+                theme = "light";
+            }
+            applyTheme(theme);
+            toggle.addEventListener("click", function () {
+                const currentTheme = html.getAttribute("data-bs-theme") || "light";
+                const newTheme = currentTheme === "dark" ? "light" : "dark";
+                applyTheme(newTheme);
+                localStorage.setItem("theme", newTheme);
+            });
+            function applyTheme(theme) {
+                html.setAttribute("data-bs-theme", theme);
+                if (theme === "dark") {
+                    icon.classList.remove("bi-moon-fill");
+                    icon.classList.add("bi-sun-fill");
+                } else {
+                    icon.classList.remove("bi-sun-fill");
+                    icon.classList.add("bi-moon-fill");
+                }
+            }
+        });
+    </script>
+    {% block extra_css %}{% endblock %}
 </head>
-
-
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
-
-
-<div class="app-wrapper">
-
-
-    <!-- ============================= -->
-    <!-- Navbar -->
-    <!-- ============================= -->
-
-    {% include "includes/navbar.html" %}
-
-
-    <!-- ============================= -->
-    <!-- Sidebar -->
-    <!-- ============================= -->
-
-    {% include "includes/sidebar.html" %}
-
-
-    <!-- ============================= -->
-    <!-- Main Content -->
-    <!-- ============================= -->
-
-    <main class="app-main">
-
-
-        <!-- Breadcrumb -->
-        {% block breadcrumb %}
-            {% include "includes/breadcrumb.html" %}
-        {% endblock %}
-
-
-        <!-- Content -->
-        <div class="app-content">
-
-            <div class="container-fluid">
-
-
-                <!-- Django Messages -->
-                {% include "includes/messages.html" %}
-
-
-                <!-- Page Content -->
-                {% block content %}
+<body class="{% block body_class %}layout-fixed sidebar-expand-lg bg-body-tertiary{% endblock %}">
+    <div class="app-wrapper">
+        {% include "includes/navbar.html" %}
+        {% block page_layout %}
+            {% include "includes/sidebar.html" %}
+            <main class="app-main">
+                {% block breadcrumb %}
+                    {% include "includes/breadcrumb.html" %}
                 {% endblock %}
-
-
-            </div>
-
-        </div>
-
-    </main>
-
-
-    <!-- ============================= -->
-    <!-- Footer -->
-    <!-- ============================= -->
-
-    {% include "includes/footer.html" %}
-
-
-</div>
-
-<!-- Bootstrap 5 -->
-
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-></script>
-
-<!-- AdminLTE JS -->
-<script src="{% static 'adminlte/js/adminlte.min.js' %}" ></script>
-
-
-{% block extra_js %}
-{% endblock %}
-
-
+                <div class="app-content">
+                    <div class="container-fluid">
+                        {% if messages %}
+                        <div class="mb-3">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm d-flex align-items-center rounded-3" role="alert">
+                                {% if message.tags == "success" %}
+                                <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+                                {% elif message.tags == "error" %}
+                                <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+                                {% elif message.tags == "warning" %}
+                                <i class="bi bi-exclamation-circle-fill fs-5 me-2"></i>
+                                {% else %}
+                                <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    {{ message }}
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% block content %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </main>
+            {% include "includes/footer.html" %}
+        {% endblock %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'adminlte/js/adminlte.min.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const alerts = document.querySelectorAll(".alert.alert-dismissible");
+            alerts.forEach(function (alert) {
+                setTimeout(function () {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
-
 </html>

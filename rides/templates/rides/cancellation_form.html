@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title|default:"Cancel Ride" }} | NandiRide{% endblock %}
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">{{ page_title|default:"Cancel Ride" }}</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_list' %}">Rides</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_details' ride.pk %}">
+                            {{ ride.ride_number }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        Cancel Ride
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card card-danger card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-car-side mr-2"></i>
+                            Ride Information
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <div class="mb-3">
+                                <span class="d-inline-flex align-items-center justify-content-center bg-danger rounded-circle"
+                                      style="width:70px;height:70px;">
+                                    <i class="fas fa-ban text-white fa-2x"></i>
+                                </span>
+                            </div>
+
+                            <h4 class="font-weight-bold mb-2">
+                                {{ ride.ride_number }}
+                            </h4>
+
+                            {% if ride.status == "completed" %}
+                                <span class="badge badge-success px-3 py-2">
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% elif ride.status == "cancelled" %}
+                                <span class="badge badge-danger px-3 py-2">
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% else %}
+                                <span class="badge badge-primary px-3 py-2">
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="card card-light">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="mr-3 text-success">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">
+                                            Pickup
+                                        </small>
+                                        <strong>{{ ride.pickup_location }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="border-left ml-1 my-2"
+                                     style="height:25px;"></div>
+
+                                <div class="d-flex align-items-start">
+                                    <div class="mr-3 text-danger">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">
+                                            Destination
+                                        </small>
+                                        <strong>{{ ride.drop_location }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5 text-muted">
+                                <i class="fas fa-user mr-1"></i>
+                                Passenger
+                            </dt>
+                            <dd class="col-sm-7">
+                                {% firstof ride.passenger.get_full_name ride.passenger.username %}
+                            </dd>
+
+                            <dt class="col-sm-5 text-muted">
+                                <i class="fas fa-user-tie mr-1"></i>
+                                Driver
+                            </dt>
+                            <dd class="col-sm-7">
+                                {% if ride.driver %}
+                                    {% firstof ride.driver.user.get_full_name ride.driver.user.username %}
+                                {% else %}
+                                    <span class="text-muted">Not Assigned</span>
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-5 text-muted">
+                                <i class="fas fa-road mr-1"></i>
+                                Distance
+                            </dt>
+                            <dd class="col-sm-7">
+                                {{ ride.distance_km }} km
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-ban mr-2"></i>
+                            Cancel Ride
+                        </h3>
+                    </div>
+
+                    <form method="post" id="cancelRideForm">
+                        {% csrf_token %}
+
+                        <div class="card-body">
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+                            <div class="callout callout-danger">
+                                <h5>
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Warning
+                                </h5>
+                                <p class="mb-0">
+                                    Cancelling this ride will permanently mark the ride
+                                    as <strong>Cancelled</strong>. Please verify the
+                                    cancellation details before continuing.
+                                </p>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.ride.id_for_label }}">
+                                            <i class="fas fa-car mr-1"></i>
+                                            Ride
+                                        </label>
+                                        {{ form.ride }}
+                                        {% for error in form.ride.errors %}
+                                            <span class="text-danger small d-block mt-1">
+                                                {{ error }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.cancelled_by.id_for_label }}">
+                                            <i class="fas fa-user-shield mr-1"></i>
+                                            Cancelled By
+                                        </label>
+                                        {{ form.cancelled_by }}
+                                        {% for error in form.cancelled_by.errors %}
+                                            <span class="text-danger small d-block mt-1">
+                                                {{ error }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.reason.id_for_label }}">
+                                            <i class="fas fa-list mr-1"></i>
+                                            Cancellation Reason
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.reason }}
+                                        {% for error in form.reason.errors %}
+                                            <span class="text-danger small d-block mt-1">
+                                                {{ error }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.cancellation_charge.id_for_label }}">
+                                            <i class="fas fa-rupee-sign mr-1"></i>
+                                            Cancellation Charge
+                                        </label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">₹</span>
+                                            </div>
+                                            {{ form.cancellation_charge }}
+                                        </div>
+                                        {% for error in form.cancellation_charge.errors %}
+                                            <span class="text-danger small d-block mt-1">
+                                                {{ error }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="{{ form.reason_text.id_for_label }}">
+                                            <i class="fas fa-comment-alt mr-1"></i>
+                                            Additional Details
+                                        </label>
+                                        {{ form.reason_text }}
+                                        <small class="form-text text-muted">
+                                            Add any additional information about the cancellation.
+                                        </small>
+                                        {% for error in form.reason_text.errors %}
+                                            <span class="text-danger small d-block mt-1">
+                                                {{ error }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card card-outline card-secondary mb-0">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        Cancellation Summary
+                                    </h3>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">
+                                                Ride Number
+                                            </small>
+                                            <strong>{{ ride.ride_number }}</strong>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">
+                                                Current Status
+                                            </small>
+                                            <span class="badge badge-primary">
+                                                {{ ride.get_status_display }}
+                                            </span>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block">
+                                                New Status
+                                            </small>
+                                            <span class="badge badge-danger">
+                                                Cancelled
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="{% url 'ride_details' ride.pk %}"
+                               class="btn btn-default">
+                                <i class="fas fa-arrow-left mr-1"></i>
+                                Back to Ride
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-danger float-right"
+                                    id="cancelRideButton">
+                                <i class="fas fa-ban mr-1"></i>
+                                Cancel Ride
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("cancelRideForm");
+    const button = document.getElementById("cancelRideButton");
+    if (form && button) {
+        form.addEventListener("submit", function (event) {
+            const confirmed = confirm(
+                "Are you sure you want to cancel ride {{ ride.ride_number }}?"
+            );
+            if (!confirmed) {
+                event.preventDefault();
+                return;
+            }
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Cancelling...';
+        });
+    }
+});
+</script>
+{% endblock %}

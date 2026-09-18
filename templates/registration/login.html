@@ -1,100 +1,161 @@
 {% extends "base.html" %}
-
-
-{% block title %}
-    Login
-{% endblock %}
-
-
-{% block content %}
-
-<div class="row justify-content-center">
-
-    <div class="col-md-6 col-lg-4">
-
-        <div class="card card-primary card-outline">
-
-            <div class="card-header text-center">
-
-                <h3 class="card-title float-none">
-                    Login
-                </h3>
-
+{% block title %}Login{% endblock %}
+{% block body_class %}bg-body-tertiary overflow-hidden{% endblock %}
+{% block page_layout %}
+<main class="app-main overflow-hidden" style="padding-top:57px;height:100vh;min-height:100vh;">
+    <div class="app-content h-100 overflow-hidden">
+        <div class="container-fluid h-100 d-flex align-items-center justify-content-center px-3" style="padding-top:74px;padding-bottom:24px;">
+            <div class="row justify-content-center w-100">
+                <div class="col-12 col-lg-9 col-xl-8">
+                    <div class="card border-0 shadow rounded-4 overflow-hidden">
+                        <div class="row g-0">
+                            <div class="col-md-5 d-none d-md-block">
+                                <div class="h-100 bg-primary text-white p-4 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex align-items-center mb-4">
+                                            <div class="bg-white text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:46px;height:46px;">
+                                                <i class="bi bi-car-front-fill fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="fw-bold mb-0">NandiRide</h5>
+                                                <small class="opacity-75">Admin Portal</small>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-white text-primary rounded-pill px-3 py-2 mb-3">
+                                            <i class="bi bi-shield-check me-1"></i>
+                                            Secure Access
+                                        </span>
+                                        <h2 class="fw-bold mb-2">Welcome Back!</h2>
+                                        <p class="small opacity-75 mb-0">Manage your NandiRide platform from one secure administration portal.</p>
+                                    </div>
+                                    <div class="border-top border-white border-opacity-25 pt-3 mt-4">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-speedometer2 fs-5 me-3"></i>
+                                            <div>
+                                                <div class="fw-semibold small">Powerful Dashboard</div>
+                                                <small class="opacity-75">Monitor your platform easily</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-people-fill fs-5 me-3"></i>
+                                            <div>
+                                                <div class="fw-semibold small">Users & Rides</div>
+                                                <small class="opacity-75">Manage everything in one place</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-shield-lock-fill fs-5 me-3"></i>
+                                            <div>
+                                                <div class="fw-semibold small">Secure Administration</div>
+                                                <small class="opacity-75">Protected administrator access</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-7">
+                                <div class="card-body p-4 p-lg-5">
+                                    <div class="text-center mb-4">
+                                        <div class="d-md-none bg-primary text-white rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width:48px;height:48px;">
+                                            <i class="bi bi-car-front-fill fs-4"></i>
+                                        </div>
+                                        <div class="text-primary fw-semibold small text-uppercase">Administrator Login</div>
+                                        <h3 class="fw-bold mt-2 mb-1">Sign in to your account</h3>
+                                        <p class="text-body-secondary small mb-0">Enter your credentials to continue</p>
+                                    </div>
+                                    {% if form.errors %}
+                                    <div class="alert alert-danger border-0 shadow-sm rounded-3 py-2 px-3 d-flex align-items-center mb-4" role="alert">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        <div>
+                                            <span class="fw-semibold">Login failed.</span>
+                                            <small> Invalid username or password.</small>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <form method="post" autocomplete="off">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold small mb-2">
+                                                <i class="bi bi-person-fill text-primary me-1"></i>
+                                                Username
+                                            </label>
+                                            <div class="position-relative">
+                                                <i class="bi bi-person-fill position-absolute top-50 start-0 translate-middle-y text-body-secondary ms-3" style="z-index:5;"></i>
+                                                {{ form.username }}
+                                            </div>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold small mb-2">
+                                                <i class="bi bi-lock-fill text-primary me-1"></i>
+                                                Password
+                                            </label>
+                                            <div class="position-relative">
+                                                <i class="bi bi-key-fill position-absolute top-50 start-0 translate-middle-y text-body-secondary ms-3" style="z-index:5;"></i>
+                                                {{ form.password }}
+                                                <button type="button" id="togglePassword" class="position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent text-body-secondary px-3" aria-label="Show password" style="z-index:5;">
+                                                    <i class="bi bi-eye fs-5" id="passwordIcon"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-3 py-2 shadow-sm">
+                                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                                            Sign In to Dashboard
+                                        </button>
+                                    </form>
+                                    <div class="row g-0 border-top mt-4 pt-3 text-center">
+                                        <div class="col-4">
+                                            <i class="bi bi-shield-check text-primary"></i>
+                                            <div class="small text-body-secondary mt-1">Secure</div>
+                                        </div>
+                                        <div class="col-4 border-start border-end">
+                                            <i class="bi bi-lightning-charge text-primary"></i>
+                                            <div class="small text-body-secondary mt-1">Fast</div>
+                                        </div>
+                                        <div class="col-4">
+                                            <i class="bi bi-headset text-primary"></i>
+                                            <div class="small text-body-secondary mt-1">Reliable</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <small class="text-body-secondary">
+                                            <i class="bi bi-c-circle me-1"></i>
+                                            NandiRide Admin Portal
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-
-            <div class="card-body">
-
-
-                {% if form.errors %}
-
-                    <div class="alert alert-danger">
-
-                        Invalid username or password.
-
-                    </div>
-
-                {% endif %}
-
-
-                <form
-                    method="post"
-                    autocomplete="off"
-                >
-
-                    {% csrf_token %}
-
-
-                    <div class="mb-3">
-
-                        <label
-                            for="{{ form.username.id_for_label }}"
-                            class="form-label"
-                        >
-                            Username
-                        </label>
-
-
-                        {{ form.username }}
-
-                    </div>
-
-
-                    <div class="mb-3">
-
-                        <label
-                            for="{{ form.password.id_for_label }}"
-                            class="form-label"
-                        >
-                            Password
-                        </label>
-
-
-                        {{ form.password }}
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary w-100"
-                    >
-
-                        <i class="bi bi-box-arrow-in-right me-1"></i>
-
-                        Login
-
-                    </button>
-
-
-                </form>
-
-            </div>
-
         </div>
-
     </div>
-
-</div>
-
+</main>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const username = document.getElementById("id_username");
+    const password = document.getElementById("id_password");
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordIcon = document.getElementById("passwordIcon");
+    if (username) {
+        username.classList.add("form-control","rounded-3","ps-5","py-2");
+        username.style.minHeight = "46px";
+    }
+    if (password) {
+        password.classList.add("form-control","rounded-3","ps-5","pe-5","py-2");
+        password.style.minHeight = "46px";
+    }
+    if (togglePassword && password && passwordIcon) {
+        togglePassword.addEventListener("click", function () {
+            const isPassword = password.type === "password";
+            password.type = isPassword ? "text" : "password";
+            passwordIcon.classList.toggle("bi-eye", !isPassword);
+            passwordIcon.classList.toggle("bi-eye-slash", isPassword);
+            togglePassword.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+        });
+    }
+});
+</script>
 {% endblock %}

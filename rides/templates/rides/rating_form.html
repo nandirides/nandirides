@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | {{ ride.ride_number }} | NandiRide{% endblock %}
+{% block content %}
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>
+                    <i class="fas fa-star mr-2"></i>
+                    {{ page_title }}
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_list' %}">Rides</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ride_details' ride.pk %}">
+                            {{ ride.ride_number }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        Rating
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card card-warning card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-star mr-2"></i>
+                            Rate Ride
+                        </h3>
+                        <div class="card-tools">
+                            <span class="badge badge-success">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Completed
+                            </span>
+                        </div>
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="callout callout-warning">
+                                <h5>
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Ride Rating
+                                </h5>
+                                <p class="mb-0">
+                                    Select the participant giving the rating,
+                                    the participant receiving it, and a rating
+                                    from 1 to 5 stars.
+                                </p>
+                            </div>
+                            <div class="card card-light">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-car mr-2"></i>
+                                        Ride Summary
+                                    </h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <strong>Ride</strong>
+                                            <p class="text-muted mb-0">
+                                                {{ ride.ride_number }}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>Passenger</strong>
+                                            <p class="text-muted mb-0">
+                                                {{ ride.passenger }}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>Driver</strong>
+                                            <p class="text-muted mb-0">
+                                                {{ ride.driver }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-group">
+                                <label for="{{ form.ride.id_for_label }}">
+                                    <i class="fas fa-car mr-1"></i>
+                                    Ride
+                                </label>
+                                {{ form.ride }}
+                                {% for error in form.ride.errors %}
+                                    <span class="text-danger d-block">
+                                        {{ error }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.from_user.id_for_label }}">
+                                            <i class="fas fa-user mr-1"></i>
+                                            Rating From
+                                        </label>
+                                        {{ form.from_user }}
+                                        {% for error in form.from_user.errors %}
+                                            <span class="text-danger d-block">
+                                                {{ error }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.to_user.id_for_label }}">
+                                            <i class="fas fa-user-check mr-1"></i>
+                                            Rating To
+                                        </label>
+                                        {{ form.to_user }}
+                                        {% for error in form.to_user.errors %}
+                                            <span class="text-danger d-block">
+                                                {{ error }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.rating.id_for_label }}">
+                                    <i class="fas fa-star mr-1"></i>
+                                    Rating
+                                </label>
+                                {{ form.rating }}
+                                <div id="starPreview" class="mt-2 text-warning">
+                                    <i class="far fa-star fa-lg"></i>
+                                    <i class="far fa-star fa-lg"></i>
+                                    <i class="far fa-star fa-lg"></i>
+                                    <i class="far fa-star fa-lg"></i>
+                                    <i class="far fa-star fa-lg"></i>
+                                </div>
+                                <small id="ratingText" class="form-text text-muted">
+                                    Select a rating from 1 to 5.
+                                </small>
+                                {% for error in form.rating.errors %}
+                                    <span class="text-danger d-block">
+                                        {{ error }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.review.id_for_label }}">
+                                    <i class="fas fa-comment-alt mr-1"></i>
+                                    Review
+                                </label>
+                                {{ form.review }}
+                                {% for error in form.review.errors %}
+                                    <span class="text-danger d-block">
+                                        {{ error }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'ride_details' ride.pk %}" class="btn btn-default">
+                                <i class="fas fa-arrow-left mr-1"></i>
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-warning float-right">
+                                <i class="fas fa-star mr-1"></i>
+                                {{ submit_text|default:"Submit Rating" }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const ratingField = document.getElementById("id_rating");
+    const starPreview = document.getElementById("starPreview");
+    const ratingText = document.getElementById("ratingText");
+    if (!ratingField || !starPreview || !ratingText) {
+        return;
+    }
+    const labels = {
+        1: "Very Poor",
+        2: "Poor",
+        3: "Average",
+        4: "Good",
+        5: "Excellent"
+    };
+    function updateStars() {
+        const rating = parseInt(ratingField.value || "0", 10);
+        let html = "";
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating) {
+                html += '<i class="fas fa-star fa-lg mr-1"></i>';
+            } else {
+                html += '<i class="far fa-star fa-lg mr-1"></i>';
+            }
+        }
+        starPreview.innerHTML = html;
+        if (rating >= 1 && rating <= 5) {
+            ratingText.textContent = labels[rating];
+        } else {
+            ratingText.textContent = "Select a rating from 1 to 5.";
+        }
+    }
+    ratingField.addEventListener("change", updateStars);
+    ratingField.addEventListener("input", updateStars);
+    updateStars();
+});
+</script>
+{% endblock %}

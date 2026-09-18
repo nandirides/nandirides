@@ -128,19 +128,20 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <form
-                                    method="post"
-                                    action="{% url 'user_status_toggle' user.id %}"
-                                    class="d-inline"
-                                >
+                                <form method="post"
+                                    action="{% url 'user_update' user.pk %}"
+                                    class="d-inline" >
                                     {% csrf_token %}
+                                    <input
+                                        type="hidden"
+                                        name="action"
+                                        value="toggle_status"
+                                    >
                                     <div class="form-check form-switch m-0">
                                         <input
                                             class="form-check-input user-status-toggle"
                                             type="checkbox"
                                             role="switch"
-                                            name="is_active"
-                                            value="1"
                                             id="status-{{ user.id }}"
                                             {% if user.is_active %}checked{% endif %}
                                             onchange="this.form.submit()"
@@ -150,17 +151,18 @@
                                             for="status-{{ user.id }}"
                                         >
                                             {% if user.is_active %}
-                                            <span class="text-success">
-                                                Active
-                                            </span>
+                                                <span class="text-success">
+                                                    Active
+                                                </span>
                                             {% else %}
-                                            <span class="text-secondary">
-                                                Inactive
-                                            </span>
+                                                <span class="text-secondary">
+                                                    Deactive
+                                                </span>
                                             {% endif %}
                                         </label>
                                     </div>
                                 </form>
+
                             </td>
                             <td class="text-nowrap">
                                 <span class="text-body-secondary small">

@@ -50,10 +50,18 @@ class SupportTicket(TimeStampedModel):
         blank=True,
         related_name="support_tickets",
     )
+    # vehicle = models.ForeignKey(
+    #     "vehicle.Vehicle",
+    #     on_delete=models.PROTECT,
+    #     null=True,
+    #     blank=True,
+    #     related_name="support_tickets",
+    # )
 
     category = models.ForeignKey(
         SupportCategory,
         on_delete=models.PROTECT,
+        related_name="support_tickets",
     )
 
     subject = models.CharField(

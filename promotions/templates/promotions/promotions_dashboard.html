@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                    <h3 class="mb-1">
+                        <i class="bi bi-megaphone me-2"></i>{{ page_title }}
+                    </h3>
+                    <p class="text-body-secondary mb-0">
+                        Manage coupons, promotional offers and coupon usage history.
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    {% if perms.promotions.add_coupon %}
+                    <a href="{% url 'coupon_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Add Coupon
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'coupon_usage_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-clock-history me-1"></i>Usage History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-primary-subtle text-primary rounded p-3 me-3">
+                        <i class="bi bi-ticket-perforated fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-body-secondary small">Total Coupons</div>
+                        <div class="fs-4 fw-bold">{{ total_coupons|default:0 }}</div>
+                        <a href="{% url 'coupon_list' %}" class="small text-decoration-none">
+                            View Coupons <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-success-subtle text-success rounded p-3 me-3">
+                        <i class="bi bi-check-circle fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-body-secondary small">Active Coupons</div>
+                        <div class="fs-4 fw-bold">{{ active_coupons|default:0 }}</div>
+                        <a href="{% url 'coupon_list' %}" class="small text-decoration-none">
+                            Manage Coupons <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-info-subtle text-info rounded p-3 me-3">
+                        <i class="bi bi-receipt fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-body-secondary small">Coupon Usage</div>
+                        <div class="fs-4 fw-bold">{{ total_usages|default:0 }}</div>
+                        <a href="{% url 'coupon_usage_list' %}" class="small text-decoration-none">
+                            View Usage <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-warning-subtle text-warning-emphasis rounded p-3 me-3">
+                        <i class="bi bi-currency-rupee fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-body-secondary small">Total Discount</div>
+                        <div class="fs-4 fw-bold">₹{{ total_discount|default:"0.00" }}</div>
+                        <span class="small text-body-secondary">
+                            Discount applied on rides
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-xl-7">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-ticket-perforated me-2"></i>Coupon Management
+                    </h5>
+                    <span class="badge text-bg-primary">
+                        Promotional Offers
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="text-body-secondary">
+                        Create and manage promotional coupons with percentage or fixed
+                        discounts, usage limits, minimum fares and validity periods.
+                    </p>
+                    <div class="row g-2">
+                        <div class="col-12 col-md-6">
+                            <a href="{% url 'coupon_list' %}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-list-ul me-1"></i>All Coupons
+                            </a>
+                        </div>
+                        {% if perms.promotions.add_coupon %}
+                        <div class="col-12 col-md-6">
+                            <a href="{% url 'coupon_create' %}" class="btn btn-primary w-100">
+                                <i class="bi bi-plus-lg me-1"></i>Create Coupon
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge text-bg-light border">
+                            <i class="bi bi-percent me-1"></i>Percentage
+                        </span>
+                        <span class="badge text-bg-light border">
+                            <i class="bi bi-currency-rupee me-1"></i>Fixed Discount
+                        </span>
+                        <span class="badge text-bg-light border">
+                            <i class="bi bi-calendar-range me-1"></i>Validity
+                        </span>
+                        <span class="badge text-bg-light border">
+                            <i class="bi bi-people me-1"></i>User Limits
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-5">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clock-history me-2"></i>Coupon Usage
+                    </h5>
+                    <span class="badge text-bg-info">
+                        Usage History
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-info-subtle text-info rounded p-3 me-3">
+                            <i class="bi bi-receipt fs-3"></i>
+                        </div>
+                        <div>
+                            <div class="text-body-secondary small">Recorded Usage</div>
+                            <div class="fs-4 fw-bold">{{ total_usages|default:0 }}</div>
+                        </div>
+                    </div>
+                    <p class="text-body-secondary mb-3">
+                        Review coupon usage by user, ride, discount amount and usage time.
+                    </p>
+                    <a href="{% url 'coupon_usage_list' %}" class="btn btn-outline-info w-100">
+                        <i class="bi bi-clock-history me-1"></i>View Usage History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-lightning me-2"></i>Quick Access
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <a href="{% url 'coupon_list' %}" class="btn btn-outline-primary w-100 h-100 py-3">
+                                <i class="bi bi-ticket-perforated d-block fs-3 mb-2"></i>
+                                <span class="fw-semibold">Coupons</span>
+                                <small class="d-block text-body-secondary mt-1">
+                                    View and manage coupons
+                                </small>
+                            </a>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            {% if perms.promotions.add_coupon %}
+                            <a href="{% url 'coupon_create' %}" class="btn btn-outline-secondary w-100 h-100 py-3">
+                                <i class="bi bi-plus-circle d-block fs-3 mb-2"></i>
+                                <span class="fw-semibold">Add Coupon</span>
+                                <small class="d-block text-body-secondary mt-1">
+                                    Create promotional offer
+                                </small>
+                            </a>
+                            {% else %}
+                            <div class="border rounded text-center p-3 h-100 text-body-secondary">
+                                <i class="bi bi-lock d-block fs-3 mb-2"></i>
+                                <span class="fw-semibold d-block">Add Coupon</span>
+                                <small>Permission required</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <a href="{% url 'coupon_usage_list' %}" class="btn btn-outline-info w-100 h-100 py-3">
+                                <i class="bi bi-clock-history d-block fs-3 mb-2"></i>
+                                <span class="fw-semibold">Coupon Usage</span>
+                                <small class="d-block text-body-secondary mt-1">
+                                    View usage history
+                                </small>
+                            </a>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <a href="{% url 'coupon_list' %}" class="btn btn-outline-success w-100 h-100 py-3">
+                                <i class="bi bi-check-circle d-block fs-3 mb-2"></i>
+                                <span class="fw-semibold">Active Coupons</span>
+                                <small class="d-block text-body-secondary mt-1">
+                                    Manage active offers
+                                </small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-12 col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-ticket-perforated me-2"></i>Coupon Operations
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'coupon_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="bi bi-list-ul me-2"></i>All Coupons
+                        </span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    {% if perms.promotions.add_coupon %}
+                    <a href="{% url 'coupon_create' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="bi bi-plus-circle me-2"></i>Create Coupon
+                        </span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clock-history me-2"></i>Usage Management
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'coupon_usage_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="bi bi-receipt me-2"></i>Usage History
+                        </span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Promotion Workflow
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-start mb-3">
+                        <span class="badge text-bg-primary rounded-circle me-2">1</span>
+                        <div>
+                            <div class="fw-semibold">Create Coupon</div>
+                            <small class="text-body-secondary">
+                                Configure discount, limits and validity.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start mb-3">
+                        <span class="badge text-bg-primary rounded-circle me-2">2</span>
+                        <div>
+                            <div class="fw-semibold">Activate Promotion</div>
+                            <small class="text-body-secondary">
+                                Enable the coupon for eligible rides.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start">
+                        <span class="badge text-bg-primary rounded-circle me-2">3</span>
+                        <div>
+                            <div class="fw-semibold">Review Usage</div>
+                            <small class="text-body-secondary">
+                                Monitor users, rides and applied discounts.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

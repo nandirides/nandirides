@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                    <h3 class="mb-1">{{ page_title }}</h3>
+                    <p class="text-body-secondary mb-0">View coupon usage and discount information.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'coupon_usage_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Usage
+                    </a>
+                    <a href="{% url 'coupon_detail' usage.coupon.pk %}" class="btn btn-primary">
+                        <i class="bi bi-ticket-perforated me-1"></i>View Coupon
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Discount Applied</p>
+                            <h3 class="mb-0">₹{{ usage.discount_amount }}</h3>
+                        </div>
+                        <div class="fs-2 text-success">
+                            <i class="bi bi-tag"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Coupon</p>
+                            <h4 class="mb-0">{{ usage.coupon.code }}</h4>
+                        </div>
+                        <div class="fs-2 text-primary">
+                            <i class="bi bi-ticket-perforated"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">User</p>
+                            <h4 class="mb-0">{{ usage.user }}</h4>
+                        </div>
+                        <div class="fs-2 text-info">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-body-secondary mb-1">Ride</p>
+                            <h4 class="mb-0">#{{ usage.ride.pk }}</h4>
+                        </div>
+                        <div class="fs-2 text-warning">
+                            <i class="bi bi-car-front"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-12 col-xl-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-receipt me-1"></i>Usage Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-12 col-md-6">
+                            <div class="text-body-secondary small">Usage ID</div>
+                            <div class="fw-semibold mt-1">#{{ usage.pk }}</div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="text-body-secondary small">Coupon Code</div>
+                            <div class="mt-1">
+                                <span class="badge text-bg-dark fs-6">{{ usage.coupon.code }}</span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="text-body-secondary small">Coupon Name</div>
+                            <div class="fw-semibold mt-1">{{ usage.coupon.name }}</div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="text-body-secondary small">User</div>
+                            <div class="fw-semibold mt-1">{{ usage.user }}</div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="text-body-secondary small">Ride ID</div>
+                            <div class="fw-semibold mt-1">
+                                #{{ usage.ride.pk }}
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="text-body-secondary small">Discount Amount</div>
+                            <div class="fs-5 fw-semibold text-success mt-1">
+                                ₹{{ usage.discount_amount }}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="text-body-secondary small">Used At</div>
+                            <div class="fw-semibold mt-1">
+                                {{ usage.used_at|date:"d M Y, h:i A" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-ticket-perforated me-1"></i>Coupon Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="text-body-secondary small">Discount Type</div>
+                        <div class="mt-1">
+                            {% if usage.coupon.discount_type == "percentage" %}
+                            <span class="badge text-bg-primary">Percentage</span>
+                            {% else %}
+                            <span class="badge text-bg-info">Fixed Amount</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="text-body-secondary small">Coupon Discount</div>
+                        <div class="fs-5 fw-semibold mt-1">
+                            {% if usage.coupon.discount_type == "percentage" %}
+                            {{ usage.coupon.discount_value }}%
+                            {% else %}
+                            ₹{{ usage.coupon.discount_value }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="text-body-secondary small">Minimum Fare</div>
+                        <div class="fw-semibold mt-1">
+                            ₹{{ usage.coupon.minimum_fare }}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-body-secondary small">Coupon Status</div>
+                        <div class="mt-1">
+                            {% if usage.coupon.is_active %}
+                            <span class="badge text-bg-success">
+                                <i class="bi bi-check-circle me-1"></i>Active
+                            </span>
+                            {% else %}
+                            <span class="badge text-bg-secondary">
+                                <i class="bi bi-pause-circle me-1"></i>Inactive
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle me-2"></i>
+                This is a historical coupon usage record and cannot be edited or deleted.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
