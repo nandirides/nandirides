@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+{% block title %}{% if location %}Edit Location{% else %}Add Location{% endif %} | NandiRide{% endblock %}
+{% block content %}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    {% if location %}Edit Location{% else %}Add Location{% endif %}
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'location_list' %}">Locations</a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        {% if location %}Edit{% else %}Add{% endif %}
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-11">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                            <div>
+                                <h3 class="card-title mb-1">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    {% if location %}Edit Location{% else %}Add Location{% endif %}
+                                </h3>
+                                <div class="text-muted small">
+                                    {% if location %}
+                                        Update location address, hierarchy and coordinates.
+                                    {% else %}
+                                        Add a pickup or drop location to the NandiRide system.
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <a href="{% url 'location_list' %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>Back
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" novalidate id="locationForm">
+                            {% csrf_token %}
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+                            <div class="card border mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-sitemap me-2"></i>Location Hierarchy
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label for="{{ form.country.id_for_label }}" class="form-label">
+                                                Country
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            {{ form.country }}
+                                            {% if form.country.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.country.errors|striptags }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="{{ form.state.id_for_label }}" class="form-label">
+                                                State
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            {{ form.state }}
+                                            {% if form.state.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.state.errors|striptags }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="{{ form.city.id_for_label }}" class="form-label">
+                                                City
+                                            </label>
+                                            {{ form.city }}
+                                            {% if form.city.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.city.errors|striptags }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card border mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-map-marker-alt me-2"></i>Location Information
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label for="{{ form.address.id_for_label }}" class="form-label">
+                                                Address
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            {{ form.address }}
+                                            {% if form.address.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.address.errors|striptags }}
+                                                </div>
+                                            {% endif %}
+                                            {% if form.address.help_text %}
+                                                <div class="form-text">
+                                                    {{ form.address.help_text }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card border mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-map-pin me-2"></i>Geographic Coordinates
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="{{ form.latitude.id_for_label }}" class="form-label">
+                                                Latitude
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-arrows-alt-v"></i>
+                                                </span>
+                                                {{ form.latitude }}
+                                            </div>
+                                            {% if form.latitude.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.latitude.errors|striptags }}
+                                                </div>
+                                            {% endif %}
+                                            <div class="form-text">
+                                                Valid range: -90 to 90.
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="{{ form.longitude.id_for_label }}" class="form-label">
+                                                Longitude
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-arrows-alt-h"></i>
+                                                </span>
+                                                {{ form.longitude }}
+                                            </div>
+                                            {% if form.longitude.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.longitude.errors|striptags }}
+                                                </div>
+                                            {% endif %}
+                                            <div class="form-text">
+                                                Valid range: -180 to 180.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if location %}
+                                <div class="alert alert-info mb-4">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-info-circle me-2 mt-1"></i>
+                                        <div>
+                                            <strong>Location ID:</strong> {{ location.pk }}
+                                            <div class="small mt-1">
+                                                Updating this location will preserve its existing record ID.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="d-flex flex-wrap justify-content-end gap-2">
+                                <a href="{% url 'location_list' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    {% if location %}Update Location{% else %}Save Location{% endif %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% if location %}
+                    <div class="card shadow-sm mt-3">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-sitemap me-2"></i>Current Location Hierarchy
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center g-3">
+                                <div class="col-md-3">
+                                    <div class="border rounded p-3 h-100">
+                                        <div class="text-muted small mb-1">
+                                            <i class="fas fa-globe me-1"></i>Country
+                                        </div>
+                                        <div class="fw-semibold">
+                                            {% if location.city %}
+                                                {{ location.city.state.country.name }}
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-1 text-center d-none d-md-block">
+                                    <i class="fas fa-chevron-right text-muted"></i>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="border rounded p-3 h-100">
+                                        <div class="text-muted small mb-1">
+                                            <i class="fas fa-map me-1"></i>State
+                                        </div>
+                                        <div class="fw-semibold">
+                                            {% if location.city %}
+                                                {{ location.city.state.name }}
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-1 text-center d-none d-md-block">
+                                    <i class="fas fa-chevron-right text-muted"></i>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="border rounded p-3 h-100">
+                                        <div class="text-muted small mb-1">
+                                            <i class="fas fa-city me-1"></i>City
+                                        </div>
+                                        <div class="fw-semibold">
+                                            {% if location.city %}
+                                                {{ location.city.name }}
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const countryField = document.getElementById("{{ form.country.id_for_label }}");
+    const stateField = document.getElementById("{{ form.state.id_for_label }}");
+    const cityField = document.getElementById("{{ form.city.id_for_label }}");
+    const statesUrl = "{% url 'states_by_country' %}";
+    const citiesUrl = "{% url 'cities_by_state' %}";
+    const currentState = "{{ selected_state|default:'' }}";
+    const currentCity = "{{ selected_city|default:'' }}";
+    if (!countryField || !stateField || !cityField) {
+        return;
+    }
+    function resetField(field, placeholder) {
+        field.innerHTML = `<option value="">${placeholder}</option>`;
+        field.disabled = false;
+    }
+    function loadCities(stateId, selectedCity) {
+        cityField.innerHTML = '<option value="">Loading cities...</option>';
+        cityField.disabled = true;
+        if (!stateId) {
+            resetField(cityField, "Select City");
+            return;
+        }
+        fetch(`${citiesUrl}?state=${encodeURIComponent(stateId)}`, {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Unable to load cities.");
+            }
+            return response.json();
+        })
+        .then(data => {
+            cityField.innerHTML = '<option value="">Select City</option>';
+            data.cities.forEach(city => {
+                const option = document.createElement("option");
+                option.value = city.id;
+                option.textContent = city.name;
+                if (String(city.id) === String(selectedCity)) {
+                    option.selected = true;
+                }
+                cityField.appendChild(option);
+            });
+            cityField.disabled = false;
+        })
+        .catch(() => {
+            cityField.innerHTML = '<option value="">Unable to load cities</option>';
+            cityField.disabled = false;
+        });
+    }
+    function loadStates(countryId, selectedState, selectedCity) {
+        stateField.innerHTML = '<option value="">Loading states...</option>';
+        stateField.disabled = true;
+        cityField.innerHTML = '<option value="">Select City</option>';
+        cityField.disabled = true;
+        if (!countryId) {
+            resetField(stateField, "Select State");
+            resetField(cityField, "Select City");
+            return;
+        }
+        fetch(`${statesUrl}?country=${encodeURIComponent(countryId)}`, {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Unable to load states.");
+            }
+            return response.json();
+        })
+        .then(data => {
+            stateField.innerHTML = '<option value="">Select State</option>';
+            data.states.forEach(state => {
+                const option = document.createElement("option");
+                option.value = state.id;
+                option.textContent = state.name;
+                if (String(state.id) === String(selectedState)) {
+                    option.selected = true;
+                }
+                stateField.appendChild(option);
+            });
+            stateField.disabled = false;
+            if (stateField.value) {
+                loadCities(stateField.value, selectedCity);
+            } else {
+                resetField(cityField, "Select City");
+            }
+        })
+        .catch(() => {
+            stateField.innerHTML = '<option value="">Unable to load states</option>';
+            stateField.disabled = false;
+            resetField(cityField, "Select City");
+        });
+    }
+    countryField.addEventListener("change", function () {
+        loadStates(this.value, "", "");
+    });
+    stateField.addEventListener("change", function () {
+        loadCities(this.value, "");
+    });
+    if (countryField.value) {
+        loadStates(
+            countryField.value,
+            currentState || stateField.value,
+            currentCity || cityField.value
+        );
+    } else {
+        resetField(stateField, "Select State");
+        resetField(cityField, "Select City");
+    }
+});
+</script>
+{% endblock %}

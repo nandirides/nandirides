@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Edit Assignment{% else %}Assign Driver{% endif %} | NandiRide{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+        <div>
+            <h1 class="h3 mb-1">{% if form.instance.pk %}Edit Assignment{% else %}Assign Driver{% endif %}</h1>
+            <p class="text-body-secondary mb-0">
+                {% if form.instance.pk %}Update the existing driver and vehicle assignment.{% else %}Assign a driver to a vehicle and manage the assignment period.{% endif %}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'assignment_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Assignments
+            </a>
+            <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-primary">
+                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+    {% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="row g-4">
+        <div class="col-12 col-xl-8">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <div class="fw-semibold mb-1">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Please correct the following:
+                    </div>
+                    {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-body">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+                                <i class="bi bi-person-badge fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Assignment Information</h5>
+                                <small class="text-body-secondary">Select the driver and vehicle.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.driver.id_for_label }}" class="form-label fw-semibold">
+                                    Driver <span class="text-danger">*</span>
+                                </label>
+                                {{ form.driver }}
+                                {% if form.driver.help_text %}
+                                <div class="form-text">{{ form.driver.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.driver.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.vehicle.id_for_label }}" class="form-label fw-semibold">
+                                    Vehicle <span class="text-danger">*</span>
+                                </label>
+                                {{ form.vehicle }}
+                                {% if form.vehicle.help_text %}
+                                <div class="form-text">{{ form.vehicle.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.vehicle.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-body">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-info-subtle text-info d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+                                <i class="bi bi-calendar-range fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Assignment Period</h5>
+                                <small class="text-body-secondary">Set when the assignment starts and whether it is currently active.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.assigned_from.id_for_label }}" class="form-label fw-semibold">
+                                    Assigned From <span class="text-danger">*</span>
+                                </label>
+                                {{ form.assigned_from }}
+                                {% if form.assigned_from.help_text %}
+                                <div class="form-text">{{ form.assigned_from.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.assigned_from.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.is_current.id_for_label }}" class="form-label fw-semibold d-block">
+                                    Assignment Status
+                                </label>
+                                <div class="form-check form-switch mt-2">
+                                    {{ form.is_current }}
+                                    <label class="form-check-label" for="{{ form.is_current.id_for_label }}">
+                                        Current Assignment
+                                    </label>
+                                </div>
+                                {% if form.is_current.help_text %}
+                                <div class="form-text">{{ form.is_current.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.is_current.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
+                            <a href="{% url 'assignment_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i>
+                                {% if form.instance.pk %}Update Assignment{% else %}Assign Driver{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-body">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle me-2 text-info"></i>Assignment Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <div class="text-success me-3">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">One Current Assignment</div>
+                            <small class="text-body-secondary">
+                                A driver or vehicle should not have conflicting current assignments.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <div class="text-primary me-3">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Assignment Start</div>
+                            <small class="text-body-secondary">
+                                Select the date and time from which the driver is assigned.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="text-warning me-3">
+                            <i class="bi bi-stop-circle"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">End Assignment</div>
+                            <small class="text-body-secondary">
+                                Use the End action from the assignment list when the driver is no longer assigned.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if form.instance.pk %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-body">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2 text-secondary"></i>Current Record
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-body-secondary d-block">Driver</small>
+                        <span class="fw-semibold">{{ form.instance.driver }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-body-secondary d-block">Vehicle</small>
+                        <span class="fw-semibold">{{ form.instance.vehicle.vehicle_number }}</span>
+                    </div>
+                    <div>
+                        <small class="text-body-secondary d-block">Status</small>
+                        {% if form.instance.is_current %}
+                        <span class="badge text-bg-success">Current</span>
+                        {% else %}
+                        <span class="badge text-bg-secondary">Ended</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Access Denied{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-12 col-sm-11 col-md-10 col-lg-9 col-xl-8">
+            <div class="card border-0 shadow-lg mb-0">
+                <div class="card-body text-center px-4 py-4 px-md-5">
+                    <div class="d-flex justify-content-center mb-3">
+                        <div class="position-relative">
+                            <div class="rounded-circle bg-danger-subtle text-danger d-flex align-items-center justify-content-center shadow-sm" style="width:90px;height:90px;">
+                                <i class="fa-solid fa-shield-halved fa-3x"></i>
+                            </div>
+                            <span class="position-absolute bottom-0 end-0 badge rounded-circle text-bg-warning p-2 border border-body">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <span class="badge rounded-pill text-bg-danger px-3 py-2">
+                            <i class="fa-solid fa-ban me-1"></i>
+                            ACCESS DENIED
+                        </span>
+                    </div>
+                    <h2 class="fw-bold mb-2">NO PERMISSION</h2>
+                    <p class="text-body-secondary mb-3">
+                        You don't have permission to access this page.
+                    </p>
+                    <div class="bg-body-tertiary rounded-3 p-3 mb-3">
+                        <div class="d-flex align-items-center text-start justify-content-center">
+                            <div class="flex-shrink-0">
+                                <span class="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle text-warning" style="width:40px;height:40px;">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                </span>
+                            </div>
+                            <div class="ms-3">
+                                <div class="fw-semibold">Permission Required</div>
+                                <div class="small text-body-secondary">
+                                    Your account doesn't have access to this section.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="small text-body-secondary mb-3">
+                        Please contact the administration to request access.
+                    </p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary px-4">
+                            <i class="fa-solid fa-house me-2"></i>
+                            Dashboard
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary px-4" onclick="history.back()">
+                            <i class="fa-solid fa-arrow-left me-2"></i>
+                            Go Back
+                        </button>
+                    </div>
+                </div>
+                <div class="card-footer bg-body-tertiary border-0 text-center py-2">
+                    <small class="text-body-secondary">
+                        <i class="fa-solid fa-shield-halved me-1"></i>
+                        NandiRide Admin Portal
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

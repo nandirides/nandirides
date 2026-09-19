@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Edit Vehicle{% else %}Add Vehicle{% endif %} | NandiRide{% endblock %}
+{% block content %}
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-sm-6">
+                <h3 class="mb-0">
+                    <i class="bi bi-car-front me-2"></i>
+                    {% if form.instance.pk %}Edit Vehicle{% else %}Add Vehicle{% endif %}
+                </h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'vehicle_dashboard' %}">Vehicles</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'vehicle_list' %}">Vehicle List</a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        {% if form.instance.pk %}Edit{% else %}Add{% endif %}
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="app-content">
+    <div class="container-fluid">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger shadow-sm border-0">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="row g-3">
+                <div class="col-12 col-xl-8">
+                    <!-- Basic Information -->
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header bg-body">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-info-circle me-2"></i>Basic Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.vehicle_number.id_for_label }}" class="form-label fw-semibold">
+                                        Vehicle Number <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.vehicle_number }}
+                                    {% for error in form.vehicle_number.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.vehicle_type.id_for_label }}" class="form-label fw-semibold">
+                                        Vehicle Type <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.vehicle_type }}
+                                    {% for error in form.vehicle_type.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.brand.id_for_label }}" class="form-label fw-semibold">
+                                        Brand <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.brand }}
+                                    {% for error in form.brand.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.model.id_for_label }}" class="form-label fw-semibold">
+                                        Model <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.model }}
+                                    {% for error in form.model.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-12">
+                                    <label for="{{ form.variant.id_for_label }}" class="form-label fw-semibold">
+                                        Variant
+                                    </label>
+                                    {{ form.variant }}
+                                    {% for error in form.variant.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Vehicle Specifications -->
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header bg-body">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-gear me-2"></i>Vehicle Specifications
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4">
+                                    <label for="{{ form.manufacturing_year.id_for_label }}" class="form-label fw-semibold">
+                                        Manufacturing Year
+                                    </label>
+                                    {{ form.manufacturing_year }}
+                                    {% for error in form.manufacturing_year.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="{{ form.color.id_for_label }}" class="form-label fw-semibold">
+                                        Color
+                                    </label>
+                                    {{ form.color }}
+                                    {% for error in form.color.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="{{ form.fuel_type.id_for_label }}" class="form-label fw-semibold">
+                                        Fuel Type <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.fuel_type }}
+                                    {% for error in form.fuel_type.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.seating_capacity.id_for_label }}" class="form-label fw-semibold">
+                                        Seating Capacity <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.seating_capacity }}
+                                    {% for error in form.seating_capacity.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Registration -->
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header bg-body">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-card-text me-2"></i>Registration Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.registration_date.id_for_label }}" class="form-label fw-semibold">
+                                        Registration Date
+                                    </label>
+                                    {{ form.registration_date }}
+                                    {% for error in form.registration_date.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.registration_expiry.id_for_label }}" class="form-label fw-semibold">
+                                        Registration Expiry
+                                    </label>
+                                    {{ form.registration_expiry }}
+                                    {% for error in form.registration_expiry.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-xl-4">
+                    <!-- Status -->
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header bg-body">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-toggle-on me-2"></i>Vehicle Status
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
+                                Status <span class="text-danger">*</span>
+                            </label>
+                            {{ form.status }}
+                            {% for error in form.status.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Select the current operational status of this vehicle.
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Form Summary -->
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header bg-body">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-clipboard-check me-2"></i>Form Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                                <span class="text-secondary">Required fields</span>
+                                <span class="fw-semibold">
+                                    <span class="text-danger">*</span>
+                                </span>
+                            </div>
+                            <div class="small text-secondary">
+                                Please verify the vehicle number, type, fuel type and seating capacity before saving.
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Actions -->
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    {% if form.instance.pk %}Update Vehicle{% else %}Save Vehicle{% endif %}
+                                </button>
+                                <a href="{% url 'vehicle_list' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

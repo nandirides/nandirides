@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ page_title }} | NandiRide{% endblock %}
+{% block content %}
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-sm-6">
+                <h3 class="mb-0 fw-semibold"><i class="bi bi-folder2-open me-2"></i>{{ page_title }}</h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'support_dashboard' %}">Support</a></li>
+                    <li class="breadcrumb-item active">Categories</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div>
+                        <h3 class="card-title fw-semibold"><i class="bi bi-folder2-open me-2"></i>Support Categories</h3>
+                        <div class="small text-body-secondary">Manage categories used to organize support tickets.</div>
+                    </div>
+                    {% if perms.support.add_supportcategory %}
+                        <a href="{% url 'category_add' %}" class="btn btn-primary"><i class="bi bi-folder-plus me-1"></i>Add Category</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if categories %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">Category</th>
+                                    <th>Description</th>
+                                    <th>Tickets</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th class="text-end pe-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in categories %}
+                                    <tr>
+                                        <td class="ps-3">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="bg-secondary-subtle text-secondary rounded-3 d-flex align-items-center justify-content-center" style="width:42px;height:42px;"><i class="bi bi-folder fs-5"></i></div>
+                                                <div class="fw-semibold">{{ category.name }}</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="text-body-secondary">{{ category.description|default:"No description"|truncatechars:80 }}</span></td>
+                                        <td><span class="badge bg-primary">{{ category.ticket_count }}</span></td>
+                                        <td>
+                                            {% if category.is_active %}
+                                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary"><i class="bi bi-x-circle me-1"></i>Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ category.created_at|date:"d M Y" }}</td>
+                                        <td class="text-end pe-3">
+                                            <div class="btn-group">
+                                                {% if perms.support.change_supportcategory %}
+                                                    <a href="{% url 'category_edit' category.pk %}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
+                                                {% endif %}
+                                                {% if perms.support.delete_supportcategory %}
+                                                    <form method="post" action="{% url 'category_delete' category.pk %}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 px-3">
+                        <i class="bi bi-folder-x display-5 text-body-secondary"></i>
+                        <h5 class="fw-semibold mt-3">No Categories Found</h5>
+                        <p class="text-body-secondary">Create your first support category to organize tickets.</p>
+                        {% if perms.support.add_supportcategory %}
+                            <a href="{% url 'category_add' %}" class="btn btn-primary"><i class="bi bi-folder-plus me-1"></i>Create Category</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

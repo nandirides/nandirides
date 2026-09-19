@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ page_title }} | NandiRide{% endblock %}
+{% block content %}
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-sm-6">
+                <h3 class="mb-0 fw-semibold">
+                    <i class="bi bi-ticket-detailed me-2"></i>{{ page_title }}
+                </h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'support_dashboard' %}">Support</a></li>
+                    <li class="breadcrumb-item active">Tickets</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-2">
+                    <div>
+                        <h3 class="card-title fw-semibold mb-1">
+                            <i class="bi bi-ticket-detailed me-2"></i>Support Tickets
+                        </h3>
+                        <div class="text-body-secondary small">Search, filter and manage customer support tickets.</div>
+                    </div>
+                    {% if perms.support.add_supportticket %}
+                        <a href="{% url 'ticket_add' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Add Ticket
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-4">
+                            <label class="form-label fw-semibold">Search</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Ticket, subject or customer...">
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <label class="form-label fw-semibold">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">All Status</option>
+                                {% for value,label in status_choices %}
+                                    <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <label class="form-label fw-semibold">Priority</label>
+                            <select name="priority" class="form-select">
+                                <option value="">All Priority</option>
+                                {% for value,label in priority_choices %}
+                                    <option value="{{ value }}" {% if selected_priority == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <label class="form-label fw-semibold">Category</label>
+                            <select name="category" class="form-select">
+                                <option value="">All Categories</option>
+                                {% for item in categories %}
+                                    <option value="{{ item.pk }}" {% if selected_category == item.pk|stringformat:"s" %}selected{% endif %}>{{ item.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 col-lg-2 d-flex align-items-end gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                <i class="bi bi-funnel me-1"></i>Filter
+                            </button>
+                            <a href="{% url 'ticket_list' %}" class="btn btn-outline-secondary" title="Reset">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card shadow-sm mt-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title fw-semibold mb-1">Ticket Records</h3>
+                        <div class="small text-body-secondary">Latest support tickets appear first.</div>
+                    </div>
+                    <span class="badge bg-primary">{{ tickets|length }} Tickets</span>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if tickets %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">Ticket</th>
+                                    <th>Customer</th>
+                                    <th>Subject</th>
+                                    <th>Category</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Assigned To</th>
+                                    <th class="text-end pe-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticket in tickets %}
+                                    <tr>
+                                        <td class="ps-3">
+                                            <a href="{% url 'ticket_detail' ticket.pk %}" class="fw-semibold text-decoration-none">
+                                                {{ ticket.ticket_number }}
+                                            </a>
+                                            <div class="small text-body-secondary">{{ ticket.created_at|date:"d M Y, h:i A" }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="bg-secondary-subtle text-secondary rounded-circle d-flex align-items-center justify-content-center fw-semibold" style="width:38px;height:38px;">
+                                                    {% if ticket.user.first_name %}
+                                                        {{ ticket.user.first_name|first|upper }}
+                                                    {% else %}
+                                                        {{ ticket.user.username|first|upper }}
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">
+                                                        {% if ticket.user.get_full_name %}
+                                                            {{ ticket.user.get_full_name }}
+                                                        {% else %}
+                                                            {{ ticket.user.username }}
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="small text-body-secondary">{{ ticket.user.username }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold text-truncate" style="max-width:220px;">{{ ticket.subject }}</div>
+                                            {% if ticket.ride %}
+                                                <div class="small text-body-secondary"><i class="bi bi-car-front me-1"></i>Ride #{{ ticket.ride.pk }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border">{{ ticket.category.name }}</span></td>
+                                        <td>
+                                            {% if ticket.priority == "urgent" %}
+                                                <span class="badge bg-danger"><i class="bi bi-exclamation-triangle me-1"></i>{{ ticket.get_priority_display }}</span>
+                                            {% elif ticket.priority == "high" %}
+                                                <span class="badge bg-warning text-dark">{{ ticket.get_priority_display }}</span>
+                                            {% elif ticket.priority == "medium" %}
+                                                <span class="badge bg-info text-dark">{{ ticket.get_priority_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ ticket.get_priority_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if ticket.status == "open" %}
+                                                <span class="badge bg-warning text-dark">{{ ticket.get_status_display }}</span>
+                                            {% elif ticket.status == "in_progress" %}
+                                                <span class="badge bg-info text-dark">{{ ticket.get_status_display }}</span>
+                                            {% elif ticket.status == "resolved" %}
+                                                <span class="badge bg-success">{{ ticket.get_status_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ ticket.get_status_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if ticket.assigned_to %}
+                                                <span class="fw-semibold">{{ ticket.assigned_to.get_full_name|default:ticket.assigned_to.username }}</span>
+                                            {% else %}
+                                                <span class="text-body-secondary"><i class="bi bi-person-dash me-1"></i>Unassigned</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <div class="btn-group">
+                                                <a href="{% url 'ticket_detail' ticket.pk %}" class="btn btn-sm btn-outline-primary" title="View">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                {% if perms.support.change_supportticket %}
+                                                    <a href="{% url 'ticket_edit' ticket.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 px-3">
+                        <i class="bi bi-ticket-perforated display-5 text-body-secondary"></i>
+                        <h5 class="fw-semibold mt-3">No Tickets Found</h5>
+                        <p class="text-body-secondary">No support tickets match your current filters.</p>
+                        <a href="{% url 'ticket_list' %}" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filters
+                        </a>
+                        {% if perms.support.add_supportticket %}
+                            <a href="{% url 'ticket_add' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Create Ticket
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

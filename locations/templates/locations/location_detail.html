@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% block title %}Location Details | NandiRide{% endblock %}
+{% block content %}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>Location Details
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'location_list' %}">Locations</a>
+                    </li>
+                    <li class="breadcrumb-item active">Details</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div>
+                        <h3 class="card-title mb-1">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ location.address }}
+                        </h3>
+                        <div class="text-muted small">
+                            Location details, hierarchy and coordinates
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'location_list' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>Back
+                        </a>
+                        <a href="{% url 'location_edit' location.pk %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Edit Location
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6 col-xl-3">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-primary">
+                                <i class="fas fa-globe"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Country</span>
+                                <span class="info-box-number">
+                                    {% if location.city %}
+                                        {{ location.city.state.country.name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-info">
+                                <i class="fas fa-map"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">State</span>
+                                <span class="info-box-number">
+                                    {% if location.city %}
+                                        {{ location.city.state.name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-secondary">
+                                <i class="fas fa-city"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">City</span>
+                                <span class="info-box-number">
+                                    {% if location.city %}
+                                        {{ location.city.name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-success">
+                                <i class="fas fa-location-arrow"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Coordinates</span>
+                                <span class="info-box-number">
+                                    {{ location.latitude }}, {{ location.longitude }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg-7 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle me-2"></i>Location Information
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="text-muted small mb-1">Address</label>
+                            <div class="fw-semibold">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                {{ location.address }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="text-muted small mb-1">Country</label>
+                                <div class="fw-semibold">
+                                    {% if location.city %}
+                                        {{ location.city.state.country.name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="text-muted small mb-1">State</label>
+                                <div class="fw-semibold">
+                                    {% if location.city %}
+                                        {{ location.city.state.name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="text-muted small mb-1">City</label>
+                                <div class="fw-semibold">
+                                    {% if location.city %}
+                                        {{ location.city.name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small mb-1">Latitude</label>
+                                <div class="fw-semibold">
+                                    {{ location.latitude }}
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small mb-1">Longitude</label>
+                                <div class="fw-semibold">
+                                    {{ location.longitude }}
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="text-muted small mb-1">Created At</label>
+                                <div class="fw-semibold">
+                                    {{ location.created_at|date:"d M Y, h:i A" }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small mb-1">Last Updated</label>
+                                <div class="fw-semibold">
+                                    {{ location.updated_at|date:"d M Y, h:i A" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-sitemap me-2"></i>Location Hierarchy
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="border rounded p-3 mb-3">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-globe me-1"></i>Country
+                            </div>
+                            <div class="fw-semibold">
+                                {% if location.city %}
+                                    {{ location.city.state.country.name }}
+                                {% else %}
+                                    Not Assigned
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-center mb-3">
+                            <i class="fas fa-arrow-down text-muted"></i>
+                        </div>
+                        <div class="border rounded p-3 mb-3">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-map me-1"></i>State
+                            </div>
+                            <div class="fw-semibold">
+                                {% if location.city %}
+                                    {{ location.city.state.name }}
+                                {% else %}
+                                    Not Assigned
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-center mb-3">
+                            <i class="fas fa-arrow-down text-muted"></i>
+                        </div>
+                        <div class="border rounded p-3">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-city me-1"></i>City
+                            </div>
+                            <div class="fw-semibold">
+                                {% if location.city %}
+                                    {{ location.city.name }}
+                                {% else %}
+                                    Not Assigned
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm mt-2">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-crosshairs me-2"></i>Coordinates
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-5 mb-3 mb-md-0">
+                        <div class="border rounded p-3">
+                            <div class="text-muted small mb-1">Latitude</div>
+                            <div class="fw-bold fs-5">
+                                {{ location.latitude }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 mb-3 mb-md-0">
+                        <div class="border rounded p-3">
+                            <div class="text-muted small mb-1">Longitude</div>
+                            <div class="fw-bold fs-5">
+                                {{ location.longitude }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button"
+                                class="btn btn-outline-primary w-100"
+                                onclick="copyCoordinates()">
+                            <i class="fas fa-copy me-1"></i>Copy
+                        </button>
+                    </div>
+                </div>
+                <div id="copyMessage" class="text-success small mt-3 d-none">
+                    <i class="fas fa-check-circle me-1"></i>
+                    Coordinates copied successfully.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+function copyCoordinates() {
+    const coordinates = "{{ location.latitude }}, {{ location.longitude }}";
+    navigator.clipboard.writeText(coordinates).then(function () {
+        const message = document.getElementById("copyMessage");
+        message.classList.remove("d-none");
+        setTimeout(function () {
+            message.classList.add("d-none");
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}

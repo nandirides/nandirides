@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ page_title }} | NandiRide{% endblock %}
+{% block content %}
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-sm-6">
+                <h3 class="mb-0 fw-semibold">
+                    <i class="bi bi-bell me-2"></i>{{ page_title }}
+                </h3>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'support_dashboard' %}">Support</a>
+                    </li>
+                    <li class="breadcrumb-item active">Notifications</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div class="flex-grow-1 min-w-0">
+                        <h3 class="fw-semibold mb-1">
+                            <i class="bi bi-bell me-2"></i>Notifications
+                        </h3>
+                        <div class="small text-body-secondary">
+                            {% if unread_count %}
+                                You have {{ unread_count }} unread notification{{ unread_count|pluralize }}.
+                            {% else %}
+                                You are all caught up.
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if unread_count %}
+                        <form method="post" action="{% url 'notification_read_all' %}" class="flex-shrink-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check2-all me-1"></i>
+                                Mark All as Read
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if notifications %}
+                    <div class="list-group list-group-flush">
+                        {% for notification in notifications %}
+                            <a href="{% url 'notification_read' notification.pk %}"
+                               class="list-group-item list-group-item-action p-3 {% if not notification.is_read %}bg-primary-subtle{% endif %}">
+                                <div class="d-flex gap-3 align-items-start">
+                                    <div class="{% if notification.is_read %}bg-body-tertiary text-body-secondary{% else %}bg-primary text-white{% endif %} rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                         style="width:48px;height:48px;">
+                                        {% if notification.notification_type == "support_assignment" %}
+                                            <i class="bi bi-person-check fs-5"></i>
+                                        {% elif notification.notification_type == "support_ticket" %}
+                                            <i class="bi bi-ticket-detailed fs-5"></i>
+                                        {% else %}
+                                            <i class="bi bi-bell fs-5"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-1">
+                                            <h6 class="fw-semibold mb-1 text-break">
+                                                {{ notification.title }}
+                                                {% if not notification.is_read %}
+                                                    <span class="badge bg-primary ms-1">New</span>
+                                                {% endif %}
+                                            </h6>
+                                            <span class="small text-body-secondary text-nowrap flex-shrink-0">
+                                                {{ notification.created_at|date:"d M Y, h:i A" }}
+                                            </span>
+                                        </div>
+                                        <p class="text-body-secondary mb-1 text-break">
+                                            {{ notification.message }}
+                                        </p>
+                                        {% if notification.reference_type %}
+                                            <span class="small text-body-secondary text-break">
+                                                <i class="bi bi-link-45deg me-1"></i>
+                                                {{ notification.reference_type|title }}
+                                                {% if notification.reference_id %}
+                                                    #{{ notification.reference_id }}
+                                                {% endif %}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="align-self-center text-body-secondary flex-shrink-0">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 px-3">
+                        <i class="bi bi-bell-slash display-5 text-body-secondary"></i>
+                        <h5 class="fw-semibold mt-3">No Notifications</h5>
+                        <p class="text-body-secondary mb-0">
+                            You don't have any notifications at the moment.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
