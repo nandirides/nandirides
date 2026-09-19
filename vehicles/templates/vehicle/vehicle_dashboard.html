@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+{% block title %}Vehicle Dashboard | NandiRide{% endblock %}
+{% block content %}
+
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                        <i class="bi bi-car-front me-1"></i>Fleet Management
+                    </span>
+                </div>
+                <h3 class="mb-1 fw-bold">Vehicle Dashboard</h3>
+                <p class="text-body-secondary mb-0">Monitor vehicles, assignments and document status from one place.</p>
+            </div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                            <i class="bi bi-house-door me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Vehicles</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<div class="app-content">
+    <div class="container-fluid">
+        <!-- Summary Cards -->
+        <div class="row g-3 g-xl-4 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="text-body-secondary small fw-semibold text-uppercase">Total Vehicles</span>
+                                <h2 class="fw-bold mt-2 mb-1">{{ total_vehicles|default:"0" }}</h2>
+                                <span class="small text-body-secondary">Registered fleet</span>
+                            </div>
+                            <div class="bg-primary-subtle text-primary rounded-3 p-3">
+                                <i class="bi bi-car-front fs-4"></i>
+                            </div>
+                        </div>
+                        {% if perms.vehicles.view_vehicle %}
+                        <a href="{% url 'vehicle_list' %}" class="btn btn-sm btn-light border mt-3">
+                            View Vehicles <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="text-body-secondary small fw-semibold text-uppercase">Active Vehicles</span>
+                                <h2 class="fw-bold mt-2 mb-1">{{ active_vehicles|default:"0" }}</h2>
+                                <span class="small text-body-secondary">Currently operational</span>
+                            </div>
+                            <div class="bg-success-subtle text-success rounded-3 p-3">
+                                <i class="bi bi-check-circle fs-4"></i>
+                            </div>
+                        </div>
+                        <span class="badge bg-success-subtle text-success mt-3 px-3 py-2">
+                            <i class="bi bi-circle-fill me-1 small"></i>Operational
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="text-body-secondary small fw-semibold text-uppercase">Maintenance</span>
+                                <h2 class="fw-bold mt-2 mb-1">{{ maintenance_vehicles|default:"0" }}</h2>
+                                <span class="small text-body-secondary">Vehicles requiring service</span>
+                            </div>
+                            <div class="bg-warning-subtle text-warning rounded-3 p-3">
+                                <i class="bi bi-tools fs-4"></i>
+                            </div>
+                        </div>
+                        <span class="badge bg-warning-subtle text-warning mt-3 px-3 py-2">
+                            <i class="bi bi-exclamation-circle me-1"></i>Needs attention
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="text-body-secondary small fw-semibold text-uppercase">Blocked Vehicles</span>
+                                <h2 class="fw-bold mt-2 mb-1">{{ blocked_vehicles|default:"0" }}</h2>
+                                <span class="small text-body-secondary">Unavailable vehicles</span>
+                            </div>
+                            <div class="bg-secondary-subtle text-secondary rounded-3 p-3">
+                                <i class="bi bi-slash-circle fs-4"></i>
+                            </div>
+                        </div>
+                        <span class="badge bg-secondary-subtle text-secondary mt-3 px-3 py-2">
+                            <i class="bi bi-pause-circle me-1"></i>Unavailable
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Management Overview -->
+        <div class="row g-3 g-xl-4 mb-4">
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-bottom py-3 px-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="mb-1 fw-semibold">Vehicle Management</h5>
+                                <small class="text-body-secondary">Manage your fleet</small>
+                            </div>
+                            <div class="bg-primary-subtle text-primary rounded-3 p-2">
+                                <i class="bi bi-car-front"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-grid gap-2">
+                            {% if perms.vehicles.view_vehicle %}
+                            <a href="{% url 'vehicle_list' %}" class="btn btn-outline-primary d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-list-ul me-2"></i>All Vehicles</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                            {% if perms.vehicles.add_vehicle %}
+                            <a href="{% url 'vehicle_add' %}" class="btn btn-primary d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-plus-circle me-2"></i>Add Vehicle</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-bottom py-3 px-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="mb-1 fw-semibold">Vehicle Types</h5>
+                                <small class="text-body-secondary">Configure vehicle categories</small>
+                            </div>
+                            <div class="bg-info-subtle text-info rounded-3 p-2">
+                                <i class="bi bi-grid-3x3-gap"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-grid gap-2">
+                            {% if perms.vehicles.view_vehicletype %}
+                            <a href="{% url 'vehicle_type_list' %}" class="btn btn-outline-primary d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-grid-3x3-gap me-2"></i>All Vehicle Types</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                            {% if perms.vehicles.add_vehicletype %}
+                            <a href="{% url 'vehicle_type_add' %}" class="btn btn-primary d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-plus-circle me-2"></i>Add Vehicle Type</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-bottom py-3 px-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="mb-1 fw-semibold">Quick Actions</h5>
+                                <small class="text-body-secondary">Frequently used actions</small>
+                            </div>
+                            <div class="bg-secondary-subtle text-secondary rounded-3 p-2">
+                                <i class="bi bi-lightning-charge"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-grid gap-2">
+                            {% if perms.vehicles.add_vehicle %}
+                            <a href="{% url 'vehicle_add' %}" class="btn btn-primary d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-plus-circle me-2"></i>Add Vehicle</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                            {% if perms.vehicles.add_drivervehicle %}
+                            <a href="{% url 'assignment_add' %}" class="btn btn-outline-primary d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-person-plus me-2"></i>Assign Driver</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                            {% if perms.vehicles.add_vehicledocument %}
+                            <a href="{% url 'document_add' %}" class="btn btn-outline-secondary d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-upload me-2"></i>Upload Document</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Assignment & Documents -->
+        <div class="row g-3 g-xl-4 mb-4">
+            <div class="col-12 col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-bottom py-3 px-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary-subtle text-primary rounded-3 p-2">
+                                    <i class="bi bi-person-badge fs-5"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1 fw-semibold">Driver Assignment</h5>
+                                    <small class="text-body-secondary">Vehicle allocation overview</small>
+                                </div>
+                            </div>
+                            {% if perms.vehicles.view_drivervehicle %}
+                            <a href="{% url 'assignment_list' %}" class="btn btn-sm btn-outline-primary">
+                                View All
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <div class="bg-success-subtle rounded-3 p-3 h-100">
+                                    <div class="text-success small fw-semibold mb-1">Assigned</div>
+                                    <div class="fs-3 fw-bold">{{ assigned_vehicles|default:"0" }}</div>
+                                    <small class="text-body-secondary">Vehicles assigned</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                    <div class="text-body-secondary small fw-semibold mb-1">Unassigned</div>
+                                    <div class="fs-3 fw-bold">{{ unassigned_vehicles|default:"0" }}</div>
+                                    <small class="text-body-secondary">Vehicles available</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% if perms.vehicles.add_drivervehicle %}
+                        <a href="{% url 'assignment_add' %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-person-plus me-2"></i>Assign Vehicle / Driver
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-bottom py-3 px-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-warning-subtle text-warning rounded-3 p-2">
+                                <i class="bi bi-file-earmark-text fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1 fw-semibold">Vehicle Documents</h5>
+                                <small class="text-body-secondary">Document compliance overview</small>
+                            </div>
+                            {% if perms.vehicles.view_vehicledocument %}
+                            <a href="{% url 'document_list' %}" class="btn btn-sm btn-outline-primary ms-auto">
+                                View All
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <div class="bg-danger-subtle rounded-3 p-3 h-100">
+                                    <div class="text-danger small fw-semibold mb-1">Expired</div>
+                                    <div class="fs-3 fw-bold">{{ expired_documents|default:"0" }}</div>
+                                    <small class="text-body-secondary">Require renewal</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-warning-subtle rounded-3 p-3 h-100">
+                                    <div class="text-warning small fw-semibold mb-1">Expiring Soon</div>
+                                    <div class="fs-3 fw-bold">{{ expiring_documents|default:"0" }}</div>
+                                    <small class="text-body-secondary">Need attention</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% if perms.vehicles.add_vehicledocument %}
+                        <a href="{% url 'document_add' %}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-file-earmark-plus me-2"></i>Upload Document
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Recent Vehicles & Document Alerts -->
+        <div class="row g-3 g-xl-4">
+            <div class="col-12 col-xl-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-bottom py-3 px-4">
+                        <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+                            <div>
+                                <h5 class="mb-1 fw-semibold">
+                                    <i class="bi bi-clock-history me-2"></i>Recent Vehicles
+                                </h5>
+                                <small class="text-body-secondary">Recently added fleet vehicles</small>
+                            </div>
+                            {% if perms.vehicles.view_vehicle %}
+                            <a href="{% url 'vehicle_list' %}" class="btn btn-sm btn-outline-primary">
+                                View All <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-3">Vehicle</th>
+                                        <th class="py-3">Type</th>
+                                        <th class="py-3">Brand / Model</th>
+                                        <th class="py-3">Fuel</th>
+                                        <th class="py-3 pe-4">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for vehicle in recent_vehicles %}
+                                    <tr>
+                                        <td class="px-4">
+                                            {% if perms.vehicles.view_vehicle %}
+                                            <a href="{% url 'vehicle_detail' vehicle.pk %}" class="fw-semibold text-decoration-none">
+                                                {{ vehicle.vehicle_number }}
+                                            </a>
+                                            {% else %}
+                                            <span class="fw-semibold">{{ vehicle.vehicle_number }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="text-body-secondary">
+                                                {{ vehicle.vehicle_type.name }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium">
+                                                {{ vehicle.brand }} {{ vehicle.model }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-body-tertiary text-body border">
+                                                {{ vehicle.get_fuel_type_display }}
+                                            </span>
+                                        </td>
+                                        <td class="pe-4">
+                                            {% if vehicle.status == "active" %}
+                                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+                                                <i class="bi bi-circle-fill me-1 small"></i>Active
+                                            </span>
+                                            {% elif vehicle.status == "maintenance" %}
+                                            <span class="badge bg-warning-subtle text-warning rounded-pill px-3 py-2">
+                                                <i class="bi bi-tools me-1"></i>Maintenance
+                                            </span>
+                                            {% elif vehicle.status == "blocked" %}
+                                            <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2">
+                                                <i class="bi bi-slash-circle me-1"></i>Blocked
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-body-tertiary text-body-secondary border rounded-pill px-3 py-2">
+                                                Inactive
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5">
+                                            <div class="text-body-secondary">
+                                                <i class="bi bi-car-front display-5 d-block mb-3"></i>
+                                                <div class="fw-semibold mb-1">No vehicles found</div>
+                                                <small>There are no vehicles available to display.</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-bottom py-3 px-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="mb-1 fw-semibold">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>Document Alerts
+                                </h5>
+                                <small class="text-body-secondary">Documents needing attention</small>
+                            </div>
+                            {% if perms.vehicles.view_vehicledocument %}
+                            <a href="{% url 'document_list' %}" class="btn btn-sm btn-outline-primary">
+                                View
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        {% for document in expiring_document_list %}
+                        <div class="d-flex align-items-start gap-3 {% if not forloop.last %}border-bottom pb-3 mb-3{% endif %}">
+                            <div class="bg-warning-subtle text-warning rounded-3 p-2 flex-shrink-0">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                            <div class="flex-grow-1 min-width-0">
+                                <div class="fw-semibold text-truncate">
+                                    {{ document.vehicle.vehicle_number }}
+                                </div>
+                                <div class="small text-body-secondary mb-1">
+                                    {{ document.get_document_type_display }}
+                                </div>
+                                <div class="small text-body-secondary">
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    Expires: <span class="fw-semibold">{{ document.expiry_date|date:"d M Y" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5">
+                            <div class="bg-success-subtle text-success rounded-circle d-inline-flex p-3 mb-3">
+                                <i class="bi bi-check-circle fs-3"></i>
+                            </div>
+                            <div class="fw-semibold mb-1">No document alerts</div>
+                            <small class="text-body-secondary">All monitored documents are up to date.</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% block title %}{{ state.name }} | State Details | NandiRide{% endblock %}
+{% block content %}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-map me-2"></i>State Details
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'state_list' %}">States</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ state.name }}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div>
+                        <h3 class="card-title mb-1">
+                            <i class="fas fa-map me-2"></i>{{ state.name }}
+                        </h3>
+                        <div class="text-muted small">
+                            State information and cities
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'state_list' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>Back
+                        </a>
+                        <a href="{% url 'state_edit' state.pk %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Edit State
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-primary">
+                                <i class="fas fa-map"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">State</span>
+                                <span class="info-box-number">{{ state.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-info">
+                                <i class="fas fa-building"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Cities</span>
+                                <span class="info-box-number">
+                                    {{ city_count|default:state.cities.count }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-secondary">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Locations</span>
+                                <span class="info-box-number">
+                                    {{ location_count|default:"0" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg-4 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle me-2"></i>State Information
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">State Name</label>
+                            <div class="fw-semibold">
+                                {{ state.name }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Country</label>
+                            <div class="fw-semibold">
+                                <i class="fas fa-globe me-1"></i>
+                                {{ state.country.name }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Created At</label>
+                            <div class="fw-semibold">
+                                {{ state.created_at|date:"d M Y, h:i A" }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-muted small mb-1">Last Updated</label>
+                            <div class="fw-semibold">
+                                {{ state.updated_at|date:"d M Y, h:i A" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                            <div>
+                                <h3 class="card-title mb-1">
+                                    <i class="fas fa-city me-2"></i>Cities
+                                </h3>
+                                <div class="text-muted small">
+                                    Cities available in {{ state.name }}
+                                </div>
+                            </div>
+                            <a href="{% url 'city_create' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i>Add City
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="px-3">#</th>
+                                        <th>City</th>
+                                        <th>Locations</th>
+                                        <th>Created</th>
+                                        <th class="text-end px-3">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for city in state.cities.all %}
+                                        <tr>
+                                            <td class="px-3">
+                                                {{ forloop.counter }}
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold">
+                                                    <i class="fas fa-city me-1"></i>
+                                                    {{ city.name }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">
+                                                    {{ city.locations.count }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted small">
+                                                    {{ city.created_at|date:"d M Y" }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end px-3">
+                                                <a href="{% url 'city_edit' city.pk %}"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="Edit City">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5">
+                                                <div class="mb-3">
+                                                    <i class="fas fa-city fa-3x text-muted"></i>
+                                                </div>
+                                                <h5 class="mb-1">No Cities Found</h5>
+                                                <p class="text-muted mb-3">
+                                                    No cities have been added to this state yet.
+                                                </p>
+                                                <a href="{% url 'city_create' %}" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-plus me-1"></i>Add City
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm mt-2">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-sitemap me-2"></i>Location Hierarchy
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-globe me-1"></i>Country
+                            </div>
+                            <div class="fw-semibold">
+                                {{ state.country.name }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-1 text-center d-none d-md-block">
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-map me-1"></i>State
+                            </div>
+                            <div class="fw-semibold">
+                                {{ state.name }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

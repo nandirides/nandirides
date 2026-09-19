@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Location Map | NandiRide{% endblock %}
+{% block content %}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-map-marked-alt me-2"></i>Location Map
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'location_list' %}">Locations</a>
+                    </li>
+                    <li class="breadcrumb-item active">Map</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div>
+                        <h3 class="card-title mb-1">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ location.address }}
+                        </h3>
+                        <div class="text-muted small">
+                            Map location and geographic coordinates
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'location_list' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>Back
+                        </a>
+                        <a href="{% url 'location_edit' location.pk %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Edit Location
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-map-marker-alt me-1"></i>Address
+                            </div>
+                            <div class="fw-semibold">
+                                {{ location.address }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-map-pin me-1"></i>Latitude
+                            </div>
+                            <div class="fw-semibold">
+                                {{ location.latitude }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-map-pin me-1"></i>Longitude
+                            </div>
+                            <div class="fw-semibold">
+                                {{ location.longitude }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm mt-3">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-map me-2"></i>Map
+                </h3>
+            </div>
+            <div class="card-body p-0">
+                <div id="locationMap" style="height: 500px; width: 100%;"></div>
+            </div>
+        </div>
+        <div class="card shadow-sm mt-3">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-sitemap me-2"></i>Location Hierarchy
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-globe me-1"></i>Country
+                            </div>
+                            <div class="fw-semibold">
+                                {% if location.city %}
+                                    {{ location.city.state.country.name }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-map me-1"></i>State
+                            </div>
+                            <div class="fw-semibold">
+                                {% if location.city %}
+                                    {{ location.city.state.name }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small mb-1">
+                                <i class="fas fa-city me-1"></i>City
+                            </div>
+                            <div class="fw-semibold">
+                                {% if location.city %}
+                                    {{ location.city.name }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const latitude = parseFloat("{{ location.latitude }}");
+    const longitude = parseFloat("{{ location.longitude }}");
+    const map = L.map("locationMap").setView([latitude, longitude], 15);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+    const marker = L.marker([latitude, longitude]).addTo(map);
+    marker.bindPopup(`
+        <div>
+            <strong>{{ location.address|escapejs }}</strong>
+            <br>
+            Latitude: ${latitude}
+            <br>
+            Longitude: ${longitude}
+        </div>
+    `).openPopup();
+});
+</script>
+{% endblock %}

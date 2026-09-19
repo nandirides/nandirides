@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Edit Vehicle Document{% else %}Upload Vehicle Document{% endif %} | NandiRide{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+        <div>
+            <h1 class="h3 mb-1">{% if form.instance.pk %}Edit Vehicle Document{% else %}Upload Vehicle Document{% endif %}</h1>
+            <p class="text-body-secondary mb-0">
+                {% if form.instance.pk %}Update vehicle document information and verification details.{% else %}Upload and register a document for a vehicle.{% endif %}
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'document_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Documents
+            </a>
+            <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-primary">
+                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+    {% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            <div class="fw-semibold mb-1">
+                <i class="bi bi-exclamation-triangle me-2"></i>Please correct the following:
+            </div>
+            {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="row g-4">
+            <div class="col-12 col-xl-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-body">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+                                <i class="bi bi-file-earmark-text fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Document Information</h5>
+                                <small class="text-body-secondary">Select the vehicle and document type.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="{{ form.vehicle.id_for_label }}" class="form-label fw-semibold">
+                                    Vehicle <span class="text-danger">*</span>
+                                </label>
+                                {{ form.vehicle }}
+                                {% if form.vehicle.help_text %}
+                                <div class="form-text">{{ form.vehicle.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.vehicle.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.document_type.id_for_label }}" class="form-label fw-semibold">
+                                    Document Type <span class="text-danger">*</span>
+                                </label>
+                                {{ form.document_type }}
+                                {% if form.document_type.help_text %}
+                                <div class="form-text">{{ form.document_type.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.document_type.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.document_number.id_for_label }}" class="form-label fw-semibold">
+                                    Document Number
+                                </label>
+                                {{ form.document_number }}
+                                {% if form.document_number.help_text %}
+                                <div class="form-text">{{ form.document_number.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.document_number.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-body">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-info-subtle text-info d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+                                <i class="bi bi-calendar-range fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Document Validity</h5>
+                                <small class="text-body-secondary">Enter the issue and expiry dates.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.issue_date.id_for_label }}" class="form-label fw-semibold">
+                                    Issue Date
+                                </label>
+                                {{ form.issue_date }}
+                                {% if form.issue_date.help_text %}
+                                <div class="form-text">{{ form.issue_date.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.issue_date.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.expiry_date.id_for_label }}" class="form-label fw-semibold">
+                                    Expiry Date
+                                </label>
+                                {{ form.expiry_date }}
+                                {% if form.expiry_date.help_text %}
+                                <div class="form-text">{{ form.expiry_date.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.expiry_date.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-body">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+                                <i class="bi bi-cloud-arrow-up fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Document File</h5>
+                                <small class="text-body-secondary">Upload the actual document file.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if form.instance.pk and form.instance.document_file %}
+                        <div class="alert alert-light border d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded bg-danger-subtle text-danger p-2 me-3">
+                                    <i class="bi bi-file-earmark-pdf fs-4"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">Current Document</div>
+                                    <small class="text-body-secondary">
+                                        {{ form.instance.document_file.name }}
+                                    </small>
+                                </div>
+                            </div>
+                            <a href="{{ form.instance.document_file.url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-eye me-1"></i>View Current
+                            </a>
+                        </div>
+                        {% endif %}
+                        <label for="{{ form.document_file.id_for_label }}" class="form-label fw-semibold">
+                            {% if form.instance.pk %}Replace Document File{% else %}Document File{% endif %}
+                            {% if not form.instance.pk %}<span class="text-danger">*</span>{% endif %}
+                        </label>
+                        {{ form.document_file }}
+                        <div class="form-text">
+                            Upload the latest valid vehicle document. PDF or image formats are recommended.
+                        </div>
+                        {% for error in form.document_file.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-body">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+                                <i class="bi bi-shield-check fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Verification</h5>
+                                <small class="text-body-secondary">Set the document verification status.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <label for="{{ form.verification_status.id_for_label }}" class="form-label fw-semibold">
+                            Verification Status <span class="text-danger">*</span>
+                        </label>
+                        {{ form.verification_status }}
+                        {% if form.verification_status.help_text %}
+                        <div class="form-text">{{ form.verification_status.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.verification_status.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
+                            <a href="{% url 'document_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i>
+                                {% if form.instance.pk %}Update Document{% else %}Upload Document{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-body">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2 text-info"></i>Document Guidelines
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex mb-3">
+                            <div class="text-primary me-3">
+                                <i class="bi bi-file-earmark-check fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Use Correct Document</div>
+                                <small class="text-body-secondary">
+                                    Select the exact document type before uploading the file.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="d-flex mb-3">
+                            <div class="text-warning me-3">
+                                <i class="bi bi-calendar-event fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Check Expiry Date</div>
+                                <small class="text-body-secondary">
+                                    Keep expiry information updated so expired documents can be tracked.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="d-flex mb-3">
+                            <div class="text-success me-3">
+                                <i class="bi bi-shield-check fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Verify Documents</div>
+                                <small class="text-body-secondary">
+                                    Mark a document as verified only after the required checks are complete.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="d-flex">
+                            <div class="text-danger me-3">
+                                <i class="bi bi-exclamation-triangle fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Expired Documents</div>
+                                <small class="text-body-secondary">
+                                    Expired vehicle documents should be reviewed before the vehicle is used.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if form.instance.pk %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-body">
+                        <h5 class="mb-0">
+                            <i class="bi bi-file-earmark-text me-2 text-secondary"></i>Current Record
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-body-secondary d-block">Vehicle</small>
+                            <a href="{% url 'vehicle_detail' form.instance.vehicle.pk %}" class="fw-semibold text-decoration-none">
+                                {{ form.instance.vehicle.vehicle_number }}
+                            </a>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-body-secondary d-block">Document Type</small>
+                            <span class="fw-semibold">
+                                {{ form.instance.get_document_type_display }}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-body-secondary d-block">Verification</small>
+                            {% if form.instance.verification_status == "verified" %}
+                            <span class="badge text-bg-success">Verified</span>
+                            {% elif form.instance.verification_status == "rejected" %}
+                            <span class="badge text-bg-danger">Rejected</span>
+                            {% else %}
+                            <span class="badge text-bg-warning">Pending</span>
+                            {% endif %}
+                        </div>
+                        {% if form.instance.expiry_date %}
+                        <div>
+                            <small class="text-body-secondary d-block">Expiry Date</small>
+                            <span class="fw-semibold">
+                                {{ form.instance.expiry_date|date:"d M Y" }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

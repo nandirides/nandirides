@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}Countries | Location Management | NandiRide{% endblock %}
+{% block content %}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-globe me-2"></i>Countries
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">Locations</li>
+                    <li class="breadcrumb-item active">Countries</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div>
+                        <h3 class="card-title mb-1">
+                            <i class="fas fa-globe me-2"></i>Country Management
+                        </h3>
+                        <div class="text-muted small">
+                            Manage countries used in the NandiRide location hierarchy.
+                        </div>
+                    </div>
+                    <a href="{% url 'country_create' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Add Country
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="get" class="mb-4">
+                    <div class="row g-2">
+                        <div class="col-md-10">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text"
+                                       name="q"
+                                       value="{{ request.GET.q|default:'' }}"
+                                       class="form-control"
+                                       placeholder="Search by country name or code...">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i>Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Country</th>
+                                <th>Code</th>
+                                <th>States</th>
+                                <th>Cities</th>
+                                <th>Locations</th>
+                                <th>Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for country in countries %}
+                                <tr>
+                                    <td>
+                                        {{ forloop.counter }}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="avatar bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-2"
+                                                  style="width: 36px; height: 36px;">
+                                                <i class="fas fa-globe text-white"></i>
+                                            </span>
+                                            <div>
+                                                <div class="fw-semibold">
+                                                    {{ country.name }}
+                                                </div>
+                                                <small class="text-muted">
+                                                    Country ID: {{ country.pk }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            {{ country.code }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ country.states.count }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            {{ country.city_count|default:"0" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            {{ country.location_count|default:"0" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">
+                                            {{ country.created_at|date:"d M Y" }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'country_detail' country.pk %}"
+                                               class="btn btn-sm btn-outline-secondary"
+                                               title="View Country">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'country_edit' country.pk %}"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Edit Country">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-secondary"
+                                                    title="Delete Country"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteCountryModal{{ country.pk }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="mb-3">
+                                            <i class="fas fa-globe fa-3x text-muted"></i>
+                                        </div>
+                                        <h5 class="mb-1">No Countries Found</h5>
+                                        <p class="text-muted mb-3">
+                                            No countries are available for the current search.
+                                        </p>
+                                        <a href="{% url 'country_create' %}" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-plus me-1"></i>Add Country
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if is_paginated %}
+                <div class="card-footer">
+                    <nav aria-label="Country pagination">
+                        <ul class="pagination pagination-sm mb-0 justify-content-end">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">
+                                        Previous
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    {{ page_obj.number }}
+                                </span>
+                            </li>
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">
+                                        Next
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            {% endif %}
+        </div>
+        {% for country in countries %}
+            <div class="modal fade"
+                 id="deleteCountryModal{{ country.pk }}"
+                 tabindex="-1"
+                 aria-labelledby="deleteCountryLabel{{ country.pk }}"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteCountryLabel{{ country.pk }}">
+                                <i class="fas fa-trash me-2"></i>Delete Country
+                            </h5>
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-2">
+                                Are you sure you want to delete
+                                <strong>{{ country.name }}</strong>?
+                            </p>
+                            <div class="alert alert-warning mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                If this country has states associated with it, deletion may be prevented.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+                            <form method="post" action="{% url 'country_delete' country.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

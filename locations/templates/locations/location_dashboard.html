@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block title %}Location Dashboard | NandiRide{% endblock %}
+{% block content %}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-map-marked-alt me-2"></i>Location Dashboard
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active">Locations</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div>
+                        <h3 class="card-title mb-1">
+                            <i class="fas fa-map-marked-alt me-2"></i>Location Management
+                        </h3>
+                        <div class="text-muted small">
+                            Manage countries, states, cities and ride locations
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'location_list' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-map-marker-alt me-1"></i>All Locations
+                        </a>
+                        <a href="{% url 'location_create' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Add Location
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-primary">
+                                <i class="fas fa-globe"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Countries</span>
+                                <span class="info-box-number">
+                                    {{ country_count|default:"0" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-info">
+                                <i class="fas fa-map"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">States</span>
+                                <span class="info-box-number">
+                                    {{ state_count|default:"0" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-secondary">
+                                <i class="fas fa-city"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Cities</span>
+                                <span class="info-box-number">
+                                    {{ city_count|default:"0" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="info-box shadow-sm mb-0">
+                            <span class="info-box-icon bg-success">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Locations</span>
+                                <span class="info-box-number">
+                                    {{ location_count|default:"0" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg-8 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-sitemap me-2"></i>Location Hierarchy
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-3">
+                                <div class="border rounded p-3 text-center h-100">
+                                    <div class="mb-2">
+                                        <i class="fas fa-globe fa-2x text-primary"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">Country</h6>
+                                    <small class="text-muted">
+                                        Top-level location master
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-1 text-center d-none d-md-block">
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="border rounded p-3 text-center h-100">
+                                    <div class="mb-2">
+                                        <i class="fas fa-map fa-2x text-info"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">State</h6>
+                                    <small class="text-muted">
+                                        State under a country
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-1 text-center d-none d-md-block">
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="border rounded p-3 text-center h-100">
+                                    <div class="mb-2">
+                                        <i class="fas fa-city fa-2x text-secondary"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">City</h6>
+                                    <small class="text-muted">
+                                        City under a state
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center my-3">
+                            <i class="fas fa-arrow-down text-muted"></i>
+                        </div>
+                        <div class="border rounded p-3 text-center">
+                            <div class="mb-2">
+                                <i class="fas fa-map-marker-alt fa-2x text-success"></i>
+                            </div>
+                            <h6 class="fw-bold mb-1">Location</h6>
+                            <small class="text-muted">
+                                Pickup, drop and service points with coordinates
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-bolt me-2"></i>Quick Actions
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'country_list' %}" class="btn btn-outline-primary text-start">
+                                <i class="fas fa-globe me-2"></i>Manage Countries
+                            </a>
+                            <a href="{% url 'country_create' %}" class="btn btn-outline-secondary text-start">
+                                <i class="fas fa-plus me-2"></i>Add Country
+                            </a>
+                            <a href="{% url 'state_list' %}" class="btn btn-outline-info text-start">
+                                <i class="fas fa-map me-2"></i>Manage States
+                            </a>
+                            <a href="{% url 'city_list' %}" class="btn btn-outline-dark text-start">
+                                <i class="fas fa-city me-2"></i>Manage Cities
+                            </a>
+                            <a href="{% url 'location_list' %}" class="btn btn-outline-success text-start">
+                                <i class="fas fa-map-marker-alt me-2"></i>Manage Locations
+                            </a>
+                            <a href="{% url 'location_create' %}" class="btn btn-primary text-start">
+                                <i class="fas fa-plus-circle me-2"></i>Add Location
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm mt-2">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>Location Management
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-globe text-primary mt-1 me-2"></i>
+                            <div>
+                                <div class="fw-semibold">Countries</div>
+                                <small class="text-muted">
+                                    Maintain country master records.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-map text-info mt-1 me-2"></i>
+                            <div>
+                                <div class="fw-semibold">States</div>
+                                <small class="text-muted">
+                                    Manage states under each country.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-city text-secondary mt-1 me-2"></i>
+                            <div>
+                                <div class="fw-semibold">Cities</div>
+                                <small class="text-muted">
+                                    Manage cities under each state.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-map-marker-alt text-success mt-1 me-2"></i>
+                            <div>
+                                <div class="fw-semibold">Locations</div>
+                                <small class="text-muted">
+                                    Store exact pickup and drop coordinates.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}{% if country %}Edit Country{% else %}Add Country{% endif %} | NandiRide{% endblock %}
+{% block content %}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-globe me-2"></i>
+                    {% if country %}Edit Country{% else %}Add Country{% endif %}
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'country_list' %}">Countries</a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        {% if country %}Edit{% else %}Add{% endif %}
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-lg-9">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                            <div>
+                                <h3 class="card-title mb-1">
+                                    <i class="fas fa-globe me-2"></i>
+                                    {% if country %}Edit Country{% else %}Add Country{% endif %}
+                                </h3>
+                                <div class="text-muted small">
+                                    {% if country %}
+                                        Update the country information below.
+                                    {% else %}
+                                        Add a new country to the location hierarchy.
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <a href="{% url 'country_list' %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>Back
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                                        Country Name
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.name.errors|striptags }}
+                                        </div>
+                                    {% endif %}
+                                    {% if form.name.help_text %}
+                                        <div class="form-text">
+                                            {{ form.name.help_text }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="{{ form.code.id_for_label }}" class="form-label">
+                                        Country Code
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.code }}
+                                    {% if form.code.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.code.errors|striptags }}
+                                        </div>
+                                    {% endif %}
+                                    {% if form.code.help_text %}
+                                        <div class="form-text">
+                                            {{ form.code.help_text }}
+                                        </div>
+                                    {% else %}
+                                        <div class="form-text">
+                                            Enter a unique country code.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if country %}
+                                <div class="alert alert-info mt-4 mb-0">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-info-circle me-2 mt-1"></i>
+                                        <div>
+                                            <strong>Country ID:</strong> {{ country.pk }}
+                                            <div class="small mt-1">
+                                                Existing states and locations will remain associated with this country.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+                                <a href="{% url 'country_list' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    {% if country %}Update Country{% else %}Save Country{% endif %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% if country %}
+                    <div class="card shadow-sm mt-3">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-sitemap me-2"></i>Country Hierarchy
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="border rounded p-3 h-100">
+                                        <div class="text-muted small mb-1">
+                                            <i class="fas fa-globe me-1"></i>Country
+                                        </div>
+                                        <div class="fw-semibold">
+                                            {{ country.name }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border rounded p-3 h-100">
+                                        <div class="text-muted small mb-1">
+                                            <i class="fas fa-map me-1"></i>States
+                                        </div>
+                                        <div class="fw-semibold">
+                                            {{ country.states.count }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border rounded p-3 h-100">
+                                        <div class="text-muted small mb-1">
+                                            <i class="fas fa-city me-1"></i>Cities
+                                        </div>
+                                        <div class="fw-semibold">
+                                            {{ city_count|default:"0" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

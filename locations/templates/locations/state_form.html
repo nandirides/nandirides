@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}{% if state %}Edit State{% else %}Add State{% endif %} | NandiRide{% endblock %}
+{% block content %}
+
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-map text-danger fs-3"></i>
+                <h2 class="fw-bold mb-0">{% if state %}Edit State{% else %}Add State{% endif %}</h2>
+            </div>
+            <p class="text-muted mb-0">
+                {% if state %}Update state information and country assignment.{% else %}Create a new state and assign it to a country.{% endif %}
+            </p>
+        </div>
+        <a href="{% url 'state_list' %}" class="btn btn-outline-danger">
+            <i class="bi bi-arrow-left me-1"></i>Back to States
+        </a>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-header border-0 bg-danger text-white">
+                    <div class="d-flex align-items-center gap-3">
+                        <div>
+                            <i class="bi bi-map fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">{% if state %}Update State{% else %}State Details{% endif %}</h5>
+                            <small class="opacity-75">
+                                {% if state %}Modify the selected state information{% else %}Enter state information below{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="card-body p-4">
+                        {% if error %}
+                            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                <span>{{ error }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label for="country" class="form-label fw-semibold">
+                                    <i class="bi bi-globe2 text-danger me-1"></i>Country
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select name="country" id="country" class="form-select" required>
+                                    <option value="">Select Country</option>
+                                    {% for country in countries %}
+                                        <option value="{{ country.id }}" {% if state and state.country_id == country.id %}selected{% endif %}>
+                                            {{ country.name }}{% if country.code %} ({{ country.code }}){% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Select the country for this state.</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="name" class="form-label fw-semibold">
+                                    <i class="bi bi-map text-danger me-1"></i>State Name
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="name" id="name" class="form-control" value="{% if state %}{{ state.name }}{% endif %}" placeholder="Enter state name" maxlength="100" required>
+                                <div class="form-text">Enter the official state name.</div>
+                            </div>
+                        </div>
+                        <div class="alert alert-secondary mt-4 mb-0" role="alert">
+                            <div class="d-flex gap-3">
+                                <i class="bi bi-diagram-3 text-danger fs-5"></i>
+                                <div>
+                                    <div class="fw-semibold">Location Hierarchy</div>
+                                    <div class="small mt-1">
+                                        Country <i class="bi bi-chevron-right"></i>
+                                        State <i class="bi bi-chevron-right"></i>
+                                        City <i class="bi bi-chevron-right"></i>
+                                        Location
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer border-0 d-flex flex-wrap justify-content-end gap-2 p-4">
+                        <a href="{% url 'state_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {% if state %}Update State{% else %}Save State{% endif %}
+                        </button>
+                    </div>
+                </form>
+                {% if state %}
+                    <div class="card-footer border-top d-flex flex-wrap justify-content-between gap-2">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar-plus me-1"></i>
+                            Created: {{ state.created_at|date:"d M Y, h:i A" }}
+                        </small>
+                        <small class="text-muted">
+                            <i class="bi bi-clock-history me-1"></i>
+                            Updated: {{ state.updated_at|date:"d M Y, h:i A" }}
+                        </small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

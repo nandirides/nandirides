@@ -1,5 +1,4 @@
 {% load static %}
-
 <nav class="app-header navbar navbar-expand bg-body border-bottom shadow-sm {% if request.resolver_match.url_name == 'login' %}app-header-login{% else %}app-header-dashboard{% endif %}" style="position:fixed!important;top:0;right:0;z-index:1030!important;">
     <div class="container-fluid position-relative">
         <ul class="navbar-nav align-items-center">
@@ -28,7 +27,7 @@
             <div class="lh-sm">
                 <div class="fw-bold fs-5 text-body">
                     Welcome to the Nandi<small class="text-warning">Ride</small>
-                    <span class="fs-5 text-body fw-sbold">Administration Portal</span>
+                    <span class="fs-5 text-body fw-semibold">Administration Portal</span>
                 </div>
             </div>
         </div>
@@ -55,33 +54,51 @@
             </li>
             {% endif %}
             {% if user.is_authenticated %}
-            <li class="nav-item dropdown">
-                <a class="nav-link position-relative rounded-circle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications" title="Notifications">
+            <li class="nav-item dropdown notification-nav-item">
+                <a class="nav-link notification-bell-wrapper rounded-circle"
+                   href="#"
+                   role="button"
+                   data-bs-toggle="dropdown"
+                   aria-expanded="false"
+                   aria-label="Notifications"
+                   title="Notifications">
                     <i class="bi bi-bell fs-5"></i>
-                    {% if unread_notifications_count %}
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {% if unread_notifications_count > 0 %}
+                    <span id="notification-badge" class="notification-badge">
                         {{ unread_notifications_count }}
                         <span class="visually-hidden">unread notifications</span>
                     </span>
-                    {% else %}
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notification-badge">0</span>
                     {% endif %}
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 overflow-hidden" style="min-width:320px;">
+                <ul class="dropdown-menu dropdown-menu-end notification-dropdown shadow border-0 rounded-3 overflow-hidden">
                     <li class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
                         <span class="fw-semibold">Notifications</span>
-                        <a href="{% url 'notification_list' %}#" class="small text-decoration-none">View All</a>
+                        <a href="{% url 'notification_list' %}" class="small text-decoration-none text-primary">View All</a>
                     </li>
                     <li id="notification-list">
                         {% if notifications %}
                         {% for notification in notifications %}
-                        <a href="{{ notification.url|default:'#' }}" class="dropdown-item py-3 border-bottom">
+                        <a href="{% url 'notification_read' notification.pk %}" class="dropdown-item notification-item py-3 border-bottom">
                             <div class="d-flex align-items-start">
-                                <i class="bi bi-bell-fill text-primary me-3 mt-1"></i>
-                                <div>
-                                    <div class="fw-semibold">{{ notification.title }}</div>
-                                    <small class="text-body-secondary">{{ notification.message }}</small>
+                                <div class="notification-item-icon me-3">
+                                    <i class="bi bi-bell-fill"></i>
                                 </div>
+                                <div class="flex-grow-1 notification-content">
+                                    <div class="fw-semibold text-body notification-title">
+                                        {{ notification.title }}
+                                    </div>
+                                    <small class="text-body-secondary notification-message">
+                                        {{ notification.message }}
+                                    </small>
+                                    {% if notification.created_at %}
+                                    <small class="d-block text-body-secondary mt-1 notification-time">
+                                        {{ notification.created_at|timesince }} ago
+                                    </small>
+                                    {% endif %}
+                                </div>
+                                {% if not notification.is_read %}
+                                <span class="notification-unread-dot"></span>
+                                {% endif %}
                             </div>
                         </a>
                         {% endfor %}
@@ -93,7 +110,9 @@
                         {% endif %}
                     </li>
                     <li class="text-center border-top">
-                        <a href="{% url 'notification_list' %}" class="dropdown-item py-2 text-primary">View all notifications</a>
+                        <a href="{% url 'notification_list' %}" class="dropdown-item py-2 text-primary fw-medium">
+                            View all notifications
+                        </a>
                     </li>
                 </ul>
             </li>
@@ -106,7 +125,7 @@
                         <i class="bi bi-person-fill"></i>
                     </span>
                     {% endif %}
-                    <span class="d-none d-md-inline fw-medium">{{ user.get_username }}</span>
+                    <span class="d-none d-md-inline fw-medium">{{ user.get_full_name|default:user.get_username }}</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0 rounded-3 overflow-hidden" style="width:320px;">
                     <div class="bg-primary text-white text-center p-3">
@@ -154,6 +173,7 @@
         </ul>
     </div>
 </nav>
+
 <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow-lg rounded-4">
@@ -174,11 +194,123 @@
         </div>
     </div>
 </div>
+
+<style>
+.notification-nav-item {
+    position: relative;
+}
+.notification-bell-wrapper {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-right: 2px;
+}
+.notification-bell-wrapper .bi-bell {
+    line-height: 1;
+}
+.notification-badge {
+    position: absolute;
+    top: 3px;
+    right: 1px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #dc3545;
+    color: #fff;
+    border: 2px solid var(--bs-body-bg);
+    border-radius: 50rem;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 2px 5px rgba(0,0,0,.18);
+    z-index: 5;
+}
+.notification-dropdown {
+    min-width: 350px;
+    max-width: 380px;
+    width: 380px;
+}
+.notification-item {
+    transition: background-color .2s ease, padding-left .2s ease;
+    white-space: normal;
+}
+.notification-item:hover {
+    background-color: var(--bs-tertiary-bg);
+    padding-left: 1.15rem !important;
+}
+.notification-item > div {
+    min-width: 0;
+}
+.notification-item-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(220,53,69,.1);
+    color: #dc3545;
+}
+.notification-content {
+    min-width: 0;
+    overflow: hidden;
+}
+.notification-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.notification-message {
+    display: block;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.45;
+}
+.notification-time {
+    white-space: nowrap;
+}
+.notification-unread-dot {
+    width: 8px;
+    height: 8px;
+    min-width: 8px;
+    margin-top: 5px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: #dc3545;
+    flex-shrink: 0;
+}
+@media (max-width: 575.98px) {
+    .notification-dropdown {
+        min-width: 290px;
+        max-width: calc(100vw - 20px);
+        width: calc(100vw - 20px);
+        margin-right: 10px;
+    }
+    .notification-bell-wrapper {
+        width: 40px;
+        height: 40px;
+    }
+    .notification-badge {
+        top: 2px;
+        right: 0;
+    }
+}
+</style>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const navbar = document.querySelector(".app-header");
     const sidebarToggle = document.querySelector('[data-lte-toggle="sidebar"]');
-    const isLoginPage = document.body.classList.contains("login-page") || navbar.classList.contains("app-header-login");
+    const isLoginPage = document.body.classList.contains("login-page") || (navbar && navbar.classList.contains("app-header-login"));
+
     function updateNavbar() {
         if (!navbar || isLoginPage) {
             if (navbar && isLoginPage) {
@@ -211,8 +343,10 @@ document.addEventListener("DOMContentLoaded", function () {
         navbar.style.left = "0px";
         navbar.style.width = "100%";
     }
+
     updateNavbar();
     window.addEventListener("resize", updateNavbar);
+
     if (sidebarToggle) {
         sidebarToggle.addEventListener("click", function () {
             setTimeout(updateNavbar, 50);
@@ -221,6 +355,7 @@ document.addEventListener("DOMContentLoaded", function () {
             setTimeout(updateNavbar, 500);
         });
     }
+
     const sidebar = document.querySelector(".app-sidebar");
     if (sidebar) {
         const observer = new MutationObserver(function () {
@@ -235,6 +370,7 @@ document.addEventListener("DOMContentLoaded", function () {
             attributeFilter: ["class", "style"]
         });
     }
+
     const searchInput = document.getElementById("navbar-search-input");
     if (searchInput) {
         searchInput.addEventListener("keydown", function (event) {
