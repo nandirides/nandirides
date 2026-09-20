@@ -57,6 +57,9 @@ class Coupon(TimeStampedModel):
         default=True,
     )
 
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
 
 class CouponUsage(TimeStampedModel):
 
@@ -85,3 +88,8 @@ class CouponUsage(TimeStampedModel):
     used_at = models.DateTimeField(
         auto_now_add=True,
     )
+
+    def __str__(self):
+        return f"{self.coupon.code} - {self.user.username}"
+
+    

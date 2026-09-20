@@ -65,7 +65,9 @@
                     <small class="text-secondary">Your basic account information</small>
                 </div>
             </div>
-            <div class="row g-3">
+             <div class="row g-3">
+                {{CustomerForm.as_p}}
+                 {{UserProfile.as_p}}
                 {% for field in form %}
                     {% if field.name == 'user_name' %}
                         <div class="col-md-6 col-xl-4">
@@ -154,6 +156,9 @@
                 </div>
             </div>
             <div class="row g-3">
+                {{Driver.as_p}}
+                {{DriverDocument.as_p}}
+                {{DriverBankAccount.as_p}}
                 {% for field in form %}
                     {% if field.name == 'Driver_Licence_Number' %}
                         <div class="col-md-6 col-xl-4">
@@ -232,6 +237,7 @@
                 </div>
             </div>
             <div class="row g-3">
+                {{UserAddress.as_p}}
                 {% for field in form %}
                     {% if field.name == 'street' %}
                         <div class="col-md-6 col-xl-4">
