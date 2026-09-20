@@ -80,6 +80,9 @@ class RideRequest(TimeStampedModel):
         db_index=True,
     )
 
+    def __str__(self):
+            return f"{self.request_number} - {self.passenger}"
+
 class Ride(TimeStampedModel):
 
     class Status(models.TextChoices):
@@ -347,6 +350,9 @@ class CancellationReason(TimeStampedModel):
     is_active = models.BooleanField(
         default=True,
     )
+
+    def __str__(self):
+            return f"{self.reason}"
 
 
 class RideCancellation(TimeStampedModel):

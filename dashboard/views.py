@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, Permission
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, dumps, loads
 from django.db import transaction
@@ -25,6 +25,8 @@ from promotions.models import Coupon, CouponUsage
 from rides.models import Ride, RideRequest
 from support.models import SupportTicket
 from vehicles.models import Vehicle, VehicleType
+from django.core.exceptions import PermissionDenied
+from .models import GroupStatus
 
 
 EMAIL_VERIFICATION_SALT = "nandiride-email-verification"
@@ -1541,3 +1543,51 @@ def user_setting(request):
             ),
         },
     )
+
+@login_required
+def group_list(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    if request.method == "POST":
+        group_id = request.POST.get("group_id")
+        if not group_id:
+            return JsonResponse({
+                "success": False,
+                "message": "Group ID is required."
+            }, status=400)
+        try:
+            group = Group.objects.get(id=group_id)
+        except Group.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Group not found."
+            }, status=404)
+        group_status, created = GroupStatus.objects.get_or_create(
+            group=group,
+            defaults={"is_active": True}
+        )
+        group_status.is_active = not group_status.is_active
+        group_status.save(update_fields=["is_active", "updated_at"])
+        return JsonResponse({
+            "success": True,
+            "group_id": group.id,
+            "is_active": group_status.is_active,
+            "status": "Active" if group_status.is_active else "Inactive"
+        })
+    query = request.GET.get("q", "").strip()
+    groups = Group.objects.all().order_by("name")
+    if query:
+        groups = groups.filter(Q(name__icontains=query))
+    for group in groups:
+        group.group_status = GroupStatus.objects.get_or_create(
+            group=group,
+            defaults={"is_active": True}
+        )[0]
+    context = {
+        "groups": groups,
+        "total_users": User.objects.count(),
+        "assigned_users": User.objects.filter(groups__isnull=False).distinct().count(),
+        "total_permissions": Permission.objects.count(),
+        "page_title": "Groups Management",
+    }
+    return render(request, "dashboard/groups.html", context)

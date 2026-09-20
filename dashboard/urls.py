@@ -19,6 +19,7 @@ urlpatterns = [
         views.dashboard,
         name="dashboard",
     ),
+    path("groups/", views.group_list, name="group_list"),
     path(
         "account/setting/",
         views.user_setting,

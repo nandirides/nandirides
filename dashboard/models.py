@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from core.models import TimeStampedModel
-
+from django.contrib.auth.models import Group
 # class User(models.Model):
 #     usernamename = models.CharField(max_length=100)
 #     email = models.EmailField()
@@ -10,6 +10,18 @@ from core.models import TimeStampedModel
 #     def __str__(self):
 #         return self.name
 
+class GroupStatus(models.Model):
+    group = models.OneToOneField(
+        Group,
+        on_delete=models.CASCADE,
+        related_name="status"
+    )
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.group.name} - {'Active' if self.is_active else 'Inactive'}"
+    
 class Gallery(models.Model):
     class Category(models.TextChoices):
         PROFILE = "profile", "Profile"

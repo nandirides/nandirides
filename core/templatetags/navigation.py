@@ -171,12 +171,25 @@ NAVIGATION = [
         ],
     },
     {
-        "title": "Administration",
+        "title": "Permissions",
         "icon": "bi-gear",
-        "url": "admin:index",
-        "staff_only": True,
-        "active_urls": [
-            "index",
+        "permission": "drivers.view_driver",
+        "children": [
+            {
+                "title": "Groups",
+                "icon": "bi-circle",
+                "url": "group_list",
+                "permission": None,
+            },
+            {
+                "title": "Administration",
+                "icon": "bi-circle",
+                "url": "admin:index",
+                "staff_only": True,
+                "active_urls": [
+                    "index",
+                ],
+            },
         ],
     },
 ]
