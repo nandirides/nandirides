@@ -1,183 +1,333 @@
 {% extends "base.html" %}
-{% block title %}{{ page_title }} | NandiRide Admin{% endblock %}
+{% block title %}NandiRide | {{ page_title|default:"Ride Stop" }}{% endblock %}
 {% block content %}
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0">
-                    <i class="fas fa-map-marker-alt mr-2"></i>{{ page_title }}
-                </h1>
+
+<div class="container-fluid py-3">
+    {% if form.non_field_errors %}
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'dashboard' %}">Dashboard</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'ride_list' %}">Rides</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'ride_details' ride.pk %}">{{ ride.ride_number }}</a>
-                    </li>
-                    <li class="breadcrumb-item active">{{ page_title }}</li>
-                </ol>
+        </div>
+    {% endif %}
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h3 class="mb-0 fw-semibold">
+                    <i class="bi bi-signpost-2-fill me-2"></i>{{ page_title|default:"Ride Stop" }}
+                </h3>
+                {% if object %}
+                    <span class="badge text-bg-warning">Edit</span>
+                {% else %}
+                    <span class="badge text-bg-primary">Add</span>
+                {% endif %}
+            </div>
+            <div class="text-body-secondary">
+                {% if object %}
+                    Update stop information for {{ ride.ride_number }}
+                {% else %}
+                    Add an intermediate stop to {{ ride.ride_number }}
+                {% endif %}
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'ride_stop_list' ride.pk %}" class="btn btn-outline-secondary">
+                <i class="bi bi-signpost-2 me-1"></i>Stops
+            </a>
+            <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-primary">
+                <i class="bi bi-car-front me-1"></i>Ride Details
+            </a>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-xl-8">
+            <div class="card card-outline card-primary shadow-sm">
+                <div class="card-header">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <h5 class="mb-1 fw-semibold">
+                                <i class="bi bi-geo-alt me-2"></i>Stop Information
+                            </h5>
+                            <div class="small text-body-secondary">
+                                Enter the location, sequence and current stop status.
+                            </div>
+                        </div>
+                        <span class="badge text-bg-secondary">
+                            {{ ride.ride_number }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="rideStopForm" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="{{ form.stop_order.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-list-ol me-1"></i>Stop Order
+                                </label>
+                                {{ form.stop_order }}
+                                {% if form.stop_order.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.stop_order.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Enter the sequence number, for example 1, 2, 3.
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="{{ form.location.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-geo-alt me-1"></i>Location
+                                </label>
+                                {{ form.location }}
+                                {% if form.location.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.location.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Select the intermediate location for this stop.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-activity me-1"></i>Stop Status
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.status.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.arrival_time.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>Arrival Time
+                                </label>
+                                {{ form.arrival_time }}
+                                {% if form.arrival_time.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.arrival_time.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.departure_time.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-box-arrow-right me-1"></i>Departure Time
+                                </label>
+                                {{ form.departure_time }}
+                                {% if form.departure_time.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.departure_time.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-body-tertiary border-top">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <a href="{% url 'ride_stop_list' ride.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Stops
+                        </a>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-car-front me-1"></i>Ride Details
+                            </a>
+                            <button type="submit" form="rideStopForm" class="btn btn-primary">
+                                <i class="bi bi-check2-circle me-1"></i>
+                                {% if object %}
+                                    Update Stop
+                                {% else %}
+                                    Save Stop
+                                {% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if object %}
+                <div class="card shadow-sm mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="bi bi-clock-history me-2"></i>Stop Timeline
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="small text-body-secondary">Created</div>
+                                <div class="fw-semibold mt-1">
+                                    {% if object.created_at %}
+                                        {{ object.created_at|date:"d M Y, h:i A" }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="small text-body-secondary">Last Updated</div>
+                                <div class="fw-semibold mt-1">
+                                    {% if object.updated_at %}
+                                        {{ object.updated_at|date:"d M Y, h:i A" }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="small text-body-secondary">Current Status</div>
+                                <div class="mt-1">
+                                    <span class="badge text-bg-secondary">
+                                        {{ object.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-xl-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <h5 class="mb-1 fw-semibold">
+                        <i class="bi bi-car-front me-2"></i>Ride Information
+                    </h5>
+                    <div class="small text-body-secondary">
+                        This stop belongs to the selected ride.
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Ride Number</div>
+                        <a href="{% url 'ride_details' ride.pk %}" class="fw-semibold text-body text-decoration-none">
+                            {{ ride.ride_number }}
+                        </a>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Passenger</div>
+                        <div class="fw-semibold mt-1">{{ ride.passenger }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Driver</div>
+                        <div class="fw-semibold mt-1">{{ ride.driver }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Vehicle</div>
+                        <div class="fw-semibold mt-1">{{ ride.vehicle }}</div>
+                    </div>
+                    <div>
+                        <div class="small text-body-secondary">Ride Status</div>
+                        <div class="mt-1">
+                            <span class="badge text-bg-secondary">
+                                {{ ride.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="bi bi-signpost-2 me-2"></i>Route
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <i class="bi bi-circle-fill text-success mt-1"></i>
+                        <div>
+                            <div class="small text-body-secondary">Pickup</div>
+                            <div class="fw-semibold mt-1">{{ ride.pickup_location }}</div>
+                        </div>
+                    </div>
+                    <div class="border-start ms-1 ps-4 mb-3">
+                        <div class="small text-body-secondary">This Stop</div>
+                        <div class="fw-semibold mt-1">
+                            {% if object %}
+                                {{ object.location }}
+                            {% else %}
+                                New Intermediate Stop
+                            {% endif %}
+                        </div>
+                        {% if object %}
+                            <div class="small text-body-secondary mt-1">
+                                Stop {{ object.stop_order }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-geo-alt-fill text-danger mt-1"></i>
+                        <div>
+                            <div class="small text-body-secondary">Destination</div>
+                            <div class="fw-semibold mt-1">{{ ride.drop_location }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-outline card-info shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="bi bi-info-circle me-2"></i>Status Guide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <span class="badge text-bg-secondary">Pending</span>
+                        <div class="small text-body-secondary">
+                            Stop has not been reached yet.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <span class="badge text-bg-info">Arrived</span>
+                        <div class="small text-body-secondary">
+                            Driver has reached this location.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3">
+                        <span class="badge text-bg-success">Completed</span>
+                        <div class="small text-body-secondary">
+                            Stop has been completed and the journey continued.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-outline card-warning shadow-sm mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="bi bi-lightbulb me-2"></i>Stop Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="small text-body-secondary">
+                        Keep stop order, arrival time and departure time consistent with the actual ride journey.
+                    </div>
+                    {% if object %}
+                        <a href="{% url 'ride_stop_list' ride.pk %}" class="btn btn-outline-secondary btn-sm mt-3">
+                            <i class="bi bi-list-ul me-1"></i>View All Stops
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card card-primary card-outline">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-map-marker-alt mr-2"></i>
-                            Stop Information
-                        </h3>
-                    </div>
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-                        <div class="card-body">
-                            {% if form.non_field_errors %}
-                                <div class="alert alert-danger">
-                                    {% for error in form.non_field_errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            {% for field in form %}
-                                {% if field.name != "ride" %}
-                                    <div class="form-group">
-                                        <label for="{{ field.id_for_label }}">
-                                            {{ field.label }}
-                                            {% if field.field.required %}
-                                                <span class="text-danger">*</span>
-                                            {% endif %}
-                                        </label>
-                                        {{ field }}
-                                        {% if field.help_text %}
-                                            <small class="form-text text-muted">
-                                                {{ field.help_text }}
-                                            </small>
-                                        {% endif %}
-                                        {% for error in field.errors %}
-                                            <div class="text-danger small mt-1">
-                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <div class="card-footer">
-                            <a href="{% url 'ride_stop_list' ride.pk %}" class="btn btn-default">
-                                <i class="fas fa-arrow-left mr-1"></i>
-                                Back
-                            </a>
-                            <button type="submit" class="btn btn-primary float-right">
-                                <i class="fas fa-save mr-1"></i>
-                                {{ submit_text }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="card card-info card-outline">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-route mr-2"></i>
-                            Ride Information
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <small class="text-muted d-block">Ride Number</small>
-                            <strong>{{ ride.ride_number }}</strong>
-                        </div>
-                        <div class="mb-3">
-                            <small class="text-muted d-block">Passenger</small>
-                            <strong>
-                                {{ ride.passenger.get_full_name|default:ride.passenger.username }}
-                            </strong>
-                        </div>
-                        <div class="mb-3">
-                            <small class="text-muted d-block">Pickup</small>
-                            <span>
-                                {{ ride.pickup_location }}
-                            </span>
-                        </div>
-                        <div class="mb-3">
-                            <small class="text-muted d-block">Destination</small>
-                            <span>
-                                {{ ride.drop_location }}
-                            </span>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block">Current Status</small>
-                            {% if ride.status == "completed" %}
-                                <span class="badge badge-success">
-                                    {{ ride.get_status_display }}
-                                </span>
-                            {% elif ride.status == "cancelled" %}
-                                <span class="badge badge-danger">
-                                    {{ ride.get_status_display }}
-                                </span>
-                            {% elif ride.status == "started" %}
-                                <span class="badge badge-primary">
-                                    {{ ride.get_status_display }}
-                                </span>
-                            {% else %}
-                                <span class="badge badge-warning">
-                                    {{ ride.get_status_display }}
-                                </span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <div class="callout callout-info">
-                    <h5>
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Ride Stop
-                    </h5>
-                    <p class="mb-0">
-                        Add intermediate locations or stops for this ride.
-                        Stop order determines the sequence in which locations
-                        are visited.
-                    </p>
-                </div>
-                <div class="card card-secondary card-outline">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-lightbulb mr-2"></i>
-                            Guidelines
-                        </h3>
-                    </div>
-                    <div class="card-body p-0">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">
-                                <i class="fas fa-check text-success mr-2"></i>
-                                Use a unique stop order for this ride.
-                            </li>
-                            <li class="list-group-item">
-                                <i class="fas fa-check text-success mr-2"></i>
-                                Select the correct location.
-                            </li>
-                            <li class="list-group-item">
-                                <i class="fas fa-clock text-info mr-2"></i>
-                                Arrival and departure times are optional.
-                            </li>
-                            <li class="list-group-item">
-                                <i class="fas fa-sync-alt text-warning mr-2"></i>
-                                Update the status as the ride progresses.
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 {% endblock %}

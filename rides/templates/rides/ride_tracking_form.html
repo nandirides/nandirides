@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+{% block title %}NandiRide | {% if object %}Edit Tracking Point{% else %}Add Tracking Point{% endif %}{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fas fa-triangle-exclamation me-2"></i>
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+    <div class="row align-items-center mb-3">
+        <div class="col-xl-8 col-lg-7">
+            <div class="d-flex align-items-center gap-3">
+                <div>
+                    <h3 class="mb-1 fw-semibold">
+                        <i class="fas fa-location-dot me-2"></i>
+                        {% if object %}Edit Tracking Point{% else %}Add Tracking Point{% endif %}
+                    </h3>
+                    <div class="text-body-secondary">
+                        {% if object %}
+                            Update GPS tracking information for {{ ride.ride_number }}
+                        {% else %}
+                            Record a new GPS location for {{ ride.ride_number }}
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="badge text-bg-primary">
+                    <i class="fas fa-satellite-dish me-1"></i>
+                    {% if object %}Edit{% else %}New{% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-5 mt-3 mt-lg-0">
+            <div class="d-flex flex-wrap justify-content-lg-end gap-2">
+                <a href="{% url 'ride_tracking_list' ride.pk %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-location-crosshairs me-1"></i>Tracking
+                </a>
+                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-primary">
+                    <i class="fas fa-car-side me-1"></i>Ride Details
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-xl-8">
+            <div class="card card-outline card-primary shadow-sm">
+                <div class="card-header">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <h5 class="mb-1 fw-semibold">
+                                <i class="fas fa-crosshairs me-2"></i>GPS Tracking Data
+                            </h5>
+                            <div class="small text-body-secondary">
+                                Enter the driver's current or recorded GPS position
+                            </div>
+                        </div>
+                        <span class="badge text-bg-secondary">
+                            {{ ride.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate id="rideTrackingForm">
+                        {% csrf_token %}
+                        <div class="card bg-body-tertiary border mb-3">
+                            <div class="card-header border-bottom">
+                                <h6 class="mb-0 fw-semibold">
+                                    <i class="fas fa-user-tie me-2"></i>Driver Information
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <label for="{{ form.driver.id_for_label }}" class="form-label fw-semibold">
+                                    Driver
+                                </label>
+                                {{ form.driver }}
+                                {% if form.driver.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.driver.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Select the driver associated with this tracking point.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card bg-body-tertiary border mb-3">
+                            <div class="card-header border-bottom">
+                                <h6 class="mb-0 fw-semibold">
+                                    <i class="fas fa-map-location-dot me-2"></i>GPS Coordinates
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="{{ form.latitude.id_for_label }}" class="form-label fw-semibold">
+                                            Latitude
+                                        </label>
+                                        {{ form.latitude }}
+                                        {% if form.latitude.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.latitude.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            Valid latitude range: -90 to 90
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="{{ form.longitude.id_for_label }}" class="form-label fw-semibold">
+                                            Longitude
+                                        </label>
+                                        {{ form.longitude }}
+                                        {% if form.longitude.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.longitude.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            Valid longitude range: -180 to 180
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card bg-body-tertiary border">
+                            <div class="card-header border-bottom">
+                                <h6 class="mb-0 fw-semibold">
+                                    <i class="fas fa-gauge-high me-2"></i>Vehicle Telemetry
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label for="{{ form.speed.id_for_label }}" class="form-label fw-semibold">
+                                            Speed
+                                        </label>
+                                        {{ form.speed }}
+                                        {% if form.speed.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.speed.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">km/h</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="{{ form.heading.id_for_label }}" class="form-label fw-semibold">
+                                            Heading
+                                        </label>
+                                        {{ form.heading }}
+                                        {% if form.heading.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.heading.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">0°–360°</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="{{ form.accuracy.id_for_label }}" class="form-label fw-semibold">
+                                            Accuracy
+                                        </label>
+                                        {{ form.accuracy }}
+                                        {% if form.accuracy.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.accuracy.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">Meters</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-top mt-4 pt-4">
+                            <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                <a href="{% url 'ride_tracking_list' ride.pk %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Back to Tracking
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    {% if object %}Update Tracking Point{% else %}Save Tracking Point{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% if object %}
+                <div class="card shadow-sm mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-1 fw-semibold">
+                            <i class="fas fa-clock-rotate-left me-2"></i>Tracking Record
+                        </h5>
+                        <div class="small text-body-secondary">
+                            Existing tracking record information
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="info-box shadow-sm h-100 mb-0">
+                                    <span class="info-box-icon bg-info">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Recorded At</span>
+                                        <span class="info-box-number text-wrap">
+                                            {% if object.recorded_at %}
+                                                {{ object.recorded_at|date:"d M Y, h:i:s A" }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box shadow-sm h-100 mb-0">
+                                    <span class="info-box-icon bg-secondary">
+                                        <i class="fas fa-hashtag"></i>
+                                    </span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Tracking ID</span>
+                                        <span class="info-box-number">
+                                            #{{ object.pk }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-xl-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-1 fw-semibold">
+                        <i class="fas fa-car-side me-2"></i>Ride Information
+                    </h5>
+                    <div class="small text-body-secondary">
+                        Current ride details
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Ride Number</div>
+                        <div class="fw-semibold mt-1">
+                            <a href="{% url 'ride_details' ride.pk %}" class="text-body text-decoration-none">
+                                {{ ride.ride_number }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Passenger</div>
+                        <div class="fw-semibold mt-1">
+                            {{ ride.passenger }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Driver</div>
+                        <div class="fw-semibold mt-1">
+                            {{ ride.driver }}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="small text-body-secondary">Status</div>
+                        <div class="mt-1">
+                            <span class="badge text-bg-secondary">
+                                {{ ride.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-route me-2"></i>Journey Route
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="text-success">
+                            <i class="fas fa-circle-dot mt-1"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="small text-body-secondary">Pickup</div>
+                            <div class="fw-semibold mt-1">
+                                {{ ride.pickup_location }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-start ms-1 my-2" style="height: 24px;"></div>
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="text-danger">
+                            <i class="fas fa-location-dot mt-1"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="small text-body-secondary">Destination</div>
+                            <div class="fw-semibold mt-1">
+                                {{ ride.drop_location }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-circle-info me-2"></i>GPS Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="small text-body-secondary mb-3">
+                        Tracking fields captured for this ride
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item bg-transparent text-body px-0 d-flex align-items-center gap-2">
+                            <i class="fas fa-crosshairs text-primary"></i>
+                            <span>Latitude / Longitude</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0 d-flex align-items-center gap-2">
+                            <i class="fas fa-gauge-high text-success"></i>
+                            <span>Vehicle Speed</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0 d-flex align-items-center gap-2">
+                            <i class="fas fa-compass text-info"></i>
+                            <span>Heading Direction</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0 d-flex align-items-center gap-2">
+                            <i class="fas fa-bullseye text-warning"></i>
+                            <span>GPS Accuracy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-outline card-info shadow-sm mt-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="fas fa-lightbulb fs-4 text-info"></i>
+                        <div>
+                            <div class="fw-semibold">GPS Entry Guide</div>
+                            <div class="small text-body-secondary mt-1">
+                                Use accurate latitude and longitude values. Speed, heading and accuracy should match the GPS data available for the tracking point.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

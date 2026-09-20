@@ -1,240 +1,354 @@
 {% extends "base.html" %}
-{% block title %}{{ page_title|default:"Assign Driver" }} | NandiRide{% endblock %}
+{% block title %}NandiRide | {% if object %}Edit Assignment{% else %}Assign Driver{% endif %}{% endblock %}
 {% block content %}
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0">{{ page_title|default:"Assign Driver" }}</h1>
+
+<div class="container-fluid py-3">
+    <!-- Page Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-user-check fa-2x text-primary"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-1">
+                        {% if object %}Edit Driver Assignment{% else %}Assign Driver{% endif %}
+                    </h3>
+                    <p class="text-muted mb-0">
+                        {% if object %}
+                            Update the driver assignment for {{ ride.ride_number }}
+                        {% else %}
+                            Assign a driver to {{ ride.ride_number }}
+                        {% endif %}
+                    </p>
+                </div>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'dashboard' %}">Dashboard</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'ride_list' %}">Rides</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'ride_details' ride.pk %}">{{ ride.ride_number }}</a>
-                    </li>
-                    <li class="breadcrumb-item active">
-                        {{ page_title|default:"Assign Driver" }}
-                    </li>
-                </ol>
+        </div>
+        <div class="col-lg-4 mt-3 mt-lg-0">
+            <div class="d-flex justify-content-lg-end align-items-center gap-2 flex-wrap">
+                <span class="badge bg-primary px-3 py-2">
+                    <i class="fas fa-car me-1"></i>
+                    {{ ride.ride_number }}
+                </span>
+                <a href="{% url 'ride_assignment_list' ride.pk %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-users-gear me-1"></i> Assignments
+                </a>
             </div>
         </div>
     </div>
-</div>
-
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-4">
-                <div class="card card-primary card-outline">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-car mr-2"></i>
-                            Ride Summary
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center mb-4">
-                            <div class="mb-3">
-                                <span class="d-inline-flex align-items-center justify-content-center bg-primary rounded-circle"
-                                      style="width:70px;height:70px;">
-                                    <i class="fas fa-car text-white fa-2x"></i>
-                                </span>
-                            </div>
-                            <h4 class="font-weight-bold mb-2">{{ ride.ride_number }}</h4>
-                            <span class="badge badge-primary px-3 py-2">
-                                {{ ride.get_status_display }}
-                            </span>
+    <!-- Form Errors -->
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fas fa-triangle-exclamation me-2"></i>
+            <div>
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+    <div class="row g-3">
+        <!-- Main Form -->
+        <div class="col-xl-8">
+            <div class="card card-outline card-primary shadow-sm">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center gap-3">
+                        <div>
+                            <h5 class="card-title mb-1">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Assignment Details
+                            </h5>
+                            <small class="text-muted">
+                                Select the driver and configure the assignment status
+                            </small>
                         </div>
-
-                        <div class="card card-light">
-                            <div class="card-body">
-                                <div class="d-flex">
-                                    <div class="mr-3 pt-1">
-                                        <i class="fas fa-circle text-success"></i>
-                                    </div>
-                                    <div>
-                                        <small class="text-muted d-block">Pickup Location</small>
-                                        <strong>{{ ride.pickup_location }}</strong>
-                                    </div>
-                                </div>
-
-                                <div class="ml-1 border-left my-2" style="height:25px;"></div>
-
-                                <div class="d-flex">
-                                    <div class="mr-3 pt-1">
-                                        <i class="fas fa-map-marker-alt text-danger"></i>
-                                    </div>
-                                    <div>
-                                        <small class="text-muted d-block">Drop Location</small>
-                                        <strong>{{ ride.drop_location }}</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <dl class="row mb-0">
-                            <dt class="col-sm-5 text-muted">
-                                <i class="fas fa-user mr-1"></i>
-                                Passenger
-                            </dt>
-                            <dd class="col-sm-7">
-                                {% firstof ride.passenger.get_full_name ride.passenger.username %}
-                            </dd>
-
-                            <dt class="col-sm-5 text-muted">
-                                <i class="fas fa-road mr-1"></i>
-                                Distance
-                            </dt>
-                            <dd class="col-sm-7">
-                                {{ ride.distance_km }} km
-                            </dd>
-
-                            <dt class="col-sm-5 text-muted">
-                                <i class="fas fa-clock mr-1"></i>
-                                Duration
-                            </dt>
-                            <dd class="col-sm-7">
-                                {{ ride.duration_minutes }} min
-                            </dd>
-                        </dl>
+                        <span class="badge bg-secondary px-3 py-2">
+                            {{ ride.get_status_display }}
+                        </span>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-lg-8">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-user-plus mr-2"></i>
-                            Driver Assignment
-                        </h3>
-                    </div>
-
-                    <form method="post">
+                <div class="card-body">
+                    <form method="post" novalidate>
                         {% csrf_token %}
-
-                        <div class="card-body">
-                            {% if form.non_field_errors %}
-                                <div class="alert alert-danger">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                                    {{ form.non_field_errors }}
-                                </div>
-                            {% endif %}
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ form.ride.id_for_label }}">
-                                            <i class="fas fa-car mr-1"></i>
-                                            Ride
-                                        </label>
-                                        {{ form.ride }}
-                                        {% for error in form.ride.errors %}
-                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
-                                        {% endfor %}
+                        <div class="card border-0 bg-body-tertiary shadow-sm mb-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start gap-3">
+                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary p-2">
+                                        <i class="fas fa-id-card"></i>
+                                    </span>
+                                    <div>
+                                        <div class="fw-semibold">Driver Assignment</div>
+                                        <small class="text-body-secondary">
+                                            Choose the driver who should receive this ride assignment.
+                                        </small>
                                     </div>
                                 </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ form.driver.id_for_label }}">
-                                            <i class="fas fa-user-tie mr-1"></i>
-                                            Driver
-                                            <span class="text-danger">*</span>
-                                        </label>
-                                        {{ form.driver }}
-                                        {% for error in form.driver.errors %}
-                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ form.status.id_for_label }}">
-                                            <i class="fas fa-tasks mr-1"></i>
-                                            Assignment Status
-                                            <span class="text-danger">*</span>
-                                        </label>
-                                        {{ form.status }}
-                                        {% for error in form.status.errors %}
-                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ form.accepted_at.id_for_label }}">
-                                            <i class="fas fa-check-circle mr-1"></i>
-                                            Accepted At
-                                        </label>
-                                        {{ form.accepted_at }}
-                                        {% for error in form.accepted_at.errors %}
-                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="{{ form.rejected_at.id_for_label }}">
-                                            <i class="fas fa-times-circle mr-1"></i>
-                                            Rejected At
-                                        </label>
-                                        {{ form.rejected_at }}
-                                        {% for error in form.rejected_at.errors %}
-                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label for="{{ form.rejection_reason.id_for_label }}">
-                                            <i class="fas fa-comment-alt mr-1"></i>
-                                            Rejection Reason
-                                        </label>
-                                        {{ form.rejection_reason }}
-                                        {% for error in form.rejection_reason.errors %}
-                                            <span class="text-danger small d-block mt-1">{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="callout callout-info mb-0">
-                                <h5>
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    Assignment Information
-                                </h5>
-                                <p class="mb-0">
-                                    Select a driver and set the appropriate assignment status.
-                                    The assigned driver can be changed later from the Ride Details page.
-                                </p>
                             </div>
                         </div>
-
-                        <div class="card-footer">
-                            <a href="{% url 'ride_details' ride.pk %}" class="btn btn-default">
-                                <i class="fas fa-arrow-left mr-1"></i>
-                                Back to Ride
-                            </a>
-                            <button type="submit" class="btn btn-primary float-right">
-                                <i class="fas fa-save mr-1"></i>
-                                {{ submit_text|default:"Save Assignment" }}
-                            </button>
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label for="{{ form.driver.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-user-tie me-1 text-primary"></i>
+                                    Driver
+                                </label>
+                                {{ form.driver }}
+                                {% if form.driver.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.driver.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Select the driver who should receive this ride assignment.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-chart-simple me-1 text-warning"></i>
+                                    Assignment Status
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.status.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.rejection_reason.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-comment-dots me-1 text-danger"></i>
+                                    Rejection Reason
+                                </label>
+                                {{ form.rejection_reason }}
+                                {% if form.rejection_reason.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.rejection_reason.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card border-0 bg-body-tertiary shadow-sm mt-4">
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                    <a href="{% url 'ride_assignment_list' ride.pk %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i>
+                                        Back to Assignments
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        {% if object %}Update Assignment{% else %}Assign Driver{% endif %}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
+            <!-- Assignment Timeline -->
+            {% if object %}
+                <div class="card card-outline card-info shadow-sm mt-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-clock-rotate-left me-2"></i>
+                            Assignment Timeline
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm bg-body-tertiary">
+                                    <div class="card-body">
+                                        <span class="badge rounded-pill bg-primary-subtle text-primary mb-3">
+                                            ASSIGNED
+                                        </span>
+                                        <div class="small text-body-secondary">Assigned At</div>
+                                        <div class="fw-semibold mt-2">
+                                            {% if object.assigned_at %}
+                                                {{ object.assigned_at|date:"d M Y, h:i A" }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm bg-body-tertiary">
+                                    <div class="card-body">
+                                        <span class="badge rounded-pill bg-success-subtle text-success mb-3">
+                                            ACCEPTED
+                                        </span>
+                                        <div class="small text-body-secondary">Accepted At</div>
+                                        <div class="fw-semibold mt-2">
+                                            {% if object.accepted_at %}
+                                                {{ object.accepted_at|date:"d M Y, h:i A" }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm bg-body-tertiary">
+                                    <div class="card-body">
+                                        <span class="badge rounded-pill bg-danger-subtle text-danger mb-3">
+                                            REJECTED
+                                        </span>
+                                        <div class="small text-body-secondary">Rejected At</div>
+                                        <div class="fw-semibold mt-2">
+                                            {% if object.rejected_at %}
+                                                {{ object.rejected_at|date:"d M Y, h:i A" }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <!-- Ride Information -->
+        <div class="col-xl-4">
+            <div class="card card-outline card-success shadow-sm mb-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-1">
+                        <i class="fas fa-car me-2"></i>
+                        Ride Information
+                    </h5>
+                    <small class="text-muted">
+                        Ride associated with this assignment
+                    </small>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <div>
+                            <small class="text-body-secondary">Ride Number</small>
+                            <div class="mt-1">
+                                <a href="{% url 'ride_details' ride.pk %}" class="fw-bold text-body text-decoration-none">
+                                    {{ ride.ride_number }}
+                                </a>
+                            </div>
+                        </div>
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary p-2">
+                            <i class="fas fa-route"></i>
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <div>
+                            <small class="text-body-secondary">Passenger</small>
+                            <div class="fw-semibold mt-1">
+                                {{ ride.passenger }}
+                            </div>
+                        </div>
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-info-subtle text-info p-2">
+                            <i class="fas fa-user"></i>
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <div>
+                            <small class="text-body-secondary">Vehicle</small>
+                            <div class="fw-semibold mt-1">
+                                {{ ride.vehicle }}
+                            </div>
+                        </div>
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-success-subtle text-success p-2">
+                            <i class="fas fa-car-side"></i>
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-body-secondary">Current Driver</small>
+                            <div class="fw-semibold mt-1">
+                                {{ ride.driver }}
+                            </div>
+                        </div>
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning-emphasis p-2">
+                            <i class="fas fa-id-card"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- Route -->
+            <div class="card card-outline card-warning shadow-sm mb-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-route me-2"></i>
+                        Route
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3 border-bottom pb-3 mb-3">
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success-subtle text-success p-2">
+                            <i class="fas fa-location-dot"></i>
+                        </span>
+                        <div>
+                            <small class="text-body-secondary">Pickup</small>
+                            <div class="fw-semibold mt-1">
+                                {{ ride.pickup_location }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3">
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger-subtle text-danger p-2">
+                            <i class="fas fa-location-dot"></i>
+                        </span>
+                        <div>
+                            <small class="text-body-secondary">Destination</small>
+                            <div class="fw-semibold mt-1">
+                                {{ ride.drop_location }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Assignment Status -->
+            <div class="card card-outline card-secondary shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-diagram-project me-2"></i>
+                        Assignment Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item bg-transparent text-body px-0 d-flex align-items-center">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary p-2 me-3">
+                                <i class="fas fa-user-plus"></i>
+                            </span>
+                            <span class="fw-semibold">Assigned</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0 d-flex align-items-center">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-success-subtle text-success p-2 me-3">
+                                <i class="fas fa-circle-check"></i>
+                            </span>
+                            <span class="fw-semibold">Accepted</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0 d-flex align-items-center">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger p-2 me-3">
+                                <i class="fas fa-circle-xmark"></i>
+                            </span>
+                            <span class="fw-semibold">Rejected</span>
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0 d-flex align-items-center">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning-emphasis p-2 me-3">
+                                <i class="fas fa-hourglass-half"></i>
+                            </span>
+                            <span class="fw-semibold">Expired</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</section>
+</div>
 {% endblock %}

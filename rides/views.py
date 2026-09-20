@@ -2,20 +2,22 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import ProtectedError, Q
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from payments.models import Payment
+
 from .forms import (
     RideCancellationForm,
     RideDriverAssignmentForm,
     RideForm,
     RideRatingForm,
+    RideRequestForm,
     RideStatusForm,
     RideStopForm,
     RideTrackingForm,
 )
 from .models import (
+    CancellationReason,
     Ride,
     RideCancellation,
     RideDriverAssignment,
@@ -24,50 +26,99 @@ from .models import (
     RideStop,
     RideTracking,
 )
-def _ride_queryset():
-    return (
-        Ride.objects
-        .select_related(
-            "ride_request",
-            "passenger",
-            "driver",
-            "driver__user",
-            "vehicle",
-            "vehicle__vehicle_type",
-            "pickup_location",
-            "drop_location",
-        )
-        .order_by("-created_at")
-    )
-def _paginate(queryset, request, per_page=10):
+
+try:
+    from payments.models import Payment
+except (ImportError, ModuleNotFoundError):
+    Payment = None
+
+
+RIDE_REQUEST_ACTIVE_STATUSES = [
+    RideRequest.Status.REQUESTED,
+    RideRequest.Status.SEARCHING,
+    RideRequest.Status.ASSIGNED,
+]
+
+RIDE_ACTIVE_STATUSES = [
+    Ride.Status.DRIVER_ASSIGNED,
+    Ride.Status.DRIVER_ARRIVING,
+    Ride.Status.DRIVER_ARRIVED,
+    Ride.Status.STARTED,
+]
+
+RIDE_LIVE_STATUSES = [
+    Ride.Status.DRIVER_ASSIGNED,
+    Ride.Status.DRIVER_ARRIVING,
+    Ride.Status.DRIVER_ARRIVED,
+    Ride.Status.STARTED,
+]
+
+
+def _paginate(request, queryset, default_per_page=15):
+    try:
+        per_page = int(request.GET.get("per_page", default_per_page))
+    except (TypeError, ValueError):
+        per_page = default_per_page
+
+    per_page = max(5, min(per_page, 100))
     paginator = Paginator(queryset, per_page)
     page_number = request.GET.get("page")
+
     return paginator.get_page(page_number)
-def _ride_search_filter(queryset, search):
-    if not search:
+
+
+def _ride_request_queryset():
+    return RideRequest.objects.select_related(
+        "passenger",
+        "pickup_location",
+        "drop_location",
+        "vehicle_type",
+    ).order_by("-requested_at", "-pk")
+
+
+def _ride_queryset():
+    return Ride.objects.select_related(
+        "ride_request",
+        "passenger",
+        "driver",
+        "vehicle",
+        "pickup_location",
+        "drop_location",
+    ).order_by("-created_at", "-pk")
+
+
+def _ride_search_filter(queryset, query):
+    if not query:
         return queryset
+
     return queryset.filter(
-        Q(ride_number__icontains=search)
-        | Q(ride_request__request_number__icontains=search)
-        | Q(passenger__username__icontains=search)
-        | Q(passenger__first_name__icontains=search)
-        | Q(passenger__last_name__icontains=search)
-        | Q(driver__driver_code__icontains=search)
-        | Q(driver__user__username__icontains=search)
-        | Q(driver__user__first_name__icontains=search)
-        | Q(driver__user__last_name__icontains=search)
-        | Q(vehicle__vehicle_number__icontains=search)
-        | Q(pickup_location__address__icontains=search)
-        | Q(drop_location__address__icontains=search)
+        Q(ride_number__icontains=query)
+        | Q(passenger__username__icontains=query)
+        | Q(passenger__first_name__icontains=query)
+        | Q(passenger__last_name__icontains=query)
+        | Q(driver__user__username__icontains=query)
+        | Q(driver__user__first_name__icontains=query)
+        | Q(driver__user__last_name__icontains=query)
+        | Q(pickup_location__name__icontains=query)
+        | Q(drop_location__name__icontains=query)
     ).distinct()
-def _live_statuses():
-    return [
-        Ride.Status.DRIVER_ASSIGNED,
-        Ride.Status.DRIVER_ARRIVING,
-        Ride.Status.DRIVER_ARRIVED,
-        Ride.Status.STARTED,
-    ]
-def _allowed_next_statuses(current_status):
+
+
+def _request_search_filter(queryset, query):
+    if not query:
+        return queryset
+
+    return queryset.filter(
+        Q(request_number__icontains=query)
+        | Q(passenger__username__icontains=query)
+        | Q(passenger__first_name__icontains=query)
+        | Q(passenger__last_name__icontains=query)
+        | Q(pickup_location__name__icontains=query)
+        | Q(drop_location__name__icontains=query)
+    ).distinct()
+
+
+def _allowed_next_statuses(ride):
     transitions = {
         Ride.Status.DRIVER_ASSIGNED: [
             Ride.Status.DRIVER_ARRIVING,
@@ -88,1328 +139,1292 @@ def _allowed_next_statuses(current_status):
         Ride.Status.COMPLETED: [],
         Ride.Status.CANCELLED: [],
     }
-    return transitions.get(current_status, [])
+
+    return transitions.get(ride.status, [])
+
+
+def _sync_request_status_from_ride(ride):
+    try:
+        ride_request = ride.ride_request
+    except RideRequest.DoesNotExist:
+        return
+
+    mapping = {
+        Ride.Status.DRIVER_ASSIGNED: RideRequest.Status.ASSIGNED,
+        Ride.Status.DRIVER_ARRIVING: RideRequest.Status.ACCEPTED,
+        Ride.Status.DRIVER_ARRIVED: RideRequest.Status.ACCEPTED,
+        Ride.Status.STARTED: RideRequest.Status.ACCEPTED,
+        Ride.Status.COMPLETED: RideRequest.Status.COMPLETED,
+        Ride.Status.CANCELLED: RideRequest.Status.CANCELLED,
+    }
+
+    new_status = mapping.get(ride.status)
+
+    if new_status and ride_request.status != new_status:
+        ride_request.status = new_status
+        ride_request.save(update_fields=["status"])
+
+
+def _payment_for_ride(ride):
+    if Payment is None:
+        return None
+
+    try:
+        payment_field_names = {
+            field.name for field in Payment._meta.get_fields()
+        }
+
+        if "ride" in payment_field_names:
+            return (
+                Payment.objects
+                .filter(ride=ride)
+                .order_by("-pk")
+                .first()
+            )
+
+        if "ride_request" in payment_field_names:
+            return (
+                Payment.objects
+                .filter(ride_request=ride.ride_request)
+                .order_by("-pk")
+                .first()
+            )
+
+    except Exception:
+        return None
+
+    return None
+
+
+@login_required
+def ride_request_list(request):
+    queryset = _ride_request_queryset()
+    query = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+
+    queryset = _request_search_filter(queryset, query)
+
+    if status:
+        queryset = queryset.filter(status=status)
+
+    page_obj = _paginate(request, queryset)
+
+    context = {
+        "page_title": "Ride Requests",
+        "ride_requests": page_obj,
+        "page_obj": page_obj,
+        "is_paginated": page_obj.has_other_pages(),
+        "q": query,
+        "selected_status": status,
+        "total_requests": RideRequest.objects.count(),
+        "requested_count": RideRequest.objects.filter(
+            status=RideRequest.Status.REQUESTED
+        ).count(),
+        "searching_count": RideRequest.objects.filter(
+            status=RideRequest.Status.SEARCHING
+        ).count(),
+        "assigned_count": RideRequest.objects.filter(
+            status=RideRequest.Status.ASSIGNED
+        ).count(),
+        "status_choices": RideRequest.Status.choices,
+    }
+
+    return render(
+        request,
+        "rides/ride_request_list.html",
+        context,
+    )
+
+
+@login_required
+def ride_request_create_edit(request, pk=None):
+    ride_request = (
+        get_object_or_404(RideRequest, pk=pk)
+        if pk
+        else None
+    )
+
+    if request.method == "POST":
+        form = RideRequestForm(
+            request.POST,
+            instance=ride_request,
+        )
+
+        if form.is_valid():
+            saved_request = form.save()
+
+            messages.success(
+                request,
+                f"Ride request {saved_request.request_number} has been "
+                f"{'updated' if ride_request else 'created'} successfully.",
+            )
+
+            return redirect(
+                "ride_request_details",
+                pk=saved_request.pk,
+            )
+
+    else:
+        form = RideRequestForm(instance=ride_request)
+
+    context = {
+        "page_title": (
+            "Edit Ride Request"
+            if ride_request
+            else "Create Ride Request"
+        ),
+        "form": form,
+        "ride_request": ride_request,
+        "is_edit": bool(ride_request),
+    }
+
+    return render(
+        request,
+        "rides/ride_request_form.html",
+        context,
+    )
+
+
+@login_required
+def ride_request_details(request, pk):
+    ride_request = get_object_or_404(
+        _ride_request_queryset(),
+        pk=pk,
+    )
+
+    ride = (
+        Ride.objects
+        .filter(ride_request=ride_request)
+        .select_related(
+            "passenger",
+            "driver",
+            "vehicle",
+            "pickup_location",
+            "drop_location",
+        )
+        .first()
+    )
+
+    context = {
+        "page_title": f"Ride Request {ride_request.request_number}",
+        "ride_request": ride_request,
+        "ride": ride,
+        "linked_ride": ride,
+    }
+
+    return render(
+        request,
+        "rides/ride_request_details.html",
+        context,
+    )
+
+
+@login_required
+def ride_request_delete(request, pk):
+    ride_request = get_object_or_404(
+        RideRequest,
+        pk=pk,
+    )
+
+    if request.method != "POST":
+        return redirect(
+            "ride_request_details",
+            pk=ride_request.pk,
+        )
+
+    if Ride.objects.filter(
+        ride_request=ride_request
+    ).exists():
+        messages.error(
+            request,
+            "This ride request cannot be deleted because a ride is linked to it.",
+        )
+
+        return redirect(
+            "ride_request_details",
+            pk=ride_request.pk,
+        )
+
+    request_number = ride_request.request_number
+    ride_request.delete()
+
+    messages.success(
+        request,
+        f"Ride request {request_number} has been deleted.",
+    )
+
+    return redirect("ride_request_list")
+
+
+@login_required
+def ride_request_status_update(request, pk):
+    ride_request = get_object_or_404(
+        RideRequest,
+        pk=pk,
+    )
+
+    if request.method != "POST":
+        return redirect(
+            "ride_request_details",
+            pk=ride_request.pk,
+        )
+
+    new_status = request.POST.get(
+        "status",
+        "",
+    ).strip()
+
+    valid_statuses = {
+        value
+        for value, label in RideRequest.Status.choices
+    }
+
+    if new_status not in valid_statuses:
+        messages.error(
+            request,
+            "Invalid ride request status.",
+        )
+
+        return redirect(
+            "ride_request_details",
+            pk=ride_request.pk,
+        )
+
+    ride_request.status = new_status
+    ride_request.save(
+        update_fields=["status"]
+    )
+
+    messages.success(
+        request,
+        f"Ride request {ride_request.request_number} status updated to "
+        f"{ride_request.get_status_display()}.",
+    )
+
+    return redirect(
+        "ride_request_details",
+        pk=ride_request.pk,
+    )
+
+
 @login_required
 def ride_list(request):
     queryset = _ride_queryset()
-    search = request.GET.get("q", "").strip()
-    selected_status = request.GET.get("status", "").strip()
-    per_page = request.GET.get("per_page", "10")
-    if search:
-        queryset = _ride_search_filter(queryset, search)
-    if selected_status:
-        queryset = queryset.filter(status=selected_status)
-    total_rides = Ride.objects.count()
-    active_rides = Ride.objects.filter(
-        status__in=_live_statuses()
-    ).count()
-    completed_rides = Ride.objects.filter(
-        status=Ride.Status.COMPLETED
-    ).count()
-    cancelled_rides = Ride.objects.filter(
-        status=Ride.Status.CANCELLED
-    ).count()
-    try:
-        per_page = int(per_page)
-    except (TypeError, ValueError):
-        per_page = 10
-    if per_page not in [10, 25, 50]:
-        per_page = 10
-    page_obj = _paginate(
+    query = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+
+    queryset = _ride_search_filter(
         queryset,
-        request,
-        per_page,
+        query,
     )
+
+    if status:
+        queryset = queryset.filter(
+            status=status
+        )
+
+    page_obj = _paginate(
+        request,
+        queryset,
+    )
+
     context = {
-        "rides": page_obj.object_list,
+        "page_title": "Rides",
+        "rides": page_obj,
         "page_obj": page_obj,
-        "search": search,
-        "selected_status": selected_status,
+        "is_paginated": page_obj.has_other_pages(),
+        "q": query,
+        "selected_status": status,
+        "total_rides": Ride.objects.count(),
+        "active_rides": Ride.objects.filter(
+            status__in=RIDE_ACTIVE_STATUSES
+        ).count(),
+        "completed_rides": Ride.objects.filter(
+            status=Ride.Status.COMPLETED
+        ).count(),
+        "cancelled_rides": Ride.objects.filter(
+            status=Ride.Status.CANCELLED
+        ).count(),
         "status_choices": Ride.Status.choices,
-        "total_rides": total_rides,
-        "active_rides": active_rides,
-        "completed_rides": completed_rides,
-        "cancelled_rides": cancelled_rides,
-        "per_page": per_page,
     }
+
     return render(
         request,
         "rides/ride_list.html",
         context,
     )
+
+
 @login_required
+@transaction.atomic
 def ride_create_edit(request, pk=None):
-    ride = None
-    if pk is not None:
-        ride = get_object_or_404(
+    ride = (
+        get_object_or_404(
             _ride_queryset(),
             pk=pk,
         )
+        if pk
+        else None
+    )
+
+    request_pk = (
+        request.GET.get("ride_request")
+        or request.POST.get("ride_request")
+    )
+
+    source_request = None
+
+    if request_pk:
+        source_request = (
+            RideRequest.objects
+            .filter(pk=request_pk)
+            .select_related(
+                "passenger",
+                "pickup_location",
+                "drop_location",
+                "vehicle_type",
+            )
+            .first()
+        )
+
     if request.method == "POST":
         form = RideForm(
             request.POST,
             instance=ride,
         )
+
         if form.is_valid():
-            try:
-                with transaction.atomic():
-                    ride = form.save()
-                    ride_request = ride.ride_request
-                    if ride_request:
-                        if ride_request.status in [
-                            RideRequest.Status.REQUESTED,
-                            RideRequest.Status.SEARCHING,
-                        ]:
-                            ride_request.status = RideRequest.Status.ASSIGNED
-                            ride_request.save(
-                                update_fields=[
-                                    "status",
-                                    "updated_at",
-                                ]
-                            )
-                if pk:
-                    messages.success(
-                        request,
-                        f"Ride {ride.ride_number} updated successfully.",
-                    )
-                else:
-                    messages.success(
-                        request,
-                        f"Ride {ride.ride_number} created successfully.",
-                    )
-                return redirect(
-                    "ride_details",
-                    pk=ride.pk,
-                )
-            except ProtectedError:
-                messages.error(
-                    request,
-                    "This ride cannot be saved because related records are protected.",
-                )
-            except Exception:
-                messages.error(
-                    request,
-                    "Unable to save ride. Please check the form and try again.",
-                )
-        else:
-            messages.error(
-                request,
-                "Please correct the errors below.",
+            saved_ride = form.save()
+
+            _sync_request_status_from_ride(
+                saved_ride
             )
+
+            messages.success(
+                request,
+                f"Ride {saved_ride.ride_number} has been "
+                f"{'updated' if ride else 'created'} successfully.",
+            )
+
+            return redirect(
+                "ride_details",
+                pk=saved_ride.pk,
+            )
+
     else:
-        form = RideForm(
-            instance=ride,
-        )
+        initial = {}
+
+        if source_request and not ride:
+            initial = {
+                "ride_request": source_request.pk,
+                "passenger": source_request.passenger_id,
+                "pickup_location": source_request.pickup_location_id,
+                "drop_location": source_request.drop_location_id,
+                "scheduled_at": source_request.scheduled_at,
+            }
+
+            form = RideForm(
+                instance=ride,
+                initial=initial,
+            )
+
+        else:
+            form = RideForm(
+                instance=ride
+            )
+
     context = {
+        "page_title": (
+            "Edit Ride"
+            if ride
+            else "Create Ride"
+        ),
         "form": form,
         "ride": ride,
-        "page_title": "Edit Ride" if ride else "Add Ride",
+        "ride_request": (
+            source_request
+            or (ride.ride_request if ride else None)
+        ),
         "is_edit": bool(ride),
     }
+
     return render(
         request,
         "rides/ride_form.html",
         context,
     )
+
+
 @login_required
 def ride_status_update(request, pk):
     ride = get_object_or_404(
         _ride_queryset(),
         pk=pk,
     )
-    allowed_statuses = _allowed_next_statuses(
-        ride.status
-    )
+
     if request.method == "POST":
         form = RideStatusForm(
-            request.POST
+            request.POST,
+            instance=ride,
         )
+
         if form.is_valid():
-            new_status = form.cleaned_data["status"]
-            old_status = ride.status
-            if old_status in [
-                Ride.Status.COMPLETED,
-                Ride.Status.CANCELLED,
-            ]:
-                messages.warning(
+            new_status = form.cleaned_data.get("status")
+
+            if new_status == ride.status:
+                messages.info(
                     request,
-                    "Completed or cancelled rides cannot be changed.",
+                    "Ride is already in this status.",
                 )
+
                 return redirect(
                     "ride_details",
                     pk=ride.pk,
                 )
-            if new_status not in allowed_statuses:
-                messages.warning(
+
+            allowed = _allowed_next_statuses(ride)
+
+            if allowed and new_status not in allowed:
+                messages.error(
                     request,
-                    "This ride status transition is not allowed.",
+                    "This status transition is not allowed from the current ride status.",
                 )
+
+            else:
+                old_status = ride.status
+                ride.status = new_status
+                now = timezone.now()
+
+                if new_status == Ride.Status.DRIVER_ARRIVED:
+                    ride.arrived_at = now
+
+                elif new_status == Ride.Status.STARTED:
+                    ride.started_at = ride.started_at or now
+
+                elif new_status == Ride.Status.COMPLETED:
+                    ride.completed_at = now
+
+                ride.save()
+
+                _sync_request_status_from_ride(
+                    ride
+                )
+
+                messages.success(
+                    request,
+                    f"Ride {ride.ride_number} changed from "
+                    f"{dict(Ride.Status.choices).get(old_status, old_status)} to "
+                    f"{ride.get_status_display()}.",
+                )
+
                 return redirect(
-                    "ride_status_update",
+                    "ride_details",
                     pk=ride.pk,
                 )
-            now = timezone.now()
-            update_fields = [
-                "status",
-                "updated_at",
-            ]
-            ride.status = new_status
-            if new_status == Ride.Status.DRIVER_ARRIVED:
-                ride.arrived_at = now
-                update_fields.append(
-                    "arrived_at"
-                )
-            elif new_status == Ride.Status.STARTED:
-                if not ride.started_at:
-                    ride.started_at = now
-                    update_fields.append(
-                        "started_at"
-                    )
-            elif new_status == Ride.Status.COMPLETED:
-                if not ride.started_at:
-                    ride.started_at = now
-                    update_fields.append(
-                        "started_at"
-                    )
-                if not ride.completed_at:
-                    ride.completed_at = now
-                    update_fields.append(
-                        "completed_at"
-                    )
-                if ride.started_at and ride.completed_at:
-                    duration = (
-                        ride.completed_at
-                        - ride.started_at
-                    ).total_seconds() / 60
-                    if duration >= 0:
-                        ride.duration_minutes = round(
-                            duration
-                        )
-                        update_fields.append(
-                            "duration_minutes"
-                        )
-                if ride.ride_request:
-                    ride_request = ride.ride_request
-                    if ride_request.status != RideRequest.Status.COMPLETED:
-                        ride_request.status = RideRequest.Status.COMPLETED
-                        ride_request.save(
-                            update_fields=[
-                                "status",
-                                "updated_at",
-                            ]
-                        )
-            elif new_status == Ride.Status.CANCELLED:
-                ride_request = ride.ride_request
-                if ride_request:
-                    if ride_request.status not in [
-                        RideRequest.Status.COMPLETED,
-                        RideRequest.Status.CANCELLED,
-                    ]:
-                        ride_request.status = RideRequest.Status.CANCELLED
-                        ride_request.save(
-                            update_fields=[
-                                "status",
-                                "updated_at",
-                            ]
-                        )
-            ride.save(
-                update_fields=list(
-                    dict.fromkeys(
-                        update_fields
-                    )
-                )
-            )
-            messages.success(
-                request,
-                f"Ride status changed from "
-                f"{old_status.replace('_', ' ').title()} "
-                f"to "
-                f"{new_status.replace('_', ' ').title()}.",
-            )
-            return redirect(
-                "ride_details",
-                pk=ride.pk,
-            )
-        messages.error(
-            request,
-            "Please select a valid ride status.",
-        )
+
     else:
-        form = RideStatusForm()
-    form.fields["status"].choices = [
-        (
-            status,
-            dict(Ride.Status.choices).get(
-                status,
-                status.replace(
-                    "_",
-                    " ",
-                ).title(),
-            ),
+        form = RideStatusForm(
+            instance=ride
         )
-        for status in allowed_statuses
-    ]
+
     context = {
-        "ride": ride,
+        "page_title": f"Update Status - {ride.ride_number}",
         "form": form,
-        "allowed_statuses": allowed_statuses,
-        "page_title": "Update Ride Status",
+        "ride": ride,
+        "ride_request": ride.ride_request,
+        "allowed_next_statuses": _allowed_next_statuses(ride),
     }
+
     return render(
         request,
-        "rides/ride_status_update.html",
+        "rides/ride_status_form.html",
         context,
     )
+
+
 @login_required
 def ride_delete(request, pk):
     ride = get_object_or_404(
         Ride,
         pk=pk,
     )
+
     if request.method != "POST":
         return redirect(
             "ride_details",
             pk=ride.pk,
         )
-    if ride.status in [
-        Ride.Status.STARTED,
-        Ride.Status.COMPLETED,
-    ]:
-        messages.error(
-            request,
-            "Started or completed rides cannot be deleted.",
-        )
-        return redirect(
-            "ride_details",
-            pk=ride.pk,
-        )
+
     ride_number = ride.ride_number
-    try:
-        with transaction.atomic():
-            ride.delete()
-        messages.success(
-            request,
-            f"Ride {ride_number} deleted successfully.",
-        )
-    except ProtectedError:
-        messages.error(
-            request,
-            "This ride cannot be deleted because related records exist.",
-        )
-    return redirect(
-        "ride_list"
+    ride.delete()
+
+    messages.success(
+        request,
+        f"Ride {ride_number} has been deleted.",
     )
+
+    return redirect("ride_list")
+
+
 @login_required
 def ride_details(request, pk):
     ride = get_object_or_404(
-        Ride.objects
-        .select_related(
-            "ride_request",
-            "passenger",
-            "driver",
-            "driver__user",
-            "vehicle",
-            "vehicle__vehicle_type",
-            "pickup_location",
-            "drop_location",
-        )
-        .prefetch_related(
-            "stops",
-            "driver_assignments",
-            "tracking_points",
-            "ratings",
-        ),
+        _ride_queryset(),
         pk=pk,
     )
-    payment = (
-        Payment.objects
-        .filter(
-            ride=ride
-        )
-        .order_by(
-            "-created_at"
-        )
-        .first()
-    )
+
     assignments = (
         ride.driver_assignments
-        .select_related(
-            "driver",
-            "driver__user",
-        )
-        .order_by(
-            "-assigned_at"
-        )
+        .select_related("driver")
+        .order_by("-assigned_at")
     )
-    latest_assignment = assignments.first()
-    latest_tracking = (
+
+    stops = (
+        ride.stops
+        .select_related("location")
+        .order_by("stop_order")
+    )
+
+    tracking_points = (
         ride.tracking_points
-        .order_by(
-            "-recorded_at"
+        .select_related("driver")
+        .order_by("-recorded_at")
+    )
+
+    latest_tracking = tracking_points.first()
+
+    ratings = (
+        ride.ratings
+        .select_related("from_user", "to_user")
+        .order_by("-created_at")
+    )
+
+    cancellation = (
+        RideCancellation.objects
+        .filter(ride=ride)
+        .select_related(
+            "cancelled_by",
+            "reason",
         )
         .first()
     )
-    ratings = (
-        ride.ratings
-        .select_related(
-            "from_user",
-            "to_user",
-        )
-        .order_by(
-            "-created_at"
-        )
-    )
-    cancellation = getattr(
-        ride,
-        "cancellation",
-        None,
-    )
-    stops = (
-        ride.stops
-        .select_related(
-            "location"
-        )
-        .order_by(
-            "stop_order"
-        )
-    )
-    tracking_points = (
-        ride.tracking_points
-        .select_related(
-            "driver"
-        )
-        .order_by(
-            "-recorded_at"
-        )
-    )
+
+    payment = _payment_for_ride(ride)
+
     context = {
+        "page_title": f"Ride {ride.ride_number}",
         "ride": ride,
-        "payment": payment,
+        "ride_request": ride.ride_request,
         "assignments": assignments,
-        "latest_assignment": latest_assignment,
+        "stops": stops,
+        "tracking_points": tracking_points[:50],
         "latest_tracking": latest_tracking,
-        "tracking_points": tracking_points,
         "ratings": ratings,
         "cancellation": cancellation,
-        "stops": stops,
-        "allowed_statuses": _allowed_next_statuses(
-            ride.status
-        ),
+        "payment": payment,
+        "allowed_next_statuses": _allowed_next_statuses(ride),
     }
+
     return render(
         request,
         "rides/ride_details.html",
         context,
     )
+
+
 @login_required
 def ride_assignment_list(request, ride_pk):
     ride = get_object_or_404(
-        Ride.objects
-        .select_related(
-            "passenger",
-            "driver",
-            "driver__user",
-            "vehicle",
-            "vehicle__vehicle_type",
-        ),
+        _ride_queryset(),
         pk=ride_pk,
     )
+
     assignments = (
         ride.driver_assignments
-        .select_related(
-            "driver",
-            "driver__user",
-        )
-        .order_by(
-            "-assigned_at"
-        )
+        .select_related("driver")
+        .order_by("-assigned_at")
     )
+
     context = {
+        "page_title": f"Driver Assignments - {ride.ride_number}",
         "ride": ride,
         "assignments": assignments,
+        "total_assignments": assignments.count(),
     }
+
     return render(
         request,
         "rides/assignment_list.html",
         context,
     )
+
+
 @login_required
+@transaction.atomic
 def ride_assignment_create(request, ride_pk):
     ride = get_object_or_404(
-        Ride.objects
-        .select_related(
-            "passenger",
-            "driver",
-            "vehicle",
-            "vehicle__vehicle_type",
-        ),
+        _ride_queryset(),
         pk=ride_pk,
     )
-    if ride.status in [
-        Ride.Status.COMPLETED,
-        Ride.Status.CANCELLED,
-    ]:
-        messages.warning(
-            request,
-            "Driver cannot be assigned to a completed or cancelled ride.",
-        )
-        return redirect(
-            "ride_details",
-            pk=ride.pk,
-        )
+
     if request.method == "POST":
         form = RideDriverAssignmentForm(
             request.POST
         )
+
         if form.is_valid():
             assignment = form.save(
                 commit=False
             )
+
             assignment.ride = ride
-            duplicate = (
-                RideDriverAssignment.objects
-                .filter(
-                    ride=ride,
-                    driver=assignment.driver,
-                    status__in=[
-                        RideDriverAssignment.Status.ASSIGNED,
-                        RideDriverAssignment.Status.ACCEPTED,
-                    ],
+            assignment.save()
+
+            if (
+                ride.status == Ride.Status.DRIVER_ASSIGNED
+                and assignment.status
+                == RideDriverAssignment.Status.ACCEPTED
+            ):
+                ride.status = Ride.Status.DRIVER_ARRIVING
+
+                ride.save(
+                    update_fields=[
+                        "status",
+                        "updated_at",
+                    ]
                 )
-                .exists()
+
+                _sync_request_status_from_ride(
+                    ride
+                )
+
+            elif ride.status not in RIDE_LIVE_STATUSES:
+                ride.status = Ride.Status.DRIVER_ASSIGNED
+
+                ride.save(
+                    update_fields=[
+                        "status",
+                        "updated_at",
+                    ]
+                )
+
+                _sync_request_status_from_ride(
+                    ride
+                )
+
+            messages.success(
+                request,
+                "Driver assignment created successfully.",
             )
-            if duplicate:
-                form.add_error(
-                    "driver",
-                    "This driver is already assigned to this ride.",
-                )
-            else:
-                try:
-                    with transaction.atomic():
-                        assignment.save()
-                        ride.driver = assignment.driver
-                        ride.status = Ride.Status.DRIVER_ASSIGNED
-                        ride.save(
-                            update_fields=[
-                                "driver",
-                                "status",
-                                "updated_at",
-                            ]
-                        )
-                    messages.success(
-                        request,
-                        f"Driver {assignment.driver.driver_code} assigned to {ride.ride_number}.",
-                    )
-                    return redirect(
-                        "ride_details",
-                        pk=ride.pk,
-                    )
-                except Exception:
-                    messages.error(
-                        request,
-                        "Unable to assign driver. Please try again.",
-                    )
+
+            return redirect(
+                "ride_assignment_list",
+                ride_pk=ride.pk,
+            )
+
     else:
-        form = RideDriverAssignmentForm(
-            initial={
-                "ride": ride,
-                "status": RideDriverAssignment.Status.ASSIGNED,
-            }
-        )
-    form.fields["ride"].queryset = Ride.objects.filter(
-        pk=ride.pk
-    )
+        form = RideDriverAssignmentForm()
+
     context = {
+        "page_title": f"Assign Driver - {ride.ride_number}",
         "form": form,
         "ride": ride,
-        "page_title": "Assign Driver",
-        "is_edit": False,
+        "assignment": None,
     }
+
     return render(
         request,
         "rides/assignment_form.html",
         context,
     )
+
+
 @login_required
 def ride_assignment_edit(request, pk):
     assignment = get_object_or_404(
-        RideDriverAssignment.objects
-        .select_related(
+        RideDriverAssignment.objects.select_related(
             "ride",
+            "ride__passenger",
+            "ride__vehicle",
             "driver",
-            "driver__user",
         ),
         pk=pk,
     )
-    ride = assignment.ride
-    if ride.status in [
-        Ride.Status.COMPLETED,
-        Ride.Status.CANCELLED,
-    ]:
-        messages.warning(
-            request,
-            "Assignment cannot be changed for a completed or cancelled ride.",
-        )
-        return redirect(
-            "ride_details",
-            pk=ride.pk,
-        )
+
     if request.method == "POST":
         form = RideDriverAssignmentForm(
             request.POST,
             instance=assignment,
         )
+
         if form.is_valid():
-            new_assignment = form.save(
-                commit=False
+            updated_assignment = form.save()
+
+            messages.success(
+                request,
+                "Driver assignment updated successfully.",
             )
-            new_assignment.ride = ride
-            duplicate = (
-                RideDriverAssignment.objects
-                .filter(
-                    ride=ride,
-                    driver=new_assignment.driver,
-                    status__in=[
-                        RideDriverAssignment.Status.ASSIGNED,
-                        RideDriverAssignment.Status.ACCEPTED,
-                    ],
-                )
-                .exclude(
-                    pk=assignment.pk
-                )
-                .exists()
+
+            return redirect(
+                "ride_assignment_list",
+                ride_pk=updated_assignment.ride.pk,
             )
-            if duplicate:
-                form.add_error(
-                    "driver",
-                    "This driver is already actively assigned to this ride.",
-                )
-            else:
-                try:
-                    with transaction.atomic():
-                        assignment = form.save()
-                        if assignment.status in [
-                            RideDriverAssignment.Status.ASSIGNED,
-                            RideDriverAssignment.Status.ACCEPTED,
-                        ]:
-                            ride.driver = assignment.driver
-                            ride.status = Ride.Status.DRIVER_ASSIGNED
-                            ride.save(
-                                update_fields=[
-                                    "driver",
-                                    "status",
-                                    "updated_at",
-                                ]
-                            )
-                    messages.success(
-                        request,
-                        "Driver assignment updated successfully.",
-                    )
-                    return redirect(
-                        "ride_details",
-                        pk=ride.pk,
-                    )
-                except Exception:
-                    messages.error(
-                        request,
-                        "Unable to update driver assignment.",
-                    )
+
     else:
         form = RideDriverAssignmentForm(
             instance=assignment
         )
-    form.fields["ride"].queryset = Ride.objects.filter(
-        pk=ride.pk
-    )
+
     context = {
+        "page_title": f"Edit Assignment - {assignment.ride.ride_number}",
         "form": form,
+        "ride": assignment.ride,
         "assignment": assignment,
-        "ride": ride,
-        "page_title": "Edit Driver Assignment",
-        "is_edit": True,
     }
+
     return render(
         request,
         "rides/assignment_form.html",
         context,
     )
+
+
 @login_required
 def ride_assignment_delete(request, pk):
     assignment = get_object_or_404(
-        RideDriverAssignment.objects
-        .select_related(
-            "ride",
-            "driver",
-        ),
+        RideDriverAssignment.objects.select_related("ride"),
         pk=pk,
     )
-    ride = assignment.ride
-    if request.method != "POST":
-        return redirect(
-            "ride_details",
-            pk=ride.pk,
-        )
-    if ride.status in [
-        Ride.Status.COMPLETED,
-        Ride.Status.CANCELLED,
-    ]:
-        messages.warning(
-            request,
-            "Assignment cannot be removed from a completed or cancelled ride.",
-        )
-        return redirect(
-            "ride_details",
-            pk=ride.pk,
-        )
-    try:
-        with transaction.atomic():
-            was_current_driver = (
-                ride.driver_id == assignment.driver_id
-            )
-            assignment.delete()
-            if was_current_driver:
-                next_assignment = (
-                    ride.driver_assignments
-                    .filter(
-                        status__in=[
-                            RideDriverAssignment.Status.ASSIGNED,
-                            RideDriverAssignment.Status.ACCEPTED,
-                        ]
-                    )
-                    .select_related(
-                        "driver"
-                    )
-                    .order_by(
-                        "-assigned_at"
-                    )
-                    .first()
-                )
-                if next_assignment:
-                    ride.driver = next_assignment.driver
-                    ride.save(
-                        update_fields=[
-                            "driver",
-                            "updated_at",
-                        ]
-                    )
+
+    ride_pk = assignment.ride.pk
+
+    if request.method == "POST":
+        assignment.delete()
+
         messages.success(
             request,
-            "Driver assignment removed successfully.",
+            "Driver assignment deleted successfully.",
         )
-    except ProtectedError:
-        messages.error(
-            request,
-            "This driver assignment cannot be deleted.",
-        )
-    return redirect(
-        "ride_details",
-        pk=ride.pk,
-    )
-@login_required
-def ride_tracking_create(request, ride_pk):
-    ride = get_object_or_404(
-        Ride.objects
-        .select_related(
-            "driver",
-            "driver__user",
-        ),
-        pk=ride_pk,
-    )
-    if ride.status in [
-        Ride.Status.COMPLETED,
-        Ride.Status.CANCELLED,
-    ]:
-        messages.warning(
-            request,
-            "Tracking cannot be added to a completed or cancelled ride.",
-        )
+
         return redirect(
-            "ride_details",
-            pk=ride.pk,
+            "ride_assignment_list",
+            ride_pk=ride_pk,
         )
-    if not ride.driver_id:
-        messages.warning(
-            request,
-            "Tracking cannot be added because this ride has no driver assigned.",
-        )
-        return redirect(
-            "ride_details",
-            pk=ride.pk,
-        )
-    if request.method == "POST":
-        form = RideTrackingForm(
-            request.POST
-        )
-        if form.is_valid():
-            tracking = form.save(
-                commit=False
-            )
-            tracking.ride = ride
-            if tracking.driver_id != ride.driver_id:
-                form.add_error(
-                    "driver",
-                    "Tracking driver must match the ride driver.",
-                )
-            else:
-                try:
-                    tracking.save()
-                    messages.success(
-                        request,
-                        "Ride tracking location added successfully.",
-                    )
-                    return redirect(
-                        "ride_details",
-                        pk=ride.pk,
-                    )
-                except Exception:
-                    messages.error(
-                        request,
-                        "Unable to save tracking information.",
-                    )
-    else:
-        form = RideTrackingForm(
-            initial={
-                "ride": ride,
-                "driver": ride.driver,
-            }
-        )
-    form.fields["ride"].queryset = Ride.objects.filter(
-        pk=ride.pk
-    )
-    form.fields["driver"].queryset = form.fields[
-        "driver"
-    ].queryset.filter(
-        pk=ride.driver_id
-    )
-    latest_tracking = (
-        ride.tracking_points
-        .order_by(
-            "-recorded_at"
-        )
-        .first()
-    )
-    context = {
-        "form": form,
-        "ride": ride,
-        "latest_tracking": latest_tracking,
-        "page_title": "Add Ride Tracking",
-        "submit_text": "Save Tracking Point",
-    }
-    return render(
-        request,
-        "rides/tracking_form.html",
-        context,
-    )
+
+
 @login_required
 def ride_tracking_list(request, ride_pk):
     ride = get_object_or_404(
-        Ride.objects
-        .select_related(
-            "passenger",
-            "driver",
-            "driver__user",
-            "vehicle",
-            "vehicle__vehicle_type",
-            "pickup_location",
-            "drop_location",
-        ),
+        _ride_queryset(),
         pk=ride_pk,
     )
-    tracking_points = (
+
+    queryset = (
         ride.tracking_points
-        .select_related(
-            "driver",
-        )
-        .order_by(
-            "-recorded_at"
-        )
+        .select_related("driver")
+        .order_by("-recorded_at")
     )
-    latest_tracking = tracking_points.first()
+
     page_obj = _paginate(
-        tracking_points,
         request,
-        per_page=20,
+        queryset,
+        default_per_page=20,
     )
+
     context = {
+        "page_title": f"Tracking - {ride.ride_number}",
         "ride": ride,
-        "tracking_points": page_obj.object_list,
+        "tracking_points": page_obj,
         "page_obj": page_obj,
-        "latest_tracking": latest_tracking,
+        "is_paginated": page_obj.has_other_pages(),
+        "latest_tracking": queryset.first(),
+        "tracking_count": queryset.count(),
     }
+
     return render(
         request,
         "rides/ride_tracking_list.html",
         context,
     )
+
+
 @login_required
-def ride_tracking_delete(request, pk):
-    tracking = get_object_or_404(
-        RideTracking.objects.select_related(
-            "ride",
-            "driver",
-        ),
-        pk=pk,
+def ride_tracking_create(request, ride_pk):
+    ride = get_object_or_404(
+        _ride_queryset(),
+        pk=ride_pk,
     )
-    ride = tracking.ride
+
     if request.method == "POST":
-        if ride.status in [
-            Ride.Status.COMPLETED,
-            Ride.Status.CANCELLED,
-        ]:
-            messages.warning(
-                request,
-                "Tracking points cannot be deleted from a completed or cancelled ride.",
+        form = RideTrackingForm(
+            request.POST
+        )
+
+        if form.is_valid():
+            tracking = form.save(
+                commit=False
             )
+
+            tracking.ride = ride
+
+            if not tracking.driver_id and ride.driver_id:
+                tracking.driver_id = ride.driver_id
+
+            tracking.save()
+
+            messages.success(
+                request,
+                "Ride tracking point added successfully.",
+            )
+
             return redirect(
                 "ride_tracking_list",
                 ride_pk=ride.pk,
             )
-        try:
-            tracking.delete()
-            messages.success(
-                request,
-                "Tracking point deleted successfully.",
-            )
-        except ProtectedError:
-            messages.error(
-                request,
-                "This tracking point cannot be deleted.",
-            )
-        return redirect(
-            "ride_tracking_list",
-            ride_pk=ride.pk,
+
+    else:
+        initial = {}
+
+        if ride.driver_id:
+            initial["driver"] = ride.driver_id
+
+        form = RideTrackingForm(
+            initial=initial
         )
+
     context = {
-        "tracking": tracking,
+        "page_title": f"Add Tracking Point - {ride.ride_number}",
+        "form": form,
         "ride": ride,
+        "tracking": None,
     }
+
     return render(
         request,
-        "rides/ride_tracking_delete.html",
+        "rides/ride_tracking_form.html",
         context,
     )
+
+
 @login_required
+def ride_tracking_delete(request, pk):
+    tracking = get_object_or_404(
+        RideTracking.objects.select_related("ride"),
+        pk=pk,
+    )
+
+    ride_pk = tracking.ride.pk
+
+    if request.method == "POST":
+        tracking.delete()
+
+        messages.success(
+            request,
+            "Tracking point deleted successfully.",
+        )
+
+        return redirect(
+            "ride_tracking_list",
+            ride_pk=ride_pk,
+        )
+
+
+@login_required
+@transaction.atomic
 def ride_cancellation_create(request, ride_pk):
     ride = get_object_or_404(
-        Ride.objects.select_related(
-            "ride_request",
-            "passenger",
-            "driver",
-        ),
+        _ride_queryset(),
         pk=ride_pk,
     )
-    if ride.status == Ride.Status.COMPLETED:
-        messages.warning(
-            request,
-            "A completed ride cannot be cancelled.",
-        )
-        return redirect(
-            "ride_details",
-            pk=ride.pk,
-        )
-    if ride.status == Ride.Status.CANCELLED:
+
+    existing_cancellation = (
+        RideCancellation.objects
+        .filter(ride=ride)
+        .first()
+    )
+
+    if existing_cancellation:
         messages.info(
             request,
-            "This ride is already cancelled.",
+            "This ride has already been cancelled.",
         )
+
         return redirect(
             "ride_details",
             pk=ride.pk,
         )
-    if hasattr(ride, "cancellation"):
-        messages.info(
-            request,
-            "Cancellation record already exists for this ride.",
-        )
-        return redirect(
-            "ride_details",
-            pk=ride.pk,
-        )
+
     if request.method == "POST":
         form = RideCancellationForm(
             request.POST
         )
+
         if form.is_valid():
             cancellation = form.save(
                 commit=False
             )
+
             cancellation.ride = ride
-            cancellation.cancelled_by = request.user
-            reason = cancellation.reason
-            if reason.charge_applicable:
-                cancellation.cancellation_charge = reason.charge_amount
-            else:
-                cancellation.cancellation_charge = 0
-            try:
-                with transaction.atomic():
-                    cancellation.save()
-                    ride.status = Ride.Status.CANCELLED
-                    ride.save(
-                        update_fields=[
-                            "status",
-                            "updated_at",
-                        ]
-                    )
-                    if ride.ride_request:
-                        ride_request = ride.ride_request
-                        if ride_request.status not in [
-                            RideRequest.Status.COMPLETED,
-                            RideRequest.Status.CANCELLED,
-                        ]:
-                            ride_request.status = RideRequest.Status.CANCELLED
-                            ride_request.save(
-                                update_fields=[
-                                    "status",
-                                    "updated_at",
-                                ]
-                            )
-                messages.success(
-                    request,
-                    f"Ride {ride.ride_number} cancelled successfully.",
-                )
-                return redirect(
-                    "ride_details",
-                    pk=ride.pk,
-                )
-            except ProtectedError:
-                messages.error(
-                    request,
-                    "Cancellation could not be saved because a related record is protected.",
-                )
-            except Exception:
-                messages.error(
-                    request,
-                    "Unable to cancel this ride. Please try again.",
-                )
-    else:
-        form = RideCancellationForm(
-            initial={
-                "ride": ride,
-                "cancelled_by": request.user,
-                "cancellation_charge": 0,
-            }
-        )
-    form.fields["ride"].queryset = Ride.objects.filter(
-        pk=ride.pk
-    )
-    if "cancelled_by" in form.fields:
-        form.fields["cancelled_by"].queryset = (
-            form.fields["cancelled_by"].queryset.filter(
-                pk=request.user.pk
+
+            if not cancellation.cancelled_by_id:
+                cancellation.cancelled_by = request.user
+
+            cancellation.save()
+
+            ride.status = Ride.Status.CANCELLED
+
+            ride.save(
+                update_fields=[
+                    "status",
+                    "updated_at",
+                ]
             )
+
+            _sync_request_status_from_ride(
+                ride
+            )
+
+            messages.success(
+                request,
+                f"Ride {ride.ride_number} has been cancelled.",
+            )
+
+            return redirect(
+                "ride_details",
+                pk=ride.pk,
+            )
+
+    else:
+        initial = {
+            "cancelled_by": request.user.pk,
+        }
+
+        form = RideCancellationForm(
+            initial=initial
         )
+
     context = {
+        "page_title": f"Cancel Ride - {ride.ride_number}",
         "form": form,
         "ride": ride,
-        "page_title": "Cancel Ride",
     }
+
     return render(
         request,
-        "rides/cancellation_form.html",
+        "rides/ride_cancellation_form.html",
         context,
     )
+
+
 @login_required
 def ride_rating_create(request, ride_pk):
     ride = get_object_or_404(
-        Ride.objects.select_related(
-            "passenger",
-            "driver",
-            "driver__user",
-        ),
+        _ride_queryset(),
         pk=ride_pk,
     )
-    if ride.status != Ride.Status.COMPLETED:
-        messages.warning(
-            request,
-            "A rating can only be added after ride completion.",
-        )
-        return redirect(
-            "ride_details",
-            pk=ride.pk,
-        )
-    participant_ids = {
-        ride.passenger_id,
-        ride.driver.user_id,
-    }
+
     if request.method == "POST":
         form = RideRatingForm(
             request.POST
         )
+
         if form.is_valid():
             rating = form.save(
                 commit=False
             )
+
             rating.ride = ride
-            if rating.from_user_id not in participant_ids:
-                form.add_error(
-                    "from_user",
-                    "Only the passenger or driver of this ride can give a rating.",
-                )
-            if rating.to_user_id not in participant_ids:
-                form.add_error(
-                    "to_user",
-                    "Rating can only be given to the passenger or driver of this ride.",
-                )
-            if (
-                rating.from_user_id
-                and rating.to_user_id
-                and rating.from_user_id == rating.to_user_id
-            ):
-                form.add_error(
-                    "to_user",
-                    "A user cannot rate themselves.",
-                )
-            if (
-                rating.from_user_id
-                and rating.to_user_id
-                and rating.from_user_id in participant_ids
-                and rating.to_user_id in participant_ids
-            ):
-                duplicate = RideRating.objects.filter(
-                    ride=ride,
-                    from_user_id=rating.from_user_id,
-                    to_user_id=rating.to_user_id,
-                ).exists()
-                if duplicate:
-                    form.add_error(
-                        "rating",
-                        "You have already submitted this rating.",
-                    )
-            if not form.errors:
+
+            if not rating.from_user_id:
+                rating.from_user = request.user
+
+            if not rating.to_user_id and ride.driver_id:
                 try:
-                    rating.save()
-                    messages.success(
-                        request,
-                        "Ride rating submitted successfully.",
-                    )
-                    return redirect(
-                        "ride_details",
-                        pk=ride.pk,
-                    )
-                except Exception:
-                    messages.error(
-                        request,
-                        "Unable to save the rating. Please try again.",
-                    )
+                    rating.to_user = ride.driver.user
+                except AttributeError:
+                    pass
+
+            rating.save()
+
+            messages.success(
+                request,
+                "Ride rating has been added successfully.",
+            )
+
+            return redirect(
+                "ride_details",
+                pk=ride.pk,
+            )
+
     else:
+        initial = {
+            "from_user": request.user.pk,
+        }
+
+        if ride.driver_id:
+            try:
+                initial["to_user"] = ride.driver.user.pk
+            except AttributeError:
+                pass
+
         form = RideRatingForm(
-            initial={
-                "ride": ride,
-                "from_user": request.user,
-            }
+            initial=initial
         )
-    form.fields["ride"].queryset = Ride.objects.filter(
-        pk=ride.pk
-    )
-    form.fields["from_user"].queryset = (
-        form.fields["from_user"].queryset.filter(
-            pk__in=participant_ids
-        )
-    )
-    form.fields["to_user"].queryset = (
-        form.fields["to_user"].queryset.filter(
-            pk__in=participant_ids
-        )
-    )
+
     context = {
+        "page_title": f"Rate Ride - {ride.ride_number}",
         "form": form,
         "ride": ride,
-        "page_title": "Add Ride Rating",
-        "submit_text": "Submit Rating",
     }
+
     return render(
         request,
-        "rides/rating_form.html",
+        "rides/ride_rating_form.html",
         context,
     )
+
+
 @login_required
 def ride_stop_list(request, ride_pk):
     ride = get_object_or_404(
-        Ride.objects
-        .select_related(
-            "passenger",
-            "driver",
-            "driver__user",
-            "vehicle",
-            "vehicle__vehicle_type",
-            "pickup_location",
-            "drop_location",
-        ),
+        _ride_queryset(),
         pk=ride_pk,
     )
+
     stops = (
         ride.stops
-        .select_related(
-            "location",
-        )
-        .order_by(
-            "stop_order"
-        )
+        .select_related("location")
+        .order_by("stop_order")
     )
+
+    context = {
+        "page_title": f"Ride Stops - {ride.ride_number}",
+        "ride": ride,
+        "stops": stops,
+        "total_stops": stops.count(),
+    }
+
     return render(
         request,
         "rides/ride_stop_list.html",
-        {
-            "ride": ride,
-            "stops": stops,
-        },
+        context,
     )
+
+
 @login_required
 def ride_stop_create(request, ride_pk):
     ride = get_object_or_404(
-        Ride,
+        _ride_queryset(),
         pk=ride_pk,
     )
-    if ride.status in [
-        Ride.Status.COMPLETED,
-        Ride.Status.CANCELLED,
-    ]:
-        messages.warning(
-            request,
-            "Stops cannot be added to a completed or cancelled ride.",
-        )
-        return redirect(
-            "ride_details",
-            pk=ride.pk,
-        )
+
     if request.method == "POST":
         form = RideStopForm(
             request.POST
         )
+
         if form.is_valid():
             stop = form.save(
                 commit=False
             )
+
             stop.ride = ride
             stop.save()
+
             messages.success(
                 request,
                 "Ride stop added successfully.",
             )
+
             return redirect(
                 "ride_stop_list",
                 ride_pk=ride.pk,
             )
+
     else:
+        next_order = ride.stops.count() + 1
+
         form = RideStopForm(
             initial={
-                "ride": ride,
-                "stop_order": ride.stops.count() + 1,
+                "stop_order": next_order
             }
         )
-    form.fields["ride"].queryset = Ride.objects.filter(
-        pk=ride.pk
-    )
+
     context = {
+        "page_title": f"Add Stop - {ride.ride_number}",
         "form": form,
         "ride": ride,
-        "page_title": "Add Ride Stop",
-        "submit_text": "Add Stop",
-        "is_edit": False,
+        "stop": None,
     }
+
     return render(
         request,
         "rides/ride_stop_form.html",
         context,
     )
+
+
 @login_required
 def ride_stop_edit(request, pk):
     stop = get_object_or_404(
-        RideStop.objects
-        .select_related(
+        RideStop.objects.select_related(
             "ride",
+            "ride__passenger",
             "location",
         ),
         pk=pk,
     )
-    ride = stop.ride
-    if ride.status in [
-        Ride.Status.COMPLETED,
-        Ride.Status.CANCELLED,
-    ]:
-        messages.warning(
-            request,
-            "Stops cannot be changed for a completed or cancelled ride.",
-        )
-        return redirect(
-            "ride_stop_list",
-            ride_pk=ride.pk,
-        )
+
     if request.method == "POST":
         form = RideStopForm(
             request.POST,
             instance=stop,
         )
+
         if form.is_valid():
-            form.save()
+            updated_stop = form.save()
+
             messages.success(
                 request,
                 "Ride stop updated successfully.",
             )
+
             return redirect(
                 "ride_stop_list",
-                ride_pk=ride.pk,
+                ride_pk=updated_stop.ride.pk,
             )
+
     else:
         form = RideStopForm(
             instance=stop
         )
-    form.fields["ride"].queryset = Ride.objects.filter(
-        pk=ride.pk
-    )
+
     context = {
+        "page_title": f"Edit Stop - {stop.ride.ride_number}",
         "form": form,
-        "ride": ride,
+        "ride": stop.ride,
         "stop": stop,
-        "page_title": "Edit Ride Stop",
-        "submit_text": "Update Stop",
-        "is_edit": True,
     }
+
     return render(
         request,
         "rides/ride_stop_form.html",
         context,
     )
+
+
 @login_required
 def ride_stop_delete(request, pk):
     stop = get_object_or_404(
-        RideStop.objects
-        .select_related(
-            "ride",
-            "location",
-        ),
+        RideStop.objects.select_related("ride"),
         pk=pk,
     )
+
     ride_pk = stop.ride.pk
-    if request.method != "POST":
-        return redirect(
-            "ride_stop_list",
-            ride_pk=ride_pk,
-        )
-    if stop.ride.status in [
-        Ride.Status.COMPLETED,
-        Ride.Status.CANCELLED,
-    ]:
-        messages.warning(
-            request,
-            "Stops cannot be deleted from a completed or cancelled ride.",
-        )
-        return redirect(
-            "ride_stop_list",
-            ride_pk=ride_pk,
-        )
-    try:
+
+    if request.method == "POST":
         stop.delete()
+
         messages.success(
             request,
             "Ride stop deleted successfully.",
         )
-    except ProtectedError:
-        messages.error(
-            request,
-            "This ride stop cannot be deleted.",
+
+        return redirect(
+            "ride_stop_list",
+            ride_pk=ride_pk,
         )
-    return redirect(
-        "ride_stop_list",
-        ride_pk=ride_pk,
+
+
+@login_required
+def ride_dashboard(request):
+    total_requests = RideRequest.objects.count()
+
+    requested_requests = RideRequest.objects.filter(
+        status=RideRequest.Status.REQUESTED
+    ).count()
+
+    searching_requests = RideRequest.objects.filter(
+        status=RideRequest.Status.SEARCHING
+    ).count()
+
+    assigned_requests = RideRequest.objects.filter(
+        status=RideRequest.Status.ASSIGNED
+    ).count()
+
+    accepted_requests = RideRequest.objects.filter(
+        status=RideRequest.Status.ACCEPTED
+    ).count()
+
+    cancelled_requests = RideRequest.objects.filter(
+        status=RideRequest.Status.CANCELLED
+    ).count()
+
+    expired_requests = RideRequest.objects.filter(
+        status=RideRequest.Status.EXPIRED
+    ).count()
+
+    completed_requests = RideRequest.objects.filter(
+        status=RideRequest.Status.COMPLETED
+    ).count()
+
+    total_rides = Ride.objects.count()
+
+    driver_assigned_rides = Ride.objects.filter(
+        status=Ride.Status.DRIVER_ASSIGNED
+    ).count()
+
+    driver_arriving_rides = Ride.objects.filter(
+        status=Ride.Status.DRIVER_ARRIVING
+    ).count()
+
+    driver_arrived_rides = Ride.objects.filter(
+        status=Ride.Status.DRIVER_ARRIVED
+    ).count()
+
+    started_rides = Ride.objects.filter(
+        status=Ride.Status.STARTED
+    ).count()
+
+    active_rides = Ride.objects.filter(
+        status__in=RIDE_ACTIVE_STATUSES
+    ).count()
+
+    completed_rides = Ride.objects.filter(
+        status=Ride.Status.COMPLETED
+    ).count()
+
+    cancelled_rides = Ride.objects.filter(
+        status=Ride.Status.CANCELLED
+    ).count()
+
+    recent_rides = _ride_queryset()[:10]
+    recent_requests = _ride_request_queryset()[:10]
+
+    context = {
+        "page_title": "Ride Dashboard",
+        "total_requests": total_requests,
+        "requested_requests": requested_requests,
+        "searching_requests": searching_requests,
+        "assigned_requests": assigned_requests,
+        "accepted_requests": accepted_requests,
+        "cancelled_requests": cancelled_requests,
+        "expired_requests": expired_requests,
+        "completed_requests": completed_requests,
+        "total_rides": total_rides,
+        "active_rides": active_rides,
+        "driver_assigned_rides": driver_assigned_rides,
+        "driver_arriving_rides": driver_arriving_rides,
+        "driver_arrived_rides": driver_arrived_rides,
+        "started_rides": started_rides,
+        "completed_rides": completed_rides,
+        "cancelled_rides": cancelled_rides,
+        "recent_rides": recent_rides,
+        "recent_requests": recent_requests,
+    }
+
+    return render(
+        request,
+        "rides/ride_dashboard.html",
+        context,
     )

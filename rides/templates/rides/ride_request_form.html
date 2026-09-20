@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+{% block title %}NandiRide | {{ page_title|default:"Ride Request" }}{% endblock %}
+{% block content %}
+
+<div class="container-fluid py-3">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-clipboard-list fa-2x"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-1">{{ page_title|default:"Ride Request" }}</h3>
+                    <p class="text-muted mb-0">
+                        {% if object %}
+                            Update ride request information and request status
+                        {% else %}
+                            Create a new passenger ride request
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-3 mt-md-0">
+            <div class="d-flex justify-content-md-end align-items-center gap-2">
+                <span class="badge bg-primary px-3 py-2">
+                    <i class="fas fa-clipboard-list me-1"></i>
+                    {% if object %}Edit Request{% else %}New Request{% endif %}
+                </span>
+                <a href="{% url 'ride_request_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-list me-1"></i> Requests
+                </a>
+            </div>
+        </div>
+    </div>
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fas fa-triangle-exclamation me-2"></i>
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="card card-outline card-primary shadow-sm mb-3">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title fw-semibold mb-1">
+                                    <i class="fas fa-circle-info me-2"></i>Request Information
+                                </h5>
+                                <div class="small text-muted">
+                                    Basic passenger and ride request details
+                                </div>
+                            </div>
+                            <span class="badge bg-primary">
+                                <i class="fas fa-user me-1"></i>Passenger Request
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.request_number.id_for_label }}" class="form-label fw-semibold">Request Number</label>
+                                {{ form.request_number }}
+                                {% if form.request_number.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.request_number.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Unique identifier for this ride request.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.passenger.id_for_label }}" class="form-label fw-semibold">Passenger</label>
+                                {{ form.passenger }}
+                                {% if form.passenger.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.passenger.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.pickup_location.id_for_label }}" class="form-label fw-semibold">Pickup Location</label>
+                                {{ form.pickup_location }}
+                                {% if form.pickup_location.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.pickup_location.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.drop_location.id_for_label }}" class="form-label fw-semibold">Drop Location</label>
+                                {{ form.drop_location }}
+                                {% if form.drop_location.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.drop_location.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.vehicle_type.id_for_label }}" class="form-label fw-semibold">Vehicle Type</label>
+                                {{ form.vehicle_type }}
+                                {% if form.vehicle_type.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.vehicle_type.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">Status</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.status.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-outline card-info shadow-sm mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title fw-semibold mb-1">
+                            <i class="fas fa-calendar-days me-2"></i>Schedule
+                        </h5>
+                        <div class="small text-muted">Optional scheduling information</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.scheduled_at.id_for_label }}" class="form-label fw-semibold">Scheduled At</label>
+                                {{ form.scheduled_at }}
+                                {% if form.scheduled_at.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.scheduled_at.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Leave empty for an immediate ride request.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-outline card-success shadow-sm mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title fw-semibold mb-1">
+                            <i class="fas fa-calculator me-2"></i>Estimated Trip Details
+                        </h5>
+                        <div class="small text-muted">Estimated distance, duration and fare</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="{{ form.estimated_distance.id_for_label }}" class="form-label fw-semibold">Estimated Distance</label>
+                                <div class="input-group">
+                                    {{ form.estimated_distance }}
+                                    <span class="input-group-text bg-body-tertiary">km</span>
+                                </div>
+                                {% if form.estimated_distance.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.estimated_distance.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.estimated_duration.id_for_label }}" class="form-label fw-semibold">Estimated Duration</label>
+                                <div class="input-group">
+                                    {{ form.estimated_duration }}
+                                    <span class="input-group-text bg-body-tertiary">min</span>
+                                </div>
+                                {% if form.estimated_duration.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.estimated_duration.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.estimated_fare.id_for_label }}" class="form-label fw-semibold">Estimated Fare</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-body-tertiary">₹</span>
+                                    {{ form.estimated_fare }}
+                                </div>
+                                {% if form.estimated_fare.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.estimated_fare.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if object %}
+                    <div class="card card-outline card-secondary shadow-sm">
+                        <div class="card-header">
+                            <h5 class="card-title fw-semibold mb-0">
+                                <i class="fas fa-clock-rotate-left me-2"></i>Request Timeline
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="bg-body-tertiary rounded-3 p-3">
+                                        <div class="small text-muted">Requested At</div>
+                                        <div class="fw-semibold mt-1">
+                                            {{ object.requested_at|date:"d M Y, h:i A" }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="bg-body-tertiary rounded-3 p-3">
+                                        <div class="small text-muted">Scheduled At</div>
+                                        <div class="fw-semibold mt-1">
+                                            {% if object.scheduled_at %}
+                                                {{ object.scheduled_at|date:"d M Y, h:i A" }}
+                                            {% else %}
+                                                Not scheduled
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-xl-4">
+                <div class="card card-outline card-primary shadow-sm mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title fw-semibold mb-1">
+                            <i class="fas fa-bolt me-2"></i>Request Actions
+                        </h5>
+                        <div class="small text-muted">Save or cancel this request</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check-circle me-1"></i>
+                                {% if object %}Update Request{% else %}Create Request{% endif %}
+                            </button>
+                            <a href="{% url 'ride_request_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Requests
+                            </a>
+                            {% if object %}
+                                <a href="{% url 'ride_request_details' object.pk %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-eye me-1"></i>View Request
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-outline card-warning shadow-sm mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title fw-semibold mb-1">
+                            <i class="fas fa-route me-2"></i>Request Lifecycle
+                        </h5>
+                        <div class="small text-muted">Available request statuses</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item bg-transparent text-body px-0">
+                                <i class="fas fa-circle me-2"></i>Requested
+                            </div>
+                            <div class="list-group-item bg-transparent text-body px-0">
+                                <i class="fas fa-magnifying-glass me-2"></i>Searching Driver
+                            </div>
+                            <div class="list-group-item bg-transparent text-body px-0">
+                                <i class="fas fa-user-check me-2"></i>Driver Assigned
+                            </div>
+                            <div class="list-group-item bg-transparent text-body px-0">
+                                <i class="fas fa-check-double me-2"></i>Accepted
+                            </div>
+                            <div class="list-group-item bg-transparent text-body px-0">
+                                <i class="fas fa-circle-xmark me-2"></i>Cancelled
+                            </div>
+                            <div class="list-group-item bg-transparent text-body px-0">
+                                <i class="fas fa-hourglass-end me-2"></i>Expired
+                            </div>
+                            <div class="list-group-item bg-transparent text-body px-0">
+                                <i class="fas fa-circle-check me-2"></i>Completed
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-outline card-info shadow-sm mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title fw-semibold mb-0">
+                            <i class="fas fa-circle-info me-2"></i>Request Guide
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="fas fa-user me-3 mt-1"></i>
+                            <div>
+                                <div class="fw-semibold">Passenger</div>
+                                <div class="small text-muted">Select the user who requested the ride.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="fas fa-location-dot me-3 mt-1"></i>
+                            <div>
+                                <div class="fw-semibold">Journey</div>
+                                <div class="small text-muted">Set pickup and destination locations.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-car me-3 mt-1"></i>
+                            <div>
+                                <div class="fw-semibold">Vehicle Type</div>
+                                <div class="small text-muted">Choose the requested vehicle category.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if object and object.ride %}
+                    <div class="card card-outline card-success shadow-sm">
+                        <div class="card-header">
+                            <h5 class="card-title fw-semibold mb-0">
+                                <i class="fas fa-car-side me-2"></i>Linked Ride
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="small text-muted">Ride Number</div>
+                            <div class="fw-semibold mb-3">{{ object.ride.ride_number }}</div>
+                            <a href="{% url 'ride_details' object.ride.pk %}" class="btn btn-outline-success btn-sm w-100">
+                                <i class="fas fa-eye me-1"></i>View Linked Ride
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

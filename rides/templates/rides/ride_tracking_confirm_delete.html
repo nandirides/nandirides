@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+{% block title %}NandiRide | Delete Tracking Point{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="row align-items-center mb-3">
+        <div class="col-xl-8 col-lg-7">
+            <div class="d-flex align-items-center gap-3">
+                <div>
+                    <h3 class="mb-1 fw-semibold">
+                        <i class="fas fa-location-dot me-2"></i>Delete Tracking Point
+                    </h3>
+                    <div class="text-body-secondary">
+                        Confirm removal of this GPS tracking record
+                    </div>
+                </div>
+                <span class="badge text-bg-danger">
+                    <i class="fas fa-trash-can me-1"></i>Delete
+                </span>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-5 mt-3 mt-lg-0">
+            <div class="d-flex flex-wrap justify-content-lg-end gap-2">
+                <a href="{% url 'ride_tracking_list' ride.pk %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-location-crosshairs me-1"></i>Tracking
+                </a>
+                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-primary">
+                    <i class="fas fa-car-side me-1"></i>Ride Details
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-xl-8">
+            <div class="card card-outline card-danger shadow-sm">
+                <div class="card-header">
+                    <div class="d-flex align-items-center justify-content-between gap-2">
+                        <div>
+                            <h5 class="mb-1 fw-semibold">
+                                <i class="fas fa-triangle-exclamation me-2"></i>Confirm Tracking Deletion
+                            </h5>
+                            <div class="small text-body-secondary">
+                                Review the GPS record before permanently deleting it.
+                            </div>
+                        </div>
+                        <span class="badge text-bg-danger">
+                            Permanent Action
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning d-flex align-items-start gap-3 shadow-sm" role="alert">
+                        <i class="fas fa-triangle-exclamation fs-4 mt-1"></i>
+                        <div>
+                            <div class="fw-semibold">
+                                Are you sure you want to delete this tracking point?
+                            </div>
+                            <div class="small mt-1">
+                                This GPS record will be permanently removed from the ride tracking history.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-box shadow-sm h-100 mb-0">
+                                <span class="info-box-icon bg-primary">
+                                    <i class="fas fa-car-side"></i>
+                                </span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Ride Number</span>
+                                    <a href="{% url 'ride_details' ride.pk %}" class="info-box-number text-decoration-none">
+                                        {{ ride.ride_number }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-box shadow-sm h-100 mb-0">
+                                <span class="info-box-icon bg-success">
+                                    <i class="fas fa-user-tie"></i>
+                                </span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Driver</span>
+                                    <span class="info-box-number text-wrap">
+                                        {{ object.driver }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card bg-body-tertiary border mt-3 mb-0">
+                        <div class="card-header border-bottom">
+                            <h6 class="mb-0 fw-semibold">
+                                <i class="fas fa-map-location-dot me-2"></i>GPS Coordinates
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-body">
+                                        <div class="small text-body-secondary">
+                                            <i class="fas fa-compass me-1"></i>Latitude
+                                        </div>
+                                        <div class="font-monospace fw-semibold mt-1">
+                                            {{ object.latitude }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-body">
+                                        <div class="small text-body-secondary">
+                                            <i class="fas fa-compass me-1"></i>Longitude
+                                        </div>
+                                        <div class="font-monospace fw-semibold mt-1">
+                                            {{ object.longitude }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card bg-body-tertiary border mt-3 mb-0">
+                        <div class="card-header border-bottom">
+                            <h6 class="mb-0 fw-semibold">
+                                <i class="fas fa-gauge-high me-2"></i>Tracking Details
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="border rounded-3 p-3 h-100 bg-body">
+                                        <div class="small text-body-secondary">Speed</div>
+                                        <div class="fw-semibold mt-1">
+                                            {% if object.speed != None %}
+                                                {{ object.speed }} km/h
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border rounded-3 p-3 h-100 bg-body">
+                                        <div class="small text-body-secondary">Heading</div>
+                                        <div class="fw-semibold mt-1">
+                                            {% if object.heading != None %}
+                                                {{ object.heading }}°
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border rounded-3 p-3 h-100 bg-body">
+                                        <div class="small text-body-secondary">Accuracy</div>
+                                        <div class="fw-semibold mt-1">
+                                            {% if object.accuracy != None %}
+                                                {{ object.accuracy }} m
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="border rounded-3 p-3 bg-body">
+                                        <div class="small text-body-secondary">
+                                            <i class="fas fa-clock me-1"></i>Recorded At
+                                        </div>
+                                        <div class="fw-semibold mt-1">
+                                            {% if object.recorded_at %}
+                                                {{ object.recorded_at|date:"d M Y, h:i:s A" }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-top mt-4 pt-4">
+                        <div class="d-flex flex-wrap justify-content-end gap-2">
+                            <a href="{% url 'ride_tracking_list' ride.pk %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancel
+                            </a>
+                            <form method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash-can me-1"></i>Yes, Delete Tracking Point
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-route me-2"></i>Ride Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Ride Number</div>
+                        <div class="fw-semibold mt-1">
+                            <a href="{% url 'ride_details' ride.pk %}" class="text-body text-decoration-none">
+                                {{ ride.ride_number }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Passenger</div>
+                        <div class="fw-semibold mt-1">{{ ride.passenger }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Driver</div>
+                        <div class="fw-semibold mt-1">{{ ride.driver }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Vehicle</div>
+                        <div class="fw-semibold mt-1">{{ ride.vehicle }}</div>
+                    </div>
+                    <div>
+                        <div class="small text-body-secondary">Ride Status</div>
+                        <span class="badge text-bg-secondary mt-1">
+                            {{ ride.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-map-marker-alt me-2"></i>Journey Route
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="small text-body-secondary">Pickup</div>
+                        <div class="fw-semibold mt-1">
+                            {{ ride.pickup_location }}
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 my-2">
+                        <i class="fas fa-arrow-down text-body-secondary"></i>
+                        <div class="border-top flex-grow-1"></div>
+                    </div>
+                    <div>
+                        <div class="small text-body-secondary">Destination</div>
+                        <div class="fw-semibold mt-1">
+                            {{ ride.drop_location }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-shield-halved me-2"></i>Before You Delete
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="text-danger">
+                            <i class="fas fa-database fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Historical GPS Data</div>
+                            <div class="small text-body-secondary mt-1">
+                                This tracking point is part of the historical GPS data associated with the ride.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="text-warning">
+                            <i class="fas fa-triangle-exclamation fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Permanent Action</div>
+                            <div class="small text-body-secondary mt-1">
+                                Deleted tracking records cannot be restored through this page.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="text-success">
+                            <i class="fas fa-shield-check fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Review First</div>
+                            <div class="small text-body-secondary mt-1">
+                                Verify the ride, coordinates and recorded time before confirming deletion.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-outline card-secondary shadow-sm mt-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="fas fa-location-dot fs-4"></i>
+                        <div>
+                            <div class="fw-semibold">Tracking History</div>
+                            <div class="small text-body-secondary mt-1">
+                                Deleting this record removes it from the historical GPS tracking data associated with this ride.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

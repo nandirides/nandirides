@@ -1,4 +1,5 @@
 from django.urls import path
+
 from dashboard import views
 from drivers import views as driver_views
 from locations import views as locations_views
@@ -14,12 +15,17 @@ urlpatterns = [
     # ============================================================
     # DASHBOARD & ACCOUNT
     # ============================================================
+
     path(
         "",
         views.dashboard,
         name="dashboard",
     ),
-    path("groups/", views.group_list, name="group_list"),
+    path(
+        "groups/",
+        views.group_list,
+        name="group_list",
+    ),
     path(
         "account/setting/",
         views.user_setting,
@@ -30,9 +36,56 @@ urlpatterns = [
         views.user_profile,
         name="user_profile",
     ),
+
+    # ============================================================
+    # RIDE DASHBOARD
+    # ============================================================
+
+    path(
+        "rides/dashboard/",
+        rides_views.ride_dashboard,
+        name="ride_dashboard",
+    ),
+
+    # ============================================================
+    # RIDE REQUEST MANAGEMENT
+    # ============================================================
+
+    path(
+        "rides/requests/",
+        rides_views.ride_request_list,
+        name="ride_request_list",
+    ),
+    path(
+        "rides/requests/add/",
+        rides_views.ride_request_create_edit,
+        name="ride_request_add",
+    ),
+    path(
+        "rides/requests/<int:pk>/edit/",
+        rides_views.ride_request_create_edit,
+        name="ride_request_edit",
+    ),
+    path(
+        "rides/requests/<int:pk>/status/",
+        rides_views.ride_request_status_update,
+        name="ride_request_status_update",
+    ),
+    path(
+        "rides/requests/<int:pk>/delete/",
+        rides_views.ride_request_delete,
+        name="ride_request_delete",
+    ),
+    path(
+        "rides/requests/<int:pk>/",
+        rides_views.ride_request_details,
+        name="ride_request_details",
+    ),
+
     # ============================================================
     # RIDE MANAGEMENT
     # ============================================================
+
     path(
         "rides/",
         rides_views.ride_list,
@@ -63,9 +116,11 @@ urlpatterns = [
         rides_views.ride_details,
         name="ride_details",
     ),
+
     # ============================================================
     # RIDE DRIVER ASSIGNMENT
     # ============================================================
+
     path(
         "rides/<int:ride_pk>/assignments/",
         rides_views.ride_assignment_list,
@@ -86,9 +141,11 @@ urlpatterns = [
         rides_views.ride_assignment_delete,
         name="ride_assignment_delete",
     ),
+
     # ============================================================
     # RIDE TRACKING
     # ============================================================
+
     path(
         "rides/<int:ride_pk>/tracking/",
         rides_views.ride_tracking_list,
@@ -104,25 +161,31 @@ urlpatterns = [
         rides_views.ride_tracking_delete,
         name="ride_tracking_delete",
     ),
+
     # ============================================================
     # RIDE CANCELLATION
     # ============================================================
+
     path(
         "rides/<int:ride_pk>/cancel/",
         rides_views.ride_cancellation_create,
         name="ride_cancellation_add",
     ),
+
     # ============================================================
     # RIDE RATING
     # ============================================================
+
     path(
         "rides/<int:ride_pk>/rating/add/",
         rides_views.ride_rating_create,
         name="ride_rating_add",
     ),
+
     # ============================================================
     # RIDE STOPS
     # ============================================================
+
     path(
         "rides/<int:ride_pk>/stops/",
         rides_views.ride_stop_list,
@@ -143,9 +206,11 @@ urlpatterns = [
         rides_views.ride_stop_delete,
         name="ride_stop_delete",
     ),
+
     # ============================================================
     # GALLERY MANAGEMENT
     # ============================================================
+
     path(
         "gallery/",
         views.ride_gallery,
@@ -156,9 +221,11 @@ urlpatterns = [
         views.gallery_delete,
         name="gallery_delete",
     ),
+
     # ============================================================
     # USER MANAGEMENT
     # ============================================================
+
     path(
         "users/",
         views.user_list,
@@ -179,9 +246,11 @@ urlpatterns = [
         views.user_create,
         name="user_update",
     ),
+
     # ============================================================
     # DRIVER MANAGEMENT
     # ============================================================
+
     path(
         "drivers/",
         driver_views.driver_list,
@@ -212,9 +281,11 @@ urlpatterns = [
         driver_views.driver_detail,
         name="driver_detail",
     ),
+
     # ============================================================
     # PAYMENT MANAGEMENT
     # ============================================================
+
     path(
         "payments/",
         payment_views.payment_list,
@@ -235,9 +306,11 @@ urlpatterns = [
         payment_views.refund_form,
         name="refund_edit",
     ),
+
     # ============================================================
     # PRICING MANAGEMENT
     # ============================================================
+
     path(
         "pricing/",
         pricing_views.pricing_dashboard,
@@ -303,9 +376,11 @@ urlpatterns = [
         pricing_views.fare_breakdown_detail,
         name="fare_breakdown_detail",
     ),
+
     # ============================================================
     # PROMOTION MANAGEMENT
     # ============================================================
+
     path(
         "promotions/",
         promotion_views.promotions_dashboard,
@@ -346,9 +421,11 @@ urlpatterns = [
         promotion_views.coupon_usage_detail,
         name="coupon_usage_detail",
     ),
+
     # ============================================================
     # SUPPORT MANAGEMENT
     # ============================================================
+
     path(
         "support/",
         support_views.support_dashboard,
@@ -409,9 +486,11 @@ urlpatterns = [
         support_views.notification_read_all,
         name="notification_read_all",
     ),
+
     # ============================================================
     # VEHICLE MANAGEMENT
     # ============================================================
+
     path(
         "vehicles/",
         vehicle_views.vehicle_dashboard,
@@ -442,9 +521,11 @@ urlpatterns = [
         vehicle_views.vehicle_detail,
         name="vehicle_detail",
     ),
+
     # ============================================================
     # VEHICLE TYPES
     # ============================================================
+
     path(
         "vehicles/types/",
         vehicle_views.vehicle_type_list,
@@ -465,9 +546,11 @@ urlpatterns = [
         vehicle_views.vehicle_type_delete,
         name="vehicle_type_delete",
     ),
+
     # ============================================================
     # DRIVER ASSIGNMENTS
     # ============================================================
+
     path(
         "vehicles/assignments/",
         vehicle_views.assignment_list,
@@ -488,9 +571,11 @@ urlpatterns = [
         vehicle_views.assignment_end,
         name="assignment_end",
     ),
+
     # ============================================================
     # VEHICLE DOCUMENTS
     # ============================================================
+
     path(
         "vehicles/documents/",
         vehicle_views.document_list,
@@ -511,9 +596,11 @@ urlpatterns = [
         vehicle_views.document_delete,
         name="document_delete",
     ),
+
     # ============================================================
     # LOCATION MANAGEMENT
     # ============================================================
+
     path(
         "locations/",
         locations_views.location_dashboard,

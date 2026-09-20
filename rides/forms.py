@@ -1,5 +1,6 @@
 from django import forms
 from django.db.models import Q
+
 from .models import (
     CancellationReason,
     Ride,
@@ -31,50 +32,71 @@ class RideRequestForm(forms.ModelForm):
             "status",
         ]
         widgets = {
-            "request_number": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Enter request number",
-            }),
-            "passenger": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "pickup_location": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "drop_location": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "vehicle_type": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "scheduled_at": forms.DateTimeInput(attrs={
-                "class": "form-control",
-                "type": "datetime-local",
-            }),
-            "estimated_distance": forms.NumberInput(attrs={
-                "class": "form-control",
-                "step": "0.01",
-                "min": "0",
-                "placeholder": "0.00",
-            }),
-            "estimated_duration": forms.NumberInput(attrs={
-                "class": "form-control",
-                "min": "0",
-                "placeholder": "0",
-            }),
-            "estimated_fare": forms.NumberInput(attrs={
-                "class": "form-control",
-                "step": "0.01",
-                "min": "0",
-                "placeholder": "0.00",
-            }),
-            "status": forms.Select(attrs={
-                "class": "form-select",
-            }),
+            "request_number": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter request number",
+                }
+            ),
+            "passenger": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "pickup_location": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "drop_location": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "vehicle_type": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "scheduled_at": forms.DateTimeInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "datetime-local",
+                }
+            ),
+            "estimated_distance": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                    "placeholder": "0.00",
+                }
+            ),
+            "estimated_duration": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                    "placeholder": "0",
+                }
+            ),
+            "estimated_fare": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                    "placeholder": "0.00",
+                }
+            ),
+            "status": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
         }
 
     def clean(self):
         cleaned_data = super().clean()
+
         pickup = cleaned_data.get("pickup_location")
         drop = cleaned_data.get("drop_location")
         distance = cleaned_data.get("estimated_distance")
@@ -125,50 +147,78 @@ class RideForm(forms.ModelForm):
             "status",
         ]
         widgets = {
-            "ride_number": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Enter ride number",
-            }),
-            "ride_request": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "passenger": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "driver": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "vehicle": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "pickup_location": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "drop_location": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "scheduled_at": forms.DateTimeInput(attrs={
-                "class": "form-control",
-                "type": "datetime-local",
-            }),
-            "distance_km": forms.NumberInput(attrs={
-                "class": "form-control",
-                "step": "0.01",
-                "min": "0",
-                "placeholder": "0.00",
-            }),
-            "duration_minutes": forms.NumberInput(attrs={
-                "class": "form-control",
-                "min": "0",
-                "placeholder": "0",
-            }),
-            "status": forms.Select(attrs={
-                "class": "form-select",
-            }),
+            "ride_number": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter ride number",
+                }
+            ),
+            "ride_request": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "passenger": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "driver": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "vehicle": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "pickup_location": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "drop_location": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "scheduled_at": forms.DateTimeInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "datetime-local",
+                }
+            ),
+            "distance_km": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                    "placeholder": "0.00",
+                }
+            ),
+            "duration_minutes": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                    "placeholder": "0",
+                }
+            ),
+            "status": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        current_request_id = (
+            self.instance.ride_request_id
+            if self.instance.pk
+            else None
+        )
 
         self.fields["ride_request"].queryset = (
             RideRequest.objects
@@ -179,8 +229,7 @@ class RideForm(forms.ModelForm):
                 "drop_location",
             )
             .filter(
-                Q(ride__isnull=True)
-                | Q(pk=self.instance.ride_request_id if self.instance.pk else None)
+                Q(ride__isnull=True) | Q(pk=current_request_id)
             )
             .order_by("-requested_at")
         )
@@ -209,7 +258,6 @@ class RideForm(forms.ModelForm):
             )
         )
 
-        # Location model me "name" field nahi hai, isliye address se sort kar rahe hain.
         self.fields["pickup_location"].queryset = (
             Location.objects.all().order_by("address")
         )
@@ -225,7 +273,6 @@ class RideForm(forms.ModelForm):
         self.fields["pickup_location"].empty_label = "Select pickup location"
         self.fields["drop_location"].empty_label = "Select drop location"
 
-        # Dropdown me address ko readable label ke roop me show karega.
         self.fields["pickup_location"].label_from_instance = (
             lambda obj: obj.address or f"Location #{obj.pk}"
         )
@@ -298,11 +345,55 @@ class RideForm(forms.ModelForm):
 
 class RideStatusForm(forms.Form):
     status = forms.ChoiceField(
+        label="Ride Status",
         choices=Ride.Status.choices,
-        widget=forms.Select(attrs={
-            "class": "form-select",
-        }),
+        widget=forms.Select(
+            attrs={
+                "class": "form-select",
+            }
+        ),
     )
+
+    def __init__(
+        self,
+        *args,
+        current_status=None,
+        allowed_statuses=None,
+        **kwargs,
+    ):
+        kwargs.pop("instance", None)
+
+        super().__init__(*args, **kwargs)
+
+        if allowed_statuses:
+            allowed_values = {
+                value
+                for value, label in allowed_statuses
+            }
+
+            self.fields["status"].choices = [
+                (value, label)
+                for value, label in Ride.Status.choices
+                if value in allowed_values
+            ]
+
+        if current_status:
+            self.initial["status"] = current_status
+
+    def clean_status(self):
+        value = self.cleaned_data.get("status")
+
+        valid_statuses = {
+            choice[0]
+            for choice in self.fields["status"].choices
+        }
+
+        if value not in valid_statuses:
+            raise forms.ValidationError(
+                "Please select a valid ride status."
+            )
+
+        return value
 
 
 class RideStopForm(forms.ModelForm):
@@ -317,28 +408,54 @@ class RideStopForm(forms.ModelForm):
             "status",
         ]
         widgets = {
-            "ride": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "stop_order": forms.NumberInput(attrs={
-                "class": "form-control",
-                "min": "1",
-            }),
-            "location": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "arrival_time": forms.DateTimeInput(attrs={
-                "class": "form-control",
-                "type": "datetime-local",
-            }),
-            "departure_time": forms.DateTimeInput(attrs={
-                "class": "form-control",
-                "type": "datetime-local",
-            }),
-            "status": forms.Select(attrs={
-                "class": "form-select",
-            }),
+            "ride": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "stop_order": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "1",
+                    "placeholder": "Enter stop order",
+                }
+            ),
+            "location": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "arrival_time": forms.DateTimeInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "datetime-local",
+                }
+            ),
+            "departure_time": forms.DateTimeInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "datetime-local",
+                }
+            ),
+            "status": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["location"].queryset = (
+            Location.objects.all().order_by("address")
+        )
+
+        self.fields["location"].empty_label = "Select location"
+
+        self.fields["location"].label_from_instance = (
+            lambda obj: obj.address or f"Location #{obj.pk}"
+        )
 
     def clean_stop_order(self):
         value = self.cleaned_data.get("stop_order")
@@ -349,6 +466,24 @@ class RideStopForm(forms.ModelForm):
             )
 
         return value
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        arrival_time = cleaned_data.get("arrival_time")
+        departure_time = cleaned_data.get("departure_time")
+
+        if (
+            arrival_time
+            and departure_time
+            and departure_time < arrival_time
+        ):
+            self.add_error(
+                "departure_time",
+                "Departure time cannot be earlier than arrival time.",
+            )
+
+        return cleaned_data
 
 
 class RideDriverAssignmentForm(forms.ModelForm):
@@ -363,28 +498,40 @@ class RideDriverAssignmentForm(forms.ModelForm):
             "rejection_reason",
         ]
         widgets = {
-            "ride": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "driver": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "status": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "accepted_at": forms.DateTimeInput(attrs={
-                "class": "form-control",
-                "type": "datetime-local",
-            }),
-            "rejected_at": forms.DateTimeInput(attrs={
-                "class": "form-control",
-                "type": "datetime-local",
-            }),
-            "rejection_reason": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 3,
-                "placeholder": "Enter rejection reason",
-            }),
+            "ride": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "driver": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "status": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "accepted_at": forms.DateTimeInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "datetime-local",
+                }
+            ),
+            "rejected_at": forms.DateTimeInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "datetime-local",
+                }
+            ),
+            "rejection_reason": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Enter rejection reason",
+                }
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -400,6 +547,45 @@ class RideDriverAssignmentForm(forms.ModelForm):
             )
         )
 
+        self.fields["driver"].empty_label = "Select driver"
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        status = cleaned_data.get("status")
+        accepted_at = cleaned_data.get("accepted_at")
+        rejected_at = cleaned_data.get("rejected_at")
+        rejection_reason = cleaned_data.get("rejection_reason")
+
+        if (
+            status == RideDriverAssignment.Status.ACCEPTED
+            and not accepted_at
+        ):
+            self.add_error(
+                "accepted_at",
+                "Accepted time is required when assignment is accepted.",
+            )
+
+        if status == RideDriverAssignment.Status.REJECTED:
+            if not rejected_at:
+                self.add_error(
+                    "rejected_at",
+                    "Rejected time is required when assignment is rejected.",
+                )
+
+            if not rejection_reason:
+                self.add_error(
+                    "rejection_reason",
+                    "Rejection reason is required when assignment is rejected.",
+                )
+
+        if status != RideDriverAssignment.Status.REJECTED:
+            cleaned_data["rejection_reason"] = (
+                cleaned_data.get("rejection_reason") or ""
+            )
+
+        return cleaned_data
+
 
 class RideTrackingForm(forms.ModelForm):
     class Meta:
@@ -414,42 +600,71 @@ class RideTrackingForm(forms.ModelForm):
             "accuracy",
         ]
         widgets = {
-            "ride": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "driver": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "latitude": forms.NumberInput(attrs={
-                "class": "form-control",
-                "step": "0.000001",
-                "placeholder": "e.g. 26.8467",
-            }),
-            "longitude": forms.NumberInput(attrs={
-                "class": "form-control",
-                "step": "0.000001",
-                "placeholder": "e.g. 80.9462",
-            }),
-            "speed": forms.NumberInput(attrs={
-                "class": "form-control",
-                "step": "0.01",
-                "min": "0",
-                "placeholder": "km/h",
-            }),
-            "heading": forms.NumberInput(attrs={
-                "class": "form-control",
-                "step": "0.01",
-                "min": "0",
-                "max": "360",
-                "placeholder": "0 - 360",
-            }),
-            "accuracy": forms.NumberInput(attrs={
-                "class": "form-control",
-                "step": "0.01",
-                "min": "0",
-                "placeholder": "Accuracy in meters",
-            }),
+            "ride": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "driver": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "latitude": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.000001",
+                    "placeholder": "e.g. 26.8467",
+                }
+            ),
+            "longitude": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.000001",
+                    "placeholder": "e.g. 80.9462",
+                }
+            ),
+            "speed": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                    "placeholder": "km/h",
+                }
+            ),
+            "heading": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                    "max": "360",
+                    "placeholder": "0 - 360",
+                }
+            ),
+            "accuracy": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                    "placeholder": "Accuracy in meters",
+                }
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["driver"].queryset = (
+            Driver.objects
+            .select_related("user")
+            .order_by(
+                "user__first_name",
+                "user__last_name",
+                "driver_code",
+            )
+        )
+
+        self.fields["driver"].empty_label = "Select driver"
 
     def clean(self):
         cleaned_data = super().clean()
@@ -504,25 +719,35 @@ class CancellationReasonForm(forms.ModelForm):
             "is_active",
         ]
         widgets = {
-            "type": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "reason": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Enter cancellation reason",
-            }),
-            "charge_applicable": forms.CheckboxInput(attrs={
-                "class": "form-check-input",
-            }),
-            "charge_amount": forms.NumberInput(attrs={
-                "class": "form-control",
-                "step": "0.01",
-                "min": "0",
-                "placeholder": "0.00",
-            }),
-            "is_active": forms.CheckboxInput(attrs={
-                "class": "form-check-input",
-            }),
+            "type": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "reason": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter cancellation reason",
+                }
+            ),
+            "charge_applicable": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input",
+                }
+            ),
+            "charge_amount": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                    "placeholder": "0.00",
+                }
+            ),
+            "is_active": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input",
+                }
+            ),
         }
 
     def clean(self):
@@ -556,27 +781,48 @@ class RideCancellationForm(forms.ModelForm):
             "cancellation_charge",
         ]
         widgets = {
-            "ride": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "cancelled_by": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "reason": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "reason_text": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 4,
-                "placeholder": "Enter additional details",
-            }),
-            "cancellation_charge": forms.NumberInput(attrs={
-                "class": "form-control",
-                "step": "0.01",
-                "min": "0",
-                "placeholder": "0.00",
-            }),
+            "ride": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "cancelled_by": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "reason": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "reason_text": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Enter additional details",
+                }
+            ),
+            "cancellation_charge": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                    "placeholder": "0.00",
+                }
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["reason"].queryset = (
+            CancellationReason.objects
+            .filter(is_active=True)
+            .order_by("type", "reason")
+        )
+
+        self.fields["reason"].empty_label = "Select cancellation reason"
 
     def clean_cancellation_charge(self):
         value = self.cleaned_data.get("cancellation_charge")
@@ -600,15 +846,21 @@ class RideRatingForm(forms.ModelForm):
             "review",
         ]
         widgets = {
-            "ride": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "from_user": forms.Select(attrs={
-                "class": "form-select",
-            }),
-            "to_user": forms.Select(attrs={
-                "class": "form-select",
-            }),
+            "ride": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "from_user": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+            "to_user": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
             "rating": forms.Select(
                 choices=[
                     (1, "1 Star"),
@@ -621,19 +873,56 @@ class RideRatingForm(forms.ModelForm):
                     "class": "form-select",
                 },
             ),
-            "review": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 4,
-                "placeholder": "Enter review",
-            }),
+            "review": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Enter review",
+                }
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["ride"].queryset = (
+            Ride.objects
+            .select_related(
+                "passenger",
+                "driver",
+                "vehicle",
+                "pickup_location",
+                "drop_location",
+            )
+            .order_by("-created_at")
+        )
+
+        self.fields["from_user"].queryset = (
+            self.fields["from_user"].queryset.order_by(
+                "first_name",
+                "last_name",
+                "username",
+            )
+        )
+
+        self.fields["to_user"].queryset = (
+            self.fields["to_user"].queryset.order_by(
+                "first_name",
+                "last_name",
+                "username",
+            )
+        )
+
+        self.fields["ride"].empty_label = "Select ride"
+        self.fields["from_user"].empty_label = "Select rating user"
+        self.fields["to_user"].empty_label = "Select receiving user"
 
     def clean_rating(self):
         value = self.cleaned_data.get("rating")
 
         if value is None or not 1 <= value <= 5:
             raise forms.ValidationError(
-                "Rating must be between 1 and 5.",
+                "Rating must be between 1 and 5."
             )
 
         return value
@@ -641,6 +930,7 @@ class RideRatingForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
+        ride = cleaned_data.get("ride")
         from_user = cleaned_data.get("from_user")
         to_user = cleaned_data.get("to_user")
 
@@ -649,5 +939,51 @@ class RideRatingForm(forms.ModelForm):
                 "to_user",
                 "A user cannot rate themselves.",
             )
+
+        if ride and from_user and to_user:
+            passenger = ride.passenger
+            driver_user = getattr(ride.driver, "user", None)
+
+            allowed_users = {
+                user
+                for user in [passenger, driver_user]
+                if user is not None
+            }
+
+            if from_user not in allowed_users:
+                self.add_error(
+                    "from_user",
+                    "Only the passenger or assigned driver can give a rating for this ride.",
+                )
+
+            if to_user not in allowed_users:
+                self.add_error(
+                    "to_user",
+                    "The rating recipient must be the passenger or assigned driver of this ride.",
+                )
+
+            if (
+                from_user
+                and to_user
+                and from_user == passenger
+                and driver_user
+                and to_user != driver_user
+            ):
+                self.add_error(
+                    "to_user",
+                    "A passenger rating should be given to the assigned driver.",
+                )
+
+            if (
+                from_user
+                and to_user
+                and driver_user
+                and from_user == driver_user
+                and to_user != passenger
+            ):
+                self.add_error(
+                    "to_user",
+                    "A driver rating should be given to the passenger.",
+                )
 
         return cleaned_data
