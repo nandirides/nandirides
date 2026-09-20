@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Account Settings{% endblock %}
 {% block content %}
+
 <div class="container-fluid py-3 py-md-4">
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
         <div>
@@ -14,23 +15,19 @@
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="badge text-bg-primary rounded-pill px-3 py-2 shadow-sm">
-                <i class="bi bi-shield-check me-1"></i>
-                Administrator
+                <i class="bi bi-shield-check me-1"></i>Administrator
             </span>
             {% if user.is_active %}
             <span class="badge text-bg-success rounded-pill px-3 py-2 shadow-sm">
-                <i class="bi bi-circle-fill me-1 small"></i>
-                Active
+                <i class="bi bi-circle-fill me-1 small"></i>Active
             </span>
             {% else %}
             <span class="badge text-bg-danger rounded-pill px-3 py-2 shadow-sm">
-                <i class="bi bi-circle-fill me-1 small"></i>
-                Inactive
+                <i class="bi bi-circle-fill me-1 small"></i>Inactive
             </span>
             {% endif %}
         </div>
     </div>
-
     <div class="row g-4">
         <div class="col-12 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
@@ -59,7 +56,6 @@
                         {% endif %}
                     </span>
                 </div>
-
                 <div class="list-group list-group-flush nav nav-pills flex-column p-2" id="settings-nav" role="tablist">
                     <a href="#account" class="list-group-item list-group-item-action active rounded-3 border-0 mb-1 d-flex align-items-center" data-bs-toggle="pill" role="tab">
                         <i class="bi bi-person-circle fs-5 me-2"></i>
@@ -81,14 +77,13 @@
                         <span>Account Status</span>
                         <i class="bi bi-chevron-right ms-auto small"></i>
                     </a>
-                    <a href="#danger" class="list-group-item list-group-item-action rounded-3 border-0 text-danger d-flex align-items-center" data-bs-toggle="pill" role="tab">
-                        <i class="bi bi-exclamation-triangle fs-5 me-2"></i>
-                        <span>Danger Zone</span>
+                    <a href="#account-details" class="list-group-item list-group-item-action rounded-3 border-0 d-flex align-items-center" data-bs-toggle="pill" role="tab">
+                        <i class="bi bi-wallet2 fs-5 me-2"></i>
+                        <span>Account Details</span>
                         <i class="bi bi-chevron-right ms-auto small"></i>
                     </a>
                 </div>
             </div>
-
             <div class="card border-0 shadow-sm rounded-4 mt-4 overflow-hidden">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-start">
@@ -103,14 +98,12 @@
                 </div>
             </div>
         </div>
-
         <div class="col-12 col-xl-9">
             <div class="tab-content">
-
                 <div class="tab-pane fade show active" id="account" role="tabpanel">
                     <form method="post" enctype="multipart/form-data" action="{% url 'user_setting' %}">
                         {% csrf_token %}
-
+                        <input type="hidden" name="action" value="update_profile">
                         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                             <div class="card-header bg-transparent py-3 px-4 border-bottom">
                                 <div class="d-flex align-items-center">
@@ -123,15 +116,9 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="card-body p-4">
-
                                 <div class="border-bottom pb-4 mb-4">
-                                    <h6 class="fw-bold mb-3">
-                                        <i class="bi bi-person me-2 text-primary"></i>
-                                        Basic Information
-                                    </h6>
-
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-person me-2 text-primary"></i>Basic Information</h6>
                                     <div class="row g-3">
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Username</label>
@@ -139,20 +126,15 @@
                                                 <span class="input-group-text"><i class="bi bi-at"></i></span>
                                                 <input type="text" class="form-control bg-body-tertiary" value="{{ user.get_username }}" readonly>
                                             </div>
-                                            <small class="text-body-secondary">
-                                                <i class="bi bi-lock me-1"></i>
-                                                Username cannot be changed from this page.
-                                            </small>
+                                            <small class="text-body-secondary"><i class="bi bi-lock me-1"></i>Username cannot be changed from this page.</small>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Email Address</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                                <input type="email" name="email" class="form-control" value="{{ user.email|default:'' }}" placeholder="Enter email address">
+                                                <input type="email" name="email" id="accountEmail" class="form-control" value="{{ user.email|default:'' }}" placeholder="Enter email address">
                                             </div>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">First Name</label>
                                             <div class="input-group">
@@ -160,7 +142,6 @@
                                                 <input type="text" name="first_name" class="form-control" value="{{ user.first_name|default:'' }}" placeholder="Enter first name">
                                             </div>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Last Name</label>
                                             <div class="input-group">
@@ -170,27 +151,18 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="border-bottom pb-4 mb-4">
-                                    <h6 class="fw-bold mb-3">
-                                        <i class="bi bi-person-lines-fill me-2 text-primary"></i>
-                                        Profile Details
-                                    </h6>
-
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-person-lines-fill me-2 text-primary"></i>Profile Details</h6>
                                     <div class="row g-3">
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Profile Photo</label>
                                             <input type="file" name="profile_image" class="form-control" accept="image/*">
                                             {% if profile and profile.profile_image %}
-                                            <small class="text-body-secondary">
-                                                <i class="bi bi-check-circle text-success me-1"></i>
-                                                Current profile photo is already uploaded.
-                                            </small>
+                                            <small class="text-body-secondary"><i class="bi bi-check-circle text-success me-1"></i>Current profile photo is already uploaded.</small>
                                             {% else %}
                                             <small class="text-body-secondary">Upload JPG, PNG or WEBP image.</small>
                                             {% endif %}
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Phone Number</label>
                                             <div class="input-group">
@@ -198,7 +170,6 @@
                                                 <input type="text" name="phone" class="form-control" value="{{ profile.phone|default:'' }}" placeholder="Enter phone number">
                                             </div>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Date of Birth</label>
                                             <div class="input-group">
@@ -206,25 +177,22 @@
                                                 <input type="date" name="date_of_birth" class="form-control" value="{{ profile.date_of_birth|date:'Y-m-d' }}">
                                             </div>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Gender</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
                                                 <select name="gender" class="form-select">
                                                     <option value="">Select gender</option>
-                                                    <option value="MALE" {% if profile.gender == "MALE" %}selected{% endif %}>Male</option>
-                                                    <option value="FEMALE" {% if profile.gender == "FEMALE" %}selected{% endif %}>Female</option>
-                                                    <option value="OTHER" {% if profile.gender == "OTHER" %}selected{% endif %}>Other</option>
+                                                    <option value="male" {% if profile.gender == "male" %}selected{% endif %}>Male</option>
+                                                    <option value="female" {% if profile.gender == "female" %}selected{% endif %}>Female</option>
+                                                    <option value="other" {% if profile.gender == "other" %}selected{% endif %}>Other</option>
                                                 </select>
                                             </div>
                                         </div>
-
                                         <div class="col-12">
                                             <label class="form-label fw-semibold">Profile Address</label>
                                             <textarea name="address" class="form-control" rows="3" placeholder="Enter complete profile address">{{ profile.address|default:'' }}</textarea>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">City</label>
                                             <div class="input-group">
@@ -239,34 +207,27 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="border-bottom pb-4 mb-4">
-                                    <h6 class="fw-bold mb-3">
-                                        <i class="bi bi-geo-alt-fill me-2 text-primary"></i>
-                                        Address Information
-                                    </h6>
-
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill me-2 text-primary"></i>Address Information</h6>
                                     <div class="row g-3">
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Address Type</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-tag"></i></span>
                                                 <select name="address_type" id="addressType" class="form-select">
-                                                    <option value="HOME" {% if address and address.address_type == "HOME" %}selected{% endif %}>Home</option>
-                                                    <option value="WORK" {% if address and address.address_type == "WORK" %}selected{% endif %}>Work</option>
-                                                    <option value="OTHER" {% if address and address.address_type == "OTHER" %}selected{% endif %}>Other</option>
+                                                    <option value="home" {% if address and address.address_type == "home" %}selected{% endif %}>Home</option>
+                                                    <option value="office" {% if address and address.address_type == "office" %}selected{% endif %}>Office</option>
+                                                    <option value="other" {% if address and address.address_type == "other" %}selected{% endif %}>Other</option>
                                                 </select>
                                             </div>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Address Label</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-bookmark"></i></span>
-                                                <input type="text" name="label" id="addressLabel" class="form-control" value="{{ address.label|default:'' }}" placeholder="Home Address">
+                                                <input type="text" name="address_label" id="addressLabel" class="form-control" value="{{ address.label|default:'' }}" placeholder="Home Address">
                                             </div>
                                         </div>
-
                                         <div class="col-12">
                                             <label class="form-label fw-semibold">Address Line 1</label>
                                             <div class="input-group">
@@ -274,7 +235,6 @@
                                                 <input type="text" name="address_line1" class="form-control" value="{{ address.address_line1|default:'' }}" placeholder="House number, street or locality">
                                             </div>
                                         </div>
-
                                         <div class="col-12">
                                             <label class="form-label fw-semibold">Address Line 2</label>
                                             <div class="input-group">
@@ -282,7 +242,6 @@
                                                 <input type="text" name="address_line2" class="form-control" value="{{ address.address_line2|default:'' }}" placeholder="Area, colony or additional address">
                                             </div>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Landmark</label>
                                             <div class="input-group">
@@ -290,7 +249,6 @@
                                                 <input type="text" name="landmark" class="form-control" value="{{ address.landmark|default:'' }}" placeholder="Nearby landmark">
                                             </div>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Postal Code</label>
                                             <div class="input-group">
@@ -298,7 +256,6 @@
                                                 <input type="text" name="postal_code" class="form-control" value="{{ address.postal_code|default:'' }}" placeholder="Postal code">
                                             </div>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Address City</label>
                                             <div class="input-group">
@@ -311,23 +268,17 @@
                                                 </select>
                                             </div>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Default Address</label>
                                             <div class="form-check form-switch border rounded-3 p-3 ps-5 h-100 d-flex align-items-center">
-                                                <input class="form-check-input" type="checkbox" role="switch" name="is_default" id="is-default-address" {% if address and address.is_default %}checked{% endif %}>
+                                                <input class="form-check-input" type="checkbox" role="switch" name="is_default" id="is-default-address" value="1" {% if address and address.is_default %}checked{% endif %}>
                                                 <label class="form-check-label fw-semibold ms-2" for="is-default-address">Set as default address</label>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="border-bottom pb-4 mb-4">
-                                    <h6 class="fw-bold mb-3">
-                                        <i class="bi bi-telephone-forward me-2 text-danger"></i>
-                                        Emergency Contact
-                                    </h6>
-
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-telephone-forward me-2 text-danger"></i>Emergency Contact</h6>
                                     <div class="row g-3">
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Contact Name</label>
@@ -336,7 +287,6 @@
                                                 <input type="text" name="emergency_contact_name" class="form-control" value="{{ profile.emergency_contact_name|default:'' }}" placeholder="Emergency contact name">
                                             </div>
                                         </div>
-
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-semibold">Contact Phone</label>
                                             <div class="input-group">
@@ -346,23 +296,18 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
                                     <button type="reset" class="btn btn-outline-secondary px-4">
-                                        <i class="bi bi-arrow-counterclockwise me-1"></i>
-                                        Reset
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
                                     </button>
                                     <button type="submit" class="btn btn-primary px-4 shadow-sm">
-                                        <i class="bi bi-check2-circle me-1"></i>
-                                        Save Changes
+                                        <i class="bi bi-check2-circle me-1"></i>Save Changes
                                     </button>
                                 </div>
-
                             </div>
                         </div>
                     </form>
                 </div>
-
                 <div class="tab-pane fade" id="notifications" role="tabpanel">
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                         <div class="card-header bg-transparent py-3 px-4 border-bottom">
@@ -376,10 +321,8 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="card-body p-4">
                             <div class="list-group list-group-flush">
-
                                 <div class="list-group-item bg-transparent px-0 py-3 d-flex justify-content-between align-items-center">
                                     <div class="d-flex align-items-start">
                                         <div class="rounded-3 bg-primary-subtle text-primary p-2 me-3">
@@ -390,12 +333,11 @@
                                             <small class="text-body-secondary">Important NandiRide platform updates and announcements.</small>
                                         </div>
                                     </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="notif-updates" checked>
+                                    <div class="form-check form-switch ms-3">
+                                        <input class="form-check-input notification-toggle" type="checkbox" role="switch" data-field="platform_updates" id="notif-updates" {% if notification_preferences.platform_updates %}checked{% endif %}>
                                         <label class="visually-hidden" for="notif-updates">Platform Updates</label>
                                     </div>
                                 </div>
-
                                 <div class="list-group-item bg-transparent px-0 py-3 d-flex justify-content-between align-items-center">
                                     <div class="d-flex align-items-start">
                                         <div class="rounded-3 bg-danger-subtle text-danger p-2 me-3">
@@ -406,12 +348,11 @@
                                             <small class="text-body-secondary">Login attempts, password changes and security events.</small>
                                         </div>
                                     </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="notif-security" checked>
+                                    <div class="form-check form-switch ms-3">
+                                        <input class="form-check-input notification-toggle" type="checkbox" role="switch" data-field="security_alerts" id="notif-security" {% if notification_preferences.security_alerts %}checked{% endif %}>
                                         <label class="visually-hidden" for="notif-security">Security Alerts</label>
                                     </div>
                                 </div>
-
                                 <div class="list-group-item bg-transparent px-0 py-3 d-flex justify-content-between align-items-center">
                                     <div class="d-flex align-items-start">
                                         <div class="rounded-3 bg-warning-subtle text-warning p-2 me-3">
@@ -422,12 +363,11 @@
                                             <small class="text-body-secondary">Important ride, booking and platform activity alerts.</small>
                                         </div>
                                     </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="notif-activity" checked>
+                                    <div class="form-check form-switch ms-3">
+                                        <input class="form-check-input notification-toggle" type="checkbox" role="switch" data-field="ride_activity" id="notif-activity" {% if notification_preferences.ride_activity %}checked{% endif %}>
                                         <label class="visually-hidden" for="notif-activity">Ride and Platform Activity</label>
                                     </div>
                                 </div>
-
                                 <div class="list-group-item bg-transparent px-0 py-3 d-flex justify-content-between align-items-center">
                                     <div class="d-flex align-items-start">
                                         <div class="rounded-3 bg-info-subtle text-info p-2 me-3">
@@ -438,24 +378,22 @@
                                             <small class="text-body-secondary">Receive important account notifications by email.</small>
                                         </div>
                                     </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="notif-email">
+                                    <div class="form-check form-switch ms-3">
+                                        <input class="form-check-input notification-toggle" type="checkbox" role="switch" data-field="email_notifications" id="notif-email" {% if notification_preferences.email_notifications %}checked{% endif %}>
                                         <label class="visually-hidden" for="notif-email">Email Notifications</label>
                                     </div>
                                 </div>
-
                             </div>
-
-                            <div class="border-top mt-3 pt-4">
-                                <button type="button" class="btn btn-primary shadow-sm">
-                                    <i class="bi bi-check2-circle me-1"></i>
-                                    Save Preferences
-                                </button>
+                            <div class="border-top mt-3 pt-4 d-flex justify-content-between align-items-center gap-2">
+                                <small class="text-body-secondary">
+                                    <i class="bi bi-database-check me-1"></i>
+                                    Preferences are saved automatically.
+                                </small>
+                                <small id="notification-status" class="fw-semibold"></small>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <div class="tab-pane fade" id="security" role="tabpanel">
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                         <div class="card-header bg-transparent py-3 px-4 border-bottom">
@@ -469,7 +407,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="card-body p-4">
                             <div class="alert alert-info border-0 rounded-3 d-flex align-items-start">
                                 <i class="bi bi-info-circle-fill fs-5 me-3"></i>
@@ -478,11 +415,9 @@
                                     <small>Use a strong password and never share your administrator credentials.</small>
                                 </div>
                             </div>
-
                             <form method="post" action="{% url 'user_setting' %}" class="row g-3">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="change_password">
-
                                 <div class="col-12">
                                     <label class="form-label fw-semibold">Current Password</label>
                                     <div class="input-group">
@@ -490,7 +425,6 @@
                                         <input type="password" name="current_password" class="form-control" placeholder="Enter current password" autocomplete="current-password" required>
                                     </div>
                                 </div>
-
                                 <div class="col-12 col-md-6">
                                     <label class="form-label fw-semibold">New Password</label>
                                     <div class="input-group">
@@ -498,7 +432,6 @@
                                         <input type="password" name="new_password" class="form-control" placeholder="Enter new password" autocomplete="new-password" minlength="8" required>
                                     </div>
                                 </div>
-
                                 <div class="col-12 col-md-6">
                                     <label class="form-label fw-semibold">Confirm New Password</label>
                                     <div class="input-group">
@@ -506,52 +439,42 @@
                                         <input type="password" name="confirm_password" class="form-control" placeholder="Confirm new password" autocomplete="new-password" minlength="8" required>
                                     </div>
                                 </div>
-
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary shadow-sm">
-                                        <i class="bi bi-shield-check me-1"></i>
-                                        Update Password
+                                        <i class="bi bi-shield-check me-1"></i>Update Password
                                     </button>
                                 </div>
                             </form>
                         </div>
                     </div>
-
                     <div class="card border-0 shadow-sm rounded-4 mt-4">
                         <div class="card-header bg-transparent py-3 px-4 border-bottom">
                             <div class="d-flex align-items-center">
-                                <div class="rounded-3 bg-success-subtle text-success p-2 me-3">
+                                <div class="rounded-3 bg-secondary-subtle text-secondary p-2 me-3">
                                     <i class="bi bi-phone-fill fs-5"></i>
                                 </div>
                                 <div>
                                     <h5 class="fw-bold mb-1">Two-Factor Authentication</h5>
-                                    <small class="text-body-secondary">Add an extra layer of protection to your administrator account.</small>
+                                    <small class="text-body-secondary">Additional authentication can be configured later.</small>
                                 </div>
                             </div>
                         </div>
-
                         <div class="card-body p-4">
                             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                                 <div>
                                     <div class="fw-semibold mb-1">Authenticator Application</div>
-                                    <small class="text-body-secondary">Use an authenticator application for additional administrator security.</small>
+                                    <small class="text-body-secondary">2FA setup is currently not configured. No additional software has been installed.</small>
                                 </div>
-                                <button type="button" class="btn btn-outline-primary">
-                                    <i class="bi bi-shield-plus me-1"></i>
-                                    Enable 2FA
-                                </button>
+                                <span class="badge text-bg-secondary rounded-pill px-3 py-2">
+                                    <i class="bi bi-pause-circle me-1"></i>Not Configured
+                                </span>
                             </div>
                         </div>
                     </div>
-
                     <div class="card border-0 shadow-sm rounded-4 mt-4">
                         <div class="card-header bg-transparent py-3 px-4 border-bottom">
-                            <h5 class="fw-bold mb-0">
-                                <i class="bi bi-clock-history text-primary me-2"></i>
-                                Account Activity
-                            </h5>
+                            <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Account Activity</h5>
                         </div>
-
                         <div class="card-body p-4">
                             <div class="d-flex align-items-center">
                                 <div class="rounded-circle bg-success-subtle text-success p-2 me-3">
@@ -571,7 +494,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="tab-pane fade" id="account-status" role="tabpanel">
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                         <div class="card-header bg-transparent py-3 px-4 border-bottom">
@@ -585,10 +507,8 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="card-body p-4">
                             <div class="row g-3">
-
                                 <div class="col-12 col-md-6">
                                     <div class="border rounded-3 p-3 h-100 shadow-sm">
                                         <div class="d-flex align-items-center mb-2">
@@ -602,7 +522,6 @@
                                         {% endif %}
                                     </div>
                                 </div>
-
                                 <div class="col-12 col-md-6">
                                     <div class="border rounded-3 p-3 h-100 shadow-sm">
                                         <div class="d-flex align-items-center mb-2">
@@ -610,17 +529,10 @@
                                             <span class="fw-semibold">Account Type</span>
                                         </div>
                                         <span class="badge text-bg-primary rounded-pill">
-                                            {% if user.is_superuser %}
-                                            Super Administrator
-                                            {% elif user.is_staff %}
-                                            Administrator
-                                            {% else %}
-                                            Web User
-                                            {% endif %}
+                                            {% if user.is_superuser %}Super Administrator{% elif user.is_staff %}Administrator{% else %}Web User{% endif %}
                                         </span>
                                     </div>
                                 </div>
-
                                 <div class="col-12 col-md-6">
                                     <div class="border rounded-3 p-3 h-100 shadow-sm">
                                         <div class="d-flex align-items-center mb-2">
@@ -630,21 +542,43 @@
                                         <div class="text-body-secondary">{{ user.date_joined|date:"d M Y" }}</div>
                                     </div>
                                 </div>
-
                                 <div class="col-12 col-md-6">
-                                    <div class="border rounded-3 p-3 h-100 shadow-sm">
+                                    <div class="border rounded-3 p-3 h-100 shadow-sm" id="email-status-card">
                                         <div class="d-flex align-items-center mb-2">
                                             <i class="bi bi-envelope-check text-warning fs-4 me-2"></i>
                                             <span class="fw-semibold">Email Status</span>
                                         </div>
                                         {% if user.email %}
-                                        <span class="badge text-bg-success rounded-pill">Email Added</span>
+                                        <div class="d-flex flex-column gap-2">
+                                            <div class="small text-body-secondary text-break">
+                                                <i class="bi bi-envelope me-1"></i>{{ user.email }}
+                                            </div>
+                                            <div id="emailVerificationState">
+                                                {% if email_verified %}
+                                                <span class="badge text-bg-success rounded-pill">
+                                                    <i class="bi bi-check-circle me-1"></i>Verified
+                                                </span>
+                                                {% else %}
+                                                <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                                                    <span class="badge text-bg-warning rounded-pill">
+                                                        <i class="bi bi-exclamation-circle me-1"></i>Not Verified
+                                                    </span>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" id="verifyEmailButton">
+                                                        <i class="bi bi-envelope-check me-1"></i>Verify Email
+                                                    </button>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <small id="emailVerificationMessage" class="fw-semibold"></small>
+                                        </div>
                                         {% else %}
-                                        <span class="badge text-bg-warning rounded-pill">Email Not Added</span>
+                                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                                            <span class="badge text-bg-warning rounded-pill">Email Not Added</span>
+                                            <small class="text-body-secondary">Add an email from Account.</small>
+                                        </div>
                                         {% endif %}
                                     </div>
                                 </div>
-
                                 <div class="col-12 col-md-6">
                                     <div class="border rounded-3 p-3 h-100 shadow-sm">
                                         <div class="d-flex align-items-center mb-2">
@@ -654,7 +588,6 @@
                                         <div class="fw-semibold">#{{ user.id|default:"-" }}</div>
                                     </div>
                                 </div>
-
                                 <div class="col-12 col-md-6">
                                     <div class="border rounded-3 p-3 h-100 shadow-sm">
                                         <div class="d-flex align-items-center mb-2">
@@ -668,56 +601,40 @@
                                         {% endif %}
                                     </div>
                                 </div>
-
                             </div>
-                        </div>
-                    </div>
-
-                                <div class="border-bottom pb-4 mb-4">
-                                    <h6 class="fw-bold mb-3">
-                                        <i class="bi bi-clock-history me-2 text-primary"></i>
-                                        Account Activity
-                                    </h6>
-
-                                    <div class="row g-3">
-                                        <div class="col-12 col-md-6">
-                                            <div class="d-flex align-items-center border rounded-3 p-3 h-100 shadow-sm">
-                                                <div class="rounded-3 bg-success-subtle text-success p-2 me-3">
-                                                    <i class="bi bi-calendar-check fs-5"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-semibold">Account Created</div>
-                                                    <small class="text-body-secondary">
-                                                        {% if user.date_joined %}
-                                                        {{ user.date_joined|date:"d M Y, h:i A" }}
-                                                        {% else %}
-                                                        -
-                                                        {% endif %}
-                                                    </small>
-                                                </div>
+                            <div class="border-top mt-4 pt-4">
+                                <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2 text-primary"></i>Account Activity</h6>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <div class="d-flex align-items-center border rounded-3 p-3 h-100 shadow-sm">
+                                            <div class="rounded-3 bg-success-subtle text-success p-2 me-3">
+                                                <i class="bi bi-calendar-check fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">Account Created</div>
+                                                <small class="text-body-secondary">
+                                                    {% if user.date_joined %}{{ user.date_joined|date:"d M Y, h:i A" }}{% else %}-{% endif %}
+                                                </small>
                                             </div>
                                         </div>
-
-                                        <div class="col-12 col-md-6">
-                                            <div class="d-flex align-items-center border rounded-3 p-3 h-100 shadow-sm">
-                                                <div class="rounded-3 bg-info-subtle text-info p-2 me-3">
-                                                    <i class="bi bi-clock-history fs-5"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-semibold">Last Login</div>
-                                                    <small class="text-body-secondary">
-                                                        {% if user.last_login %}
-                                                        {{ user.last_login|date:"d M Y, h:i A" }}
-                                                        {% else %}
-                                                        No login recorded
-                                                        {% endif %}
-                                                    </small>
-                                                </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <div class="d-flex align-items-center border rounded-3 p-3 h-100 shadow-sm">
+                                            <div class="rounded-3 bg-info-subtle text-info p-2 me-3">
+                                                <i class="bi bi-clock-history fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">Last Login</div>
+                                                <small class="text-body-secondary">
+                                                    {% if user.last_login %}{{ user.last_login|date:"d M Y, h:i A" }}{% else %}No login recorded{% endif %}
+                                                </small>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
+                            </div>
+                        </div>
+                    </div>
                     <div class="card border-0 shadow-sm rounded-4 mt-4">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-start">
@@ -732,82 +649,417 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="tab-pane fade" id="danger" role="tabpanel">
-                    <div class="card border-danger shadow-sm rounded-4 overflow-hidden">
-                        <div class="card-header bg-danger-subtle border-danger py-3 px-4">
-                            <div class="d-flex align-items-center">
-                                <div class="rounded-3 bg-danger text-white p-2 me-3">
-                                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <div class="tab-pane fade" id="account-details" role="tabpanel">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="card-header bg-transparent py-3 px-4 border-bottom">
+                            <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-3 bg-primary-subtle text-primary p-2 me-3">
+                                        <i class="bi bi-wallet2 fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-1">Account Details</h5>
+                                        <small class="text-body-secondary">Manage payment, wallet and billing information associated with your account.</small>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h5 class="fw-bold text-danger mb-1">Danger Zone</h5>
-                                    <small class="text-body-secondary">Actions in this section may affect your administrator account permanently.</small>
-                                </div>
+                                <span id="accountDetailsStatus" class="small fw-semibold"></span>
                             </div>
                         </div>
-
                         <div class="card-body p-4">
-                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-4 border-bottom">
-                                <div>
-                                    <h6 class="fw-bold mb-1">Sign out from this account</h6>
-                                    <small class="text-body-secondary">End your current administrator session securely.</small>
+                            <div class="row g-3">
+                                <div class="col-12 col-lg-6">
+                                    <div class="border rounded-4 p-4 h-100 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-3 bg-info-subtle text-info p-2 me-3">
+                                                    <i class="bi bi-phone fs-4"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">UPI Details</h6>
+                                                    <small class="text-body-secondary">Administrator payment identity</small>
+                                                </div>
+                                            </div>
+                                            <span id="upiBadge" class="badge {% if payment_details.upi_id %}text-bg-success{% else %}text-bg-secondary{% endif %} rounded-pill">
+                                                {% if payment_details.upi_id %}Linked{% else %}Not Linked{% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="bg-body-tertiary rounded-3 p-3 mb-3">
+                                            <small class="text-body-secondary d-block mb-1">UPI ID</small>
+                                            <span id="upiDisplay" class="fw-semibold">
+                                                {% if payment_details.upi_id %}{{ payment_details.upi_id }}{% else %}No UPI ID linked{% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                                            <input type="text" id="upiIdInput" class="form-control" value="{{ payment_details.upi_id|default:'' }}" placeholder="example@upi" maxlength="100">
+                                        </div>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="saveUpiButton">
+                                            <i class="bi bi-save me-1"></i>Save UPI
+                                        </button>
+                                    </div>
                                 </div>
-                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#signOutModal">
-                                    <i class="bi bi-box-arrow-right me-1"></i>
-                                    Sign Out
-                                </button>
-                            </div>
-
-                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pt-4">
-                                <div>
-                                    <h6 class="fw-bold text-danger mb-1">Delete Account</h6>
-                                    <small class="text-body-secondary">Permanently deleting an administrator account should only be performed after proper verification.</small>
+                                <div class="col-12 col-lg-6">
+                                    <div class="border rounded-4 p-4 h-100 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-3 bg-success-subtle text-success p-2 me-3">
+                                                    <i class="bi bi-wallet2 fs-4"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">NandiRide Wallet</h6>
+                                                    <small class="text-body-secondary">Account wallet balance</small>
+                                                </div>
+                                            </div>
+                                            <span class="badge text-bg-success rounded-pill">Active</span>
+                                        </div>
+                                        <div class="bg-body-tertiary rounded-3 p-3 mb-3">
+                                            <small class="text-body-secondary d-block mb-1">Available Balance</small>
+                                            <div class="fs-3 fw-bold">₹<span id="walletBalance">{{ payment_details.wallet_balance|default:"0.00" }}</span></div>
+                                        </div>
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <button type="button" class="btn btn-outline-success btn-sm" id="addWalletMoneyButton" data-bs-toggle="modal" data-bs-target="#addWalletMoneyModal">
+                                                <i class="bi bi-plus-circle me-1"></i>Add Money
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="walletTransactionsButton" data-bs-toggle="modal" data-bs-target="#walletTransactionsModal">
+                                                <i class="bi bi-clock-history me-1"></i>Transactions
+                                            </button>
+                                        </div>
+                                        <small id="walletStatus" class="text-body-secondary d-block mt-2"></small>
+                                    </div>
                                 </div>
-                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
-                                    <i class="bi bi-trash3 me-1"></i>
-                                    Delete Account
-                                </button>
+                                <div class="col-12 col-lg-6">
+                                    <div class="border rounded-4 p-4 h-100 shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-3 bg-warning-subtle text-warning p-2 me-3">
+                                                    <i class="bi bi-credit-card-2-front fs-4"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Card Details</h6>
+                                                    <small class="text-body-secondary">Saved payment card</small>
+                                                </div>
+                                            </div>
+                                            <span id="cardBadge" class="badge {% if payment_details.card_last_four %}text-bg-success{% else %}text-bg-secondary{% endif %} rounded-pill">
+                                                {% if payment_details.card_last_four %}Linked{% else %}Not Added{% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="bg-body-tertiary rounded-3 p-3" id="cardDisplay">
+                                            {% if payment_details.card_last_four %}
+                                            <div class="d-flex align-items-center justify-content-between gap-3">
+                                                <div>
+                                                    <small class="text-body-secondary d-block" id="cardBrandDisplay">{{ payment_details.card_brand|default:"Payment Card" }}</small>
+                                                    <span class="fw-semibold">•••• •••• •••• <span id="cardLastFourDisplay">{{ payment_details.card_last_four }}</span></span>
+                                                    <small class="text-body-secondary d-block mt-1">Expiry: <span id="cardExpiryDisplay">{{ payment_details.card_expiry|default:"-" }}</span></small>
+                                                </div>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm rounded-circle" id="viewCardDetailsButton" data-bs-toggle="modal" data-bs-target="#viewCardDetailsModal" title="View saved card details" aria-label="View saved card details">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </div>
+                                            {% else %}
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <span class="text-body-secondary">No payment card linked</span>
+                                                <i class="bi bi-credit-card fs-2 text-secondary"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="d-flex gap-2 flex-wrap mt-3">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" id="addCardButton" data-bs-toggle="modal" data-bs-target="#cardModal">
+                                                <i class="bi bi-credit-card me-1"></i>{% if payment_details.card_last_four %}Update Card{% else %}Add Card{% endif %}
+                                            </button>
+                                            {% if payment_details.card_last_four %}
+                                            <button type="button" class="btn btn-outline-danger btn-sm" id="removeCardButton">
+                                                <i class="bi bi-trash3 me-1"></i>Remove
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                        <small id="cardStatus" class="text-body-secondary d-block mt-2"></small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <div class="border rounded-4 p-4 h-100 shadow-sm">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="rounded-3 bg-primary-subtle text-primary p-2 me-3">
+                                                <i class="bi bi-receipt fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1">Billing Information</h6>
+                                                <small class="text-body-secondary">Account billing and invoice information</small>
+                                            </div>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-6">
+                                                <small class="text-body-secondary d-block">Account Name</small>
+                                                <span class="fw-semibold">{{ user.get_full_name|default:user.get_username }}</span>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-body-secondary d-block">Email</small>
+                                                <span class="fw-semibold text-break" id="billingEmail">{{ user.email|default:"Not added" }}</span>
+                                            </div>
+                                            <div class="col-12">
+                                                <small class="text-body-secondary d-block">Billing Address</small>
+                                                <span class="fw-semibold">{{ profile.address|default:"No billing address configured" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-warning border-0 rounded-4 mt-4 d-flex align-items-start shadow-sm">
-                        <i class="bi bi-shield-exclamation fs-4 me-3"></i>
-                        <div>
-                            <div class="fw-bold">Administrator Warning</div>
-                            <small>Deleting or disabling an administrator account can affect access to the NandiRide administration portal.</small>
+                            <div class="alert alert-info border-0 rounded-4 mt-4 mb-0 d-flex align-items-start">
+                                <i class="bi bi-shield-check fs-4 me-3"></i>
+                                <div>
+                                    <div class="fw-bold">Payment Security</div>
+                                    <small>For security, complete card numbers, CVV and other sensitive payment credentials should never be stored directly in the NandiRide application database.</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+<div class="modal fade" id="addWalletMoneyModal" tabindex="-1" aria-labelledby="addWalletMoneyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold text-danger" id="deleteAccountModalLabel">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    Delete Account
-                </h5>
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-3 bg-success-subtle text-success p-2 me-3">
+                        <i class="bi bi-wallet2 fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="addWalletMoneyModalLabel">Add Money to Wallet</h5>
+                        <small class="text-body-secondary">Increase your NandiRide wallet balance.</small>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-
-            <div class="modal-body">
-                <p class="mb-2">Are you sure you want to delete this administrator account?</p>
-                <small class="text-body-secondary">This action should only be continued after verifying the account and its associated data.</small>
+            <div class="modal-body p-4">
+                <label for="walletAmountInput" class="form-label fw-semibold">Amount</label>
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text">₹</span>
+                    <input type="number" id="walletAmountInput" class="form-control" min="1" step="0.01" placeholder="Enter amount">
+                </div>
+                <div class="d-flex gap-2 flex-wrap mt-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm wallet-quick-amount" data-amount="100">₹100</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm wallet-quick-amount" data-amount="500">₹500</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm wallet-quick-amount" data-amount="1000">₹1,000</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm wallet-quick-amount" data-amount="2000">₹2,000</button>
+                </div>
+                <small id="walletModalStatus" class="d-block mt-3 fw-semibold"></small>
             </div>
-
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger">
-                    <i class="bi bi-trash3 me-1"></i>
-                    Confirm Delete
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmWalletMoneyButton">
+                    <i class="bi bi-plus-circle me-1"></i>Add Money
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="walletTransactionsModal" tabindex="-1" aria-labelledby="walletTransactionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-3 bg-success-subtle text-success p-2 me-3">
+                        <i class="bi bi-clock-history fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="walletTransactionsModalLabel">Wallet Transaction History</h5>
+                        <small class="text-body-secondary">Complete wallet credit and debit transaction records.</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                {% if user.wallet_transactions.all %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-3 py-3">Date &amp; Time</th>
+                                <th class="py-3">Type</th>
+                                <th class="py-3">Amount</th>
+                                <th class="py-3">Balance</th>
+                                <th class="py-3">Status</th>
+                                <th class="py-3">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for wallet_transaction in user.wallet_transactions.all %}
+                            <tr>
+                                <td class="px-3">
+                                    <div class="fw-semibold">{{ wallet_transaction.created_at|date:"d M Y" }}</div>
+                                    <small class="text-body-secondary">{{ wallet_transaction.created_at|date:"h:i A" }}</small>
+                                </td>
+                                <td>
+                                    {% if wallet_transaction.transaction_type == "credit" %}
+                                    <span class="badge text-bg-success rounded-pill">
+                                        <i class="bi bi-arrow-down-circle me-1"></i>Credit
+                                    </span>
+                                    {% else %}
+                                    <span class="badge text-bg-danger rounded-pill">
+                                        <i class="bi bi-arrow-up-circle me-1"></i>Debit
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if wallet_transaction.transaction_type == "credit" %}
+                                    <span class="fw-bold text-success">+₹{{ wallet_transaction.amount }}</span>
+                                    {% else %}
+                                    <span class="fw-bold text-danger">-₹{{ wallet_transaction.amount }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="fw-semibold">₹{{ wallet_transaction.balance_after }}</span>
+                                </td>
+                                <td>
+                                    {% if wallet_transaction.status == "success" %}
+                                    <span class="badge text-bg-success rounded-pill">Success</span>
+                                    {% elif wallet_transaction.status == "pending" %}
+                                    <span class="badge text-bg-warning rounded-pill">Pending</span>
+                                    {% else %}
+                                    <span class="badge text-bg-danger rounded-pill">Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="fw-semibold">{{ wallet_transaction.description|default:"Wallet transaction" }}</span>
+                                    {% if wallet_transaction.reference %}
+                                    <small class="text-body-secondary d-block">Ref: {{ wallet_transaction.reference }}</small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-5 text-center">
+                    <div class="rounded-circle bg-body-tertiary d-inline-flex align-items-center justify-content-center p-3 mb-3">
+                        <i class="bi bi-wallet2 fs-2 text-body-secondary"></i>
+                    </div>
+                    <h6 class="fw-bold">No Wallet Transactions</h6>
+                    <p class="text-body-secondary mb-0">No wallet transaction has been recorded for this account yet.</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer border-top">
+                <div class="me-auto">
+                    <small class="text-body-secondary">
+                        <i class="bi bi-shield-check me-1"></i>Wallet records are linked to your NandiRide account.
+                    </small>
+                </div>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cardModal" tabindex="-1" aria-labelledby="cardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-3 bg-warning-subtle text-warning p-2 me-3">
+                        <i class="bi bi-credit-card-2-front fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="cardModalLabel">{% if payment_details.card_last_four %}Update Card{% else %}Add Card{% endif %}</h5>
+                        <small class="text-body-secondary">Only the last 4 digits will be stored.</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-warning border-0 rounded-3 small">
+                    <i class="bi bi-shield-lock me-2"></i>
+                    Do not enter your complete card number or CVV. NandiRide stores only the last 4 digits.
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="cardLastFourInput" class="form-label fw-semibold">Last 4 Digits</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                            <input type="text" id="cardLastFourInput" class="form-control" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" value="{{ payment_details.card_last_four|default:'' }}" placeholder="1234">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="cardBrandInput" class="form-label fw-semibold">Card Brand</label>
+                        <select id="cardBrandInput" class="form-select">
+                            <option value="">Select brand</option>
+                            <option value="Visa" {% if payment_details.card_brand == "Visa" %}selected{% endif %}>Visa</option>
+                            <option value="Mastercard" {% if payment_details.card_brand == "Mastercard" %}selected{% endif %}>Mastercard</option>
+                            <option value="RuPay" {% if payment_details.card_brand == "RuPay" %}selected{% endif %}>RuPay</option>
+                            <option value="American Express" {% if payment_details.card_brand == "American Express" %}selected{% endif %}>American Express</option>
+                            <option value="Other" {% if payment_details.card_brand == "Other" %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="cardExpiryInput" class="form-label fw-semibold">Expiry</label>
+                        <input type="text" id="cardExpiryInput" class="form-control" maxlength="7" value="{{ payment_details.card_expiry|default:'' }}" placeholder="MM/YY">
+                    </div>
+                </div>
+                <small id="cardModalStatus" class="d-block mt-3 fw-semibold"></small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveCardButton">
+                    <i class="bi bi-save me-1"></i>Save Card
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewCardDetailsModal" tabindex="-1" aria-labelledby="viewCardDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-3 bg-primary-subtle text-primary p-2 me-3">
+                        <i class="bi bi-eye fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="viewCardDetailsModalLabel">Saved Card Details</h5>
+                        <small class="text-body-secondary">Secure view of your saved payment information.</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                {% if payment_details.card_last_four %}
+                <div class="bg-body-tertiary rounded-4 p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div>
+                            <small class="text-body-secondary d-block mb-1">Card Brand</small>
+                            <h6 class="fw-bold mb-0" id="secureCardBrand">{{ payment_details.card_brand|default:"Payment Card" }}</h6>
+                        </div>
+                        <i class="bi bi-credit-card-2-front fs-1 text-primary"></i>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-body-secondary d-block mb-1">Card Number</small>
+                        <span class="fs-5 fw-bold" id="secureCardNumber">•••• •••• •••• {{ payment_details.card_last_four }}</span>
+                    </div>
+                    <div>
+                        <small class="text-body-secondary d-block mb-1">Expiry</small>
+                        <span class="fw-semibold" id="secureCardExpiry">{{ payment_details.card_expiry|default:"-" }}</span>
+                    </div>
+                </div>
+                <div class="alert alert-warning border-0 rounded-3 mt-3 mb-0">
+                    <i class="bi bi-shield-lock-fill me-2"></i>
+                    <strong>Security:</strong> NandiRide does not store or display the complete 16-digit card number or CVV. Only the last 4 digits, card brand and expiry are retained.
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-credit-card fs-1 text-body-secondary"></i>
+                    <h6 class="fw-bold mt-3">No Card Added</h6>
+                    <p class="text-body-secondary mb-0">There is no saved payment card for this account.</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -815,22 +1067,436 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    const settingsUrl = "{% url 'user_setting' %}";
+    const csrfToken = getCookie("csrftoken");
     const addressType = document.getElementById("addressType");
     const addressLabel = document.getElementById("addressLabel");
+    const notificationToggles = document.querySelectorAll(".notification-toggle");
+    const notificationStatus = document.getElementById("notification-status");
+    const verifyEmailButton = document.getElementById("verifyEmailButton");
+    const emailVerificationMessage = document.getElementById("emailVerificationMessage");
+    const saveUpiButton = document.getElementById("saveUpiButton");
+    const upiIdInput = document.getElementById("upiIdInput");
+    const upiDisplay = document.getElementById("upiDisplay");
+    const upiBadge = document.getElementById("upiBadge");
+    const accountDetailsStatus = document.getElementById("accountDetailsStatus");
+    const walletBalance = document.getElementById("walletBalance");
+    const walletAmountInput = document.getElementById("walletAmountInput");
+    const confirmWalletMoneyButton = document.getElementById("confirmWalletMoneyButton");
+    const walletModalStatus = document.getElementById("walletModalStatus");
+    const walletStatus = document.getElementById("walletStatus");
+    const addWalletMoneyButton = document.getElementById("addWalletMoneyButton");
+    const walletTransactionsButton = document.getElementById("walletTransactionsButton");
+    const cardLastFourInput = document.getElementById("cardLastFourInput");
+    const cardBrandInput = document.getElementById("cardBrandInput");
+    const cardExpiryInput = document.getElementById("cardExpiryInput");
+    const saveCardButton = document.getElementById("saveCardButton");
+    const removeCardButton = document.getElementById("removeCardButton");
+    const cardBadge = document.getElementById("cardBadge");
+    const cardDisplay = document.getElementById("cardDisplay");
+    const cardStatus = document.getElementById("cardStatus");
+    const cardModalStatus = document.getElementById("cardModalStatus");
 
     if (addressType && addressLabel) {
         const labels = {
-            HOME: "Home Address",
-            WORK: "Work Address",
-            OTHER: "Other Address"
+            home: "Home Address",
+            office: "Office Address",
+            other: "Other Address"
         };
-
         addressType.addEventListener("change", function () {
-            if (labels[this.value]) {
+            if (labels[this.value] && !addressLabel.value.trim()) {
                 addressLabel.value = labels[this.value];
             }
         });
     }
+
+    function getCookie(name) {
+        const cookies = document.cookie ? document.cookie.split(";") : [];
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+                return decodeURIComponent(cookie.substring(name.length + 1));
+            }
+        }
+        return null;
+    }
+
+    function setStatus(element, message, type) {
+        if (!element) {
+            return;
+        }
+        element.className = "small fw-semibold";
+        if (type === "success") {
+            element.classList.add("text-success");
+        } else if (type === "error") {
+            element.classList.add("text-danger");
+        } else {
+            element.classList.add("text-body-secondary");
+        }
+        element.textContent = message;
+    }
+
+    function postAjax(data) {
+        if (!csrfToken) {
+            return Promise.reject(new Error("CSRF token not found. Please refresh the page."));
+        }
+        return fetch(settingsUrl, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json"
+            },
+            body: new URLSearchParams(data).toString()
+        }).then(function (response) {
+            return response.text().then(function (text) {
+                let data = {};
+                try {
+                    data = text ? JSON.parse(text) : {};
+                } catch (error) {
+                    throw new Error("Invalid server response.");
+                }
+                if (!response.ok) {
+                    throw new Error(data.message || "Server request failed.");
+                }
+                return data;
+            });
+        });
+    }
+
+    notificationToggles.forEach(function (toggle) {
+        toggle.addEventListener("change", function () {
+            const currentToggle = this;
+            const field = currentToggle.dataset.field;
+            const newValue = currentToggle.checked;
+            const previousValue = !newValue;
+            currentToggle.disabled = true;
+            setStatus(notificationStatus, "Saving...", "loading");
+            postAjax({
+                action: "update_notification",
+                field: field,
+                value: newValue ? "true" : "false"
+            }).then(function (data) {
+                if (!data.success) {
+                    throw new Error(data.message || "Notification update failed.");
+                }
+                currentToggle.checked = Boolean(data.value);
+                setStatus(notificationStatus, "Preference saved", "success");
+                setTimeout(function () {
+                    if (notificationStatus) {
+                        notificationStatus.textContent = "";
+                    }
+                }, 1800);
+            }).catch(function (error) {
+                currentToggle.checked = previousValue;
+                setStatus(notificationStatus, error.message || "Unable to save", "error");
+                console.error("NandiRide notification error:", error);
+            }).finally(function () {
+                currentToggle.disabled = false;
+            });
+        });
+    });
+
+    if (verifyEmailButton) {
+        verifyEmailButton.addEventListener("click", function () {
+            verifyEmailButton.disabled = true;
+            verifyEmailButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sending...';
+            setStatus(emailVerificationMessage, "", "loading");
+            postAjax({
+                action: "send_email_verification"
+            }).then(function (data) {
+                if (!data.success) {
+                    throw new Error(data.message || "Unable to send verification email.");
+                }
+                setStatus(emailVerificationMessage, data.message || "Verification email sent.", "success");
+                verifyEmailButton.innerHTML = '<i class="bi bi-envelope-check me-1"></i>Email Sent';
+            }).catch(function (error) {
+                setStatus(emailVerificationMessage, error.message || "Unable to send verification email.", "error");
+                verifyEmailButton.disabled = false;
+                verifyEmailButton.innerHTML = '<i class="bi bi-envelope-check me-1"></i>Verify Email';
+            });
+        });
+    }
+
+    if (saveUpiButton) {
+        saveUpiButton.addEventListener("click", function () {
+            const upiId = upiIdInput ? upiIdInput.value.trim() : "";
+            if (upiId && !/^[a-zA-Z0-9][a-zA-Z0-9._-]{1,}@[a-zA-Z0-9.-]{2,}$/.test(upiId)) {
+                setStatus(accountDetailsStatus, "Please enter a valid UPI ID.", "error");
+                return;
+            }
+            saveUpiButton.disabled = true;
+            saveUpiButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving...';
+            setStatus(accountDetailsStatus, "Saving UPI details...", "loading");
+            postAjax({
+                action: "save_account_details",
+                upi_id: upiId
+            }).then(function (data) {
+                if (!data.success) {
+                    throw new Error(data.message || "Unable to save UPI details.");
+                }
+                const savedUpi = data.upi_id || "";
+                if (upiDisplay) {
+                    upiDisplay.textContent = savedUpi || "No UPI ID linked";
+                }
+                if (upiBadge) {
+                    upiBadge.className = "badge " + (savedUpi ? "text-bg-success" : "text-bg-secondary") + " rounded-pill";
+                    upiBadge.textContent = savedUpi ? "Linked" : "Not Linked";
+                }
+                setStatus(accountDetailsStatus, data.message || "UPI details saved successfully.", "success");
+            }).catch(function (error) {
+                setStatus(accountDetailsStatus, error.message || "Unable to save UPI details.", "error");
+                console.error("NandiRide UPI error:", error);
+            }).finally(function () {
+                saveUpiButton.disabled = false;
+                saveUpiButton.innerHTML = '<i class="bi bi-save me-1"></i>Save UPI';
+            });
+        });
+    }
+
+    document.querySelectorAll(".wallet-quick-amount").forEach(function (button) {
+        button.addEventListener("click", function () {
+            if (walletAmountInput) {
+                walletAmountInput.value = this.dataset.amount;
+                walletAmountInput.focus();
+            }
+        });
+    });
+
+    if (confirmWalletMoneyButton) {
+        confirmWalletMoneyButton.addEventListener("click", function () {
+            const amount = walletAmountInput ? walletAmountInput.value.trim() : "";
+            const amountNumber = Number(amount);
+            if (!amount || !Number.isFinite(amountNumber) || amountNumber <= 0) {
+                setStatus(walletModalStatus, "Please enter a valid amount.", "error");
+                return;
+            }
+            if (Math.round(amountNumber * 100) !== amountNumber * 100) {
+                setStatus(walletModalStatus, "Maximum 2 decimal places are allowed.", "error");
+                return;
+            }
+            confirmWalletMoneyButton.disabled = true;
+            confirmWalletMoneyButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Adding...';
+            setStatus(walletModalStatus, "Adding money to wallet...", "loading");
+            postAjax({
+                action: "add_wallet_money",
+                amount: amount
+            }).then(function (data) {
+                if (!data.success) {
+                    throw new Error(data.message || "Unable to add money.");
+                }
+                if (walletBalance) {
+                    walletBalance.textContent = data.wallet_balance || "0.00";
+                }
+                setStatus(walletStatus, "₹" + (data.amount_added || amount) + " added successfully.", "success");
+                setStatus(accountDetailsStatus, "Wallet balance updated successfully.", "success");
+                setStatus(walletModalStatus, data.message || "Money added successfully.", "success");
+                if (walletAmountInput) {
+                    walletAmountInput.value = "";
+                }
+                setTimeout(function () {
+                    const modalElement = document.getElementById("addWalletMoneyModal");
+                    if (modalElement && window.bootstrap) {
+                        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                        if (modalInstance) {
+                            modalInstance.hide();
+                        }
+                    }
+                }, 900);
+            }).catch(function (error) {
+                setStatus(walletModalStatus, error.message || "Unable to add money.", "error");
+                console.error("NandiRide wallet error:", error);
+            }).finally(function () {
+                confirmWalletMoneyButton.disabled = false;
+                confirmWalletMoneyButton.innerHTML = '<i class="bi bi-plus-circle me-1"></i>Add Money';
+            });
+        });
+    }
+
+    if (addWalletMoneyButton) {
+        addWalletMoneyButton.addEventListener("click", function () {
+            setStatus(walletModalStatus, "", "loading");
+            if (walletAmountInput) {
+                walletAmountInput.value = "";
+            }
+        });
+    }
+
+    if (walletTransactionsButton) {
+        walletTransactionsButton.addEventListener("click", function () {
+            setStatus(walletStatus, "", "success");
+        });
+    }
+
+    if (cardExpiryInput) {
+        cardExpiryInput.addEventListener("input", function () {
+            let value = this.value.replace(/\D/g, "").slice(0, 6);
+            if (value.length > 2) {
+                value = value.substring(0, 2) + "/" + value.substring(2);
+            }
+            this.value = value;
+        });
+    }
+
+    if (cardLastFourInput) {
+        cardLastFourInput.addEventListener("input", function () {
+            this.value = this.value.replace(/\D/g, "").slice(0, 4);
+        });
+    }
+
+    function updateCardUI(lastFour, brand, expiry) {
+        if (cardBadge) {
+            cardBadge.className = "badge " + (lastFour ? "text-bg-success" : "text-bg-secondary") + " rounded-pill";
+            cardBadge.textContent = lastFour ? "Linked" : "Not Added";
+        }
+
+        if (cardDisplay) {
+            if (lastFour) {
+                cardDisplay.innerHTML =
+                    '<div class="d-flex align-items-center justify-content-between gap-3">' +
+                        '<div>' +
+                            '<small class="text-body-secondary d-block" id="cardBrandDisplay">' + escapeHtml(brand || "Payment Card") + '</small>' +
+                            '<span class="fw-semibold">•••• •••• •••• <span id="cardLastFourDisplay">' + escapeHtml(lastFour) + '</span></span>' +
+                            '<small class="text-body-secondary d-block mt-1">Expiry: <span id="cardExpiryDisplay">' + escapeHtml(expiry || "-") + '</span></small>' +
+                        '</div>' +
+                        '<button type="button" class="btn btn-outline-secondary btn-sm rounded-circle" id="viewCardDetailsButton" data-bs-toggle="modal" data-bs-target="#viewCardDetailsModal" title="View saved card details" aria-label="View saved card details">' +
+                            '<i class="bi bi-eye"></i>' +
+                        '</button>' +
+                    '</div>';
+
+                const secureCardBrand = document.getElementById("secureCardBrand");
+                const secureCardNumber = document.getElementById("secureCardNumber");
+                const secureCardExpiry = document.getElementById("secureCardExpiry");
+
+                if (secureCardBrand) {
+                    secureCardBrand.textContent = brand || "Payment Card";
+                }
+
+                if (secureCardNumber) {
+                    secureCardNumber.textContent = "•••• •••• •••• " + lastFour;
+                }
+
+                if (secureCardExpiry) {
+                    secureCardExpiry.textContent = expiry || "-";
+                }
+            } else {
+                cardDisplay.innerHTML =
+                    '<div class="d-flex align-items-center justify-content-between">' +
+                        '<span class="text-body-secondary">No payment card linked</span>' +
+                        '<i class="bi bi-credit-card fs-2 text-secondary"></i>' +
+                    '</div>';
+            }
+        }
+    }
+
+    function escapeHtml(value) {
+        return String(value || "").replace(/[&<>"']/g, function (character) {
+            const entities = {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            };
+            return entities[character];
+        });
+    }
+
+    if (saveCardButton) {
+        saveCardButton.addEventListener("click", function () {
+            const lastFour = cardLastFourInput ? cardLastFourInput.value.trim() : "";
+            const brand = cardBrandInput ? cardBrandInput.value.trim() : "";
+            const expiry = cardExpiryInput ? cardExpiryInput.value.trim() : "";
+
+            if (!/^\d{4}$/.test(lastFour)) {
+                setStatus(cardModalStatus, "Please enter exactly the last 4 digits of the card.", "error");
+                return;
+            }
+
+            if (!brand) {
+                setStatus(cardModalStatus, "Please select a card brand.", "error");
+                return;
+            }
+
+            if (!/^(0[1-9]|1[0-2])\/(?:\d{2}|\d{4})$/.test(expiry)) {
+                setStatus(cardModalStatus, "Expiry must be in MM/YY or MM/YYYY format.", "error");
+                return;
+            }
+
+            saveCardButton.disabled = true;
+            saveCardButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving...';
+            setStatus(cardModalStatus, "Saving card details...", "loading");
+
+            postAjax({
+                action: "save_card",
+                card_last_four: lastFour,
+                card_brand: brand,
+                card_expiry: expiry
+            }).then(function (data) {
+                if (!data.success) {
+                    throw new Error(data.message || "Unable to save card.");
+                }
+
+                updateCardUI(
+                    data.card_last_four || lastFour,
+                    data.card_brand || brand,
+                    data.card_expiry || expiry
+                );
+
+                setStatus(cardStatus, data.message || "Card details saved successfully.", "success");
+                setStatus(accountDetailsStatus, "Card details updated successfully.", "success");
+                setStatus(cardModalStatus, data.message || "Card details saved successfully.", "success");
+
+                setTimeout(function () {
+                    const modalElement = document.getElementById("cardModal");
+                    if (modalElement && window.bootstrap) {
+                        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                        if (modalInstance) {
+                            modalInstance.hide();
+                        }
+                    }
+                }, 900);
+            }).catch(function (error) {
+                setStatus(cardModalStatus, error.message || "Unable to save card.", "error");
+                console.error("NandiRide card error:", error);
+            }).finally(function () {
+                saveCardButton.disabled = false;
+                saveCardButton.innerHTML = '<i class="bi bi-save me-1"></i>Save Card';
+            });
+        });
+    }
+
+    if (removeCardButton) {
+        removeCardButton.addEventListener("click", function () {
+            if (!confirm("Are you sure you want to remove the saved card?")) {
+                return;
+            }
+
+            removeCardButton.disabled = true;
+            removeCardButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Removing...';
+
+            postAjax({
+                action: "remove_card"
+            }).then(function (data) {
+                if (!data.success) {
+                    throw new Error(data.message || "Unable to remove card.");
+                }
+
+                updateCardUI("", "", "");
+                setStatus(cardStatus, data.message || "Card removed successfully.", "success");
+                setStatus(accountDetailsStatus, "Saved card removed successfully.", "success");
+                removeCardButton.remove();
+            }).catch(function (error) {
+                setStatus(cardStatus, error.message || "Unable to remove card.", "error");
+                removeCardButton.disabled = false;
+                removeCardButton.innerHTML = '<i class="bi bi-trash3 me-1"></i>Remove';
+                console.error("NandiRide remove card error:", error);
+            });
+        });
+    }
 });
 </script>
+
 {% endblock %}

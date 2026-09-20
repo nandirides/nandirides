@@ -28,10 +28,9 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 ROOT_URLCONF = "nandirides.urls"
-LOGOUT_REDIRECT_URL = "/"
-LOGIN_URL = "/accounts/login/"
-LOGOUT_REDIRECT_URL = "/accounts/login/"
 
+LOGOUT_REDIRECT_URL = "/accounts/login/"
+LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/admindashboard/"
 
 
@@ -59,6 +58,7 @@ INSTALLED_APPS = [
     'support',
 ]
 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -69,7 +69,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 ROOT_URLCONF = 'nandirides.urls'
+
 
 TEMPLATES = [
     {
@@ -87,6 +89,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'nandirides.wsgi.application'
 
@@ -142,16 +145,34 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# Email Configuration
+# Gmail SMTP
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+EMAIL_HOST_USER = 'nandiride@gmail.com'
+
+# IMPORTANT:
+# Use Gmail App Password here, NOT your normal Gmail password.
+EMAIL_HOST_PASSWORD = 'ilwhvtbwdliptxdn'
+
+DEFAULT_FROM_EMAIL = 'NandiRide <nandiride@gmail.com>'
+SERVER_EMAIL = 'nandiride@gmail.com'
+
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/6.1/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
