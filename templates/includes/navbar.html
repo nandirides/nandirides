@@ -118,24 +118,24 @@
             </li>
             <li class="nav-item dropdown ms-1">
                 <a class="nav-link dropdown-toggle d-flex align-items-center px-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    {% if user.profile.profile_image %}
+                    {% comment %} {% if user.profile.profile_image %}
                     <img src="{{ user.profile.profile_image.url }}" class="rounded-circle shadow-sm border me-2 object-fit-cover" width="34" height="34" alt="User profile">
                     {% else %}
                     <span class="rounded-circle shadow-sm border me-2 bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width:34px;height:34px;">
                         <i class="bi bi-person-fill"></i>
                     </span>
-                    {% endif %}
+                    {% endif %} {% endcomment %}
                     <span class="d-none d-md-inline fw-medium">{{ user.get_full_name|default:user.get_username }}</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0 rounded-3 overflow-hidden" style="width:320px;">
                     <div class="bg-primary text-white text-center p-3">
-                        {% if user.profile.profile_image %}
+                        {% comment %} {% if user.profile.profile_image %}
                         <img src="{{ user.profile.profile_image.url }}" class="rounded-circle border border-3 border-white shadow-sm bg-white object-fit-cover" width="90" height="90" alt="User profile">
                         {% else %}
                         <div class="rounded-circle border border-3 border-white shadow-sm bg-white text-primary d-inline-flex align-items-center justify-content-center" style="width:90px;height:90px;">
                             <i class="bi bi-person-fill fs-1"></i>
                         </div>
-                        {% endif %}
+                        {% endif %} {% endcomment %}
                         <h6 class="mb-1 mt-2 fw-semibold">{{ user.get_full_name|default:user.get_username }}</h6>
                         <p class="mb-1 small fw-medium">
                             {% if user.is_superuser %}
