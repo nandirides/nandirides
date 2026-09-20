@@ -377,8 +377,7 @@ def user_create(request, pk=None):
             )
 
             return redirect(
-                "user_profile",
-                user_id=saved_user.pk,
+                "user_list"
             )
 
     else:
