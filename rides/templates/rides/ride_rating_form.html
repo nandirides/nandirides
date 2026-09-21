@@ -73,9 +73,10 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="{{ form.from_user.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-user-arrow-up me-1"></i>From User
-                                </label>
+                                    <i class="fas fa-user-arrow-up me-1"></i>Customer
+                                </label><br>
                                 {{ form.from_user }}
+                                <small class="me-2">{{ ride.passenger }}</small>
                                 {% if form.from_user.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.from_user.errors %}
@@ -89,9 +90,10 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="{{ form.to_user.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-user-arrow-down me-1"></i>To User
-                                </label>
-                                {{ form.to_user }}
+                                    <i class="fas fa-user-arrow-down me-1"></i>Driver
+                                </label><br>
+                                 {{ form.to_user }}
+                                 <small class="me-2">{{ ride.driver }}</small>
                                 {% if form.to_user.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.to_user.errors %}

@@ -462,7 +462,7 @@ def user_list(request):
         "dashboard/users/list.html",
         {
             "users": users,
-            "page_title": "User List",
+            #"page_title": "User List",
             "breadcrumb_items": [
                 {
                     "title": "User List",
@@ -723,7 +723,7 @@ def dashboard(request):
         .order_by("-count")
     )
     context = {
-        "page_title": "Admin Dashboard",
+        #"page_title": "Admin Dashboard",
         "total_users": total_users,
         "active_users": active_users,
         "total_rides": total_rides,

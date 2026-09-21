@@ -573,10 +573,6 @@ def ride_create_edit(request, pk=None):
 
         "breadcrumb_items": [
             {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
-            {
                 "title": (
                     "Edit Ride"
                     if ride
@@ -585,7 +581,7 @@ def ride_create_edit(request, pk=None):
                 "url": (
                     reverse("ride_edit", args=[ride.id])
                     if ride
-                    else reverse("ride_create")
+                    else reverse("ride_add")
                 ),
             },
         ],
@@ -681,10 +677,6 @@ def ride_status_update(request, pk):
         "page_title": f"Update Status - {ride.ride_number}",
         "breadcrumb_items": [
             {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
-            {
                 "title": "Update Status",
                 "url": "ride_status_update"
             },
@@ -775,10 +767,6 @@ def ride_details(request, pk):
         "page_title": f"Ride {ride.ride_number}",
         "breadcrumb_items": [
             {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
-            {
                 "title": "Ride",
                 "url": "ride_details"
             },
@@ -818,10 +806,6 @@ def ride_assignment_list(request, ride_pk):
     context = {
         "page_title": f"Driver Assignments - {ride.ride_number}",
         "breadcrumb_items": [
-            {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
             {
                 "title": "Driver Assignment",
                 "url": "ride_assignment_list"
@@ -909,10 +893,6 @@ def ride_assignment_create(request, ride_pk):
         "page_title": f"Assign Driver - {ride.ride_number}",
         "breadcrumb_items": [
             {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
-            {
                 "title": "Assign Driver",
                 "url": "ride_assignment_add"
             },
@@ -968,10 +948,6 @@ def ride_assignment_edit(request, pk):
     context = {
         "page_title": f"Edit Assignment - {assignment.ride.ride_number}",
         "breadcrumb_items": [
-            {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
             {
                 "title": "Edit Assignment",
                 "url": "ride_assignment_edit"
@@ -1034,10 +1010,6 @@ def ride_tracking_list(request, ride_pk):
     context = {
         "page_title": f"Tracking - {ride.ride_number}",
         "breadcrumb_items": [
-            {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
             {
                 "title": "Tracking",
                 "url": "ride_tracking_list"
@@ -1103,12 +1075,8 @@ def ride_tracking_create(request, ride_pk):
         )
 
     context = {
-        "page_title": f"Add Tracking Point - {ride.ride_number}",
+        #"page_title": f"Add Tracking Point",
         "breadcrumb_items": [
-            {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
             {
                 "title": "Add Tracking Point",
                 "url": "ride_tracking_add"
@@ -1229,10 +1197,6 @@ def ride_cancellation_create(request, ride_pk):
         "page_title": f"Cancel Ride - {ride.ride_number}",
         "breadcrumb_items": [
             {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
-            {
                 "title": "Cancel Ride",
                 "url": "ride_cancellation_add"
             },
@@ -1307,10 +1271,6 @@ def ride_rating_create(request, ride_pk):
         "page_title": f"Rate Ride - {ride.ride_number}",
         "breadcrumb_items": [
             {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
-            {
                 "title": "Rate Ride",
                 "url": "ride_rating_add"
             },
@@ -1342,10 +1302,6 @@ def ride_stop_list(request, ride_pk):
     context = {
         "page_title": f"Ride Stops - {ride.ride_number}",
         "breadcrumb_items": [
-            {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
             {
                 "title": "Ride Stops",
                 "url": "ride_stop_list"
@@ -1406,10 +1362,6 @@ def ride_stop_create(request, ride_pk):
         "page_title": f"Add Stop - {ride.ride_number}",
         "breadcrumb_items": [
             {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
-            {
                 "title": "Add Stop",
                 "url": "ride_stop_add"
             },
@@ -1464,10 +1416,6 @@ def ride_stop_edit(request, pk):
     context = {
         "page_title": f"Edit Stop - {stop.ride.ride_number}",
         "breadcrumb_items": [
-            {
-                "title": "Ride Dashboard",
-                "url": "ride_dashboard"
-            },
             {
                 "title": "Edit Stop",
                 "url": "ride_stop_edit"

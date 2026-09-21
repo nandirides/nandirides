@@ -16,6 +16,8 @@ class SupportCategory(TimeStampedModel):
     is_active = models.BooleanField(
         default=True,
     )
+    def __str__(self):
+                return f"{self.name}"
 
 
 class SupportTicket(TimeStampedModel):
@@ -94,6 +96,8 @@ class SupportTicket(TimeStampedModel):
         null=True,
         blank=True,
     )
+
+    
 
 
 class Notification(TimeStampedModel):
