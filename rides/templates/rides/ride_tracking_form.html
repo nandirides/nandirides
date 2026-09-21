@@ -19,13 +19,6 @@
                         <i class="fas fa-location-dot me-2"></i>
                         {% if object %}Edit Tracking Point{% else %}Add Tracking Point{% endif %}
                     </h3>
-                    <div class="text-body-secondary">
-                        {% if object %}
-                            Update GPS tracking information for {{ ride.ride_number }}
-                        {% else %}
-                            Record a new GPS location for {{ ride.ride_number }}
-                        {% endif %}
-                    </div>
                 </div>
                 <span class="badge text-bg-primary">
                     <i class="fas fa-satellite-dish me-1"></i>

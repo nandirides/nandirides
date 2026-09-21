@@ -2,11 +2,6 @@
 <nav class="app-header navbar navbar-expand bg-body border-bottom shadow-sm {% if request.resolver_match.url_name == 'login' %}app-header-login{% else %}app-header-dashboard{% endif %}" style="position:fixed!important;top:0;right:0;z-index:1030!important;">
     <div class="container-fluid position-relative">
         <ul class="navbar-nav align-items-center">
-            <li class="nav-item">
-                <button type="button" class="nav-link border-0 bg-transparent rounded-circle" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
-                    <i class="bi bi-moon-fill" id="theme-icon"></i>
-                </button>
-            </li>
             {% if request.resolver_match.url_name != 'login' %}
             <li class="nav-item">
                 <a class="nav-link rounded" data-lte-toggle="sidebar" href="#" role="button" aria-label="Toggle sidebar" title="Toggle sidebar">
@@ -53,6 +48,11 @@
                 </a>
             </li>
             {% endif %}
+            <li class="nav-item">
+                <button type="button" class="nav-link border-0 bg-transparent rounded-circle" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+                    <i class="bi bi-moon-fill" id="theme-icon"></i>
+                </button>
+            </li>
             {% if user.is_authenticated %}
             <li class="nav-item dropdown notification-nav-item">
                 <a class="nav-link notification-bell-wrapper rounded-circle"
@@ -145,7 +145,7 @@
                             Web User
                             {% endif %}
                         </p>
-                        <small class="opacity-75">Member since {{ user.date_joined|date:"M. Y" }}</small>
+                        <small class="opacity-75">Last Login {{ user.last_login|date:"d M Y, h:i A" }}</small>
                     </div>
                     <div class="p-3 bg-body">
                         <div class="d-flex gap-2">
