@@ -1,16 +1,18 @@
 <div class="app-content-header" id="app-content-header">
     <div class="container-fluid">
-        <div class="row">
+        <div class="row align-items-center">
+            <!-- Page Title -->
             <div class="col-sm-6">
                 <h3 class="mb-0">
                     {{ page_title|default:"Dashboard" }}
                 </h3>
             </div>
+            <!-- Breadcrumb -->
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-end mb-0">
                     <li class="breadcrumb-item">
                         <a href="{% url 'dashboard' %}">
-                            Home
+                            Admin Dashboard
                         </a>
                     </li>
                     {% if breadcrumb_items %}
@@ -37,59 +39,26 @@
         </div>
     </div>
 </div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const header = document.getElementById("app-content-header");
     const navbar = document.querySelector(".app-header");
-    const sidebar = document.querySelector(".app-sidebar");
     function updateContentHeader() {
         if (!header || !navbar) return;
         const navbarHeight = navbar.getBoundingClientRect().height;
         header.style.marginTop = navbarHeight + "px";
+        header.style.marginLeft = "0";
+        header.style.width = "100%";
         header.style.position = "relative";
         header.style.zIndex = "1";
-        if (window.innerWidth <= 991.98) {
-            header.style.marginLeft = "0";
-            header.style.width = "100%";
-            return;
-        }
-        if (sidebar) {
-            const body = document.body;
-            const collapsed = body.classList.contains("sidebar-collapse");
-            if (collapsed) {
-                header.style.marginLeft = "0";
-                header.style.width = "100%";
-            } else {
-                const sidebarWidth = sidebar.getBoundingClientRect().width;
-                if (sidebarWidth > 0) {
-                    header.style.marginLeft = sidebarWidth + "px";
-                    header.style.width = "calc(100% - " + sidebarWidth + "px)";
-                } else {
-                    header.style.marginLeft = "0";
-                    header.style.width = "100%";
-                }
-            }
-        } else {
-            header.style.marginLeft = "0";
-            header.style.width = "100%";
-        }
     }
+
     updateContentHeader();
+
     window.addEventListener("resize", updateContentHeader);
-    const observer = new MutationObserver(function () {
-        requestAnimationFrame(updateContentHeader);
-    });
-    observer.observe(document.body, {
-        attributes: true,
-        attributeFilter: ["class"]
-    });
-    if (sidebar) {
-        observer.observe(sidebar, {
-            attributes: true,
-            attributeFilter: ["class", "style"]
-        });
-    }
-    if (navbar) {
+
+    if (typeof ResizeObserver !== "undefined") {
         const navbarObserver = new ResizeObserver(function () {
             updateContentHeader();
         });

@@ -2,22 +2,6 @@
 {% load static %}
 {% block title %}{{ page_title }} | NandiRide{% endblock %}
 {% block content %}
-<div class="app-content-header">
-    <div class="container-fluid">
-        <div class="row align-items-center">
-            <div class="col-sm-6">
-                <h3 class="mb-0 fw-semibold"><i class="bi bi-folder2-open me-2"></i>{{ page_title }}</h3>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-end mb-0">
-                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'support_dashboard' %}">Support</a></li>
-                    <li class="breadcrumb-item active">Categories</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-</div>
 <div class="app-content">
     <div class="container-fluid">
         <div class="card shadow-sm">

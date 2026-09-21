@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Gallery Management{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 {% block content %}
 <div class="app-main">
     <div class="app-content-header">
@@ -9,14 +9,6 @@
                     <h3 class="mb-0 fw-bold">
                         <i class="bi bi-images text-primary me-2"></i>Gallery Management
                     </h3>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-end mb-0">
-                        <li class="breadcrumb-item">
-                            <a href="{% url 'home' %}" class="text-primary text-decoration-none">Home</a>
-                        </li>
-                        <li class="breadcrumb-item active">Gallery</li>
-                    </ol>
                 </div>
             </div>
         </div>

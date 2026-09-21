@@ -9,14 +9,6 @@
                 {% if form.instance.pk %}Update the existing driver and vehicle assignment.{% else %}Assign a driver to a vehicle and manage the assignment period.{% endif %}
             </p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'assignment_list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Back to Assignments
-            </a>
-            <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-primary">
-                <i class="bi bi-speedometer2 me-1"></i>Dashboard
-            </a>
-        </div>
     </div>
     {% if messages %}
     <div class="mb-3">

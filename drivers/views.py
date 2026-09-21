@@ -4,12 +4,19 @@ from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import DriverDocumentForm, DriverForm
 from .models import Driver, DriverDocument
+from django.urls import reverse
 
 def driver_list(request):
     drivers = Driver.objects.select_related("user").all().order_by("-id")
     context = {
-        "drivers": drivers,
         "page_title": "Drivers",
+        "breadcrumb_items": [
+            {
+                "title": "Drivers",
+                "url": "driver_list"
+            },
+        ],
+        "drivers": drivers,
         "total_drivers": drivers.count(),
         "active_drivers": drivers.filter(
             status=Driver.Status.ACTIVE
@@ -61,6 +68,16 @@ def driver_form(request, pk=None):
         "form": form,
         "driver": driver,
         "page_title": "Edit Driver" if pk else "Add Driver",
+        "breadcrumb_items": [
+            {
+                "title": "Edit Driver" if pk else "Add Driver",
+                "url": (
+                    reverse("driver_edit", args=[pk])
+                    if pk
+                    else reverse("driver_create")
+                ),
+            },
+        ],
     }
     return render(
         request,
@@ -112,6 +129,12 @@ def driver_detail(request, pk):
         "earnings": earnings,
         "payouts": payouts,
         "page_title": "Driver Details",
+        "breadcrumb_items": [
+            {
+                "title": "Driver Details",
+                "url": "driver_detail"
+            },
+        ],
     }
     return render(
         request,
@@ -181,6 +204,16 @@ def driver_document_form(request, driver_pk, pk=None):
         "driver": driver,
         "document": document,
         "page_title": "Edit Document" if pk else "Add Document",
+        "breadcrumb_items": [
+            {
+                "title": "Edit Document" if pk else "Add Document",
+                "url": (
+                    reverse("ddriver_document_edit", args=[pk])
+                    if pk
+                    else reverse("driver_document_create")
+                ),
+            },
+        ],
     }
     return render(
         request,

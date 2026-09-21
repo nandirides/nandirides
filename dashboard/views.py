@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
+from functools import lru_cache
 import re
 from django.conf import settings
 from django.contrib import messages
@@ -10,13 +11,21 @@ from django.contrib.auth.models import User, Group, Permission
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, dumps, loads
 from django.db import transaction
-from django.db.models import Count, F, Sum
+from django.db.models import Count, F, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from .forms import GalleryForm, UserCreateForm
-from .models import AccountNotificationPreference, AccountPaymentDetail, Gallery, UserAddress, UserProfile, WalletTransaction
+from .models import (
+    AccountNotificationPreference,
+    AccountPaymentDetail,
+    Gallery,
+    GroupStatus,
+    UserAddress,
+    UserProfile,
+    WalletTransaction,
+)
 from drivers.models import Driver
 from locations.models import City, Country, Location, State
 from payments.models import Payment, Refund
@@ -26,16 +35,12 @@ from rides.models import Ride, RideRequest
 from support.models import SupportTicket
 from vehicles.models import Vehicle, VehicleType
 from django.core.exceptions import PermissionDenied
-from .models import GroupStatus
-
 
 EMAIL_VERIFICATION_SALT = "nandiride-email-verification"
 EMAIL_VERIFICATION_MAX_AGE = 86400
 
-
 def _is_ajax(request):
     return request.headers.get("X-Requested-With") == "XMLHttpRequest"
-
 
 def _json_error(message, status=400):
     return JsonResponse(
@@ -46,7 +51,6 @@ def _json_error(message, status=400):
         status=status,
     )
 
-
 def _json_success(message="", **kwargs):
     data = {
         "success": True,
@@ -55,21 +59,14 @@ def _json_success(message="", **kwargs):
     data.update(kwargs)
     return JsonResponse(data)
 
-
+@lru_cache(maxsize=None)
 def _field_names(model):
-    return {
-        field.name
-        for field in model._meta.get_fields()
-    }
-
+    return frozenset(field.name for field in model._meta.get_fields())
 
 def _safe_count(model, filters=None):
     filters = filters or {}
     fields = _field_names(model)
-    if not all(
-        key.split("__")[0] in fields
-        for key in filters
-    ):
+    if not all(key.split("__", 1)[0] in fields for key in filters):
         return model.objects.count()
     return model.objects.filter(**filters).count()
 
@@ -101,12 +98,20 @@ def _safe_active_count(model):
     return model.objects.count()
 
 def _safe_status_count(model, values):
-    fields = _field_names(model)
-    if "status" not in fields:
+    if "status" not in _field_names(model):
         return 0
-    return model.objects.filter(
-        status__in=values
-    ).count()
+    return model.objects.filter(status__in=values).count()
+
+def _safe_status_counts(model, groups):
+    if "status" not in _field_names(model):
+        return {name: 0 for name in groups}
+    result = model.objects.aggregate(
+        **{
+            name: Count("id", filter=Q(status__in=values))
+            for name, values in groups.items()
+        }
+    )
+    return {name: result[name] or 0 for name in groups}
 
 def _safe_verified_count(model):
     fields = _field_names(model)
@@ -171,14 +176,22 @@ def ride_gallery(request):
             return redirect("ride_gallery")
     else:
         form = GalleryForm()
-    return render(
-        request,
-        "includes/gallery.html",
-        {
+
+        context = {
+            "page_title": "Gallery",
             "gallery": gallery,
             "galleries": gallery,
             "form": form,
-        },
+            "breadcrumb_items": [
+                {
+                    "title": "Gallery",
+                    "url": "/ride_gallery"
+                },
+            ]
+        }
+    return render(
+        request,
+        "includes/gallery.html",context
     )
 
 @login_required
@@ -286,12 +299,10 @@ def user_create(request, pk=None):
                 )
                 == "1"
             )
-
             if remove_profile_image and profile.profile_image:
                 profile.profile_image.delete(
                     save=False
                 )
-
                 profile.profile_image = None
             profile.save()
             address_line1 = request.POST.get(
@@ -302,27 +313,22 @@ def user_create(request, pk=None):
                 "address_line2",
                 "",
             ).strip()
-
             landmark = request.POST.get(
                 "landmark",
                 "",
             ).strip()
-
             postal_code = request.POST.get(
                 "postal_code",
                 "",
             ).strip()
-
             label = request.POST.get(
                 "address_label",
                 "",
             ).strip()
-
             address_type = request.POST.get(
                 "address_type",
                 UserAddress.AddressType.OTHER,
             ).strip()
-
             address_city_id = (
                 request.POST.get(
                     "address_city",
@@ -330,7 +336,6 @@ def user_create(request, pk=None):
                 ).strip()
                 or city_id
             )
-
             if address_line1:
                 address = (
                     UserAddress.objects.filter(
@@ -341,19 +346,16 @@ def user_create(request, pk=None):
                         user=saved_user
                     ).first()
                 )
-
                 if address is None:
                     address = UserAddress(
                         user=saved_user
                     )
-
                 address.address_line1 = address_line1
                 address.address_line2 = address_line2
                 address.landmark = landmark
                 address.postal_code = postal_code
                 address.label = label
                 address.address_type = address_type
-
                 address.city = (
                     City.objects.filter(
                         pk=address_city_id
@@ -361,10 +363,8 @@ def user_create(request, pk=None):
                     if address_city_id
                     else None
                 )
-
                 address.is_default = True
                 address.save()
-
                 UserAddress.objects.filter(
                     user=saved_user
                 ).exclude(
@@ -372,25 +372,20 @@ def user_create(request, pk=None):
                 ).update(
                     is_default=False
                 )
-
             messages.success(
                 request,
                 "User saved successfully.",
             )
-
             return redirect(
                 "user_list"
             )
-
     else:
         form = UserCreateForm(
             instance=user_obj
         )
-
     cities = City.objects.all().order_by(
         "name"
     )
-
     return render(
         request,
         "dashboard/users/user_create.html",
@@ -398,43 +393,49 @@ def user_create(request, pk=None):
             "form": form,
             "user_obj": user_obj,
             "selected_user": user_obj,
-            "page_title": (
+           "page_title": (
                 "Edit User"
                 if user_obj
                 else "Add User"
             ),
+            "breadcrumb_items": [
+                {
+                    "title": (
+                        "Edit User"
+                        if user_obj
+                        else "Add User"
+                    ),
+                    "url": (
+                        reverse("user_edit", args=[user_obj.id])
+                        if user_obj
+                        else reverse("user_create")
+                    ),
+                },
+            ],
             "cities": cities,
         },
     )
-
 
 @login_required
 def user_delete(request, pk):
     if request.method != "POST":
         return redirect("user_list")
-
     user_obj = get_object_or_404(
         User,
         pk=pk,
     )
-
     if user_obj.pk == request.user.pk:
         messages.error(
             request,
             "You cannot delete your own account.",
         )
-
         return redirect("user_list")
-
     user_obj.delete()
-
     messages.success(
         request,
         "User deleted successfully.",
     )
-
     return redirect("user_list")
-
 
 @login_required
 def gallery_delete(request, pk):
@@ -451,7 +452,6 @@ def gallery_delete(request, pk):
     )
     return redirect("ride_gallery")
 
-
 @login_required
 def user_list(request):
     users = User.objects.all().order_by(
@@ -462,9 +462,15 @@ def user_list(request):
         "dashboard/users/list.html",
         {
             "users": users,
+            "page_title": "User List",
+            "breadcrumb_items": [
+                {
+                    "title": "User List",
+                    "url": "user_list"
+                },
+            ],
         },
     )
-
 
 @login_required
 def user_profile(request, user_id):
@@ -475,7 +481,6 @@ def user_profile(request, user_id):
     profile, _ = UserProfile.objects.get_or_create(
         user=profile_user
     )
-
     address = (
         UserAddress.objects.filter(
             user=profile_user,
@@ -485,7 +490,6 @@ def user_profile(request, user_id):
             user=profile_user
         ).first()
     )
-
     return render(
         request,
         "account/user_profile.html",
@@ -498,101 +502,80 @@ def user_profile(request, user_id):
         },
     )
 
-
 @login_required
 def dashboard(request):
-    total_users = User.objects.count()
-    active_users = User.objects.filter(
-        is_active=True
-    ).count()
-
-    total_rides = Ride.objects.count()
-    total_ride_requests = RideRequest.objects.count()
-
-    completed_rides = Ride.objects.filter(
-        status=Ride.Status.COMPLETED
-    ).count()
-
-    cancelled_rides = Ride.objects.filter(
-        status=Ride.Status.CANCELLED
-    ).count()
-
-    ongoing_rides = Ride.objects.filter(
-        status__in=[
-            Ride.Status.DRIVER_ASSIGNED,
-            Ride.Status.DRIVER_ARRIVING,
-            Ride.Status.DRIVER_ARRIVED,
-            Ride.Status.STARTED,
-        ]
-    ).count()
-
-    pending_rides = RideRequest.objects.filter(
-        status__in=[
-            RideRequest.Status.REQUESTED,
-            RideRequest.Status.SEARCHING,
-        ]
-    ).count()
-
+    user_counts = User.objects.aggregate(
+        total=Count("id"),
+        active=Count("id", filter=Q(is_active=True)),
+    )
+    ride_counts = Ride.objects.aggregate(
+        total=Count("id"),
+        completed=Count("id", filter=Q(status=Ride.Status.COMPLETED)),
+        cancelled=Count("id", filter=Q(status=Ride.Status.CANCELLED)),
+        ongoing=Count(
+            "id",
+            filter=Q(
+                status__in=[
+                    Ride.Status.DRIVER_ASSIGNED,
+                    Ride.Status.DRIVER_ARRIVING,
+                    Ride.Status.DRIVER_ARRIVED,
+                    Ride.Status.STARTED,
+                ]
+            ),
+        ),
+    )
+    ride_request_counts = RideRequest.objects.aggregate(
+        total=Count("id"),
+        pending=Count(
+            "id",
+            filter=Q(
+                status__in=[
+                    RideRequest.Status.REQUESTED,
+                    RideRequest.Status.SEARCHING,
+                ]
+            ),
+        ),
+    )
+    total_users = user_counts["total"]
+    active_users = user_counts["active"]
+    total_rides = ride_counts["total"]
+    total_ride_requests = ride_request_counts["total"]
+    completed_rides = ride_counts["completed"]
+    cancelled_rides = ride_counts["cancelled"]
+    ongoing_rides = ride_counts["ongoing"]
+    pending_rides = ride_request_counts["pending"]
     total_drivers = Driver.objects.count()
-
     active_drivers = _safe_active_count(
         Driver
     )
-
     verified_drivers = _safe_verified_count(
         Driver
     )
-
     pending_driver_verification = (
         _safe_pending_verification_count(
             Driver
         )
     )
-
     total_vehicles = Vehicle.objects.count()
-
     active_vehicles = _safe_active_count(
         Vehicle
     )
-
     total_vehicle_types = VehicleType.objects.count()
-
     total_payments = Payment.objects.count()
-
-    successful_payments = _safe_status_count(
+    payment_status_counts = _safe_status_counts(
         Payment,
-        [
-            "success",
-            "successful",
-            "completed",
-            "paid",
-            "SUCCESS",
-            "SUCCESSFUL",
-            "COMPLETED",
-            "PAID",
-        ],
+        {
+            "successful": [
+                "success", "successful", "completed", "paid",
+                "SUCCESS", "SUCCESSFUL", "COMPLETED", "PAID",
+            ],
+            "pending": ["pending", "processing", "PENDING", "PROCESSING"],
+            "failed": ["failed", "failure", "FAILED", "FAILURE"],
+        },
     )
-
-    pending_payments = _safe_status_count(
-        Payment,
-        [
-            "pending",
-            "processing",
-            "PENDING",
-            "PROCESSING",
-        ],
-    )
-
-    failed_payments = _safe_status_count(
-        Payment,
-        [
-            "failed",
-            "failure",
-            "FAILED",
-            "FAILURE",
-        ],
-    )
-
+    successful_payments = payment_status_counts["successful"]
+    pending_payments = payment_status_counts["pending"]
+    failed_payments = payment_status_counts["failed"]
     total_revenue = _safe_sum(
         Payment,
         [
@@ -603,22 +586,18 @@ def dashboard(request):
             "price",
         ],
     )
-
     if total_revenue == Decimal("0"):
         completed_fare = RideRequest.objects.filter(
             status=RideRequest.Status.COMPLETED
         ).aggregate(
             total=Sum("estimated_fare")
         )
-
         completed_fare_value = (
             completed_fare["total"]
             or Decimal("0")
         )
-
         if completed_fare_value > 0:
             total_revenue = completed_fare_value
-
     total_refunds = _safe_sum(
         Refund,
         [
@@ -627,39 +606,28 @@ def dashboard(request):
             "total_amount",
         ],
     )
-
     refunded_payments = Refund.objects.count()
-
     total_fare_rules = FareRule.objects.count()
-
     active_fare_rules = _safe_active_count(
         FareRule
     )
-
     total_surge_pricing = SurgePricing.objects.count()
-
     active_surge_pricing = _safe_active_count(
         SurgePricing
     )
-
     total_fare_breakdowns = (
         FareBreakdown.objects.count()
     )
-
     total_coupons = Coupon.objects.count()
-
     active_coupons = _safe_active_count(
         Coupon
     )
-
     total_coupon_usage = (
         CouponUsage.objects.count()
     )
-
     total_support_tickets = (
         SupportTicket.objects.count()
     )
-
     open_tickets = _safe_status_count(
         SupportTicket,
         [
@@ -669,7 +637,6 @@ def dashboard(request):
             "PENDING",
         ],
     )
-
     in_progress_tickets = _safe_status_count(
         SupportTicket,
         [
@@ -681,13 +648,10 @@ def dashboard(request):
             "ASSIGNED",
         ],
     )
-
     urgent_tickets = 0
-
     support_ticket_fields = _field_names(
         SupportTicket
     )
-
     if "priority" in support_ticket_fields:
         urgent_tickets = SupportTicket.objects.filter(
             priority__in=[
@@ -699,14 +663,11 @@ def dashboard(request):
                 "HIGH",
             ]
         ).count()
-
     maintenance_vehicles = 0
     blocked_vehicles = 0
-
     vehicle_fields = _field_names(
         Vehicle
     )
-
     if "status" in vehicle_fields:
         maintenance_vehicles = Vehicle.objects.filter(
             status__in=[
@@ -716,7 +677,6 @@ def dashboard(request):
                 "Under Maintenance",
             ]
         ).count()
-
         blocked_vehicles = Vehicle.objects.filter(
             status__in=[
                 "blocked",
@@ -725,22 +685,18 @@ def dashboard(request):
                 "Inactive",
             ]
         ).count()
-
     elif "is_maintenance" in vehicle_fields:
         maintenance_vehicles = Vehicle.objects.filter(
             is_maintenance=True
         ).count()
-
     elif "is_blocked" in vehicle_fields:
         blocked_vehicles = Vehicle.objects.filter(
             is_blocked=True
         ).count()
-
     total_locations = Location.objects.count()
     total_countries = Country.objects.count()
     total_states = State.objects.count()
     total_cities = City.objects.count()
-
     recent_rides = (
         Ride.objects
         .select_related(
@@ -751,7 +707,6 @@ def dashboard(request):
         )
         .order_by("-id")[:10]
     )
-
     ride_distribution = list(
         Ride.objects
         .filter(
@@ -767,8 +722,8 @@ def dashboard(request):
         )
         .order_by("-count")
     )
-
     context = {
+        "page_title": "Admin Dashboard",
         "total_users": total_users,
         "active_users": active_users,
         "total_rides": total_rides,
@@ -817,35 +772,29 @@ def dashboard(request):
         "vehicles_count": total_vehicles,
         "revenue": total_revenue,
     }
-
     return render(
         request,
         "dashboard/dashboard.html",
         context,
     )
 
-
 @login_required
 @transaction.atomic
 def user_setting(request):
     user = request.user
-
     profile, _ = UserProfile.objects.get_or_create(
         user=user
     )
-
     notification_preferences, _ = (
         AccountNotificationPreference.objects.get_or_create(
             user=user
         )
     )
-
     payment_detail, _ = (
         AccountPaymentDetail.objects.get_or_create(
             user=user
         )
     )
-
     address = (
         UserAddress.objects.filter(
             user=user,
@@ -855,12 +804,10 @@ def user_setting(request):
             user=user
         ).first()
     )
-
     verify_token = request.GET.get(
         "verify",
         "",
     ).strip()
-
     if verify_token:
         try:
             payload = loads(
@@ -868,14 +815,12 @@ def user_setting(request):
                 salt=EMAIL_VERIFICATION_SALT,
                 max_age=EMAIL_VERIFICATION_MAX_AGE,
             )
-
             if (
                 int(payload.get("user_id")) == user.pk
                 and payload.get("email") == user.email
             ):
                 profile.email_verified = True
                 profile.email_verified_at = timezone.now()
-
                 profile.save(
                     update_fields=[
                         "email_verified",
@@ -883,7 +828,6 @@ def user_setting(request):
                         "updated_at",
                     ]
                 )
-
                 messages.success(
                     request,
                     "Email address verified successfully.",
@@ -893,7 +837,6 @@ def user_setting(request):
                     request,
                     "This email verification link is invalid.",
                 )
-
         except (
             SignatureExpired,
             BadSignature,
@@ -904,21 +847,17 @@ def user_setting(request):
                 request,
                 "This email verification link is invalid or expired.",
             )
-
         return redirect("user_setting")
-
     if request.method == "POST":
         action = request.POST.get(
             "action",
             "update_profile",
         ).strip()
-
         if action == "update_notification":
             field = request.POST.get(
                 "field",
                 "",
             ).strip()
-
             value = (
                 request.POST.get(
                     "value",
@@ -926,37 +865,31 @@ def user_setting(request):
                 ).lower()
                 == "true"
             )
-
             allowed_fields = {
                 "platform_updates",
                 "security_alerts",
                 "ride_activity",
                 "email_notifications",
             }
-
             if field not in allowed_fields:
                 return _json_error(
                     "Invalid notification field."
                 )
-
             setattr(
                 notification_preferences,
                 field,
                 value,
             )
-
             notification_preferences.save(
                 update_fields=[
                     field,
                 ]
             )
-
             return _json_success(
                 "Notification preference updated.",
                 field=field,
                 value=value,
             )
-
         if action == "update_notifications":
             allowed_fields = {
                 "platform_updates",
@@ -964,7 +897,6 @@ def user_setting(request):
                 "ride_activity",
                 "email_notifications",
             }
-
             for field in allowed_fields:
                 if field in request.POST:
                     setattr(
@@ -975,28 +907,22 @@ def user_setting(request):
                         ).lower()
                         == "true",
                     )
-
             notification_preferences.save()
-
             messages.success(
                 request,
                 "Notification preferences updated.",
             )
-
             return redirect("user_setting")
-
         if action == "send_email_verification":
             if not user.email:
                 return _json_error(
                     "Please add an email address first."
                 )
-
             if profile.email_verified:
                 return _json_success(
                     "Your email address is already verified.",
                     email_verified=True,
                 )
-
             token = dumps(
                 {
                     "user_id": user.pk,
@@ -1004,21 +930,17 @@ def user_setting(request):
                 },
                 salt=EMAIL_VERIFICATION_SALT,
             )
-
             query_string = urlencode(
                 {
                     "verify": token,
                 }
             )
-
             verification_url = request.build_absolute_uri(
                 f"{reverse('user_setting')}?{query_string}"
             )
-
             subject = (
                 "Verify your NandiRide email address"
             )
-
             message = (
                 f"Hello {user.get_full_name() or user.get_username()},\n\n"
                 "Please verify your NandiRide email address by opening the link below:\n\n"
@@ -1027,7 +949,6 @@ def user_setting(request):
                 "Regards,\n"
                 "NandiRide"
             )
-
             try:
                 send_mail(
                     subject,
@@ -1040,29 +961,24 @@ def user_setting(request):
                     [user.email],
                     fail_silently=False,
                 )
-
             except Exception:
                 return _json_error(
                     "Verification email could not be sent. Please check your email settings."
                 )
-
             return _json_success(
                 "Verification email sent successfully. Please check your inbox.",
                 email_verified=False,
             )
-
         if action == "save_account_details":
             upi_id = request.POST.get(
                 "upi_id",
                 "",
             ).strip()
-
             if upi_id:
                 if len(upi_id) > 100:
                     return _json_error(
                         "UPI ID is too long."
                     )
-
                 if not re.match(
                     r"^[A-Za-z0-9][A-Za-z0-9._-]{1,}@[A-Za-z0-9.-]{2,}$",
                     upi_id,
@@ -1070,16 +986,13 @@ def user_setting(request):
                     return _json_error(
                         "Please enter a valid UPI ID."
                     )
-
             payment_detail.upi_id = upi_id
-
             payment_detail.save(
                 update_fields=[
                     "upi_id",
                     "updated_at",
                 ]
             )
-
             return _json_success(
                 (
                     "UPI ID linked successfully."
@@ -1094,7 +1007,6 @@ def user_setting(request):
                     else "Not Linked"
                 ),
             )
-
         if action == "get_account_details":
             return _json_success(
                 "Account details loaded.",
@@ -1113,13 +1025,11 @@ def user_setting(request):
                     payment_detail.card_last_four
                 ),
             )
-
         if action == "add_wallet_money":
             amount_raw = request.POST.get(
                 "amount",
                 "",
             ).strip()
-
             try:
                 amount = Decimal(amount_raw)
             except (
@@ -1129,34 +1039,28 @@ def user_setting(request):
                 return _json_error(
                     "Please enter a valid amount."
                 )
-
             if amount <= 0:
                 return _json_error(
                     "Wallet amount must be greater than zero."
                 )
-
             if amount.as_tuple().exponent < -2:
                 return _json_error(
                     "Wallet amount can have maximum 2 decimal places."
                 )
-
             with transaction.atomic():
                 locked_payment_detail = (
                     AccountPaymentDetail.objects.select_for_update().get(
                         pk=payment_detail.pk
                     )
                 )
-
                 locked_payment_detail.wallet_balance += amount
-
                 locked_payment_detail.save(
                     update_fields=[
                         "wallet_balance",
                         "updated_at",
                     ]
                 )
-
-                WalletTransaction.objects.create(
+                wallet_transaction = WalletTransaction.objects.create(
                     user=user,
                     transaction_type=WalletTransaction.TransactionType.CREDIT,
                     amount=amount,
@@ -1164,33 +1068,61 @@ def user_setting(request):
                     status=WalletTransaction.Status.SUCCESS,
                     description="Wallet balance added from Account Settings.",
                 )
-
                 wallet_balance = (
                     locked_payment_detail.wallet_balance
                 )
-
+            transaction_date = getattr(
+                wallet_transaction,
+                "created_at",
+                None,
+            )
+            if transaction_date is None:
+                transaction_date = getattr(
+                    wallet_transaction,
+                    "created",
+                    None,
+                )
+            if transaction_date is None:
+                transaction_date = timezone.now()
+            transaction_type = getattr(
+                wallet_transaction.transaction_type,
+                "label",
+                None,
+            ) or "Credit"
+            transaction_status = getattr(
+                wallet_transaction.status,
+                "label",
+                None,
+            ) or "Success"
             return _json_success(
                 "Money added to wallet successfully.",
                 wallet_balance=f"{wallet_balance:.2f}",
                 amount_added=f"{amount:.2f}",
+                transaction={
+                    "id": wallet_transaction.pk,
+                    "date": transaction_date.strftime(
+                        "%d %b %Y, %I:%M %p"
+                    ),
+                    "type": str(transaction_type),
+                    "amount": f"{amount:.2f}",
+                    "balance": f"{wallet_balance:.2f}",
+                    "status": str(transaction_status),
+                    "description": wallet_transaction.description,
+                },
             )
-
         if action == "save_card":
             card_last_four = request.POST.get(
                 "card_last_four",
                 "",
             ).strip()
-
             card_brand = request.POST.get(
                 "card_brand",
                 "",
             ).strip()
-
             card_expiry = request.POST.get(
                 "card_expiry",
                 "",
             ).strip()
-
             if (
                 not card_last_four.isdigit()
                 or len(card_last_four) != 4
@@ -1198,17 +1130,14 @@ def user_setting(request):
                 return _json_error(
                     "Please enter the last 4 digits of your card."
                 )
-
             if not card_brand:
                 return _json_error(
                     "Please select or enter the card brand."
                 )
-
             if len(card_brand) > 30:
                 return _json_error(
                     "Card brand is too long."
                 )
-
             if not re.match(
                 r"^(0[1-9]|1[0-2])/(?:[0-9]{2}|[0-9]{4})$",
                 card_expiry,
@@ -1216,11 +1145,9 @@ def user_setting(request):
                 return _json_error(
                     "Card expiry must be in MM/YY or MM/YYYY format."
                 )
-
             payment_detail.card_last_four = card_last_four
             payment_detail.card_brand = card_brand
             payment_detail.card_expiry = card_expiry
-
             payment_detail.save(
                 update_fields=[
                     "card_last_four",
@@ -1229,7 +1156,6 @@ def user_setting(request):
                     "updated_at",
                 ]
             )
-
             return _json_success(
                 "Card details saved successfully.",
                 card_last_four=payment_detail.card_last_four,
@@ -1237,12 +1163,10 @@ def user_setting(request):
                 card_expiry=payment_detail.card_expiry,
                 has_card=True,
             )
-
         if action == "remove_card":
             payment_detail.card_last_four = ""
             payment_detail.card_brand = ""
             payment_detail.card_expiry = ""
-
             payment_detail.save(
                 update_fields=[
                     "card_last_four",
@@ -1251,7 +1175,6 @@ def user_setting(request):
                     "updated_at",
                 ]
             )
-
             return _json_success(
                 "Card removed successfully.",
                 has_card=False,
@@ -1259,23 +1182,19 @@ def user_setting(request):
                 card_brand="",
                 card_expiry="",
             )
-
         if action == "change_password":
             current_password = request.POST.get(
                 "current_password",
                 "",
             )
-
             new_password = request.POST.get(
                 "new_password",
                 "",
             )
-
             confirm_password = request.POST.get(
                 "confirm_password",
                 "",
             )
-
             if not user.check_password(
                 current_password
             ):
@@ -1283,64 +1202,48 @@ def user_setting(request):
                     request,
                     "Current password is incorrect.",
                 )
-
                 return redirect("user_setting")
-
             if len(new_password) < 8:
                 messages.error(
                     request,
                     "New password must contain at least 8 characters.",
                 )
-
                 return redirect("user_setting")
-
             if new_password != confirm_password:
                 messages.error(
                     request,
                     "New password and confirmation password do not match.",
                 )
-
                 return redirect("user_setting")
-
             user.set_password(new_password)
-
             user.save(
                 update_fields=[
                     "password",
                 ]
             )
-
             update_session_auth_hash(
                 request,
                 user,
             )
-
             messages.success(
                 request,
                 "Password changed successfully.",
             )
-
             return redirect("user_setting")
-
         old_email = user.email.strip()
-
         new_email = request.POST.get(
             "email",
             user.email,
         ).strip()
-
         user.first_name = request.POST.get(
             "first_name",
             user.first_name,
         ).strip()
-
         user.last_name = request.POST.get(
             "last_name",
             user.last_name,
         ).strip()
-
         user.email = new_email
-
         user.save(
             update_fields=[
                 "first_name",
@@ -1348,41 +1251,33 @@ def user_setting(request):
                 "email",
             ]
         )
-
         if new_email != old_email:
             profile.email_verified = False
             profile.email_verified_at = None
-
         profile.phone = request.POST.get(
             "phone",
             profile.phone,
         ).strip()
-
         profile.gender = request.POST.get(
             "gender",
             profile.gender,
         ).strip()
-
         profile.address = request.POST.get(
             "address",
             profile.address,
         ).strip()
-
         profile.emergency_contact_name = request.POST.get(
             "emergency_contact_name",
             profile.emergency_contact_name,
         ).strip()
-
         profile.emergency_contact_phone = request.POST.get(
             "emergency_contact_phone",
             profile.emergency_contact_phone,
         ).strip()
-
         date_of_birth = request.POST.get(
             "date_of_birth",
             "",
         ).strip()
-
         if date_of_birth:
             try:
                 profile.date_of_birth = datetime.strptime(
@@ -1391,12 +1286,10 @@ def user_setting(request):
                 ).date()
             except ValueError:
                 pass
-
         city_id = request.POST.get(
             "city",
             "",
         ).strip()
-
         profile.city = (
             City.objects.filter(
                 pk=city_id
@@ -1404,66 +1297,52 @@ def user_setting(request):
             if city_id
             else None
         )
-
         remove_profile_image = (
             request.POST.get(
                 "remove_profile_image"
             )
             == "1"
         )
-
         profile_image = request.FILES.get(
             "profile_image"
         )
-
         if remove_profile_image:
             if profile.profile_image:
                 profile.profile_image.delete(
                     save=False
                 )
-
             profile.profile_image = None
-
         elif profile_image:
             if profile.profile_image:
                 profile.profile_image.delete(
                     save=False
                 )
-
             profile.profile_image = profile_image
-
         profile.save()
-
         address_line1 = request.POST.get(
             "address_line1",
             "",
         ).strip()
-
         address_line2 = request.POST.get(
             "address_line2",
             "",
         ).strip()
-
         landmark = request.POST.get(
             "landmark",
             "",
         ).strip()
-
         postal_code = request.POST.get(
             "postal_code",
             "",
         ).strip()
-
         label = request.POST.get(
             "address_label",
             "",
         ).strip()
-
         address_type = request.POST.get(
             "address_type",
             UserAddress.AddressType.OTHER,
         ).strip()
-
         address_city_id = (
             request.POST.get(
                 "address_city",
@@ -1471,27 +1350,23 @@ def user_setting(request):
             ).strip()
             or city_id
         )
-
         remove_address = (
             request.POST.get(
                 "remove_address"
             )
             == "1"
         )
-
         if address_line1:
             if address is None:
                 address = UserAddress(
                     user=user
                 )
-
             address.address_line1 = address_line1
             address.address_line2 = address_line2
             address.landmark = landmark
             address.postal_code = postal_code
             address.label = label
             address.address_type = address_type
-
             address.city = (
                 City.objects.filter(
                     pk=address_city_id
@@ -1499,10 +1374,8 @@ def user_setting(request):
                 if address_city_id
                 else None
             )
-
             address.is_default = True
             address.save()
-
             UserAddress.objects.filter(
                 user=user
             ).exclude(
@@ -1510,26 +1383,25 @@ def user_setting(request):
             ).update(
                 is_default=False
             )
-
         elif remove_address and address:
             address.delete()
             address = None
-
         messages.success(
             request,
             "Account settings updated successfully.",
         )
-
         return redirect("user_setting")
-
     cities = City.objects.all().order_by(
         "name"
     )
-
-    return render(
-        request,
-        "account/setting.html",
-        {
+    context = {
+            "page_title": 'Admin Setting',
+            "breadcrumb_items": [
+                {
+                    "title": "Admin Setting",
+                    "url": "user_setting"
+                },
+            ],
             "user": user,
             "profile": profile,
             "address": address,
@@ -1541,8 +1413,11 @@ def user_setting(request):
                 profile.email_verified
                 and user.email
             ),
-        },
-    )
+            }
+    return render(
+        request,
+        "account/setting.html",context 
+        )
 
 @login_required
 def group_list(request):
@@ -1577,17 +1452,44 @@ def group_list(request):
     query = request.GET.get("q", "").strip()
     groups = Group.objects.all().order_by("name")
     if query:
-        groups = groups.filter(Q(name__icontains=query))
+        groups = groups.filter(name__icontains=query)
+    groups = list(groups)
+    group_ids = [group.pk for group in groups]
+    statuses = {
+        status.group_id: status
+        for status in GroupStatus.objects.filter(group_id__in=group_ids)
+    }
+    missing_groups = [
+        group for group in groups
+        if group.pk not in statuses
+    ]
+    if missing_groups:
+        GroupStatus.objects.bulk_create(
+            [
+                GroupStatus(group=group, is_active=True)
+                for group in missing_groups
+            ],
+            ignore_conflicts=True,
+        )
+        statuses.update(
+            {
+                status.group_id: status
+                for status in GroupStatus.objects.filter(group_id__in=group_ids)
+            }
+        )
     for group in groups:
-        group.group_status = GroupStatus.objects.get_or_create(
-            group=group,
-            defaults={"is_active": True}
-        )[0]
+        group.group_status = statuses.get(group.pk)
     context = {
         "groups": groups,
+        "page_title": "Groups Management",
+        "breadcrumb_items": [
+            {
+                "title": "Groups",
+                "url": "group_list"
+            },
+        ],
         "total_users": User.objects.count(),
         "assigned_users": User.objects.filter(groups__isnull=False).distinct().count(),
         "total_permissions": Permission.objects.count(),
-        "page_title": "Groups Management",
     }
     return render(request, "dashboard/groups.html", context)

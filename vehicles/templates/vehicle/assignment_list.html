@@ -2,46 +2,51 @@
 {% load static %}
 {% block title %}Driver Assignments | NandiRide{% endblock %}
 {% block content %}
-<div class="container-fluid py-3">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
-        <div>
-            <h1 class="h3 mb-1">Driver Assignments</h1>
-            <p class="text-body-secondary mb-0">Manage driver and vehicle assignments.</p>
-        </div>
-        <div class="d-flex gap-2">
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="bg-body rounded-4 p-4 p-lg-5 mb-4 border shadow-sm">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+            <div>
+                <div class="d-inline-flex align-items-center gap-2 bg-primary-subtle rounded-pill px-3 py-2 mb-3 text-primary-emphasis small fw-semibold">
+                    <i class="bi bi-link-45deg"></i>
+                    Assignment Management
+                </div>
+                <h1 class="h2 fw-bold mb-2 text-body">Driver Assignments</h1>
+                <p class="text-body-secondary mb-0">Manage driver and vehicle assignments in one place.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
             {% if perms.vehicle.add_driversvehicle %}
-            <a href="{% url 'assignment_add' %}" class="btn btn-primary">
+            <a href="{% url 'assignment_add' %}" class="btn btn-primary rounded-3 px-3">
                 <i class="bi bi-person-plus me-1"></i>Assign Driver
             </a>
             {% endif %}
-            <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-secondary">
+            <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-secondary rounded-3 px-3">
                 <i class="bi bi-speedometer2 me-1"></i>Dashboard
             </a>
         </div>
     </div>
     <div class="row g-3 mb-4">
         <div class="col-12 col-sm-6 col-xl-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="rounded-circle bg-primary-subtle text-primary p-3 me-3">
+            <div class="card border shadow-sm rounded-4 h-100 bg-body">
+                <div class="card-body d-flex align-items-center p-4">
+                    <div class="rounded-circle bg-primary-subtle text-primary-emphasis p-3 me-3 rounded-3">
                         <i class="bi bi-link-45deg fs-4"></i>
                     </div>
                     <div>
-                        <div class="text-body-secondary small">Total Assignments</div>
-                        <div class="fs-3 fw-semibold">{{ assignments|length }}</div>
+                        <div class="text-body-secondary small text-uppercase fw-semibold">Total Assignments</div>
+                        <div class="fs-3 fw-bold text-body">{{ assignments|length }}</div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-xl-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="rounded-circle bg-success-subtle text-success p-3 me-3">
+            <div class="card border shadow-sm rounded-4 h-100 bg-body">
+                <div class="card-body d-flex align-items-center p-4">
+                    <div class="rounded-circle bg-success-subtle text-success-emphasis p-3 me-3 rounded-3">
                         <i class="bi bi-check-circle fs-4"></i>
                     </div>
                     <div>
-                        <div class="text-body-secondary small">Current Assignments</div>
-                        <div class="fs-3 fw-semibold">
+                        <div class="text-body-secondary small text-uppercase fw-semibold">Current Assignments</div>
+                        <div class="fs-3 fw-bold text-body">
                             {{ current_count|default:"0" }}
                         </div>
                     </div>
@@ -49,14 +54,14 @@
             </div>
         </div>
         <div class="col-12 col-sm-6 col-xl-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="rounded-circle bg-secondary-subtle text-secondary p-3 me-3">
+            <div class="card border shadow-sm rounded-4 h-100 bg-body">
+                <div class="card-body d-flex align-items-center p-4">
+                    <div class="rounded-circle bg-secondary-subtle text-secondary-emphasis p-3 me-3 rounded-3">
                         <i class="bi bi-clock-history fs-4"></i>
                     </div>
                     <div>
-                        <div class="text-body-secondary small">Ended Assignments</div>
-                        <div class="fs-3 fw-semibold">
+                        <div class="text-body-secondary small text-uppercase fw-semibold">Ended Assignments</div>
+                        <div class="fs-3 fw-bold text-body">
                             {{ ended_count|default:"0" }}
                         </div>
                     </div>
@@ -64,48 +69,71 @@
             </div>
         </div>
     </div>
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="get">
+    <div class="card border shadow-sm rounded-4 mb-4 bg-body">
+        <div class="card-body p-4 p-lg-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="rounded-3 bg-primary-subtle text-primary-emphasis p-2 px-3"><i class="bi bi-sliders2"></i></span>
+                <div>
+                    <h6 class="mb-0 fw-bold">Filter assignments</h6>
+                    <small class="text-body-secondary">Search or select a status to update the records.</small>
+                </div>
+            </div>
+            <form method="get" id="assignment-filter-form">
                 <div class="row g-3 align-items-end">
                     <div class="col-12 col-lg-5">
-                        <label for="search" class="form-label fw-semibold">Search</label>
+                        <label for="search" class="form-label small text-uppercase fw-semibold text-body-secondary">Search</label>
                         <div class="input-group">
-                            <span class="input-group-text">
+                            <span class="input-group-text bg-body-tertiary border-end-0 rounded-start-3">
                                 <i class="bi bi-search"></i>
                             </span>
-                            <input type="search" id="search" name="search" value="{{ search }}" class="form-control" placeholder="Driver or vehicle number">
+                            <input type="search" id="search" name="search" value="{{ search }}" class="form-control border-start-0 bg-body-tertiary rounded-end-3 shadow-none" placeholder="Driver or vehicle number">
                         </div>
                     </div>
                     <div class="col-12 col-sm-6 col-lg-3">
-                        <label for="status" class="form-label fw-semibold">Assignment Status</label>
-                        <select name="status" id="status" class="form-select">
+                        <label for="status" class="form-label small text-uppercase fw-semibold text-body-secondary">Assignment Status</label>
+                        <select name="status" id="status" class="form-select bg-body-tertiary border-0 rounded-3 shadow-none">
                             <option value="">All Assignments</option>
                             <option value="current" {% if selected_status == "current" %}selected{% endif %}>Current</option>
                             <option value="ended" {% if selected_status == "ended" %}selected{% endif %}>Ended</option>
                         </select>
                     </div>
-                    <div class="col-12 col-sm-6 col-lg-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-funnel me-1"></i>Filter
-                        </button>
-                    </div>
                     <div class="col-12 col-lg-2">
-                        <a href="{% url 'assignment_list' %}" class="btn btn-outline-secondary w-100">
+                        <a href="{% url 'assignment_list' %}" class="btn btn-light border w-100 rounded-3">
                             <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
                         </a>
                     </div>
                 </div>
             </form>
+            <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const form = document.getElementById("assignment-filter-form");
+                const search = document.getElementById("search");
+                const status = document.getElementById("status");
+                if (!form) return;
+                if (status) {
+                    status.addEventListener("change", function () {
+                        form.submit();
+                    });
+                }
+                if (search) {
+                    search.addEventListener("keydown", function (event) {
+                        if (event.key === "Enter") {
+                            event.preventDefault();
+                            form.submit();
+                        }
+                    });
+                }
+            });
+            </script>
         </div>
     </div>
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+    <div class="card border shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-body border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 p-4">
             <div>
-                <h5 class="mb-1">Assignment Records</h5>
+                <h5 class="mb-1 fw-bold">Assignment Records</h5>
                 <small class="text-body-secondary">Driver and vehicle assignment history</small>
             </div>
-            <span class="badge text-bg-light border">
+            <span class="badge bg-white text-primary-emphasis border border-primary-subtle rounded-pill px-3 py-2">
                 {{ assignments|length }} record{{ assignments|length|pluralize }}
             </span>
         </div>
@@ -185,14 +213,14 @@
                             <td class="text-end px-3">
                                 <div class="btn-group" role="group">
                                     {% if perms.vehicle.change_driversvehicle %}
-                                    <a href="{% url 'assignment_edit' assignment.pk %}" class="btn btn-sm btn-outline-primary" title="Edit Assignment">
+                                    <a href="{% url 'assignment_edit' assignment.pk %}" class="btn btn-sm btn-outline-primary rounded-2" title="Edit Assignment">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     {% endif %}
                                     {% if assignment.is_current and perms.vehicle.change_driversvehicle %}
                                     <form method="post" action="{% url 'assignment_end' assignment.pk %}" class="d-inline" onsubmit="return confirm('Are you sure you want to end this assignment?');">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="End Assignment">
+                                        <button type="submit" class="btn btn-sm btn-outline-warning rounded-2" title="End Assignment">
                                             <i class="bi bi-stop-circle"></i>
                                         </button>
                                     </form>
@@ -205,11 +233,11 @@
                 </table>
             </div>
             {% else %}
-            <div class="text-center py-5 px-3">
-                <div class="rounded-circle bg-body-secondary d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;">
+            <div class="text-center py-5 px-3 bg-body-tertiary">
+                <div class="rounded-circle bg-primary-subtle text-primary-emphasis d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;">
                     <i class="bi bi-person-badge fs-2 text-body-secondary"></i>
                 </div>
-                <h5>No assignments found</h5>
+                <h5 class="fw-bold">No assignments found</h5>
                 <p class="text-body-secondary mb-4">
                     No driver-vehicle assignments match your current filters.
                 </p>

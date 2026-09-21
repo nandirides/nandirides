@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block title %}NandiRide | Add Ride Rating{% endblock %}
+{% block content %}
+
+<div class="container-fluid py-3">
+    <!-- Page Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-star fa-2x"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-1">Add Ride Rating</h3>
+                    <p class="text-muted mb-0">
+                        Add passenger or driver feedback for {{ ride.ride_number }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-3 mt-md-0">
+            <div class="d-flex justify-content-md-end align-items-center gap-2">
+                <span class="badge bg-warning text-dark px-3 py-2">
+                    <i class="fas fa-star me-1"></i> Rating
+                </span>
+                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-car-side me-1"></i> Ride Details
+                </a>
+            </div>
+        </div>
+    </div>
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-3" role="alert">
+            <i class="fas fa-triangle-exclamation me-2"></i>
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+    <div class="row">
+        <!-- Rating Form -->
+        <div class="col-xl-8">
+            <div class="card card-outline card-warning shadow-sm">
+                <div class="card-header">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <h5 class="mb-1 fw-semibold">
+                                <i class="fas fa-comment-dots me-2"></i>Rating & Review
+                            </h5>
+                            <div class="small text-muted">
+                                Record feedback between the passenger and driver
+                            </div>
+                        </div>
+                        {% if ride.status == "completed" %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-circle-check me-1"></i>{{ ride.get_status_display }}
+                            </span>
+                        {% elif ride.status == "cancelled" %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-circle-xmark me-1"></i>{{ ride.get_status_display }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">
+                                {{ ride.get_status_display }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.from_user.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-user-arrow-up me-1"></i>From User
+                                </label>
+                                {{ form.from_user }}
+                                {% if form.from_user.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.from_user.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    User giving the rating.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.to_user.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-user-arrow-down me-1"></i>To User
+                                </label>
+                                {{ form.to_user }}
+                                {% if form.to_user.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.to_user.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    User receiving the rating.
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="{{ form.rating.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-star me-1"></i>Rating
+                                </label>
+                                {{ form.rating }}
+                                {% if form.rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.rating.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Select a rating from 1 to 5.
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="{{ form.review.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-message me-1"></i>Review
+                                </label>
+                                {{ form.review }}
+                                {% if form.review.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.review.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Add optional feedback about the ride experience.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-top mt-4 pt-3">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-star me-1"></i>Save Rating
+                                </button>
+                                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Back to Ride
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Rating Information -->
+            <div class="card card-outline card-primary shadow-sm mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="fas fa-circle-info me-2"></i>Rating Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                <div class="text-primary mb-2">
+                                    <i class="fas fa-user-check fa-lg"></i>
+                                </div>
+                                <div class="fw-semibold">From User</div>
+                                <small class="text-muted">
+                                    The passenger or driver who is submitting the feedback.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                <div class="text-success mb-2">
+                                    <i class="fas fa-user-tag fa-lg"></i>
+                                </div>
+                                <div class="fw-semibold">To User</div>
+                                <small class="text-muted">
+                                    The passenger or driver receiving the feedback.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                <div class="text-warning mb-2">
+                                    <i class="fas fa-star-half-stroke fa-lg"></i>
+                                </div>
+                                <div class="fw-semibold">Rating Scale</div>
+                                <small class="text-muted">
+                                    Ratings are recorded on a scale from 1 to 5.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Sidebar -->
+        <div class="col-xl-4 mt-3 mt-xl-0">
+            <!-- Ride Information -->
+            <div class="card card-outline card-primary shadow-sm mb-3">
+                <div class="card-header">
+                    <h5 class="mb-1 fw-semibold">
+                        <i class="fas fa-car-side me-2"></i>Ride Information
+                    </h5>
+                    <div class="small text-muted">
+                        Ride associated with this rating
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="small text-muted">Ride Number</div>
+                        <a href="{% url 'ride_details' ride.pk %}" class="fw-semibold text-body text-decoration-none">
+                            {{ ride.ride_number }}
+                        </a>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Passenger</div>
+                        <div class="fw-semibold mt-1">{{ ride.passenger }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Driver</div>
+                        <div class="fw-semibold mt-1">{{ ride.driver }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Vehicle</div>
+                        <div class="fw-semibold mt-1">{{ ride.vehicle }}</div>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Ride Status</div>
+                        <div class="mt-1">
+                            {% if ride.status == "completed" %}
+                                <span class="badge bg-success-subtle text-success">
+                                    <i class="fas fa-circle-check me-1"></i>{{ ride.get_status_display }}
+                                </span>
+                            {% elif ride.status == "cancelled" %}
+                                <span class="badge bg-danger-subtle text-danger">
+                                    <i class="fas fa-circle-xmark me-1"></i>{{ ride.get_status_display }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary">
+                                    {{ ride.get_status_display }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Journey -->
+            <div class="card card-outline card-info shadow-sm mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-route me-2"></i>Journey
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="me-3 text-success">
+                            <i class="fas fa-location-dot fa-lg"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted">Pickup</div>
+                            <div class="fw-semibold mt-1">{{ ride.pickup_location }}</div>
+                        </div>
+                    </div>
+                    <div class="border-start ms-2 ps-4 mb-3"></div>
+                    <div class="d-flex align-items-start">
+                        <div class="me-3 text-danger">
+                            <i class="fas fa-location-dot fa-lg"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted">Destination</div>
+                            <div class="fw-semibold mt-1">{{ ride.drop_location }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Rating Guide -->
+            <div class="card card-outline card-warning shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-star-half-stroke me-2"></i>Rating Guide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center py-2 border-bottom">
+                        <span class="text-warning me-3">★</span>
+                        <span class="fw-semibold">1</span>
+                        <span class="text-muted ms-2">Very Poor</span>
+                    </div>
+                    <div class="d-flex align-items-center py-2 border-bottom">
+                        <span class="text-warning me-3">★★</span>
+                        <span class="fw-semibold">2</span>
+                        <span class="text-muted ms-2">Poor</span>
+                    </div>
+                    <div class="d-flex align-items-center py-2 border-bottom">
+                        <span class="text-warning me-3">★★★</span>
+                        <span class="fw-semibold">3</span>
+                        <span class="text-muted ms-2">Average</span>
+                    </div>
+                    <div class="d-flex align-items-center py-2 border-bottom">
+                        <span class="text-warning me-3">★★★★</span>
+                        <span class="fw-semibold">4</span>
+                        <span class="text-muted ms-2">Good</span>
+                    </div>
+                    <div class="d-flex align-items-center pt-2">
+                        <span class="text-warning me-3">★★★★★</span>
+                        <span class="fw-semibold">5</span>
+                        <span class="text-muted ms-2">Excellent</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

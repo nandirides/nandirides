@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}NandiRide | Update Ride Status{% endblock %}
+{% block content %}
+
+<div class="container-fluid py-3">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-arrows-rotate fa-2x"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-1">Update Ride Status</h3>
+                    <p class="text-muted mb-0">
+                        Update the current lifecycle status of ride {{ ride.ride_number }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-3 mt-md-0">
+            <div class="d-flex justify-content-md-end align-items-center gap-2">
+                <span class="badge bg-warning text-dark px-3 py-2">
+                    <i class="fas fa-route me-1"></i>Status Management
+                </span>
+                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-eye me-1"></i> Ride Details
+                </a>
+            </div>
+        </div>
+    </div>
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fas fa-triangle-exclamation me-2"></i>
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card card-outline card-warning shadow-sm mb-3">
+                <div class="card-header">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <h5 class="card-title fw-semibold mb-1">
+                                <i class="fas fa-car-side me-2"></i>{{ ride.ride_number }}
+                            </h5>
+                            <div class="small text-muted">Ride status management</div>
+                        </div>
+                        <span class="badge bg-warning text-dark px-3 py-2">
+                            {{ ride.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="info-box shadow-sm h-100">
+                                <span class="info-box-icon bg-primary">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Passenger</span>
+                                    <span class="info-box-number text-wrap fs-6">{{ ride.passenger }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-box shadow-sm h-100">
+                                <span class="info-box-icon bg-success">
+                                    <i class="fas fa-user-tie"></i>
+                                </span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Driver</span>
+                                    <span class="info-box-number text-wrap fs-6">{{ ride.driver }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-box shadow-sm h-100">
+                                <span class="info-box-icon bg-info">
+                                    <i class="fas fa-car"></i>
+                                </span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Vehicle</span>
+                                    <span class="info-box-number text-wrap fs-6">{{ ride.vehicle }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card bg-body-tertiary border shadow-none mb-4">
+                        <div class="card-body">
+                            <div class="row g-3 align-items-stretch">
+                                <div class="col-md-6">
+                                    <div class="bg-body border rounded-3 p-3 h-100">
+                                        <div class="small text-muted mb-2">
+                                            <i class="fas fa-location-dot me-1"></i>Pickup
+                                        </div>
+                                        <div class="fw-semibold">{{ ride.pickup_location }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="bg-body border rounded-3 p-3 h-100">
+                                        <div class="small text-muted mb-2">
+                                            <i class="fas fa-location-dot me-1"></i>Destination
+                                        </div>
+                                        <div class="fw-semibold">{{ ride.drop_location }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card card-outline card-primary shadow-none mb-0">
+                        <div class="card-header">
+                            <h5 class="card-title fw-semibold mb-1">
+                                <i class="fas fa-sliders me-2"></i>Status Update
+                            </h5>
+                            <div class="small text-muted">Select the next valid ride lifecycle status</div>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" novalidate>
+                                {% csrf_token %}
+                                <div class="row justify-content-center">
+                                    <div class="col-lg-8">
+                                        <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
+                                            New Ride Status
+                                        </label>
+                                        {{ form.status }}
+                                        {% if form.status.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.status.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            Only valid next lifecycle statuses should be selected.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="fas fa-check-circle me-1"></i>Update Status
+                                    </button>
+                                    <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-secondary px-4">
+                                        <i class="fas fa-arrow-left me-1"></i>Back to Ride
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card card-outline card-secondary shadow-sm mb-3">
+                <div class="card-header">
+                    <h5 class="card-title fw-semibold mb-1">
+                        <i class="fas fa-route me-2"></i>Ride Lifecycle
+                    </h5>
+                    <div class="small text-muted">Standard ride status progression</div>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item bg-transparent text-body px-0">
+                            <i class="fas fa-user-check me-2"></i>Driver Assigned
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0">
+                            <i class="fas fa-car-side me-2"></i>Driver Arriving
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0">
+                            <i class="fas fa-location-dot me-2"></i>Driver Arrived
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0">
+                            <i class="fas fa-play-circle me-2"></i>Started
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0">
+                            <i class="fas fa-circle-check me-2"></i>Completed
+                        </div>
+                        <div class="list-group-item bg-transparent text-body px-0">
+                            <i class="fas fa-circle-xmark me-2"></i>Cancelled
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-outline card-info shadow-sm mb-3">
+                <div class="card-header">
+                    <h5 class="card-title fw-semibold mb-1">
+                        <i class="fas fa-circle-info me-2"></i>Current Ride
+                    </h5>
+                    <div class="small text-muted">Ride information</div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                <div class="small text-muted">Ride Number</div>
+                                <div class="fw-semibold mt-1">{{ ride.ride_number }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                <div class="small text-muted">Status</div>
+                                <div class="mt-1">
+                                    <span class="badge bg-warning text-dark">{{ ride.get_status_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                <div class="small text-muted">Distance</div>
+                                <div class="fw-semibold mt-1">{{ ride.distance_km }} km</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                <div class="small text-muted">Duration</div>
+                                <div class="fw-semibold mt-1">{{ ride.duration_minutes }} min</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if ride.ride_request %}
+                <div class="card card-outline card-success shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title fw-semibold mb-1">
+                            <i class="fas fa-clipboard-check me-2"></i>Linked Ride Request
+                        </h5>
+                        <div class="small text-muted">Original passenger request</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="small text-muted">Request Number</div>
+                        <div class="fw-semibold mt-1 mb-3">{{ ride.ride_request.request_number }}</div>
+                        <div class="small text-muted">Request Status</div>
+                        <div class="mb-3 mt-1">
+                            <span class="badge bg-secondary">{{ ride.ride_request.get_status_display }}</span>
+                        </div>
+                        <a href="{% url 'ride_request_details' ride.ride_request.pk %}" class="btn btn-outline-success btn-sm w-100">
+                            <i class="fas fa-eye me-1"></i>View Request
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -31,6 +31,13 @@ def location_dashboard(request):
         .order_by("-created_at")[:10]
     )
     context = {
+        "page_title": "Location Dashboard",
+        "breadcrumb_items": [
+            {
+                "title": "Location Dashboard",
+                "url": "location_dashboard"
+            },
+        ],
         "country_count": country_count,
         "state_count": state_count,
         "city_count": city_count,
@@ -103,6 +110,13 @@ def location_list(request):
         longitude__isnull=False,
     ).count()
     context = {
+        "page_title": "Location List",
+        "breadcrumb_items": [
+            {
+                "title": "Location list",
+                "url": "location_list"
+            },
+        ],
         "locations": locations,
         "countries": countries,
         "states": states,
@@ -136,6 +150,13 @@ def location_detail(request, pk):
     )
     context = {
         "location": location,
+        "page_title": "Location Details",
+        "breadcrumb_items": [
+            {
+                "title": "Location Details",
+                "url": "location_details"
+            },
+        ],
     }
     return render(
         request,
@@ -158,6 +179,13 @@ def location_map(request, pk):
     )
     context = {
         "location": location,
+        "page_title": "Location Map",
+        "breadcrumb_items": [
+            {
+                "title": "Location Map",
+                "url": "location_map"
+            },
+        ],
     }
     return render(
         request,
@@ -197,6 +225,13 @@ def location_create(request):
         else ""
     )
     context = {
+        "page_title": "Location Add",
+        "breadcrumb_items": [
+            {
+                "title": "Location Add",
+                "url": "location_create"
+            },
+        ],
         "form": form,
         "location": None,
         "countries": Country.objects.order_by("name"),
@@ -260,6 +295,13 @@ def location_edit(request, pk):
             selected_city,
         )
     context = {
+        "page_title": "Location Edit",
+        "breadcrumb_items": [
+            {
+                "title": "Location Edit",
+                "url": "location_edit"
+            },
+        ],
         "form": form,
         "location": location,
         "countries": Country.objects.order_by("name"),
@@ -320,6 +362,13 @@ def country_list(request):
             | Q(code__icontains=query)
         )
     context = {
+        "page_title": "Country List",
+        "breadcrumb_items": [
+            {
+                "title": "Country List",
+                "url": "country_list"
+            },
+        ],
         "countries": countries,
         "query": query,
         "q": query,
@@ -350,6 +399,13 @@ def country_detail(request, pk):
         ),
     ).order_by("name")
     context = {
+        "page_title": "Country Details",
+        "breadcrumb_items": [
+            {
+                "title": "Country Details",
+                "url": "country_details"
+            },
+        ],
         "country": country,
         "states": states,
         "state_count": states.count(),
@@ -383,6 +439,13 @@ def country_create(request):
     else:
         form = CountryForm()
     context = {
+        "page_title": "Country Create",
+        "breadcrumb_items": [
+            {
+                "title": "Country Create",
+                "url": "country_create"
+            },
+        ],
         "form": form,
         "country": None,
     }
@@ -418,6 +481,13 @@ def country_edit(request, pk):
             instance=country,
         )
     context = {
+        "page_title": "Country Edit",
+        "breadcrumb_items": [
+            {
+                "title": "Country Edit",
+                "url": "country_edit"
+            },
+        ],
         "form": form,
         "country": country,
     }
@@ -489,6 +559,13 @@ def state_list(request):
             country_id=country_id
         )
     context = {
+        "page_title": "State List",
+        "breadcrumb_items": [
+            {
+                "title": "State List",
+                "url": "state_list"
+            },
+        ],
         "states": states,
         "countries": Country.objects.order_by("name"),
         "query": query,
@@ -517,6 +594,13 @@ def state_detail(request, pk):
         )
     ).order_by("name")
     context = {
+        "page_title": "State Details",
+        "breadcrumb_items": [
+            {
+                "title": "State Details",
+                "url": "state_detail"
+            },
+        ],
         "state": state,
         "cities": cities,
         "city_count": cities.count(),
@@ -547,6 +631,13 @@ def state_create(request):
     else:
         form = StateForm()
     context = {
+        "page_title": "State Create",
+        "breadcrumb_items": [
+            {
+                "title": "State Create",
+                "url": "state_create"
+            },
+        ],
         "form": form,
         "state": None,
         "countries": Country.objects.order_by("name"),
@@ -588,6 +679,13 @@ def state_edit(request, pk):
             instance=state,
         )
     context = {
+        "page_title": "State Edit",
+        "breadcrumb_items": [
+            {
+                "title": "State Edit",
+                "url": "state_edit"
+            },
+        ],
         "form": form,
         "state": state,
         "countries": Country.objects.order_by("name"),
@@ -675,6 +773,13 @@ def city_list(request):
             state_id=state_id
         )
     context = {
+        "page_title": "City List",
+        "breadcrumb_items": [
+            {
+                "title": "City List",
+                "url": "city_list"
+            },
+        ],
         "cities": cities,
         "countries": Country.objects.order_by("name"),
         "states": State.objects.select_related(
@@ -710,6 +815,13 @@ def city_detail(request, pk):
         "-created_at"
     )
     context = {
+        "page_title": "City Details",
+        "breadcrumb_items": [
+            {
+                "title": "City Details",
+                "url": "city_details"
+            },
+        ],
         "city": city,
         "locations": locations,
         "location_count": locations.count(),
@@ -771,6 +883,13 @@ def city_create(request):
         country_id = ""
         state_id = ""
     context = {
+        "page_title": "City Create",
+        "breadcrumb_items": [
+            {
+                "title": "City Create",
+                "url": "city_create"
+            },
+        ],
         "form": form,
         "city": None,
         "countries": Country.objects.order_by("name"),
@@ -852,6 +971,13 @@ def city_edit(request, pk):
             country_id=country_id
         ).order_by("name")
     context = {
+        "page_title": "City Edit",
+        "breadcrumb_items": [
+            {
+                "title": "City Edit",
+                "url": "city_edit"
+            },
+        ],
         "form": form,
         "city": city,
         "countries": Country.objects.order_by("name"),

@@ -58,7 +58,6 @@
                 <a class="nav-link notification-bell-wrapper rounded-circle"
                    href="#"
                    role="button"
-                   data-bs-toggle="dropdown"
                    aria-expanded="false"
                    aria-label="Notifications"
                    title="Notifications">
@@ -75,7 +74,7 @@
                         <span class="fw-semibold">Notifications</span>
                         <a href="{% url 'notification_list' %}" class="small text-decoration-none text-primary">View All</a>
                     </li>
-                    <li id="notification-list">
+                    <li id="notification-list" class="notification-list-scroll">
                         {% if notifications %}
                         {% for notification in notifications %}
                         <a href="{% url 'notification_read' notification.pk %}" class="dropdown-item notification-item py-3 border-bottom">
@@ -118,24 +117,24 @@
             </li>
             <li class="nav-item dropdown ms-1">
                 <a class="nav-link dropdown-toggle d-flex align-items-center px-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    {% comment %} {% if user.profile.profile_image %}
+                    {% if user.profile.profile_image %}
                     <img src="{{ user.profile.profile_image.url }}" class="rounded-circle shadow-sm border me-2 object-fit-cover" width="34" height="34" alt="User profile">
                     {% else %}
                     <span class="rounded-circle shadow-sm border me-2 bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width:34px;height:34px;">
                         <i class="bi bi-person-fill"></i>
                     </span>
-                    {% endif %} {% endcomment %}
+                    {% endif %}
                     <span class="d-none d-md-inline fw-medium">{{ user.get_full_name|default:user.get_username }}</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0 rounded-3 overflow-hidden" style="width:320px;">
                     <div class="bg-primary text-white text-center p-3">
-                        {% comment %} {% if user.profile.profile_image %}
+                        {% if user.profile.profile_image %}
                         <img src="{{ user.profile.profile_image.url }}" class="rounded-circle border border-3 border-white shadow-sm bg-white object-fit-cover" width="90" height="90" alt="User profile">
                         {% else %}
                         <div class="rounded-circle border border-3 border-white shadow-sm bg-white text-primary d-inline-flex align-items-center justify-content-center" style="width:90px;height:90px;">
                             <i class="bi bi-person-fill fs-1"></i>
                         </div>
-                        {% endif %} {% endcomment %}
+                        {% endif %}
                         <h6 class="mb-1 mt-2 fw-semibold">{{ user.get_full_name|default:user.get_username }}</h6>
                         <p class="mb-1 small fw-medium">
                             {% if user.is_superuser %}
@@ -173,7 +172,6 @@
         </ul>
     </div>
 </nav>
-
 <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow-lg rounded-4">
@@ -194,123 +192,11 @@
         </div>
     </div>
 </div>
-
-<style>
-.notification-nav-item {
-    position: relative;
-}
-.notification-bell-wrapper {
-    width: 42px;
-    height: 42px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    margin-right: 2px;
-}
-.notification-bell-wrapper .bi-bell {
-    line-height: 1;
-}
-.notification-badge {
-    position: absolute;
-    top: 3px;
-    right: 1px;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #dc3545;
-    color: #fff;
-    border: 2px solid var(--bs-body-bg);
-    border-radius: 50rem;
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 1;
-    box-shadow: 0 2px 5px rgba(0,0,0,.18);
-    z-index: 5;
-}
-.notification-dropdown {
-    min-width: 350px;
-    max-width: 380px;
-    width: 380px;
-}
-.notification-item {
-    transition: background-color .2s ease, padding-left .2s ease;
-    white-space: normal;
-}
-.notification-item:hover {
-    background-color: var(--bs-tertiary-bg);
-    padding-left: 1.15rem !important;
-}
-.notification-item > div {
-    min-width: 0;
-}
-.notification-item-icon {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(220,53,69,.1);
-    color: #dc3545;
-}
-.notification-content {
-    min-width: 0;
-    overflow: hidden;
-}
-.notification-title {
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-}
-.notification-message {
-    display: block;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    line-height: 1.45;
-}
-.notification-time {
-    white-space: nowrap;
-}
-.notification-unread-dot {
-    width: 8px;
-    height: 8px;
-    min-width: 8px;
-    margin-top: 5px;
-    margin-left: 8px;
-    border-radius: 50%;
-    background: #dc3545;
-    flex-shrink: 0;
-}
-@media (max-width: 575.98px) {
-    .notification-dropdown {
-        min-width: 290px;
-        max-width: calc(100vw - 20px);
-        width: calc(100vw - 20px);
-        margin-right: 10px;
-    }
-    .notification-bell-wrapper {
-        width: 40px;
-        height: 40px;
-    }
-    .notification-badge {
-        top: 2px;
-        right: 0;
-    }
-}
-</style>
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const navbar = document.querySelector(".app-header");
     const sidebarToggle = document.querySelector('[data-lte-toggle="sidebar"]');
     const isLoginPage = document.body.classList.contains("login-page") || (navbar && navbar.classList.contains("app-header-login"));
-
     function updateNavbar() {
         if (!navbar || isLoginPage) {
             if (navbar && isLoginPage) {
@@ -343,10 +229,8 @@ document.addEventListener("DOMContentLoaded", function () {
         navbar.style.left = "0px";
         navbar.style.width = "100%";
     }
-
     updateNavbar();
     window.addEventListener("resize", updateNavbar);
-
     if (sidebarToggle) {
         sidebarToggle.addEventListener("click", function () {
             setTimeout(updateNavbar, 50);
@@ -355,7 +239,6 @@ document.addEventListener("DOMContentLoaded", function () {
             setTimeout(updateNavbar, 500);
         });
     }
-
     const sidebar = document.querySelector(".app-sidebar");
     if (sidebar) {
         const observer = new MutationObserver(function () {
@@ -370,7 +253,45 @@ document.addEventListener("DOMContentLoaded", function () {
             attributeFilter: ["class", "style"]
         });
     }
-
+    const notificationBell = document.querySelector(".notification-bell-wrapper");
+    const notificationMenu = document.querySelector(".notification-dropdown");
+    const notificationNav = document.querySelector(".notification-nav-item");
+    if (notificationBell && notificationMenu) {
+        notificationBell.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const isOpen = notificationMenu.classList.contains("notification-open");
+            document.querySelectorAll(".notification-dropdown.notification-open").forEach(function (menu) {
+                menu.classList.remove("notification-open");
+            });
+            document.querySelectorAll(".notification-nav-item.notification-parent-open").forEach(function (item) {
+                item.classList.remove("notification-parent-open");
+            });
+            if (!isOpen) {
+                notificationMenu.classList.add("notification-open");
+                if (notificationNav) {
+                    notificationNav.classList.add("notification-parent-open");
+                }
+            }
+        });
+        notificationMenu.addEventListener("click", function (event) {
+            event.stopPropagation();
+        });
+        document.addEventListener("click", function () {
+            notificationMenu.classList.remove("notification-open");
+            if (notificationNav) {
+                notificationNav.classList.remove("notification-parent-open");
+            }
+        });
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                notificationMenu.classList.remove("notification-open");
+                if (notificationNav) {
+                    notificationNav.classList.remove("notification-parent-open");
+                }
+            }
+        });
+    }
     const searchInput = document.getElementById("navbar-search-input");
     if (searchInput) {
         searchInput.addEventListener("keydown", function (event) {

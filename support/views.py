@@ -9,6 +9,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from .forms import SupportCategoryForm, SupportTicketForm
 from .models import SupportCategory, SupportTicket, Notification, AuditLog
+from django.urls import reverse
+
 User = get_user_model()
 def support_permission(permission):
     def decorator(view_func):
@@ -111,6 +113,12 @@ def support_dashboard(request):
     ).order_by("-assigned_count", "username")[:8]
     context = {
         "page_title": "Support Dashboard",
+        "breadcrumb_items": [
+            {
+                "title": "Support Dashboard",
+                "url": "support_dashboard", 
+            },
+        ],
         "total_tickets": total_tickets,
         "open_tickets": open_tickets,
         "in_progress_tickets": in_progress_tickets,
@@ -174,6 +182,12 @@ def ticket_list(request):
     tickets = tickets.order_by("-created_at")
     context = {
         "page_title": "Support Tickets",
+        "breadcrumb_items": [
+            {
+                "title": "Support Tickets",
+                "url": "ticket_list", 
+            },
+        ],
         "tickets": tickets,
         "categories": SupportCategory.objects.filter(
             is_active=True
@@ -266,6 +280,20 @@ def ticket_form(request, pk=None):
         )
     context = {
         "page_title": "Edit Ticket" if ticket else "Create Ticket",
+        "breadcrumb_items": [
+            {
+                "title": "Tickets",
+                "url": reverse("ticket_list"),
+            },
+            {
+                "title": "Edit Ticket" if ticket else "Create Ticket",
+                "url": (
+                    reverse("ticket_edit", args=[ticket.id])
+                    if ticket
+                    else reverse("ticket_add")
+                ),
+            },
+        ],
         "form": form,
         "ticket": ticket,
     }
@@ -455,6 +483,12 @@ def ticket_detail(request, pk):
                 return redirect("ticket_detail", pk=pk)
     context = {
         "page_title": "Ticket Details",
+        "breadcrumb_items": [
+            {
+                "title": "Ticket Details",
+                "url": "ticket_detail", 
+            },
+        ],
         "ticket": ticket,
         "users": User.objects.filter(
             is_active=True
@@ -479,6 +513,12 @@ def category_list(request):
     ).order_by("name")
     context = {
         "page_title": "Support Categories",
+        "breadcrumb_items": [
+            {
+                "title": "Support Categories",
+                "url": "category_list", 
+            },
+        ],
         "categories": categories,
     }
     return render(
@@ -527,6 +567,20 @@ def category_form(request, pk=None):
         )
     context = {
         "page_title": "Edit Category" if category else "Add Category",
+        "breadcrumb_items": [
+            {
+                "title": "Categories",
+                "url": reverse("category_list"),
+            },
+            {
+                "title": "Edit Category" if category else "Add Category",
+                "url": (
+                    reverse("category_edit", args=[category.id])
+                    if category
+                    else reverse("category_add")
+                ),
+            },
+        ],
         "form": form,
         "category": category,
     }
@@ -586,6 +640,12 @@ def notification_list(request):
     ).count()
     context = {
         "page_title": "Notifications",
+        "breadcrumb_items": [
+            {
+                "title": "Notifications",
+                "url": "notification_list", 
+            },
+        ],
         "notifications": notifications,
         "unread_count": unread_count,
     }

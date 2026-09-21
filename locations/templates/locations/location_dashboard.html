@@ -1,26 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Location Dashboard | NandiRide{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 {% block content %}
 
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0">
-                    <i class="fas fa-map-marked-alt me-2"></i>Location Dashboard
-                </h1>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-end">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'dashboard' %}">Dashboard</a>
-                    </li>
-                    <li class="breadcrumb-item active">Locations</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-</section>
 <section class="content">
     <div class="container-fluid">
         <div class="card shadow-sm">
@@ -29,10 +10,10 @@
                     <div>
                         <h3 class="card-title mb-1">
                             <i class="fas fa-map-marked-alt me-2"></i>Location Management
-                        </h3>
-                        <div class="text-muted small">
+                        </h3>&nbsp;
+                        <small class="text-muted small">
                             Manage countries, states, cities and ride locations
-                        </div>
+                        </small>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
                         <a href="{% url 'location_list' %}" class="btn btn-primary btn-sm">

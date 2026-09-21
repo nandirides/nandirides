@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from .forms import VehicleTypeForm, VehicleForm, DriverVehicleForm, VehicleDocumentForm
 from .models import VehicleType, Vehicle, DriverVehicle, VehicleDocument
+from django.urls import reverse
 
 def vehicle_permission(permission):
     def decorator(view_func):
@@ -81,6 +82,12 @@ def vehicle_dashboard(request):
     )
     context = {
         "page_title": "Vehicle Dashboard",
+        "breadcrumb_items": [
+            {
+                "title": "Vehicle Dashboard",
+                "url": reverse("vehicle_dashboard"),
+            },
+        ],
         "total_vehicles": total_vehicles,
         "active_vehicles": active_vehicles,
         "inactive_vehicles": inactive_vehicles,
@@ -126,6 +133,12 @@ def vehicle_type_list(request):
         status = ""
     context = {
         "page_title": "Vehicle Types",
+        "breadcrumb_items": [
+            {
+                "title": "Vehicle Types",
+                "url": reverse("vehicle_type_list"),
+            },
+        ],
         "vehicle_types": vehicle_types,
         "search": search,
         "selected_status": status,
@@ -173,6 +186,24 @@ def vehicle_type_form(request, pk=None):
             if vehicle_type
             else "Add Vehicle Type"
         ),
+        "breadcrumb_items": [
+            {
+                "title": "Vehicle Types",
+                "url": reverse("vehicle_type_list"),
+            },
+            {
+                "title": (
+                    "Edit Vehicle Type"
+                    if vehicle_type
+                    else "Add Vehicle Type"
+                ),
+                "url": (
+                    reverse("vehicle_type_form_edit", args=[vehicle_type.id])
+                    if vehicle_type
+                    else reverse("vehicle_type_add")
+                ),
+            },
+        ],
         "form": form,
         "vehicle_type": vehicle_type,
     }
@@ -258,6 +289,12 @@ def vehicle_list(request):
     vehicles = vehicles.order_by("-created_at")
     context = {
         "page_title": "Vehicles",
+        "breadcrumb_items": [
+            {
+                "title": "Vehicles",
+                "url": reverse("vehicle_list"),
+            },
+        ],
         "vehicles": vehicles,
         "vehicle_types": (
             VehicleType.objects
@@ -320,6 +357,24 @@ def vehicle_form(request, pk=None):
             if vehicle
             else "Add Vehicle"
         ),
+        "breadcrumb_items": [
+            {
+                "title": "Vehicles",
+                "url": reverse("vehicle_list"),
+            },
+            {
+                "title": (
+                    "Edit Vehicle"
+                    if vehicle
+                    else "Add Vehicle"
+                ),
+                "url": (
+                    reverse("vehicle_edit", args=[vehicle.id])
+                    if vehicle
+                    else reverse("vehicle_add")
+                ),
+            },
+        ],
         "form": form,
         "vehicle": vehicle,
     }
@@ -367,6 +422,12 @@ def vehicle_detail(request, pk):
     )
     context = {
         "page_title": "Vehicle Details",
+        "breadcrumb_items": [
+            {
+                "title": "Vehicle Details",
+                "url": reverse("vehicle_detail"),
+            },
+        ],
         "vehicle": vehicle,
         "current_assignment": current_assignment,
         "assignment_history": assignment_history,
@@ -476,6 +537,12 @@ def assignment_list(request):
     ).count()
     context = {
         "page_title": "Driver Assignments",
+        "breadcrumb_items": [
+            {
+                "title": "Driver Assignments",
+                "url": reverse("assignment_list"),
+            },
+        ],
         "assignments": assignments,
         "current_count": current_count,
         "ended_count": ended_count,
@@ -566,8 +633,26 @@ def assignment_form(request, pk=None):
         "page_title": (
             "Edit Assignment"
             if assignment
-            else "Assign Vehicle"
+            else "Assign Driver"
         ),
+        "breadcrumb_items": [
+            {
+                "title": "Assignments",
+                "url": reverse("assignment_list"),
+            },
+            {
+                "title": (
+                    "Edit Assignment"
+                    if assignment
+                    else "Assign Driver"
+                ),
+                "url": (
+                    reverse("assignment_edit", args=[assignment.id])
+                    if assignment
+                    else reverse("assignment_add")
+                ),
+            },
+        ],
         "form": form,
         "assignment": assignment,
     }
@@ -689,6 +774,12 @@ def document_list(request):
     )
     context = {
         "page_title": "Vehicle Documents",
+        "breadcrumb_items": [
+            {
+                "title": "Vehicle Documents",
+                "url": reverse("document_list"),
+            },
+        ],
         "documents": documents,
         "total_documents": total_documents,
         "verified_documents": verified_documents,
@@ -759,6 +850,24 @@ def document_form(request, pk=None):
             if document
             else "Upload Vehicle Document"
         ),
+        "breadcrumb_items": [
+            {
+                "title": "Documents",
+                "url": reverse("document_list"),
+            },
+            {
+                "title": (
+                    "Edit Vehicle Document"
+                    if document
+                    else "Upload Vehicle Document"
+                ),
+                "url": (
+                    reverse("document_edit", args=[document.id])
+                    if document
+                    else reverse("document_add")
+                ),
+            },
+        ],
         "form": form,
         "document": document,
     }

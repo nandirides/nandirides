@@ -2,31 +2,6 @@
 {% load static %}
 {% block title %}{{ page_title }} | NandiRide{% endblock %}
 {% block content %}
-<div class="app-content-header">
-    <div class="container-fluid">
-        <div class="row align-items-center">
-            <div class="col-lg-7">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
-                        <i class="bi bi-ticket-detailed fs-4"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-1 fw-semibold">{{ ticket.ticket_number }}</h3>
-                        <div class="text-body-secondary small">{{ ticket.subject }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-5">
-                <ol class="breadcrumb float-sm-end mb-0">
-                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'support_dashboard' %}">Support</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'ticket_list' %}">Tickets</a></li>
-                    <li class="breadcrumb-item active">Details</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-</div>
 <div class="app-content">
     <div class="container-fluid">
         <div class="row g-4">
