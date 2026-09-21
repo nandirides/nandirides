@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}NandiRide | Ride Dashboard{% endblock %}
 {% block content %}
+
 <div class="container-fluid py-3">
     <div class="row align-items-center mb-4">
         <div class="col-xl-8 col-lg-7">
@@ -37,365 +38,371 @@
             </div>
         </div>
     </div>
-    <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="info-box shadow-sm h-100">
-                <span class="info-box-icon bg-primary bg-opacity-10 text-primary">
-                    <i class="fas fa-inbox"></i>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="info-box shadow-sm h-100">
+            <span class="info-box-icon bg-primary bg-opacity-10 text-primary">
+                <i class="fas fa-inbox"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Ride Requests</span>
+                <span class="info-box-number">{{ total_requests }}</span>
+                <span class="progress-description text-primary">
+                    <i class="fas fa-arrow-up me-1"></i>{{ requested_requests }} new
                 </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Ride Requests</span>
-                    <span class="info-box-number">{{ total_requests }}</span>
-                    <span class="progress-description text-primary">
-                        <i class="fas fa-arrow-up me-1"></i>{{ requested_requests }} new
-                    </span>
-                </div>
-                <a href="{% url 'ride_request_list' %}" class="stretched-link"></a>
             </div>
+            <a href="{% url 'ride_request_list' %}" class="stretched-link"></a>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="info-box shadow-sm h-100">
-                <span class="info-box-icon bg-info bg-opacity-10 text-info">
-                    <i class="fas fa-route"></i>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="info-box shadow-sm h-100">
+            <span class="info-box-icon bg-info bg-opacity-10 text-info">
+                <i class="fas fa-route"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total Rides</span>
+                <span class="info-box-number">{{ total_rides }}</span>
+                <span class="progress-description text-info">
+                    {{ completed_rides }} completed
                 </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total Rides</span>
-                    <span class="info-box-number">{{ total_rides }}</span>
-                    <span class="progress-description text-info">
-                        {{ completed_rides }} completed
-                    </span>
-                </div>
-                <a href="{% url 'ride_list' %}" class="stretched-link"></a>
             </div>
+            <a href="{% url 'ride_list' %}" class="stretched-link"></a>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="info-box shadow-sm h-100">
-                <span class="info-box-icon bg-success bg-opacity-10 text-success">
-                    <i class="fas fa-car-side"></i>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="info-box shadow-sm h-100">
+            <span class="info-box-icon bg-success bg-opacity-10 text-success">
+                <i class="fas fa-car-side"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Active Rides</span>
+                <span class="info-box-number">{{ active_rides }}</span>
+                <span class="progress-description text-success">
+                    {{ started_rides }} started
                 </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Active Rides</span>
-                    <span class="info-box-number">{{ active_rides }}</span>
-                    <span class="progress-description text-success">
-                        {{ started_rides }} started
-                    </span>
-                </div>
-                <a href="{% url 'ride_list' %}" class="stretched-link"></a>
             </div>
+            <a href="{% url 'ride_list' %}" class="stretched-link"></a>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="info-box shadow-sm h-100">
-                <span class="info-box-icon bg-warning bg-opacity-10 text-warning">
-                    <i class="fas fa-circle-check"></i>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="info-box shadow-sm h-100">
+            <span class="info-box-icon bg-warning bg-opacity-10 text-warning">
+                <i class="fas fa-circle-check"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Completed Rides</span>
+                <span class="info-box-number">{{ completed_rides }}</span>
+                <span class="progress-description text-success">
+                    <i class="fas fa-check me-1"></i>Successfully completed
                 </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Completed Rides</span>
-                    <span class="info-box-number">{{ completed_rides }}</span>
-                    <span class="progress-description text-success">
-                        <i class="fas fa-check me-1"></i>Successfully completed
+            </div>
+            <a href="{% url 'ride_list' %}?status=completed" class="stretched-link"></a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-outline card-primary shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="small text-body-secondary">Requested</div>
+                        <div class="fs-3 fw-bold text-primary">{{ requested_requests }}</div>
+                    </div>
+                    <span class="rounded-3 bg-primary bg-opacity-10 text-primary p-2">
+                        <i class="fas fa-inbox"></i>
                     </span>
                 </div>
-                <a href="{% url 'ride_list' %}?status=completed" class="stretched-link"></a>
+                <div class="small text-body-secondary mt-2">New requests</div>
             </div>
         </div>
     </div>
-    <div class="row g-3 mb-4">
-        <div class="col-xl-2 col-md-4 col-6">
-            <div class="card card-outline card-primary shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="small text-body-secondary">Requested</div>
-                            <div class="fs-3 fw-bold text-primary">{{ requested_requests }}</div>
-                        </div>
-                        <span class="rounded-3 bg-primary bg-opacity-10 text-primary p-2">
-                            <i class="fas fa-inbox"></i>
-                        </span>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-outline card-warning shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="small text-body-secondary">Searching</div>
+                        <div class="fs-3 fw-bold text-warning">{{ searching_requests }}</div>
                     </div>
-                    <div class="small text-body-secondary mt-2">New requests</div>
+                    <span class="rounded-3 bg-warning bg-opacity-10 text-warning p-2">
+                        <i class="fas fa-magnifying-glass"></i>
+                    </span>
                 </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-md-4 col-6">
-            <div class="card card-outline card-warning shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="small text-body-secondary">Searching</div>
-                            <div class="fs-3 fw-bold text-warning">{{ searching_requests }}</div>
-                        </div>
-                        <span class="rounded-3 bg-warning bg-opacity-10 text-warning p-2">
-                            <i class="fas fa-magnifying-glass"></i>
-                        </span>
-                    </div>
-                    <div class="small text-body-secondary mt-2">Finding driver</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-md-4 col-6">
-            <div class="card card-outline card-info shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="small text-body-secondary">Assigned</div>
-                            <div class="fs-3 fw-bold text-info">{{ assigned_requests }}</div>
-                        </div>
-                        <span class="rounded-3 bg-info bg-opacity-10 text-info p-2">
-                            <i class="fas fa-user-check"></i>
-                        </span>
-                    </div>
-                    <div class="small text-body-secondary mt-2">Driver assigned</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-md-4 col-6">
-            <div class="card card-outline card-secondary shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="small text-body-secondary">Arriving</div>
-                            <div class="fs-3 fw-bold text-secondary">{{ driver_arriving_rides }}</div>
-                        </div>
-                        <span class="rounded-3 bg-secondary bg-opacity-10 text-secondary p-2">
-                            <i class="fas fa-car"></i>
-                        </span>
-                    </div>
-                    <div class="small text-body-secondary mt-2">Driver on the way</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-md-4 col-6">
-            <div class="card card-outline card-success shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="small text-body-secondary">Started</div>
-                            <div class="fs-3 fw-bold text-success">{{ started_rides }}</div>
-                        </div>
-                        <span class="rounded-3 bg-success bg-opacity-10 text-success p-2">
-                            <i class="fas fa-play"></i>
-                        </span>
-                    </div>
-                    <div class="small text-body-secondary mt-2">Journey in progress</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-md-4 col-6">
-            <div class="card card-outline card-danger shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="small text-body-secondary">Cancelled</div>
-                            <div class="fs-3 fw-bold text-danger">{{ cancelled_rides }}</div>
-                        </div>
-                        <span class="rounded-3 bg-danger bg-opacity-10 text-danger p-2">
-                            <i class="fas fa-circle-xmark"></i>
-                        </span>
-                    </div>
-                    <div class="small text-body-secondary mt-2">Cancelled rides</div>
-                </div>
+                <div class="small text-body-secondary mt-2">Finding driver</div>
             </div>
         </div>
     </div>
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary bg-opacity-10 py-3">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div>
-                    <h5 class="card-title mb-1 fw-semibold text-body">
-                        <i class="fas fa-layer-group me-2 text-primary"></i>Ride Operations
-                    </h5>&nbsp;
-                    <small class="text-body-secondary">Complete ride management workflow</small>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-outline card-info shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="small text-body-secondary">Assigned</div>
+                        <div class="fs-3 fw-bold text-info">{{ assigned_requests }}</div>
+                    </div>
+                    <span class="rounded-3 bg-info bg-opacity-10 text-info p-2">
+                        <i class="fas fa-user-check"></i>
+                    </span>
                 </div>
-                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-2">
-                    <i class="fas fa-car me-1"></i>{{ total_rides }} Rides
-                </span>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-xl-3 col-md-6">
-                    <a href="{% url 'ride_request_list' %}" class="text-decoration-none">
-                        <div class="card border-primary shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary p-3 me-3">
-                                        <i class="fas fa-inbox fa-lg"></i>
-                                    </span>
-                                    <div>
-                                        <h6 class="fw-bold text-body mb-1">Ride Requests</h6>
-                                        <small class="text-body-secondary">Manage request lifecycle</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-primary bg-opacity-10 border-0 text-primary small">
-                                Open Requests <i class="fas fa-arrow-right float-end mt-1"></i>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <a href="{% url 'ride_list' %}" class="text-decoration-none">
-                        <div class="card border-info shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-info bg-opacity-10 text-info p-3 me-3">
-                                        <i class="fas fa-car fa-lg"></i>
-                                    </span>
-                                    <div>
-                                        <h6 class="fw-bold text-body mb-1">All Rides</h6>
-                                        <small class="text-body-secondary">Search and manage rides</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-info bg-opacity-10 border-0 text-info small">
-                                View Rides <i class="fas fa-arrow-right float-end mt-1"></i>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <a href="{% url 'ride_add' %}" class="text-decoration-none">
-                        <div class="card border-success shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-success bg-opacity-10 text-success p-3 me-3">
-                                        <i class="fas fa-plus-circle fa-lg"></i>
-                                    </span>
-                                    <div>
-                                        <h6 class="fw-bold text-body mb-1">Create Ride</h6>
-                                        <small class="text-body-secondary">Create a new ride</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-success bg-opacity-10 border-0 text-success small">
-                                Create New <i class="fas fa-arrow-right float-end mt-1"></i>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <a href="{% url 'ride_request_list' %}" class="text-decoration-none">
-                        <div class="card border-warning shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning bg-opacity-10 text-warning p-3 me-3">
-                                        <i class="fas fa-arrow-right-arrow-left fa-lg"></i>
-                                    </span>
-                                    <div>
-                                        <h6 class="fw-bold text-body mb-1">Request Workflow</h6>
-                                        <small class="text-body-secondary">Request to ride workflow</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-warning bg-opacity-10 border-0 text-warning-emphasis small">
-                                Manage Workflow <i class="fas fa-arrow-right float-end mt-1"></i>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <a href="{% url 'ride_list' %}" class="text-decoration-none">
-                        <div class="card border-secondary shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-secondary bg-opacity-10 text-secondary p-3 me-3">
-                                        <i class="fas fa-user-check fa-lg"></i>
-                                    </span>
-                                    <div>
-                                        <h6 class="fw-bold text-body mb-1">Driver Assignment</h6>
-                                        <small class="text-body-secondary">Manage ride drivers</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-secondary bg-opacity-10 border-0 text-secondary small">
-                                Manage Assignments <i class="fas fa-arrow-right float-end mt-1"></i>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <a href="{% url 'ride_list' %}" class="text-decoration-none">
-                        <div class="card border-danger shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-danger bg-opacity-10 text-danger p-3 me-3">
-                                        <i class="fas fa-location-dot fa-lg"></i>
-                                    </span>
-                                    <div>
-                                        <h6 class="fw-bold text-body mb-1">Live Tracking</h6>
-                                        <small class="text-body-secondary">Monitor GPS tracking</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-danger bg-opacity-10 border-0 text-danger small">
-                                Track Rides <i class="fas fa-arrow-right float-end mt-1"></i>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <a href="{% url 'ride_list' %}" class="text-decoration-none">
-                        <div class="card border-primary shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary p-3 me-3">
-                                        <i class="fas fa-signs-post fa-lg"></i>
-                                    </span>
-                                    <div>
-                                        <h6 class="fw-bold text-body mb-1">Ride Stops</h6>
-                                        <small class="text-body-secondary">Manage intermediate stops</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-primary bg-opacity-10 border-0 text-primary small">
-                                Manage Stops <i class="fas fa-arrow-right float-end mt-1"></i>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <a href="{% url 'ride_list' %}" class="text-decoration-none">
-                        <div class="card border-warning shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning bg-opacity-10 text-warning p-3 me-3">
-                                        <i class="fas fa-star fa-lg"></i>
-                                    </span>
-                                    <div>
-                                        <h6 class="fw-bold text-body mb-1">Ratings & Resolution</h6>
-                                        <small class="text-body-secondary">Manage ride resolution</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-warning bg-opacity-10 border-0 text-warning-emphasis small">
-                                View Resolution <i class="fas fa-arrow-right float-end mt-1"></i>
-                            </div>
-                        </div>
-                    </a>
-                </div>
+                <div class="small text-body-secondary mt-2">Driver assigned</div>
             </div>
         </div>
     </div>
-    <div class="row g-3 mb-4">
-        <div class="col-xl-8">
-            <div class="card shadow-sm h-100">
-                <div class="card-header py-3">
-                    <div class="d-flex justify-content-between align-items-center gap-2">
-                        <div>
-                            <h5 class="card-title mb-1 fw-semibold">
-                                <i class="fas fa-clock-rotate-left me-2 text-primary"></i>Recent Rides
-                            </h5>&nbsp;
-                            <small class="text-body-secondary">Latest ride activity across NandiRide</small>
-                        </div>
-                        <a href="{% url 'ride_list' %}" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-list me-1"></i>View All
-                        </a>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-outline card-secondary shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="small text-body-secondary">Arriving</div>
+                        <div class="fs-3 fw-bold text-secondary">{{ driver_arriving_rides }}</div>
                     </div>
+                    <span class="rounded-3 bg-secondary bg-opacity-10 text-secondary p-2">
+                        <i class="fas fa-car"></i>
+                    </span>
                 </div>
+                <div class="small text-body-secondary mt-2">Driver on the way</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-outline card-success shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="small text-body-secondary">Started</div>
+                        <div class="fs-3 fw-bold text-success">{{ started_rides }}</div>
+                    </div>
+                    <span class="rounded-3 bg-success bg-opacity-10 text-success p-2">
+                        <i class="fas fa-play"></i>
+                    </span>
+                </div>
+                <div class="small text-body-secondary mt-2">Journey in progress</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card card-outline card-danger shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="small text-body-secondary">Cancelled</div>
+                        <div class="fs-3 fw-bold text-danger">{{ cancelled_rides }}</div>
+                    </div>
+                    <span class="rounded-3 bg-danger bg-opacity-10 text-danger p-2">
+                        <i class="fas fa-circle-xmark"></i>
+                    </span>
+                </div>
+                <div class="small text-body-secondary mt-2">Cancelled rides</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary bg-opacity-10 py-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h5 class="card-title mb-1 fw-semibold text-body">
+                    <i class="fas fa-layer-group me-2 text-primary"></i>Ride Operations
+                </h5>&nbsp;
+                <small class="text-body-secondary">Complete ride management workflow</small>
+            </div>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-2">
+                <i class="fas fa-car me-1"></i>{{ total_rides }} Rides
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-xl-3 col-md-6">
+                <a href="{% url 'ride_request_list' %}" class="text-decoration-none">
+                    <div class="card border-primary shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary p-3 me-3">
+                                    <i class="fas fa-inbox fa-lg"></i>
+                                </span>
+                                <div>
+                                    <h6 class="fw-bold text-body mb-1">Ride Requests</h6>
+                                    <small class="text-body-secondary">Manage request lifecycle</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-primary bg-opacity-10 border-0 text-primary small">
+                            Open Requests <i class="fas fa-arrow-right float-end mt-1"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <a href="{% url 'ride_list' %}" class="text-decoration-none">
+                    <div class="card border-info shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-info bg-opacity-10 text-info p-3 me-3">
+                                    <i class="fas fa-car fa-lg"></i>
+                                </span>
+                                <div>
+                                    <h6 class="fw-bold text-body mb-1">All Rides</h6>
+                                    <small class="text-body-secondary">Search and manage rides</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-info bg-opacity-10 border-0 text-info small">
+                            View Rides <i class="fas fa-arrow-right float-end mt-1"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <a href="{% url 'ride_add' %}" class="text-decoration-none">
+                    <div class="card border-success shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-success bg-opacity-10 text-success p-3 me-3">
+                                    <i class="fas fa-plus-circle fa-lg"></i>
+                                </span>
+                                <div>
+                                    <h6 class="fw-bold text-body mb-1">Create Ride</h6>
+                                    <small class="text-body-secondary">Create a new ride</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-success bg-opacity-10 border-0 text-success small">
+                            Create New <i class="fas fa-arrow-right float-end mt-1"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <a href="{% url 'ride_request_list' %}" class="text-decoration-none">
+                    <div class="card border-warning shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning bg-opacity-10 text-warning p-3 me-3">
+                                    <i class="fas fa-arrow-right-arrow-left fa-lg"></i>
+                                </span>
+                                <div>
+                                    <h6 class="fw-bold text-body mb-1">Request Workflow</h6>
+                                    <small class="text-body-secondary">Request to ride workflow</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-warning bg-opacity-10 border-0 text-warning-emphasis small">
+                            Manage Workflow <i class="fas fa-arrow-right float-end mt-1"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <a href="{% url 'ride_list' %}" class="text-decoration-none">
+                    <div class="card border-secondary shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-secondary bg-opacity-10 text-secondary p-3 me-3">
+                                    <i class="fas fa-user-check fa-lg"></i>
+                                </span>
+                                <div>
+                                    <h6 class="fw-bold text-body mb-1">Driver Assignment</h6>
+                                    <small class="text-body-secondary">Manage ride drivers</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-secondary bg-opacity-10 border-0 text-secondary small">
+                            Manage Assignments <i class="fas fa-arrow-right float-end mt-1"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <a href="{% url 'ride_list' %}" class="text-decoration-none">
+                    <div class="card border-danger shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-danger bg-opacity-10 text-danger p-3 me-3">
+                                    <i class="fas fa-location-dot fa-lg"></i>
+                                </span>
+                                <div>
+                                    <h6 class="fw-bold text-body mb-1">Live Tracking</h6>
+                                    <small class="text-body-secondary">Monitor GPS tracking</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-danger bg-opacity-10 border-0 text-danger small">
+                            Track Rides <i class="fas fa-arrow-right float-end mt-1"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <a href="{% url 'ride_list' %}" class="text-decoration-none">
+                    <div class="card border-primary shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary p-3 me-3">
+                                    <i class="fas fa-signs-post fa-lg"></i>
+                                </span>
+                                <div>
+                                    <h6 class="fw-bold text-body mb-1">Ride Stops</h6>
+                                    <small class="text-body-secondary">Manage intermediate stops</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-primary bg-opacity-10 border-0 text-primary small">
+                            Manage Stops <i class="fas fa-arrow-right float-end mt-1"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <a href="{% url 'ride_list' %}" class="text-decoration-none">
+                    <div class="card border-warning shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning bg-opacity-10 text-warning p-3 me-3">
+                                    <i class="fas fa-star fa-lg"></i>
+                                </span>
+                                <div>
+                                    <h6 class="fw-bold text-body mb-1">Ratings & Resolution</h6>
+                                    <small class="text-body-secondary">Manage ride resolution</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-warning bg-opacity-10 border-0 text-warning-emphasis small">
+                            View Resolution <i class="fas fa-arrow-right float-end mt-1"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <div>
+                        <h5 class="card-title mb-1 fw-semibold">
+                            <i class="fas fa-clock-rotate-left me-2 text-primary"></i>Recent Rides
+                        </h5>&nbsp;
+                        <small class="text-body-secondary">Latest ride activity across NandiRide</small>
+                    </div>
+                    <a href="{% url 'ride_list' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-list me-1"></i>View All
+                    </a>
+                </div>
+            </div>
+
+            {% if recent_rides %}
                 <div class="card-body p-0">
-                    <div class="table-responsive">
+                    <div style="max-height:320px;overflow-y:auto;overflow-x:auto;">
                         <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
+                            <thead class="table-light" style="position:sticky;top:0;z-index:2;">
                                 <tr>
                                     <th class="ps-3">Ride</th>
                                     <th>Passenger</th>
@@ -467,38 +474,42 @@
                                             </a>
                                         </td>
                                     </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="6" class="text-center py-5">
-                                            <div class="text-body-secondary">
-                                                <i class="fas fa-car fa-2x mb-2"></i>
-                                                <div class="fw-semibold">No rides available</div>
-                                                <small>Recent ride activity will appear here.</small>
-                                            </div>
-                                        </td>
-                                    </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-xl-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="card-title mb-1 fw-semibold">
-                                <i class="fas fa-inbox me-2 text-primary"></i>Recent Requests
-                            </h5><br>
-                            <small class="text-body-secondary">Latest incoming requests</small>
+            {% else %}
+                <div class="card-body p-0">
+                    <div class="text-center py-5">
+                        <div class="text-body-secondary">
+                            <i class="fas fa-car fa-2x mb-2"></i>
+                            <div class="fw-semibold">No rides available</div>
+                            <small>Recent ride activity will appear here.</small>
                         </div>
-                        <a href="{% url 'ride_request_list' %}" class="btn btn-sm btn-outline-primary">All</a>
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    {% if recent_requests %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-1 fw-semibold">
+                            <i class="fas fa-inbox me-2 text-primary"></i>Recent Requests
+                        </h5><br>
+                        <small class="text-body-secondary">Latest incoming requests</small>
+                    </div>
+                    <a href="{% url 'ride_request_list' %}" class="btn btn-sm btn-outline-primary">All</a>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                {% if recent_requests %}
+                    <div style="max-height:285px;overflow-y:auto;">
                         <div class="list-group list-group-flush">
                             {% for ride_request in recent_requests %}
                                 <a href="{% url 'ride_request_details' ride_request.pk %}" class="list-group-item list-group-item-action py-3">
@@ -534,163 +545,168 @@
                                 </a>
                             {% endfor %}
                         </div>
-                    {% else %}
-                        <div class="text-center py-5 px-3">
-                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary p-3 mb-3">
-                                <i class="fas fa-inbox fa-lg"></i>
-                            </span>
-                            <h6 class="fw-semibold">No requests found</h6>
-                            <p class="small text-body-secondary mb-0">
-                                New ride requests will appear here.
-                            </p>
-                        </div>
-                    {% endif %}
-                </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 px-3">
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary p-3 mb-3">
+                            <i class="fas fa-inbox fa-lg"></i>
+                        </span>
+                        <h6 class="fw-semibold">No requests found</h6>
+                        <p class="small text-body-secondary mb-0">
+                            New ride requests will appear here.
+                        </p>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-dark bg-opacity-10 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="card-title mb-1 fw-semibold">
-                        <i class="fas fa-diagram-project me-2 text-primary"></i>Ride Lifecycle
-                    </h5>&nbsp;
-                    <small class="text-body-secondary"> Current operational flow</small>
-                </div>
-                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle">Live Status</span>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark bg-opacity-10 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="card-title mb-1 fw-semibold">
+                    <i class="fas fa-diagram-project me-2 text-primary"></i>Ride Lifecycle
+                </h5>&nbsp;
+                <small class="text-body-secondary"> Current operational flow</small>
             </div>
-        </div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-xl-2 col-md-4 col-6">
-                    <div class="card card-outline card-primary shadow-sm h-100 text-center">
-                        <div class="card-body py-3">
-                            <i class="fas fa-inbox fa-2x text-primary mb-2"></i>
-                            <div class="small text-body-secondary">Step 01</div>
-                            <div class="fw-bold">Requested</div>
-                            <div class="fs-4 fw-bold text-primary">{{ requested_requests }}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-2 col-md-4 col-6">
-                    <div class="card card-outline card-warning shadow-sm h-100 text-center">
-                        <div class="card-body py-3">
-                            <i class="fas fa-search fa-2x text-warning mb-2"></i>
-                            <div class="small text-body-secondary">Step 02</div>
-                            <div class="fw-bold">Searching</div>
-                            <div class="fs-4 fw-bold text-warning">{{ searching_requests }}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-2 col-md-4 col-6">
-                    <div class="card card-outline card-info shadow-sm h-100 text-center">
-                        <div class="card-body py-3">
-                            <i class="fas fa-user-check fa-2x text-info mb-2"></i>
-                            <div class="small text-body-secondary">Step 03</div>
-                            <div class="fw-bold">Assigned</div>
-                            <div class="fs-4 fw-bold text-info">{{ driver_assigned_rides }}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-2 col-md-4 col-6">
-                    <div class="card card-outline card-secondary shadow-sm h-100 text-center">
-                        <div class="card-body py-3">
-                            <i class="fas fa-car fa-2x text-secondary mb-2"></i>
-                            <div class="small text-body-secondary">Step 04</div>
-                            <div class="fw-bold">Arriving</div>
-                            <div class="fs-4 fw-bold text-secondary">{{ driver_arriving_rides }}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-2 col-md-4 col-6">
-                    <div class="card card-outline card-success shadow-sm h-100 text-center">
-                        <div class="card-body py-3">
-                            <i class="fas fa-play-circle fa-2x text-success mb-2"></i>
-                            <div class="small text-body-secondary">Step 05</div>
-                            <div class="fw-bold">Started</div>
-                            <div class="fs-4 fw-bold text-success">{{ started_rides }}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-2 col-md-4 col-6">
-                    <div class="card card-outline card-success shadow-sm h-100 text-center">
-                        <div class="card-body py-3">
-                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-                            <div class="small text-body-secondary">Step 06</div>
-                            <div class="fw-bold">Completed</div>
-                            <div class="fs-4 fw-bold text-success">{{ completed_rides }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle">Live Status</span>
         </div>
     </div>
-    <div class="row g-3">
-        <div class="col-xl-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-primary bg-opacity-10 py-3">
-                    <h5 class="card-title mb-1 fw-semibold">
-                        <i class="fas fa-user-check me-2 text-primary"></i>Driver Operations
-                    </h5>&nbsp;
-                    <small class="text-body-secondary">Driver-related ride management</small>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <a href="{% url 'ride_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
-                            <span>
-                                <i class="fas fa-user-plus text-primary me-2"></i>Driver Assignments
-                            </span>
-                            <i class="fas fa-chevron-right text-body-secondary"></i>
-                        </a>
-                        <a href="{% url 'ride_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
-                            <span>
-                                <i class="fas fa-location-dot text-danger me-2"></i>GPS Tracking
-                            </span>
-                            <i class="fas fa-chevron-right text-body-secondary"></i>
-                        </a>
-                        <a href="{% url 'ride_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
-                            <span>
-                                <i class="fas fa-signs-post text-success me-2"></i>Ride Stops
-                            </span>
-                            <i class="fas fa-chevron-right text-body-secondary"></i>
-                        </a>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card card-outline card-primary shadow-sm h-100 text-center">
+                    <div class="card-body py-3">
+                        <i class="fas fa-inbox fa-2x text-primary mb-2"></i>
+                        <div class="small text-body-secondary">Step 01</div>
+                        <div class="fw-bold">Requested</div>
+                        <div class="fs-4 fw-bold text-primary">{{ requested_requests }}</div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-xl-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-danger bg-opacity-10 py-3">
-                    <h5 class="card-title mb-1 fw-semibold">
-                        <i class="fas fa-shield-halved me-2 text-danger"></i>Ride Resolution
-                    </h5>&nbsp;
-                    <small class="text-body-secondary">Cancellation, ratings and completed rides</small>
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card card-outline card-warning shadow-sm h-100 text-center">
+                    <div class="card-body py-3">
+                        <i class="fas fa-search fa-2x text-warning mb-2"></i>
+                        <div class="small text-body-secondary">Step 02</div>
+                        <div class="fw-bold">Searching</div>
+                        <div class="fs-4 fw-bold text-warning">{{ searching_requests }}</div>
+                    </div>
                 </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <a href="{% url 'ride_list' %}?status=completed" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
-                            <span>
-                                <i class="fas fa-circle-check text-success me-2"></i>Completed Rides
-                            </span>
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill">{{ completed_rides }}</span>
-                        </a>
-                        <a href="{% url 'ride_list' %}?status=cancelled" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
-                            <span>
-                                <i class="fas fa-circle-xmark text-danger me-2"></i>Cancelled Rides
-                            </span>
-                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill">{{ cancelled_rides }}</span>
-                        </a>
-                        <a href="{% url 'ride_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
-                            <span>
-                                <i class="fas fa-star text-warning me-2"></i>Ratings & Reviews
-                            </span>
-                            <i class="fas fa-chevron-right text-body-secondary"></i>
-                        </a>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card card-outline card-info shadow-sm h-100 text-center">
+                    <div class="card-body py-3">
+                        <i class="fas fa-user-check fa-2x text-info mb-2"></i>
+                        <div class="small text-body-secondary">Step 03</div>
+                        <div class="fw-bold">Assigned</div>
+                        <div class="fs-4 fw-bold text-info">{{ driver_assigned_rides }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card card-outline card-secondary shadow-sm h-100 text-center">
+                    <div class="card-body py-3">
+                        <i class="fas fa-car fa-2x text-secondary mb-2"></i>
+                        <div class="small text-body-secondary">Step 04</div>
+                        <div class="fw-bold">Arriving</div>
+                        <div class="fs-4 fw-bold text-secondary">{{ driver_arriving_rides }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card card-outline card-success shadow-sm h-100 text-center">
+                    <div class="card-body py-3">
+                        <i class="fas fa-play-circle fa-2x text-success mb-2"></i>
+                        <div class="small text-body-secondary">Step 05</div>
+                        <div class="fw-bold">Started</div>
+                        <div class="fs-4 fw-bold text-success">{{ started_rides }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-6">
+                <div class="card card-outline card-success shadow-sm h-100 text-center">
+                    <div class="card-body py-3">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <div class="small text-body-secondary">Step 06</div>
+                        <div class="fw-bold">Completed</div>
+                        <div class="fs-4 fw-bold text-success">{{ completed_rides }}</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-xl-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary bg-opacity-10 py-3">
+                <h5 class="card-title mb-1 fw-semibold">
+                    <i class="fas fa-user-check me-2 text-primary"></i>Driver Operations
+                </h5>&nbsp;
+                <small class="text-body-secondary">Driver-related ride management</small>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'ride_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
+                        <span>
+                            <i class="fas fa-user-plus text-primary me-2"></i>Driver Assignments
+                        </span>
+                        <i class="fas fa-chevron-right text-body-secondary"></i>
+                    </a>
+                    <a href="{% url 'ride_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
+                        <span>
+                            <i class="fas fa-location-dot text-danger me-2"></i>GPS Tracking
+                        </span>
+                        <i class="fas fa-chevron-right text-body-secondary"></i>
+                    </a>
+                    <a href="{% url 'ride_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
+                        <span>
+                            <i class="fas fa-signs-post text-success me-2"></i>Ride Stops
+                        </span>
+                        <i class="fas fa-chevron-right text-body-secondary"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-danger bg-opacity-10 py-3">
+                <h5 class="card-title mb-1 fw-semibold">
+                    <i class="fas fa-shield-halved me-2 text-danger"></i>Ride Resolution
+                </h5>&nbsp;
+                <small class="text-body-secondary">Cancellation, ratings and completed rides</small>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'ride_list' %}?status=completed" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
+                        <span>
+                            <i class="fas fa-circle-check text-success me-2"></i>Completed Rides
+                        </span>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill">{{ completed_rides }}</span>
+                    </a>
+                    <a href="{% url 'ride_list' %}?status=cancelled" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
+                        <span>
+                            <i class="fas fa-circle-xmark text-danger me-2"></i>Cancelled Rides
+                        </span>
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill">{{ cancelled_rides }}</span>
+                    </a>
+                    <a href="{% url 'ride_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-3">
+                        <span>
+                            <i class="fas fa-star text-warning me-2"></i>Ratings & Reviews
+                        </span>
+                        <i class="fas fa-chevron-right text-body-secondary"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 </div>
 {% endblock %}
