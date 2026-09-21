@@ -3,6 +3,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import RefundForm
 from .models import Payment, Refund
+from django.urls import reverse
 
 def payment_list(request):
     payments = Payment.objects.select_related(
@@ -14,6 +15,12 @@ def payment_list(request):
     context = {
         "payments": payments,
         "page_title": "Payments",
+        "breadcrumb_items": [
+            {
+                "title": "Payments",
+                "url": "payment_list"
+            },
+        ],
         "total_payments": payments.count(),
         "pending_payments": payments.filter(
             status=Payment.Status.PENDING
@@ -49,6 +56,12 @@ def payment_detail(request, pk):
         "payment": payment,
         "refunds": refunds,
         "page_title": "Payment Details",
+        "breadcrumb_items": [
+            {
+                "title": "Payment Details",
+                "url": "payment_detail"
+            },
+        ],
     }
     return render(
         request,
@@ -103,6 +116,20 @@ def refund_form(request, payment_pk, pk=None):
         "payment": payment,
         "refund": refund,
         "page_title": "Edit Refund" if pk else "Add Refund",
+        "breadcrumb_items": [
+            {
+                "title": "Refunds",
+                "url": reverse("payment_list"),
+            },
+            {
+                "title": "Edit Refund" if pk else "Add Refund",
+                "url": (
+                    reverse("refund_edit", args=[pk])
+                    if pk
+                    else reverse("refund_create")
+                ),
+            },
+        ],
     }
     return render(
         request,

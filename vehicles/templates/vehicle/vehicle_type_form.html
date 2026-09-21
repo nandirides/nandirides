@@ -10,22 +10,6 @@
                     {% if form.instance.pk %}Edit Vehicle Type{% else %}Add Vehicle Type{% endif %}
                 </h3>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-end mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'dashboard' %}">Dashboard</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'vehicle_dashboard' %}">Vehicles</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'vehicle_type_list' %}">Vehicle Types</a>
-                    </li>
-                    <li class="breadcrumb-item active">
-                        {% if form.instance.pk %}Edit{% else %}Add{% endif %}
-                    </li>
-                </ol>
-            </div>
         </div>
     </div>
 </div>

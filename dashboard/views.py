@@ -176,14 +176,22 @@ def ride_gallery(request):
             return redirect("ride_gallery")
     else:
         form = GalleryForm()
-    return render(
-        request,
-        "includes/gallery.html",
-        {
+
+        context = {
+            "page_title": "Gallery",
             "gallery": gallery,
             "galleries": gallery,
             "form": form,
-        },
+            "breadcrumb_items": [
+                {
+                    "title": "Gallery",
+                    "url": "/ride_gallery"
+                },
+            ]
+        }
+    return render(
+        request,
+        "includes/gallery.html",context
     )
 
 @login_required
@@ -385,11 +393,25 @@ def user_create(request, pk=None):
             "form": form,
             "user_obj": user_obj,
             "selected_user": user_obj,
-            "page_title": (
+           "page_title": (
                 "Edit User"
                 if user_obj
                 else "Add User"
             ),
+            "breadcrumb_items": [
+                {
+                    "title": (
+                        "Edit User"
+                        if user_obj
+                        else "Add User"
+                    ),
+                    "url": (
+                        reverse("user_edit", args=[user_obj.id])
+                        if user_obj
+                        else reverse("user_create")
+                    ),
+                },
+            ],
             "cities": cities,
         },
     )
@@ -440,6 +462,13 @@ def user_list(request):
         "dashboard/users/list.html",
         {
             "users": users,
+            "page_title": "User List",
+            "breadcrumb_items": [
+                {
+                    "title": "User List",
+                    "url": "user_list"
+                },
+            ],
         },
     )
 
@@ -694,6 +723,7 @@ def dashboard(request):
         .order_by("-count")
     )
     context = {
+        "page_title": "Admin Dashboard",
         "total_users": total_users,
         "active_users": active_users,
         "total_rides": total_rides,
@@ -1364,10 +1394,14 @@ def user_setting(request):
     cities = City.objects.all().order_by(
         "name"
     )
-    return render(
-        request,
-        "account/setting.html",
-        {
+    context = {
+            "page_title": 'Admin Setting',
+            "breadcrumb_items": [
+                {
+                    "title": "Admin Setting",
+                    "url": "user_setting"
+                },
+            ],
             "user": user,
             "profile": profile,
             "address": address,
@@ -1379,8 +1413,11 @@ def user_setting(request):
                 profile.email_verified
                 and user.email
             ),
-        },
-    )
+            }
+    return render(
+        request,
+        "account/setting.html",context 
+        )
 
 @login_required
 def group_list(request):
@@ -1444,9 +1481,15 @@ def group_list(request):
         group.group_status = statuses.get(group.pk)
     context = {
         "groups": groups,
+        "page_title": "Groups Management",
+        "breadcrumb_items": [
+            {
+                "title": "Groups",
+                "url": "group_list"
+            },
+        ],
         "total_users": User.objects.count(),
         "assigned_users": User.objects.filter(groups__isnull=False).distinct().count(),
         "total_permissions": Permission.objects.count(),
-        "page_title": "Groups Management",
     }
     return render(request, "dashboard/groups.html", context)

@@ -2,32 +2,6 @@
 {% block title %}{% if form.instance.pk %}Edit Vehicle Document{% else %}Upload Vehicle Document{% endif %} | NandiRide{% endblock %}
 {% block content %}
 <div class="container-fluid py-3">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
-        <div>
-            <h1 class="h3 mb-1">{% if form.instance.pk %}Edit Vehicle Document{% else %}Upload Vehicle Document{% endif %}</h1>
-            <p class="text-body-secondary mb-0">
-                {% if form.instance.pk %}Update vehicle document information and verification details.{% else %}Upload and register a document for a vehicle.{% endif %}
-            </p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{% url 'document_list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Back to Documents
-            </a>
-            <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-primary">
-                <i class="bi bi-speedometer2 me-1"></i>Dashboard
-            </a>
-        </div>
-    </div>
-    {% if messages %}
-    <div class="mb-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-            <i class="bi bi-info-circle me-2"></i>{{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
     <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         {% if form.non_field_errors %}

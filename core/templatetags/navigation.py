@@ -18,7 +18,7 @@ NAVIGATION = [
         "permission": "auth.user_setting",
     },
     {
-        "title": "Ride Status",
+        "title": "Rides",
         "icon": "bi-scooter",
         "url": "ride_dashboard",
         "permission": "rides.view_ride",

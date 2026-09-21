@@ -28,6 +28,12 @@ def promotions_dashboard(request):
 
     context = {
         "page_title": "Promotions Dashboard",
+        "breadcrumb_items": [
+            {
+                "title": "Promotions Dashboard",
+                "url": "promotions_dashboard",
+            },
+        ],
         "total_coupons": total_coupons,
         "active_coupons": active_coupons,
         "inactive_coupons": inactive_coupons,
@@ -50,6 +56,12 @@ def coupon_list(request):
     context = {
         "coupons": coupons,
         "page_title": "Coupons",
+        "breadcrumb_items": [
+            {
+                "title": "Coupons",
+                "url": "coupon_list",
+            },
+        ],
         "total_coupons": coupons.count(),
         "active_coupons": coupons.filter(
             is_active=True
@@ -91,6 +103,12 @@ def coupon_create(request):
     context = {
         "form": form,
         "page_title": "Add Coupon",
+        "breadcrumb_items": [
+            {
+                "title": "Add Coupon",
+                "url": "coupon_create",
+            },
+        ],
         "form_title": "Create Coupon",
     }
 
@@ -137,6 +155,12 @@ def coupon_edit(request, pk):
         "form": form,
         "coupon": coupon,
         "page_title": "Edit Coupon",
+        "breadcrumb_items": [
+            {
+                "title": "Edit Coupon",
+                "url": "coupon_edit", 
+            },
+        ],
         "form_title": "Update Coupon",
     }
 
@@ -161,6 +185,12 @@ def coupon_detail(request, pk):
         "coupon": coupon,
         "usage_count": usage_count,
         "page_title": "Coupon Details",
+        "breadcrumb_items": [
+            {
+                "title": "Coupon Details",
+                "url": "coupon_detail", 
+            },
+        ],
     }
 
     return render(
@@ -230,6 +260,12 @@ def coupon_usage_list(request):
     context = {
         "usages": usages,
         "page_title": "Coupon Usage",
+        "breadcrumb_items": [
+            {
+                "title": "Coupon Usage",
+                "url": "coupon_usage_list", 
+            },
+        ],
         "total_usages": usages.count(),
         "total_discount": total_discount,
     }
@@ -256,6 +292,12 @@ def coupon_usage_detail(request, pk):
     context = {
         "usage": usage,
         "page_title": "Coupon Usage Details",
+        "breadcrumb_items": [
+            {
+                "title": "Coupon Usage Details",
+                "url": "coupon_usage_detail", 
+            },
+        ],
     }
 
     return render(

@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-
+from django.urls import reverse
 from .forms import (
     RideCancellationForm,
     RideDriverAssignmentForm,
@@ -211,6 +211,12 @@ def ride_request_list(request):
 
     context = {
         "page_title": "Ride Requests",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Requests",
+                "url": "ride_request_list"
+            },
+        ],
         "ride_requests": page_obj,
         "page_obj": page_obj,
         "is_paginated": page_obj.has_other_pages(),
@@ -272,7 +278,20 @@ def ride_request_create_edit(request, pk=None):
             "Edit Ride Request"
             if ride_request
             else "Create Ride Request"
-        ),
+        ), "breadcrumb_items": [
+        {
+            "title": (
+                "Edit Ride Request"
+                if ride_request
+                else "Create Ride Request"
+            ),
+            "url": (
+                reverse("ride_request_edit", args=[ride_request.id])
+                if ride_request
+                else reverse("ride_request_add")
+            ),
+        },
+    ],
         "form": form,
         "ride_request": ride_request,
         "is_edit": bool(ride_request),
@@ -307,6 +326,12 @@ def ride_request_details(request, pk):
 
     context = {
         "page_title": f"Ride Request {ride_request.request_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Request",
+                "url": "ride_request_list"
+            },
+        ],
         "ride_request": ride_request,
         "ride": ride,
         "linked_ride": ride,
@@ -430,6 +455,12 @@ def ride_list(request):
 
     context = {
         "page_title": "Rides",
+        "breadcrumb_items": [
+            {
+                "title": "Rides",
+                "url": "ride_list"
+            },
+        ],
         "rides": page_obj,
         "page_obj": page_obj,
         "is_paginated": page_obj.has_other_pages(),
@@ -539,6 +570,25 @@ def ride_create_edit(request, pk=None):
             if ride
             else "Create Ride"
         ),
+
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": (
+                    "Edit Ride"
+                    if ride
+                    else "Create Ride"
+                ),
+                "url": (
+                    reverse("ride_edit", args=[ride.id])
+                    if ride
+                    else reverse("ride_create")
+                ),
+            },
+        ],
         "form": form,
         "ride": ride,
         "ride_request": (
@@ -629,6 +679,16 @@ def ride_status_update(request, pk):
 
     context = {
         "page_title": f"Update Status - {ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Update Status",
+                "url": "ride_status_update"
+            },
+        ],
         "form": form,
         "ride": ride,
         "ride_request": ride.ride_request,
@@ -713,6 +773,16 @@ def ride_details(request, pk):
 
     context = {
         "page_title": f"Ride {ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Ride",
+                "url": "ride_details"
+            },
+        ],
         "ride": ride,
         "ride_request": ride.ride_request,
         "assignments": assignments,
@@ -747,6 +817,16 @@ def ride_assignment_list(request, ride_pk):
 
     context = {
         "page_title": f"Driver Assignments - {ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Driver Assignment",
+                "url": "ride_assignment_list"
+            },
+        ],
         "ride": ride,
         "assignments": assignments,
         "total_assignments": assignments.count(),
@@ -827,6 +907,16 @@ def ride_assignment_create(request, ride_pk):
 
     context = {
         "page_title": f"Assign Driver - {ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Assign Driver",
+                "url": "ride_assignment_add"
+            },
+        ],
         "form": form,
         "ride": ride,
         "assignment": None,
@@ -877,6 +967,16 @@ def ride_assignment_edit(request, pk):
 
     context = {
         "page_title": f"Edit Assignment - {assignment.ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Edit Assignment",
+                "url": "ride_assignment_edit"
+            },
+        ],
         "form": form,
         "ride": assignment.ride,
         "assignment": assignment,
@@ -933,6 +1033,16 @@ def ride_tracking_list(request, ride_pk):
 
     context = {
         "page_title": f"Tracking - {ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Tracking",
+                "url": "ride_tracking_list"
+            },
+        ],
         "ride": ride,
         "tracking_points": page_obj,
         "page_obj": page_obj,
@@ -994,6 +1104,16 @@ def ride_tracking_create(request, ride_pk):
 
     context = {
         "page_title": f"Add Tracking Point - {ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Add Tracking Point",
+                "url": "ride_tracking_add"
+            },
+        ],
         "form": form,
         "ride": ride,
         "tracking": None,
@@ -1029,6 +1149,7 @@ def ride_tracking_delete(request, pk):
         )
 
 
+
 @login_required
 @transaction.atomic
 def ride_cancellation_create(request, ride_pk):
@@ -1036,84 +1157,95 @@ def ride_cancellation_create(request, ride_pk):
         _ride_queryset(),
         pk=ride_pk,
     )
-
+    if ride.status == Ride.Status.CANCELLED:
+        messages.info(
+            request,
+            "This ride has already been cancelled.",
+        )
+        return redirect(
+            "ride_details",
+            pk=ride.pk,
+        )
+    if ride.status == Ride.Status.COMPLETED:
+        messages.error(
+            request,
+            "A completed ride cannot be cancelled.",
+        )
+        return redirect(
+            "ride_details",
+            pk=ride.pk,
+        )
     existing_cancellation = (
         RideCancellation.objects
         .filter(ride=ride)
         .first()
     )
-
     if existing_cancellation:
         messages.info(
             request,
-            "This ride has already been cancelled.",
+            "This ride already has a cancellation record.",
         )
-
         return redirect(
             "ride_details",
             pk=ride.pk,
         )
-
     if request.method == "POST":
         form = RideCancellationForm(
             request.POST
         )
-
         if form.is_valid():
-            cancellation = form.save(
-                commit=False
-            )
-
-            cancellation.ride = ride
-
-            if not cancellation.cancelled_by_id:
+            with transaction.atomic():
+                cancellation = form.save(
+                    commit=False
+                )
+                cancellation.ride = ride
                 cancellation.cancelled_by = request.user
-
-            cancellation.save()
-
-            ride.status = Ride.Status.CANCELLED
-
-            ride.save(
-                update_fields=[
-                    "status",
-                    "updated_at",
-                ]
-            )
-
-            _sync_request_status_from_ride(
-                ride
-            )
-
+                cancellation.save()
+                ride.status = Ride.Status.CANCELLED
+                ride.save(
+                    update_fields=[
+                        "status",
+                        "updated_at",
+                    ]
+                )
+                _sync_request_status_from_ride(
+                    ride
+                )
             messages.success(
                 request,
-                f"Ride {ride.ride_number} has been cancelled.",
+                f"Ride {ride.ride_number} has been cancelled successfully.",
             )
-
             return redirect(
                 "ride_details",
                 pk=ride.pk,
             )
-
     else:
-        initial = {
-            "cancelled_by": request.user.pk,
-        }
-
         form = RideCancellationForm(
-            initial=initial
+            initial={
+                "cancelled_by": request.user.pk,
+            }
         )
-
     context = {
         "page_title": f"Cancel Ride - {ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Cancel Ride",
+                "url": "ride_cancellation_add"
+            },
+        ],
         "form": form,
         "ride": ride,
     }
-
     return render(
         request,
         "rides/ride_cancellation_form.html",
         context,
     )
+
 
 
 @login_required
@@ -1173,6 +1305,16 @@ def ride_rating_create(request, ride_pk):
 
     context = {
         "page_title": f"Rate Ride - {ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Rate Ride",
+                "url": "ride_rating_add"
+            },
+        ],
         "form": form,
         "ride": ride,
     }
@@ -1199,6 +1341,16 @@ def ride_stop_list(request, ride_pk):
 
     context = {
         "page_title": f"Ride Stops - {ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Ride Stops",
+                "url": "ride_stop_list"
+            },
+        ],
         "ride": ride,
         "stops": stops,
         "total_stops": stops.count(),
@@ -1252,6 +1404,16 @@ def ride_stop_create(request, ride_pk):
 
     context = {
         "page_title": f"Add Stop - {ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Add Stop",
+                "url": "ride_stop_add"
+            },
+        ],
         "form": form,
         "ride": ride,
         "stop": None,
@@ -1301,6 +1463,16 @@ def ride_stop_edit(request, pk):
 
     context = {
         "page_title": f"Edit Stop - {stop.ride.ride_number}",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+            {
+                "title": "Edit Stop",
+                "url": "ride_stop_edit"
+            },
+        ],
         "form": form,
         "ride": stop.ride,
         "stop": stop,
@@ -1403,6 +1575,12 @@ def ride_dashboard(request):
 
     context = {
         "page_title": "Ride Dashboard",
+        "breadcrumb_items": [
+            {
+                "title": "Ride Dashboard",
+                "url": "ride_dashboard"
+            },
+        ],
         "total_requests": total_requests,
         "requested_requests": requested_requests,
         "searching_requests": searching_requests,

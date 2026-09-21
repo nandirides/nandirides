@@ -19,7 +19,13 @@ def pricing_dashboard(request):
     total_breakdowns = FareBreakdown.objects.count()
 
     context = {
-        "page_title": "Pricing Dashboard | NandiRide",
+        "page_title": "Pricing Dashboard",
+        "breadcrumb_items": [
+            {
+                "title": "Pricing Dashboard",
+                "url": "pricing_dashboard",
+            },
+        ],
         "total_rules": total_rules,
         "active_rules": active_rules,
         "inactive_rules": inactive_rules,
@@ -51,6 +57,12 @@ def fare_rule_list(request):
     context = {
         "fare_rules": fare_rules,
         "page_title": "Fare Rules",
+        "breadcrumb_items": [
+            {
+                "title": "Fare Rules",
+                "url": "fare_rule_list",
+            },
+        ],
         "total_rules": fare_rules.count(),
         "active_rules": fare_rules.filter(is_active=True).count(),
         "inactive_rules": fare_rules.filter(is_active=False).count(),
@@ -86,6 +98,12 @@ def fare_rule_create(request):
     context = {
         "form": form,
         "page_title": "Add Fare Rule",
+        "breadcrumb_items": [
+            {
+                "title": "Add Fare Rule",
+                "url": "fare_rule_create",
+            },
+        ],
         "form_title": "Create Fare Rule",
     }
 
@@ -132,6 +150,12 @@ def fare_rule_edit(request, pk):
         "form": form,
         "fare_rule": fare_rule,
         "page_title": "Edit Fare Rule",
+        "breadcrumb_items": [
+            {
+                "title": "Edit Fare Rule",
+                "url": "fare_rule_edit",
+            },
+        ],
         "form_title": "Update Fare Rule",
     }
 
@@ -156,6 +180,12 @@ def fare_rule_detail(request, pk):
     context = {
         "fare_rule": fare_rule,
         "page_title": "Fare Rule Details",
+        "breadcrumb_items": [
+            {
+                "title": "Fare Rule Details",
+                "url": "fare_rule_detail",
+            },
+        ],
     }
 
     return render(
@@ -220,6 +250,12 @@ def surge_list(request):
     context = {
         "surge_pricing": surge_pricing,
         "page_title": "Surge Pricing",
+        "breadcrumb_items": [
+            {
+                "title": "Surge Pricing",
+                "url": "surge_list",
+            },
+        ],
         "total_surge": surge_pricing.count(),
         "active_surge": surge_pricing.filter(is_active=True).count(),
         "inactive_surge": surge_pricing.filter(is_active=False).count(),
@@ -257,6 +293,12 @@ def surge_create(request):
     context = {
         "form": form,
         "page_title": "Add Surge Pricing",
+        "breadcrumb_items": [
+            {
+                "title": "Add Surge Pricing",
+                "url": "surge_create",
+            },
+        ],
         "form_title": "Create Surge Pricing",
     }
 
@@ -303,6 +345,12 @@ def surge_edit(request, pk):
         "form": form,
         "surge": surge,
         "page_title": "Edit Surge Pricing",
+        "breadcrumb_items": [
+            {
+                "title": "Edit Surge Pricing",
+                "url": "surge_edit",
+            },
+        ],
         "form_title": "Update Surge Pricing",
     }
 
@@ -327,6 +375,12 @@ def surge_detail(request, pk):
     context = {
         "surge": surge,
         "page_title": "Surge Pricing Details",
+        "breadcrumb_items": [
+            {
+                "title": "Surge Pricing Details",
+                "url": "surge_detail",
+            },
+        ],
     }
 
     return render(
@@ -390,6 +444,12 @@ def fare_breakdown_list(request):
     context = {
         "fare_breakdowns": fare_breakdowns,
         "page_title": "Fare Breakdowns",
+        "breadcrumb_items": [
+            {
+                "title": "Fare Breakdowns",
+                "url": "fare_breakdown_list",
+            },
+        ],
         "total_breakdowns": fare_breakdowns.count(),
     }
 
@@ -413,6 +473,12 @@ def fare_breakdown_detail(request, pk):
     context = {
         "fare_breakdown": fare_breakdown,
         "page_title": "Fare Breakdown Details",
+        "breadcrumb_items": [
+            {
+                "title": "Fare Breakdown Details",
+                "url": "fare_breakdown_detail",
+            },
+        ],
     }
 
     return render(
