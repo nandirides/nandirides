@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
+from functools import lru_cache
 import re
 from django.conf import settings
 from django.contrib import messages
@@ -10,13 +11,21 @@ from django.contrib.auth.models import User, Group, Permission
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, dumps, loads
 from django.db import transaction
-from django.db.models import Count, F, Sum
+from django.db.models import Count, F, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from .forms import GalleryForm, UserCreateForm
-from .models import AccountNotificationPreference, AccountPaymentDetail, Gallery, UserAddress, UserProfile, WalletTransaction
+from .models import (
+    AccountNotificationPreference,
+    AccountPaymentDetail,
+    Gallery,
+    GroupStatus,
+    UserAddress,
+    UserProfile,
+    WalletTransaction,
+)
 from drivers.models import Driver
 from locations.models import City, Country, Location, State
 from payments.models import Payment, Refund
@@ -26,16 +35,12 @@ from rides.models import Ride, RideRequest
 from support.models import SupportTicket
 from vehicles.models import Vehicle, VehicleType
 from django.core.exceptions import PermissionDenied
-from .models import GroupStatus
-
 
 EMAIL_VERIFICATION_SALT = "nandiride-email-verification"
 EMAIL_VERIFICATION_MAX_AGE = 86400
 
-
 def _is_ajax(request):
     return request.headers.get("X-Requested-With") == "XMLHttpRequest"
-
 
 def _json_error(message, status=400):
     return JsonResponse(
@@ -46,7 +51,6 @@ def _json_error(message, status=400):
         status=status,
     )
 
-
 def _json_success(message="", **kwargs):
     data = {
         "success": True,
@@ -55,24 +59,16 @@ def _json_success(message="", **kwargs):
     data.update(kwargs)
     return JsonResponse(data)
 
-
+@lru_cache(maxsize=None)
 def _field_names(model):
-    return {
-        field.name
-        for field in model._meta.get_fields()
-    }
-
+    return frozenset(field.name for field in model._meta.get_fields())
 
 def _safe_count(model, filters=None):
     filters = filters or {}
     fields = _field_names(model)
-    if not all(
-        key.split("__")[0] in fields
-        for key in filters
-    ):
+    if not all(key.split("__", 1)[0] in fields for key in filters):
         return model.objects.count()
     return model.objects.filter(**filters).count()
-
 
 def _safe_sum(model, field_names):
     fields = _field_names(model)
@@ -83,7 +79,6 @@ def _safe_sum(model, field_names):
             )
             return result["total"] or Decimal("0")
     return Decimal("0")
-
 
 def _safe_active_count(model):
     fields = _field_names(model)
@@ -102,15 +97,21 @@ def _safe_active_count(model):
         ).count()
     return model.objects.count()
 
-
 def _safe_status_count(model, values):
-    fields = _field_names(model)
-    if "status" not in fields:
+    if "status" not in _field_names(model):
         return 0
-    return model.objects.filter(
-        status__in=values
-    ).count()
+    return model.objects.filter(status__in=values).count()
 
+def _safe_status_counts(model, groups):
+    if "status" not in _field_names(model):
+        return {name: 0 for name in groups}
+    result = model.objects.aggregate(
+        **{
+            name: Count("id", filter=Q(status__in=values))
+            for name, values in groups.items()
+        }
+    )
+    return {name: result[name] or 0 for name in groups}
 
 def _safe_verified_count(model):
     fields = _field_names(model)
@@ -135,7 +136,6 @@ def _safe_verified_count(model):
         ).count()
     return 0
 
-
 def _safe_pending_verification_count(model):
     fields = _field_names(model)
     if "is_verified" in fields:
@@ -158,7 +158,6 @@ def _safe_pending_verification_count(model):
             ]
         ).count()
     return 0
-
 
 @login_required
 def ride_gallery(request):
@@ -186,7 +185,6 @@ def ride_gallery(request):
             "form": form,
         },
     )
-
 
 @login_required
 @transaction.atomic
@@ -396,7 +394,6 @@ def user_create(request, pk=None):
         },
     )
 
-
 @login_required
 def user_delete(request, pk):
     if request.method != "POST":
@@ -418,7 +415,6 @@ def user_delete(request, pk):
     )
     return redirect("user_list")
 
-
 @login_required
 def gallery_delete(request, pk):
     if request.method != "POST":
@@ -434,7 +430,6 @@ def gallery_delete(request, pk):
     )
     return redirect("ride_gallery")
 
-
 @login_required
 def user_list(request):
     users = User.objects.all().order_by(
@@ -447,7 +442,6 @@ def user_list(request):
             "users": users,
         },
     )
-
 
 @login_required
 def user_profile(request, user_id):
@@ -479,35 +473,48 @@ def user_profile(request, user_id):
         },
     )
 
-
 @login_required
 def dashboard(request):
-    total_users = User.objects.count()
-    active_users = User.objects.filter(
-        is_active=True
-    ).count()
-    total_rides = Ride.objects.count()
-    total_ride_requests = RideRequest.objects.count()
-    completed_rides = Ride.objects.filter(
-        status=Ride.Status.COMPLETED
-    ).count()
-    cancelled_rides = Ride.objects.filter(
-        status=Ride.Status.CANCELLED
-    ).count()
-    ongoing_rides = Ride.objects.filter(
-        status__in=[
-            Ride.Status.DRIVER_ASSIGNED,
-            Ride.Status.DRIVER_ARRIVING,
-            Ride.Status.DRIVER_ARRIVED,
-            Ride.Status.STARTED,
-        ]
-    ).count()
-    pending_rides = RideRequest.objects.filter(
-        status__in=[
-            RideRequest.Status.REQUESTED,
-            RideRequest.Status.SEARCHING,
-        ]
-    ).count()
+    user_counts = User.objects.aggregate(
+        total=Count("id"),
+        active=Count("id", filter=Q(is_active=True)),
+    )
+    ride_counts = Ride.objects.aggregate(
+        total=Count("id"),
+        completed=Count("id", filter=Q(status=Ride.Status.COMPLETED)),
+        cancelled=Count("id", filter=Q(status=Ride.Status.CANCELLED)),
+        ongoing=Count(
+            "id",
+            filter=Q(
+                status__in=[
+                    Ride.Status.DRIVER_ASSIGNED,
+                    Ride.Status.DRIVER_ARRIVING,
+                    Ride.Status.DRIVER_ARRIVED,
+                    Ride.Status.STARTED,
+                ]
+            ),
+        ),
+    )
+    ride_request_counts = RideRequest.objects.aggregate(
+        total=Count("id"),
+        pending=Count(
+            "id",
+            filter=Q(
+                status__in=[
+                    RideRequest.Status.REQUESTED,
+                    RideRequest.Status.SEARCHING,
+                ]
+            ),
+        ),
+    )
+    total_users = user_counts["total"]
+    active_users = user_counts["active"]
+    total_rides = ride_counts["total"]
+    total_ride_requests = ride_request_counts["total"]
+    completed_rides = ride_counts["completed"]
+    cancelled_rides = ride_counts["cancelled"]
+    ongoing_rides = ride_counts["ongoing"]
+    pending_rides = ride_request_counts["pending"]
     total_drivers = Driver.objects.count()
     active_drivers = _safe_active_count(
         Driver
@@ -526,37 +533,20 @@ def dashboard(request):
     )
     total_vehicle_types = VehicleType.objects.count()
     total_payments = Payment.objects.count()
-    successful_payments = _safe_status_count(
+    payment_status_counts = _safe_status_counts(
         Payment,
-        [
-            "success",
-            "successful",
-            "completed",
-            "paid",
-            "SUCCESS",
-            "SUCCESSFUL",
-            "COMPLETED",
-            "PAID",
-        ],
+        {
+            "successful": [
+                "success", "successful", "completed", "paid",
+                "SUCCESS", "SUCCESSFUL", "COMPLETED", "PAID",
+            ],
+            "pending": ["pending", "processing", "PENDING", "PROCESSING"],
+            "failed": ["failed", "failure", "FAILED", "FAILURE"],
+        },
     )
-    pending_payments = _safe_status_count(
-        Payment,
-        [
-            "pending",
-            "processing",
-            "PENDING",
-            "PROCESSING",
-        ],
-    )
-    failed_payments = _safe_status_count(
-        Payment,
-        [
-            "failed",
-            "failure",
-            "FAILED",
-            "FAILURE",
-        ],
-    )
+    successful_payments = payment_status_counts["successful"]
+    pending_payments = payment_status_counts["pending"]
+    failed_payments = payment_status_counts["failed"]
     total_revenue = _safe_sum(
         Payment,
         [
@@ -757,7 +747,6 @@ def dashboard(request):
         "dashboard/dashboard.html",
         context,
     )
-
 
 @login_required
 @transaction.atomic
@@ -1393,7 +1382,6 @@ def user_setting(request):
         },
     )
 
-
 @login_required
 def group_list(request):
     if not request.user.is_staff:
@@ -1427,12 +1415,33 @@ def group_list(request):
     query = request.GET.get("q", "").strip()
     groups = Group.objects.all().order_by("name")
     if query:
-        groups = groups.filter(Q(name__icontains=query))
+        groups = groups.filter(name__icontains=query)
+    groups = list(groups)
+    group_ids = [group.pk for group in groups]
+    statuses = {
+        status.group_id: status
+        for status in GroupStatus.objects.filter(group_id__in=group_ids)
+    }
+    missing_groups = [
+        group for group in groups
+        if group.pk not in statuses
+    ]
+    if missing_groups:
+        GroupStatus.objects.bulk_create(
+            [
+                GroupStatus(group=group, is_active=True)
+                for group in missing_groups
+            ],
+            ignore_conflicts=True,
+        )
+        statuses.update(
+            {
+                status.group_id: status
+                for status in GroupStatus.objects.filter(group_id__in=group_ids)
+            }
+        )
     for group in groups:
-        group.group_status = GroupStatus.objects.get_or_create(
-            group=group,
-            defaults={"is_active": True}
-        )[0]
+        group.group_status = statuses.get(group.pk)
     context = {
         "groups": groups,
         "total_users": User.objects.count(),

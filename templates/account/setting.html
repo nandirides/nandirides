@@ -662,7 +662,6 @@
                                         <small class="text-body-secondary">Manage payment, wallet and billing information associated with your account.</small>
                                     </div>
                                 </div>
-                                <span id="accountDetailsStatus" class="small fw-semibold"></span>
                             </div>
                         </div>
                         <div class="card-body p-4">
@@ -696,6 +695,7 @@
                                         <button type="button" class="btn btn-outline-primary btn-sm" id="saveUpiButton">
                                             <i class="bi bi-save me-1"></i>Save UPI
                                         </button>
+                                <span id="accountDetailsStatus" class="small fw-semibold d-none" aria-live="polite"></span>
                                     </div>
                                 </div>
                                 <div class="col-12 col-lg-6">
@@ -878,7 +878,8 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="px-3 py-3">Date &amp; Time</th>
+                                <th class="px-3 py-3">Transaction ID</th>
+                                <th class="py-3">Date &amp; Time</th>
                                 <th class="py-3">Type</th>
                                 <th class="py-3">Amount</th>
                                 <th class="py-3">Balance</th>
@@ -886,10 +887,11 @@
                                 <th class="py-3">Description</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="walletTransactionsBody">
                             {% for wallet_transaction in user.wallet_transactions.all %}
                             <tr>
-                                <td class="px-3">
+                                <td class="px-3"><span class="fw-semibold text-primary">#{{ wallet_transaction.pk }}</span></td>
+                                <td>
                                     <div class="fw-semibold">{{ wallet_transaction.created_at|date:"d M Y" }}</div>
                                     <small class="text-body-secondary">{{ wallet_transaction.created_at|date:"h:i A" }}</small>
                                 </td>
@@ -935,7 +937,7 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="p-5 text-center">
+                <div id="walletTransactionsEmpty" class="p-5 text-center">
                     <div class="rounded-circle bg-body-tertiary d-inline-flex align-items-center justify-content-center p-3 mb-3">
                         <i class="bi bi-wallet2 fs-2 text-body-secondary"></i>
                     </div>
@@ -1104,11 +1106,42 @@ document.addEventListener("DOMContentLoaded", function () {
             other: "Other Address"
         };
         addressType.addEventListener("change", function () {
-            if (labels[this.value] && !addressLabel.value.trim()) {
-                addressLabel.value = labels[this.value];
-            }
+            addressLabel.value = labels[this.value] || "";
         });
     }
+
+    postAjax({
+        action: "get_account_details"
+    }).then(function (data) {
+        if (!data.success) {
+            return;
+        }
+        if (upiIdInput) {
+            upiIdInput.value = data.upi_id || "";
+        }
+        if (upiDisplay) {
+            upiDisplay.textContent = data.upi_id || "No UPI ID linked";
+        }
+        if (upiBadge) {
+            upiBadge.className = "badge " + (data.has_upi ? "text-bg-success" : "text-bg-secondary") + " rounded-pill";
+            upiBadge.textContent = data.has_upi ? "Linked" : "Not Linked";
+        }
+        if (walletBalance) {
+            walletBalance.textContent = data.wallet_balance || "0.00";
+        }
+        if (cardLastFourInput) {
+            cardLastFourInput.value = data.card_last_four || "";
+        }
+        if (cardBrandInput) {
+            cardBrandInput.value = data.card_brand || "";
+        }
+        if (cardExpiryInput) {
+            cardExpiryInput.value = data.card_expiry || "";
+        }
+        updateCardUI(data.card_last_four || "", data.card_brand || "", data.card_expiry || "");
+    }).catch(function (error) {
+        console.debug("NandiRide account details refresh skipped:", error);
+    });
 
     function getCookie(name) {
         const cookies = document.cookie ? document.cookie.split(";") : [];
@@ -1121,11 +1154,23 @@ document.addEventListener("DOMContentLoaded", function () {
         return null;
     }
 
-    function setStatus(element, message, type) {
+    const statusTimers = new WeakMap();
+
+    function setStatus(element, message, type, autoHide) {
         if (!element) {
             return;
         }
+        const oldTimer = statusTimers.get(element);
+        if (oldTimer) {
+            clearTimeout(oldTimer);
+        }
         element.className = "small fw-semibold";
+        if (!message) {
+            element.classList.add("d-none");
+            element.textContent = "";
+            return;
+        }
+        element.classList.remove("d-none");
         if (type === "success") {
             element.classList.add("text-success");
         } else if (type === "error") {
@@ -1134,6 +1179,13 @@ document.addEventListener("DOMContentLoaded", function () {
             element.classList.add("text-body-secondary");
         }
         element.textContent = message;
+        if (autoHide !== false && type === "success") {
+            const timer = setTimeout(function () {
+                element.classList.add("d-none");
+                element.textContent = "";
+            }, 2500);
+            statusTimers.set(element, timer);
+        }
     }
 
     function postAjax(data) {
@@ -1256,6 +1308,45 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    function renderTransactionRow(transaction) {
+        const type = String(transaction.type || "Credit");
+        const isCredit = type.toLowerCase() === "credit";
+        const status = String(transaction.status || "Success");
+        const statusLower = status.toLowerCase();
+        const amountClass = isCredit ? "text-success" : "text-danger";
+        const amountPrefix = isCredit ? "+" : "-";
+        const typeBadge = isCredit
+            ? '<span class="badge text-bg-success rounded-pill"><i class="bi bi-arrow-down-circle me-1"></i>Credit</span>'
+            : '<span class="badge text-bg-danger rounded-pill"><i class="bi bi-arrow-up-circle me-1"></i>Debit</span>';
+        let statusBadge = '<span class="badge text-bg-danger rounded-pill">Failed</span>';
+        if (statusLower === "success" || statusLower === "successful") {
+            statusBadge = '<span class="badge text-bg-success rounded-pill">Success</span>';
+        } else if (statusLower === "pending") {
+            statusBadge = '<span class="badge text-bg-warning rounded-pill">Pending</span>';
+        }
+        return '<tr>' +
+            '<td class="px-3"><span class="fw-semibold text-primary">#' + escapeHtml(transaction.id || "-") + '</span></td>' +
+            '<td><div class="fw-semibold">' + escapeHtml(transaction.date || "-") + '</div></td>' +
+            '<td>' + typeBadge + '</td>' +
+            '<td><span class="fw-bold ' + amountClass + '">' + amountPrefix + '₹' + escapeHtml(transaction.amount || "0.00") + '</span></td>' +
+            '<td><span class="fw-semibold">₹' + escapeHtml(transaction.balance || "0.00") + '</span></td>' +
+            '<td>' + statusBadge + '</td>' +
+            '<td><span class="fw-semibold">' + escapeHtml(transaction.description || "Wallet transaction") + '</span></td>' +
+            '</tr>';
+    }
+
+    function addTransactionToHistory(transaction) {
+        const body = document.getElementById("walletTransactionsBody");
+        const emptyState = document.getElementById("walletTransactionsEmpty");
+        if (!body) {
+            return;
+        }
+        if (emptyState) {
+            emptyState.remove();
+        }
+        body.insertAdjacentHTML("afterbegin", renderTransactionRow(transaction));
+    }
+
     document.querySelectorAll(".wallet-quick-amount").forEach(function (button) {
         button.addEventListener("click", function () {
             if (walletAmountInput) {
@@ -1289,6 +1380,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 if (walletBalance) {
                     walletBalance.textContent = data.wallet_balance || "0.00";
+                }
+                if (data.transaction) {
+                    addTransactionToHistory(data.transaction);
                 }
                 setStatus(walletStatus, "₹" + (data.amount_added || amount) + " added successfully.", "success");
                 setStatus(accountDetailsStatus, "Wallet balance updated successfully.", "success");
@@ -1347,6 +1441,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateCardUI(lastFour, brand, expiry) {
+        const addCardButton = document.getElementById("addCardButton");
+        if (addCardButton) {
+            addCardButton.innerHTML = lastFour
+                ? '<i class="bi bi-credit-card me-1"></i>Update Card'
+                : '<i class="bi bi-credit-card me-1"></i>Add Card';
+        }
+
+        let currentRemoveCardButton = document.getElementById("removeCardButton");
+        if (lastFour && !currentRemoveCardButton && addCardButton && addCardButton.parentElement) {
+            currentRemoveCardButton = document.createElement("button");
+            currentRemoveCardButton.type = "button";
+            currentRemoveCardButton.className = "btn btn-outline-danger btn-sm";
+            currentRemoveCardButton.id = "removeCardButton";
+            currentRemoveCardButton.innerHTML = '<i class="bi bi-trash3 me-1"></i>Remove';
+            addCardButton.parentElement.appendChild(currentRemoveCardButton);
+            bindRemoveCardButton(currentRemoveCardButton);
+        }
+        if (!lastFour && currentRemoveCardButton) {
+            currentRemoveCardButton.remove();
+        }
+
         if (cardBadge) {
             cardBadge.className = "badge " + (lastFour ? "text-bg-success" : "text-bg-secondary") + " rounded-pill";
             cardBadge.textContent = lastFour ? "Linked" : "Not Added";
@@ -1468,34 +1583,36 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    if (removeCardButton) {
-        removeCardButton.addEventListener("click", function () {
+    function bindRemoveCardButton(button) {
+        if (!button || button.dataset.bound === "1") {
+            return;
+        }
+        button.dataset.bound = "1";
+        button.addEventListener("click", function () {
             if (!confirm("Are you sure you want to remove the saved card?")) {
                 return;
             }
-
-            removeCardButton.disabled = true;
-            removeCardButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Removing...';
-
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Removing...';
             postAjax({
                 action: "remove_card"
             }).then(function (data) {
                 if (!data.success) {
                     throw new Error(data.message || "Unable to remove card.");
                 }
-
                 updateCardUI("", "", "");
                 setStatus(cardStatus, data.message || "Card removed successfully.", "success");
                 setStatus(accountDetailsStatus, "Saved card removed successfully.", "success");
-                removeCardButton.remove();
             }).catch(function (error) {
-                setStatus(cardStatus, error.message || "Unable to remove card.", "error");
-                removeCardButton.disabled = false;
-                removeCardButton.innerHTML = '<i class="bi bi-trash3 me-1"></i>Remove';
+                setStatus(cardStatus, error.message || "Unable to remove card.", "error", false);
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-trash3 me-1"></i>Remove';
                 console.error("NandiRide remove card error:", error);
             });
         });
     }
+
+    bindRemoveCardButton(removeCardButton);
 });
 </script>
 
