@@ -4,6 +4,10 @@ class Migration(migrations.Migration):
         ("dashboard", "0002_remove_gallery_my_file"),
     ]
     operations = [
+        migrations.RemoveField(
+        model_name="gallery",
+        name="category",
+    ),
         migrations.AddField(
             model_name="gallery",
             name="category",
