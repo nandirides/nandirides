@@ -2,7 +2,6 @@
 {% load static %}
 {% block title %}Groups Management{% endblock %}
 {% block content %}
-
 <div class="container-fluid py-3 py-md-4">
     <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3 mb-4">
         <div class="d-flex align-items-center gap-3">
@@ -32,7 +31,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="text-body-secondary small mb-1">Total Groups</div>
-                            <h3 class="fw-bold mb-0">{{ groups.count }}</h3>
+                            <h3 class="fw-bold mb-0">{{ total_groups }}</h3>
                         </div>
                         <div class="bg-primary-subtle text-primary rounded-3 p-2 px-3">
                             <i class="bi bi-people-fill fs-5"></i>
@@ -106,16 +105,13 @@
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-body border-bottom py-3">
             <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-                <div>
+                <div class="col-lg-auto">
                     <h5 class="mb-1 fw-semibold">
                         <i class="bi bi-list-ul me-2 text-primary"></i>
                         All Groups
                     </h5>
-                    <small class="text-body-secondary">
-                        Configure and manage system access roles
-                    </small>
                 </div>
-                <div class="input-group w-100 w-lg-auto">
+                <div class="input-group w-60 w-lg-auto">
                     <span class="input-group-text bg-body border-end-0">
                         <i class="bi bi-search text-body-secondary"></i>
                     </span>
@@ -193,21 +189,35 @@
                                 </div>
                                 <span class="badge group-status-badge {% if group.group_status.is_active %}text-bg-success{% else %}text-bg-secondary{% endif %}">
                                     <i class="bi {% if group.group_status.is_active %}bi-check-circle{% else %}bi-x-circle{% endif %} me-1"></i>
-                                    <span class="status-text">{% if group.group_status.is_active %}Active{% else %}Inactive{% endif %}</span>
+                                    <span class="status-text">
+                                        {% if group.group_status.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
                                 </span>
                             </div>
                         </td>
                         <td class="text-end pe-4">
                             <div class="d-inline-flex gap-1">
-                                <a href="{% url 'admin:auth_group_change' group.id %}" class="btn btn-sm btn-outline-primary" title="Edit Group">
+                                <a
+                                    href="{% url 'admin:auth_group_change' group.id %}"
+                                    class="btn btn-sm btn-outline-primary"
+                                    title="Edit Group"
+                                >
                                     <i class="bi bi-pencil-square"></i>
                                     <span class="d-none d-xl-inline ms-1">Edit</span>
                                 </a>
-                                <a href="{% url 'admin:auth_group_change' group.id %}" class="btn btn-sm btn-outline-info" title="Manage Permissions">
+                                <a
+                                    href="{% url 'admin:auth_group_change' group.id %}"
+                                    class="btn btn-sm btn-outline-info"
+                                    title="Manage Permissions"
+                                >
                                     <i class="bi bi-key"></i>
                                     <span class="d-none d-xl-inline ms-1">Permissions</span>
                                 </a>
-                                <a href="{% url 'admin:auth_group_delete' group.id %}" class="btn btn-sm btn-outline-danger" title="Delete Group">
+                                <a
+                                    href="{% url 'admin:auth_group_delete' group.id %}"
+                                    class="btn btn-sm btn-outline-danger"
+                                    title="Delete Group"
+                                >
                                     <i class="bi bi-trash3"></i>
                                     <span class="d-none d-xl-inline ms-1">Delete</span>
                                 </a>
@@ -253,8 +263,8 @@
             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
                 <div class="text-body-secondary small">
                     <i class="bi bi-info-circle me-1"></i>
-                    Showing <strong id="groupCount">{{ groups.count }}</strong>
-                    group{{ groups.count|pluralize }}
+                    Showing <strong id="groupCount">{{ total_groups }}</strong>
+                    group{{ total_groups|pluralize }}
                 </div>
                 <a href="{% url 'admin:auth_group_add' %}" class="btn btn-sm btn-primary">
                     <i class="bi bi-plus-lg me-1"></i>
@@ -265,109 +275,94 @@
     </div>
 </div>
 <script>
-document.addEventListener("DOMContentLoaded",function(){
-    const searchInput=document.getElementById("groupSearch");
-    const clearSearch=document.getElementById("clearSearch");
-    const rows=document.querySelectorAll(".group-row");
-    const noResults=document.getElementById("noSearchResults");
-    const groupCount=document.getElementById("groupCount");
-
-function getCookie(name){
-    let cookieValue=null;
-    if(document.cookie&&document.cookie!==""){
-        const cookies=document.cookie.split(";");
-        for(let i=0;i<cookies.length;i++){
-            const cookie=cookies[i].trim();
-            if(cookie.substring(0,name.length+1)===(name+"=")){
-                cookieValue=decodeURIComponent(cookie.substring(name.length+1));
-                break;
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById("groupSearch");
+    const clearSearch = document.getElementById("clearSearch");
+    const rows = document.querySelectorAll(".group-row");
+    const noResults = document.getElementById("noSearchResults");
+    const groupCount = document.getElementById("groupCount");
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
         }
+        return cookieValue;
     }
-    return cookieValue;
-}
-
-function filterGroups(){
-    const searchValue=searchInput.value.trim().toLowerCase();
-    let visibleCount=0;
-
-    rows.forEach(function(row){
-        const groupName=row.dataset.groupName||"";
-        const visible=groupName.includes(searchValue);
-
-        row.classList.toggle("d-none",!visible);
-
-        if(visible){
-            visibleCount++;
-        }
+    function filterGroups() {
+        const searchValue = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+        rows.forEach(function(row) {
+            const groupName = row.dataset.groupName || "";
+            const visible = groupName.includes(searchValue);
+            row.classList.toggle("d-none", !visible);
+            if (visible) {
+                visibleCount++;
+            }
+        });
+        noResults.classList.toggle("d-none", !(searchValue && visibleCount === 0));
+        clearSearch.classList.toggle("d-none", !searchValue);
+        groupCount.textContent = visibleCount;
+    }
+    searchInput.addEventListener("input", filterGroups);
+    clearSearch.addEventListener("click", function() {
+        searchInput.value = "";
+        filterGroups();
+        searchInput.focus();
     });
-
-    noResults.classList.toggle("d-none",!(searchValue&&visibleCount===0));
-    clearSearch.classList.toggle("d-none",!searchValue);
-    groupCount.textContent=visibleCount;
-}
-
-searchInput.addEventListener("input",filterGroups);
-
-clearSearch.addEventListener("click",function(){
-    searchInput.value="";
-    filterGroups();
-    searchInput.focus();
-});
-
-document.querySelectorAll(".group-status-toggle").forEach(function(toggle){
-    toggle.addEventListener("change",function(){
-        const checkbox=this;
-        const groupId=checkbox.dataset.groupId;
-        const row=checkbox.closest(".group-row");
-        const badge=row.querySelector(".group-status-badge");
-        const statusText=row.querySelector(".status-text");
-        const icon=badge.querySelector("i");
-        const previousState=!checkbox.checked;
-
-        checkbox.disabled=true;
-
-        fetch(window.location.href,{
-            method:"POST",
-            headers:{
-                "X-CSRFToken":getCookie("csrftoken"),
-                "X-Requested-With":"XMLHttpRequest",
-                "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"
-            },
-            body:new URLSearchParams({
-                group_id:groupId
+    document.querySelectorAll(".group-status-toggle").forEach(function(toggle) {
+        toggle.addEventListener("change", function() {
+            const checkbox = this;
+            const groupId = checkbox.dataset.groupId;
+            const row = checkbox.closest(".group-row");
+            const badge = row.querySelector(".group-status-badge");
+            const statusText = row.querySelector(".status-text");
+            const icon = badge.querySelector("i");
+            const previousState = !checkbox.checked;
+            checkbox.disabled = true;
+            fetch(window.location.href, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                },
+                body: new URLSearchParams({
+                    group_id: groupId
+                })
             })
-        })
-        .then(function(response){
-            return response.json().then(function(data){
-                if(!response.ok||!data.success){
-                    throw new Error(data.message||"Unable to update group status.");
-                }
-                return data;
+            .then(function(response) {
+                return response.json().then(function(data) {
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || "Unable to update group status.");
+                    }
+                    return data;
+                });
+            })
+            .then(function(data) {
+                const isActive = Boolean(data.is_active);
+                checkbox.checked = isActive;
+                badge.classList.toggle("text-bg-success", isActive);
+                badge.classList.toggle("text-bg-secondary", !isActive);
+                icon.classList.toggle("bi-check-circle", isActive);
+                icon.classList.toggle("bi-x-circle", !isActive);
+                statusText.textContent = isActive ? "Active" : "Inactive";
+            })
+            .catch(function(error) {
+                checkbox.checked = previousState;
+                alert(error.message || "Unable to update group status. Please try again.");
+            })
+            .finally(function() {
+                checkbox.disabled = false;
             });
-        })
-        .then(function(data){
-            const isActive=Boolean(data.is_active);
-
-            checkbox.checked=isActive;
-
-            badge.classList.toggle("text-bg-success",isActive);
-            badge.classList.toggle("text-bg-secondary",!isActive);
-
-            icon.classList.toggle("bi-check-circle",isActive);
-            icon.classList.toggle("bi-x-circle",!isActive);
-
-            statusText.textContent=isActive?"Active":"Inactive";
-        })
-        .catch(function(error){
-            checkbox.checked=previousState;
-            alert(error.message||"Unable to update group status. Please try again.");
-        })
-        .finally(function(){
-            checkbox.disabled=false;
         });
     });
 });
-
-}); </script>
+</script>
 {% endblock %}

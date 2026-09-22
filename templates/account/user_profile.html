@@ -3,6 +3,7 @@
 NandiRide | User Profile
 {% endblock %}
 {% block breadcrumb %}
+
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb px-3 py-2 mb-0">
         <li class="breadcrumb-item">
@@ -12,7 +13,9 @@ NandiRide | User Profile
             </a>
         </li>
         <li class="breadcrumb-item">
-            Users
+            <a href="{% url 'user_list' %}" class="text-decoration-none">
+                Users
+            </a>
         </li>
         <li class="breadcrumb-item active" aria-current="page">
             User Profile
@@ -60,7 +63,7 @@ NandiRide | User Profile
                                 {% if profile and profile.profile_image %}
                                     <img
                                         src="{{ profile.profile_image.url }}"
-                                        alt="{{ user.get_username }}"
+                                        alt="{{ profile_user.get_username }}"
                                         class="w-100 h-100 d-block"
                                         style="width: 130px; height: 130px; object-fit: cover; object-position: center;"
                                     >
@@ -72,7 +75,7 @@ NandiRide | User Profile
                                     </div>
                                 {% endif %}
                                 <span
-                                    class="position-absolute bottom-0 end-0 bg-success border border-3 border-body rounded-circle"
+                                    class="position-absolute bottom-0 end-0 {% if profile_user.is_active %}bg-success{% else %}bg-secondary{% endif %} border border-3 border-body rounded-circle"
                                     style="width: 22px; height: 22px;"
                                 ></span>
                             </div>
@@ -81,17 +84,17 @@ NandiRide | User Profile
                             <div class="d-flex flex-column flex-lg-row align-items-center align-items-lg-end justify-content-between gap-3">
                                 <div class="col-md-6">
                                     <h3 class="fw-bold mb-1">
-                                        {% if user.get_full_name %}
-                                            {{ user.get_full_name }}
+                                        {% if profile_user.get_full_name %}
+                                            {{ profile_user.get_full_name }}
                                         {% else %}
-                                            {{ user.get_username }}
+                                            {{ profile_user.get_username }}
                                         {% endif %}
                                     </h3>
                                     <p class="text-body-secondary mb-2">
                                         <i class="bi bi-person-circle me-1"></i>
-                                        @{{ user.get_username }}
+                                        @{{ profile_user.get_username }}
                                     </p>
-                                    {% if user.is_active %}
+                                    {% if profile_user.is_active %}
                                         <span class="badge text-bg-success px-3 py-2">
                                             <i class="bi bi-check-circle-fill me-1"></i>
                                             Active Account
@@ -104,29 +107,29 @@ NandiRide | User Profile
                                     {% endif %}
                                 </div>
                                 <div class="col-md-6">
-                                    {% if user.is_superuser %}
-                                <span class="badge rounded-pill text-bg-dark px-3 py-2">
-                                    <i class="bi bi-shield-fill-check me-1"></i>
-                                    Administrator
-                                </span>
-                                {% elif user.is_staff %}
-                                <span class="badge rounded-pill text-bg-primary px-3 py-2">
-                                    <i class="bi bi-person-badge-fill me-1"></i>
-                                    Staff
-                                </span>
-                                {% else %}
-                                <span class="badge rounded-pill text-bg-secondary px-3 py-2">
-                                    <i class="bi bi-person-fill me-1"></i>
-                                    User
-                                </span>
-                                {% endif %}
+                                    {% if profile_user.is_superuser %}
+                                        <span class="badge rounded-pill text-bg-dark px-3 py-2">
+                                            <i class="bi bi-shield-fill-check me-1"></i>
+                                            Administrator
+                                        </span>
+                                    {% elif profile_user.is_staff %}
+                                        <span class="badge rounded-pill text-bg-primary px-3 py-2">
+                                            <i class="bi bi-person-badge-fill me-1"></i>
+                                            Staff
+                                        </span>
+                                    {% else %}
+                                        <span class="badge rounded-pill text-bg-secondary px-3 py-2">
+                                            <i class="bi bi-person-fill me-1"></i>
+                                            User
+                                        </span>
+                                    {% endif %}
                                 </div>
                                 <div class="text-center text-lg-end">
                                     <small class="text-body-secondary d-block">
                                         Member Since
                                     </small>
                                     <strong>
-                                        {{ user.date_joined|date:"d M Y" }}
+                                        {{ profile_user.date_joined|date:"d M Y" }}
                                     </strong>
                                 </div>
                             </div>
@@ -163,7 +166,7 @@ NandiRide | User Profile
                                 First Name
                             </small>
                             <span class="fw-semibold">
-                                {{ user.first_name|default:"Not provided" }}
+                                {{ profile_user.first_name|default:"Not provided" }}
                             </span>
                         </div>
                         <div class="col-12 col-sm-6">
@@ -171,7 +174,7 @@ NandiRide | User Profile
                                 Last Name
                             </small>
                             <span class="fw-semibold">
-                                {{ user.last_name|default:"Not provided" }}
+                                {{ profile_user.last_name|default:"Not provided" }}
                             </span>
                         </div>
                         <div class="col-12 col-sm-6">
@@ -203,7 +206,7 @@ NandiRide | User Profile
                                 User ID
                             </small>
                             <span class="fw-semibold">
-                                #{{ user.id }}
+                                #{{ profile_user.id }}
                             </span>
                         </div>
                     </div>
@@ -237,7 +240,7 @@ NandiRide | User Profile
                             <div class="d-flex align-items-center gap-2">
                                 <i class="bi bi-envelope-fill text-primary"></i>
                                 <span class="fw-semibold text-break">
-                                    {{ user.email|default:"Not provided" }}
+                                    {{ profile_user.email|default:"Not provided" }}
                                 </span>
                             </div>
                         </div>
@@ -373,7 +376,10 @@ NandiRide | User Profile
                         </div>
                     {% else %}
                         <div class="text-center py-4">
-                            <div class="bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 65px; height: 65px;">
+                            <div
+                                class="bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                                style="width: 65px; height: 65px;"
+                            >
                                 <i class="bi bi-geo-alt fs-3"></i>
                             </div>
                             <h6 class="fw-bold">
@@ -412,7 +418,7 @@ NandiRide | User Profile
                                 Account Status
                             </span>
                         </div>
-                        {% if user.is_active %}
+                        {% if profile_user.is_active %}
                             <span class="badge text-bg-success">
                                 Active
                             </span>
@@ -428,7 +434,7 @@ NandiRide | User Profile
                                 Email Verification
                             </span>
                         </div>
-                        {% if user.email %}
+                        {% if profile_user.email %}
                             <span class="badge text-bg-success">
                                 <i class="bi bi-check-lg me-1"></i>
                                 Available
@@ -463,8 +469,8 @@ NandiRide | User Profile
                             </span>
                         </div>
                         <span class="fw-semibold text-end">
-                            {% if user.last_login %}
-                                {{ user.last_login|date:"d M Y, h:i A" }}
+                            {% if profile_user.last_login %}
+                                {{ profile_user.last_login|date:"d M Y, h:i A" }}
                             {% else %}
                                 Never
                             {% endif %}
@@ -488,13 +494,13 @@ NandiRide | User Profile
                         </div>
                         <div class="d-flex flex-column flex-sm-row gap-2">
                             <a
-                                href="{% url 'user_update' user.pk %}"
+                                href="{% url 'user_update' profile_user.pk %}"
                                 class="btn btn-outline-primary"
                             >
                                 <i class="bi bi-pencil-square me-1"></i>
                                 Edit Profile
                             </a>
-                            {% if user.is_active %}
+                            {% if profile_user.is_active %}
                                 <button
                                     type="button"
                                     class="btn btn-outline-warning"
@@ -578,7 +584,7 @@ NandiRide | User Profile
                 </button>
                 <form
                     method="POST"
-                    action="{% url 'user_update' user.pk %}"
+                    action="{% url 'user_update' profile_user.pk %}"
                     class="d-inline"
                 >
                     {% csrf_token %}
@@ -646,7 +652,7 @@ NandiRide | User Profile
                 </button>
                 <form
                     method="POST"
-                    action="{% url 'user_update' user.pk %}"
+                    action="{% url 'user_update' profile_user.pk %}"
                     class="d-inline"
                 >
                     {% csrf_token %}
@@ -714,7 +720,7 @@ NandiRide | User Profile
                 </button>
                 <form
                     method="POST"
-                    action="{% url 'user_delete' user.pk %}"
+                    action="{% url 'user_delete' profile_user.pk %}"
                     class="d-inline"
                 >
                     {% csrf_token %}

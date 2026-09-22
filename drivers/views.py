@@ -9,7 +9,7 @@ from django.urls import reverse
 def driver_list(request):
     drivers = Driver.objects.select_related("user").all().order_by("-id")
     context = {
-        "page_title": "Drivers",
+        #"page_title": "Drivers",
         "breadcrumb_items": [
             {
                 "title": "Drivers",
@@ -128,7 +128,7 @@ def driver_detail(request, pk):
         "bank_accounts": bank_accounts,
         "earnings": earnings,
         "payouts": payouts,
-        "page_title": "Driver Details",
+        #"page_title": "Driver Details",
         "breadcrumb_items": [
             {
                 "title": "Driver Details",
@@ -203,7 +203,7 @@ def driver_document_form(request, driver_pk, pk=None):
         "form": form,
         "driver": driver,
         "document": document,
-        "page_title": "Edit Document" if pk else "Add Document",
+        #"page_title": "Edit Document" if pk else "Add Document",
         "breadcrumb_items": [
             {
                 "title": "Edit Document" if pk else "Add Document",

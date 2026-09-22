@@ -81,7 +81,7 @@ def vehicle_dashboard(request):
         .order_by("expiry_date")[:8]
     )
     context = {
-        "page_title": "Vehicle Dashboard",
+        #"page_title": "Vehicle Dashboard",
         "breadcrumb_items": [
             {
                 "title": "Vehicle Dashboard",
@@ -132,7 +132,7 @@ def vehicle_type_list(request):
     else:
         status = ""
     context = {
-        "page_title": "Vehicle Types",
+        #"page_title": "Vehicle Types",
         "breadcrumb_items": [
             {
                 "title": "Vehicle Types",
@@ -288,7 +288,7 @@ def vehicle_list(request):
         status = ""
     vehicles = vehicles.order_by("-created_at")
     context = {
-        "page_title": "Vehicles",
+        #"page_title": "Vehicles",
         "breadcrumb_items": [
             {
                 "title": "Vehicles",
@@ -421,11 +421,11 @@ def vehicle_detail(request, pk):
         )
     )
     context = {
-        "page_title": "Vehicle Details",
+        #"page_title": "Vehicle Details",
         "breadcrumb_items": [
             {
                 "title": "Vehicle Details",
-                "url": reverse("vehicle_detail"),
+                "url": reverse("vehicle_detail", kwargs={"pk": vehicle.pk}),
             },
         ],
         "vehicle": vehicle,
@@ -536,7 +536,7 @@ def assignment_list(request):
         is_current=False
     ).count()
     context = {
-        "page_title": "Driver Assignments",
+        #"page_title": "Driver Assignments",
         "breadcrumb_items": [
             {
                 "title": "Driver Assignments",
@@ -630,11 +630,11 @@ def assignment_form(request, pk=None):
             instance=assignment
         )
     context = {
-        "page_title": (
-            "Edit Assignment"
-            if assignment
-            else "Assign Driver"
-        ),
+        # "page_title": (
+        #     "Edit Assignment"
+        #     if assignment
+        #     else "Assign Driver"
+        # ),
         "breadcrumb_items": [
             {
                 "title": "Assignments",

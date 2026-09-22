@@ -124,9 +124,20 @@ def refund_form(request, payment_pk, pk=None):
             {
                 "title": "Edit Refund" if pk else "Add Refund",
                 "url": (
-                    reverse("refund_edit", args=[pk])
+                    reverse(
+                        "refund_edit",
+                        kwargs={
+                            "payment_pk": payment.pk,
+                            "pk": pk,
+                        },
+                    )
                     if pk
-                    else reverse("refund_create")
+                    else reverse(
+                        "refund_create",
+                        kwargs={
+                            "payment_pk": payment.pk,
+                        },
+                    )
                 ),
             },
         ],
