@@ -1,44 +1,41 @@
 {% extends "base.html" %}
 {% block title %}
-    {% if user_obj %}Update User{% else %}Add User{% endif %}
+{% if user_obj %}Update User{% else %}Add User{% endif %}
 {% endblock %}
 {% block content %}
-<div class="container-fluid py-3 py-md-4">
+
+<div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-12 col-xxl-11">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-bottom p-3 p-md-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card-header bg-body border-bottom px-3 px-md-4 py-3">
                     <div class="row align-items-center g-3">
-                        <div class="col-12 col-md">
+                        <div class="col">
                             <div class="d-flex align-items-center">
-                                <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 me-3" style="width:58px;height:58px;">
+                                <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 me-3" style="width:56px;height:56px;">
                                     <i class="bi bi-person-vcard-fill fs-3"></i>
                                 </div>
                                 <div>
-                                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                                        <h3 class="mb-0 fw-bold text-dark">
-                                            {% if user_obj %}
-                                                Update User
-                                            {% else %}
-                                                Add New User
-                                            {% endif %}
+                                    <div class="d-flex align-items-center flex-wrap gap-2">
+                                        <h3 class="mb-0 fw-bold text-body">
+                                            {% if user_obj %}Update User{% else %}Add User{% endif %}
                                         </h3>
-                                        <span class="badge bg-primary-subtle text-primary rounded-pill">
+                                        <span class="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
                                             {% if user_obj %}EDIT MODE{% else %}NEW USER{% endif %}
                                         </span>
                                     </div>
-                                    <p class="mb-0 mt-1 text-body-secondary">
+                                    <div class="text-body-secondary small mt-1">
                                         {% if user_obj %}
-                                            Update account, personal, address and security information
+                                            Manage user account, profile, address and security details
                                         {% else %}
                                             Create a complete user account and profile
                                         {% endif %}
-                                    </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-md-auto">
-                            <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">
+                            <a href="{% url 'user_list' %}" class="btn btn-outline-primary">
                                 <i class="bi bi-arrow-left me-1"></i>
                                 Back to Users
                             </a>
@@ -49,7 +46,7 @@
                     <form method="post" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
                         {% if form.non_field_errors %}
-                        <div class="alert alert-danger shadow-sm mb-3 mb-md-4">
+                        <div class="alert alert-danger shadow-sm border-0 mb-3 mb-md-4">
                             <div class="d-flex align-items-start">
                                 <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
                                 <div>
@@ -61,17 +58,17 @@
                         {% endif %}
                         <div class="row g-3 g-lg-4">
                             <div class="col-12">
-                                <div class="card card-success card-outline mb-0 shadow-sm">
-                                    <div class="card-header">
+                                <div class="card card-primary card-outline mb-0 shadow-sm">
+                                    <div class="card-header bg-body">
                                         <div class="d-flex align-items-center">
-                                            <div class="bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center me-3" style="width:46px;height:46px;">
+                                            <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:44px;height:44px;">
                                                 <span class="fw-bold">01</span>
                                             </div>
                                             <div>
-                                                <h5 class="mb-0 fw-bold">Profile Image</h5>
-                                                <small class="text-body-secondary">Upload user profile photo</small>
+                                                <h5 class="mb-0 fw-bold text-body">Profile Image</h5>
+                                                <small class="text-body-secondary">User profile photo</small>
                                             </div>
-                                            <span class="badge bg-success-subtle text-success ms-auto">
+                                            <span class="badge bg-primary-subtle text-primary ms-auto rounded-pill">
                                                 <i class="bi bi-camera-fill me-1"></i>
                                                 Profile Photo
                                             </span>
@@ -81,32 +78,26 @@
                                         <div class="row align-items-center g-4">
                                             <div class="col-12 col-md-auto text-center">
                                                 {% if profile and profile.profile_image %}
-                                                    <img src="{{ profile.profile_image.url }}" id="profilePreview" class="rounded-circle border border-3 border-success shadow" style="width:150px;height:150px;object-fit:cover;" alt="Profile Image">
-                                                    <div id="profilePlaceholder" class="bg-success-subtle text-success rounded-circle d-none align-items-center justify-content-center shadow" style="width:150px;height:150px;">
+                                                    <img src="{{ profile.profile_image.url }}" id="profilePreview" class="rounded-circle border border-3 border-primary shadow-sm" style="width:140px;height:140px;object-fit:cover;" alt="Profile Image">
+                                                    <div id="profilePlaceholder" class="bg-primary-subtle text-primary rounded-circle d-none align-items-center justify-content-center shadow-sm" style="width:140px;height:140px;">
                                                         <i class="bi bi-person-fill display-3"></i>
                                                     </div>
                                                 {% else %}
-                                                    <img src="" id="profilePreview" class="rounded-circle border border-3 border-success shadow d-none" style="width:150px;height:150px;object-fit:cover;" alt="Profile Image">
-                                                    <div id="profilePlaceholder" class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center shadow mx-auto" style="width:150px;height:150px;">
+                                                    <img src="" id="profilePreview" class="rounded-circle border border-3 border-primary shadow-sm d-none" style="width:140px;height:140px;object-fit:cover;" alt="Profile Image">
+                                                    <div id="profilePlaceholder" class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm mx-auto" style="width:140px;height:140px;">
                                                         <i class="bi bi-person-fill display-3"></i>
                                                     </div>
                                                 {% endif %}
                                             </div>
                                             <div class="col">
-                                                <div class="mb-3">
-                                                    <h5 class="fw-bold mb-1">
-                                                        {% if user_obj %}
-                                                            Update Profile Photo
-                                                        {% else %}
-                                                            Add Profile Photo
-                                                        {% endif %}
-                                                    </h5>
-                                                    <p class="text-body-secondary mb-0">
-                                                        Select a clear profile image for this user.
-                                                    </p>
-                                                </div>
+                                                <h5 class="fw-bold text-body mb-1">
+                                                    {% if user_obj %}Update Profile Photo{% else %}Add Profile Photo{% endif %}
+                                                </h5>
+                                                <p class="text-body-secondary mb-3">
+                                                    Select a clear profile image for this user account.
+                                                </p>
                                                 <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
-                                                    <label for="{{ form.profile_image.id_for_label }}" class="btn btn-success px-4 mb-0">
+                                                    <label for="{{ form.profile_image.id_for_label }}" class="btn btn-primary px-4 mb-0">
                                                         <i class="bi bi-cloud-arrow-up-fill me-2"></i>
                                                         Choose Image
                                                     </label>
@@ -133,66 +124,62 @@
                             </div>
                             <div class="col-12 col-lg-6">
                                 <div class="card card-primary card-outline h-100 mb-0 shadow-sm">
-                                    <div class="card-header">
+                                    <div class="card-header bg-body">
                                         <div class="d-flex align-items-center">
                                             <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
                                                 <span class="fw-bold">02</span>
                                             </div>
                                             <div>
-                                                <h5 class="mb-0 fw-bold">Account Information</h5>
-                                                <small class="text-body-secondary">Login and account details</small>
+                                                <h5 class="mb-0 fw-bold text-body">Account Information</h5>
+                                                <small class="text-body-secondary">Login credentials and account details</small>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="card-body">
                                         <div class="mb-3">
-                                            <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold">
+                                            <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold text-body">
                                                 <i class="bi bi-person-fill text-primary me-1"></i>
                                                 Username
                                                 <span class="text-danger">*</span>
                                             </label>
                                             <div class="input-group">
-                                                <span class="input-group-text">
-                                                    <i class="bi bi-at"></i>
+                                                <span class="input-group-text bg-body">
+                                                    <i class="bi bi-at text-primary"></i>
                                                 </span>
                                                 {{ form.username }}
                                             </div>
                                             {% if form.username.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {{ form.username.errors }}
-                                            </div>
+                                            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
                                             {% endif %}
                                         </div>
                                         <div>
-                                            <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">
+                                            <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold text-body">
                                                 <i class="bi bi-envelope-fill text-primary me-1"></i>
                                                 Email Address
                                                 <span class="text-danger">*</span>
                                             </label>
                                             <div class="input-group">
-                                                <span class="input-group-text">
-                                                    <i class="bi bi-envelope"></i>
+                                                <span class="input-group-text bg-body">
+                                                    <i class="bi bi-envelope text-primary"></i>
                                                 </span>
                                                 {{ form.email }}
                                             </div>
                                             {% if form.email.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {{ form.email.errors }}
-                                            </div>
+                                            <div class="text-danger small mt-1">{{ form.email.errors }}</div>
                                             {% endif %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12 col-lg-6">
-                                <div class="card card-info card-outline h-100 mb-0 shadow-sm">
-                                    <div class="card-header">
+                                <div class="card card-primary card-outline h-100 mb-0 shadow-sm">
+                                    <div class="card-header bg-body">
                                         <div class="d-flex align-items-center">
-                                            <div class="bg-info-subtle text-info rounded-3 d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+                                            <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
                                                 <span class="fw-bold">03</span>
                                             </div>
                                             <div>
-                                                <h5 class="mb-0 fw-bold">Personal Information</h5>
+                                                <h5 class="mb-0 fw-bold text-body">Personal Information</h5>
                                                 <small class="text-body-secondary">Personal details and location</small>
                                             </div>
                                         </div>
@@ -200,18 +187,14 @@
                                     <div class="card-body">
                                         <div class="row g-3">
                                             <div class="col-12 col-md-6">
-                                                <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">
-                                                    First Name
-                                                </label>
+                                                <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">First Name</label>
                                                 {{ form.first_name }}
                                                 {% if form.first_name.errors %}
                                                 <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
                                                 {% endif %}
                                             </div>
                                             <div class="col-12 col-md-6">
-                                                <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">
-                                                    Last Name
-                                                </label>
+                                                <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">Last Name</label>
                                                 {{ form.last_name }}
                                                 {% if form.last_name.errors %}
                                                 <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
@@ -219,7 +202,7 @@
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="{{ form.phone.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-telephone-fill text-info me-1"></i>
+                                                    <i class="bi bi-telephone-fill text-primary me-1"></i>
                                                     Mobile Number
                                                 </label>
                                                 {{ form.phone }}
@@ -229,7 +212,7 @@
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="{{ form.date_of_birth.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-calendar3 text-info me-1"></i>
+                                                    <i class="bi bi-calendar3 text-primary me-1"></i>
                                                     Date of Birth
                                                 </label>
                                                 {{ form.date_of_birth }}
@@ -239,7 +222,7 @@
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="{{ form.gender.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-gender-ambiguous text-info me-1"></i>
+                                                    <i class="bi bi-gender-ambiguous text-primary me-1"></i>
                                                     Gender
                                                 </label>
                                                 {{ form.gender }}
@@ -249,7 +232,7 @@
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="{{ form.city.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-buildings-fill text-info me-1"></i>
+                                                    <i class="bi bi-buildings-fill text-primary me-1"></i>
                                                     City
                                                 </label>
                                                 {{ form.city }}
@@ -262,14 +245,14 @@
                                 </div>
                             </div>
                             <div class="col-12">
-                                <div class="card card-info card-outline mb-0 shadow-sm">
-                                    <div class="card-header">
+                                <div class="card card-primary card-outline mb-0 shadow-sm">
+                                    <div class="card-header bg-body">
                                         <div class="d-flex align-items-center">
-                                            <div class="bg-info-subtle text-info rounded-3 d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+                                            <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
                                                 <span class="fw-bold">04</span>
                                             </div>
                                             <div>
-                                                <h5 class="mb-0 fw-bold">Profile Details</h5>
+                                                <h5 class="mb-0 fw-bold text-body">Profile Details</h5>
                                                 <small class="text-body-secondary">Address and emergency contact</small>
                                             </div>
                                         </div>
@@ -277,7 +260,7 @@
                                     <div class="card-body">
                                         <div class="mb-3">
                                             <label for="{{ form.address.id_for_label }}" class="form-label fw-semibold">
-                                                <i class="bi bi-house-fill text-info me-1"></i>
+                                                <i class="bi bi-house-fill text-primary me-1"></i>
                                                 Profile Address
                                             </label>
                                             {{ form.address }}
@@ -288,7 +271,7 @@
                                         <div class="row g-3">
                                             <div class="col-12 col-md-6">
                                                 <label for="{{ form.emergency_contact_name.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-person-heart text-info me-1"></i>
+                                                    <i class="bi bi-person-heart text-primary me-1"></i>
                                                     Emergency Contact Name
                                                 </label>
                                                 {{ form.emergency_contact_name }}
@@ -298,7 +281,7 @@
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="{{ form.emergency_contact_phone.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-telephone text-info me-1"></i>
+                                                    <i class="bi bi-telephone text-primary me-1"></i>
                                                     Emergency Contact Phone
                                                 </label>
                                                 {{ form.emergency_contact_phone }}
@@ -311,34 +294,42 @@
                                 </div>
                             </div>
                             <div class="col-12">
-                                <div class="card card-secondary card-outline mb-0 shadow-sm">
-                                    <div class="card-header">
+                                <div class="card card-primary card-outline mb-0 shadow-sm">
+                                    <div class="card-header bg-body">
                                         <div class="d-flex align-items-center">
-                                            <div class="bg-secondary-subtle text-secondary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+                                            <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
                                                 <span class="fw-bold">05</span>
                                             </div>
                                             <div>
-                                                <h5 class="mb-0 fw-bold">Address Information</h5>
-                                                <small class="text-body-secondary">Saved address details</small>
+                                                <h5 class="mb-0 fw-bold text-body">Address Information</h5>
+                                                <small class="text-body-secondary">Saved address and location details</small>
                                             </div>
+                                            <span class="badge bg-primary-subtle text-primary ms-auto rounded-pill d-none d-md-inline-flex">
+                                                <i class="bi bi-geo-alt-fill me-1"></i>
+                                                Address
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="card-body">
                                         <div class="row g-3">
                                             <div class="col-12 col-md-4">
                                                 <label for="{{ form.address_type.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-tag-fill text-secondary me-1"></i>
+                                                    <i class="bi bi-tag-fill text-primary me-1"></i>
                                                     Address Type
                                                 </label>
                                                 {{ form.address_type }}
                                                 {% if form.address_type.errors %}
                                                 <div class="text-danger small mt-1">{{ form.address_type.errors }}</div>
                                                 {% endif %}
+                                                <div class="form-text">
+                                                    <i class="bi bi-magic me-1"></i>
+                                                    Selecting type will update the label automatically.
+                                                </div>
                                             </div>
                                             <div class="col-12 col-md-4">
                                                 <label for="{{ form.label.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-bookmark-fill text-secondary me-1"></i>
-                                                    Label
+                                                    <i class="bi bi-bookmark-fill text-primary me-1"></i>
+                                                    Address Label
                                                 </label>
                                                 {{ form.label }}
                                                 {% if form.label.errors %}
@@ -347,7 +338,7 @@
                                             </div>
                                             <div class="col-12 col-md-4">
                                                 <label for="{{ form.postal_code.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-mailbox2 text-secondary me-1"></i>
+                                                    <i class="bi bi-mailbox2 text-primary me-1"></i>
                                                     Postal Code
                                                 </label>
                                                 {{ form.postal_code }}
@@ -357,7 +348,7 @@
                                             </div>
                                             <div class="col-12">
                                                 <label for="{{ form.address_line1.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-house-door-fill text-secondary me-1"></i>
+                                                    <i class="bi bi-house-door-fill text-primary me-1"></i>
                                                     Address Line 1
                                                 </label>
                                                 {{ form.address_line1 }}
@@ -367,7 +358,7 @@
                                             </div>
                                             <div class="col-12">
                                                 <label for="{{ form.address_line2.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-house text-secondary me-1"></i>
+                                                    <i class="bi bi-house text-primary me-1"></i>
                                                     Address Line 2
                                                 </label>
                                                 {{ form.address_line2 }}
@@ -377,7 +368,7 @@
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="{{ form.landmark.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-signpost-2-fill text-secondary me-1"></i>
+                                                    <i class="bi bi-signpost-2-fill text-primary me-1"></i>
                                                     Landmark
                                                 </label>
                                                 {{ form.landmark }}
@@ -387,7 +378,7 @@
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label for="{{ form.address_city.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-buildings-fill text-secondary me-1"></i>
+                                                    <i class="bi bi-buildings-fill text-primary me-1"></i>
                                                     Address City
                                                 </label>
                                                 {{ form.address_city }}
@@ -400,89 +391,63 @@
                                 </div>
                             </div>
                             <div class="col-12">
-                                <div class="card card-warning card-outline mb-0 shadow-sm">
-                                    <div class="card-header">
+                                <div class="card card-primary card-outline mb-0 shadow-sm">
+                                    <div class="card-header bg-body">
                                         <div class="d-flex align-items-center">
-                                            <div class="bg-warning-subtle text-warning-emphasis rounded-3 d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+                                            <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
                                                 <span class="fw-bold">06</span>
                                             </div>
                                             <div>
-                                                <h5 class="mb-0 fw-bold">Security</h5>
+                                                <h5 class="mb-0 fw-bold text-body">Account Security</h5>
                                                 <small class="text-body-secondary">
                                                     {% if user_obj %}
-                                                        Change password only when required
+                                                        Password changes are optional
                                                     {% else %}
-                                                        Set a secure account password
+                                                        Secure account password
                                                     {% endif %}
                                                 </small>
+                                            </div>
+                                            <div class="ms-auto">
+                                                <button type="button" class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#passwordModal">
+                                                    <i class="bi bi-shield-lock-fill me-1"></i>
+                                                    {% if user_obj %}Change Password{% else %}Set Password{% endif %}
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="card-body">
-                                        <div class="alert alert-warning d-flex align-items-start mb-3">
-                                            <i class="bi bi-shield-check fs-5 me-2"></i>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 me-3" style="width:50px;height:50px;">
+                                                <i class="bi bi-lock-fill fs-5"></i>
+                                            </div>
                                             <div>
-                                                <div class="fw-semibold">Password Security</div>
-                                                <small>
+                                                <div class="fw-semibold text-body">
                                                     {% if user_obj %}
-                                                        Leave both fields blank if you do not want to change the existing password.
+                                                        Password protected
                                                     {% else %}
-                                                        Use a strong password containing letters, numbers and symbols.
+                                                        Secure password required
                                                     {% endif %}
-                                                </small>
+                                                </div>
+                                                <div class="small text-body-secondary">
+                                                    Your password is managed securely and is never displayed on this page.
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="row g-3">
-                                            <div class="col-12 col-md-6">
-                                                <label for="{{ form.password1.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-key-fill text-warning-emphasis me-1"></i>
-                                                    Password
-                                                    {% if not user_obj %}
-                                                        <span class="text-danger">*</span>
-                                                    {% endif %}
-                                                </label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">
-                                                        <i class="bi bi-lock-fill"></i>
-                                                    </span>
-                                                    {{ form.password1 }}
-                                                </div>
-                                                {% if form.password1.errors %}
-                                                <div class="text-danger small mt-1">
-                                                    {{ form.password1.errors }}
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                            <div class="col-12 col-md-6">
-                                                <label for="{{ form.password2.id_for_label }}" class="form-label fw-semibold">
-                                                    <i class="bi bi-check2-square text-warning-emphasis me-1"></i>
-                                                    Confirm Password
-                                                    {% if not user_obj %}
-                                                        <span class="text-danger">*</span>
-                                                    {% endif %}
-                                                </label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">
-                                                        <i class="bi bi-lock"></i>
-                                                    </span>
-                                                    {{ form.password2 }}
-                                                </div>
-                                                {% if form.password2.errors %}
-                                                <div class="text-danger small mt-1">
-                                                    {{ form.password2.errors }}
-                                                </div>
-                                                {% endif %}
-                                            </div>
+                                        {% if form.password1.errors or form.password2.errors %}
+                                        <div class="alert alert-danger border-0 mt-3 mb-0">
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                            Please review the password fields in the security popup.
                                         </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer bg-body p-3 p-md-4 mt-4">
+                        <div class="card-footer bg-body border-top p-3 p-md-4 mt-4">
                             <div class="row align-items-center g-3">
                                 <div class="col-12 col-md">
                                     <div class="d-flex align-items-center text-body-secondary small">
-                                        <i class="bi bi-info-circle-fill me-2"></i>
+                                        <i class="bi bi-info-circle-fill text-primary me-2"></i>
                                         <span>
                                             Fields marked with <span class="text-danger fw-bold">*</span> are required.
                                         </span>
@@ -511,36 +476,94 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow">
+                                    <div class="modal-header bg-body border-bottom">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:46px;height:46px;">
+                                                <i class="bi bi-shield-lock-fill fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="modal-title fw-bold text-body mb-0" id="passwordModalLabel">
+                                                    {% if user_obj %}Change Password{% else %}Set Password{% endif %}
+                                                </h5>
+                                                <small class="text-body-secondary">
+                                                    Secure account credentials
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body bg-body-tertiary">
+                                        <div class="alert alert-primary border-0 d-flex align-items-start">
+                                            <i class="bi bi-shield-check fs-5 me-2"></i>
+                                            <div>
+                                                <div class="fw-semibold">Password Security</div>
+                                                <small>
+                                                    {% if user_obj %}
+                                                        Leave both fields blank if you do not want to change the existing password.
+                                                    {% else %}
+                                                        Use a strong password containing letters, numbers and symbols.
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="{{ form.password1.id_for_label }}" class="form-label fw-semibold text-body">
+                                                <i class="bi bi-key-fill text-primary me-1"></i>
+                                                Password
+                                                {% if not user_obj %}
+                                                    <span class="text-danger">*</span>
+                                                {% endif %}
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-body">
+                                                    <i class="bi bi-lock-fill text-primary"></i>
+                                                </span>
+                                                {{ form.password1 }}
+                                            </div>
+                                            {% if form.password1.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.password1.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <label for="{{ form.password2.id_for_label }}" class="form-label fw-semibold text-body">
+                                                <i class="bi bi-check2-square text-primary me-1"></i>
+                                                Confirm Password
+                                                {% if not user_obj %}
+                                                    <span class="text-danger">*</span>
+                                                {% endif %}
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-body">
+                                                    <i class="bi bi-lock text-primary"></i>
+                                                </span>
+                                                {{ form.password2 }}
+                                            </div>
+                                            {% if form.password2.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.password2.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer bg-body border-top">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                            <i class="bi bi-x-circle me-1"></i>
+                                            Close
+                                        </button>
+                                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                                            <i class="bi bi-check-circle-fill me-1"></i>
+                                            Save Password
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
-                </div>
-            </div>
-            <div class="row g-3 mt-1">
-                <div class="col-12 col-md-4">
-                    <div class="small-box text-bg-primary shadow-sm mb-0">
-                        <div class="inner">
-                            <h5>Account</h5>
-                            <p>Login information</p>
-                        </div>
-                        <i class="small-box-icon bi bi-person-vcard"></i>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="small-box text-bg-info shadow-sm mb-0">
-                        <div class="inner">
-                            <h5>Profile</h5>
-                            <p>Personal information</p>
-                        </div>
-                        <i class="small-box-icon bi bi-person-lines-fill"></i>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="small-box text-bg-success shadow-sm mb-0">
-                        <div class="inner">
-                            <h5>Secure</h5>
-                            <p>Protected account</p>
-                        </div>
-                        <i class="small-box-icon bi bi-shield-check"></i>
-                    </div>
                 </div>
             </div>
         </div>
@@ -548,18 +571,18 @@
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const input = document.getElementById("{{ form.profile_image.id_for_label }}");
+    const imageInput = document.getElementById("{{ form.profile_image.id_for_label }}");
     const preview = document.getElementById("profilePreview");
     const placeholder = document.getElementById("profilePlaceholder");
     const fileName = document.getElementById("fileName");
-    if (input) {
-        input.addEventListener("change", function () {
+    if (imageInput) {
+        imageInput.addEventListener("change", function () {
             if (this.files && this.files[0]) {
                 const file = this.files[0];
                 fileName.textContent = file.name;
                 const reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.src = e.target.result;
+                reader.onload = function (event) {
+                    preview.src = event.target.result;
                     preview.classList.remove("d-none");
                     if (placeholder) {
                         placeholder.classList.remove("d-flex");
@@ -569,6 +592,44 @@ document.addEventListener("DOMContentLoaded", function () {
                 reader.readAsDataURL(file);
             }
         });
+    }
+    const addressType = document.getElementById("{{ form.address_type.id_for_label }}");
+    const addressLabel = document.getElementById("{{ form.label.id_for_label }}");
+    if (addressType && addressLabel) {
+        const updateAddressLabel = function () {
+            const selectedOption = addressType.options[addressType.selectedIndex];
+            const value = selectedOption ? selectedOption.value.trim().toLowerCase() : "";
+            const text = selectedOption ? selectedOption.text.trim() : "";
+            if (!value || !text) {
+                return;
+            }
+            const labelMap = {
+                "home": "Home",
+                "work": "Work",
+                "office": "Office",
+                "other": "Other"
+            };
+            let labelValue = labelMap[value];
+            if (!labelValue) {
+                const normalizedText = text.toLowerCase();
+                if (normalizedText.includes("home")) {
+                    labelValue = "Home";
+                } else if (normalizedText.includes("work")) {
+                    labelValue = "Work";
+                } else if (normalizedText.includes("office")) {
+                    labelValue = "Office";
+                } else if (normalizedText.includes("other")) {
+                    labelValue = "Other";
+                } else {
+                    labelValue = text;
+                }
+            }
+            addressLabel.value = labelValue;
+        };
+        addressType.addEventListener("change", updateAddressLabel);
+        if (addressType.value) {
+            updateAddressLabel();
+        }
     }
 });
 </script>

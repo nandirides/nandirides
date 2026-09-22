@@ -2,13 +2,6 @@ from django.db import models
 from django.conf import settings
 from core.models import TimeStampedModel
 from django.contrib.auth.models import Group
-# class User(models.Model):
-#     usernamename = models.CharField(max_length=100)
-#     email = models.EmailField()
-#     # roll = models.IntegerField()
-#
-#     def __str__(self):
-#         return self.name
 
 class GroupStatus(models.Model):
     group = models.OneToOneField(

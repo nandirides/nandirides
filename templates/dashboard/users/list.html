@@ -137,6 +137,11 @@
                                         name="action"
                                         value="toggle_status"
                                     >
+                                    <input
+                                        type="hidden"
+                                        name="return_to"
+                                        value="list"
+                                    >
                                     <div class="form-check form-switch m-0">
                                         <input
                                             class="form-check-input user-status-toggle"
@@ -172,7 +177,7 @@
                             <td class="pe-3 text-end">
                                 <div class="d-flex justify-content-end gap-2">
                                     <a
-                                        href="{% url 'user_profile' user.id %}"
+                                        href="{% url 'user_profile' user_id=user.id %}"
                                         class="btn btn-sm btn-outline-primary"
                                         title="View User"
                                     >

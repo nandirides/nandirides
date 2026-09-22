@@ -206,7 +206,7 @@ def user_create(request, pk=None):
         action = request.POST.get(
             "action",
             "",
-        )
+        ).strip()
         if action == "toggle_status":
             if user_obj is None:
                 messages.error(
@@ -228,16 +228,55 @@ def user_create(request, pk=None):
             )
             messages.success(
                 request,
-                "User status updated successfully.",
+                (
+                    "User account activated successfully."
+                    if user_obj.is_active
+                    else "User account deactivated successfully."
+                ),
             )
+            return_to = request.POST.get(
+                "return_to",
+                "list",
+            ).strip().lower()
+            if return_to == "edit":
+                return redirect(
+                    "user_update",
+                    pk=user_obj.pk,
+                )
             return redirect("user_list")
         form = UserCreateForm(
             request.POST,
             request.FILES,
             instance=user_obj,
         )
+        old_password = (
+            user_obj.password
+            if user_obj is not None
+            else None
+        )
+        password_values = [
+            request.POST.get(name, "").strip()
+            for name in (
+                "password",
+                "new_password",
+                "password1",
+            )
+        ]
+        password_changed = any(password_values)
         if form.is_valid():
             saved_user = form.save()
+            if (
+                user_obj is not None
+                and old_password
+                and not password_changed
+                and saved_user.password != old_password
+            ):
+                saved_user.password = old_password
+                saved_user.save(
+                    update_fields=[
+                        "password",
+                    ]
+                )
             profile, _ = UserProfile.objects.get_or_create(
                 user=saved_user
             )
@@ -287,23 +326,29 @@ def user_create(request, pk=None):
             profile_image = request.FILES.get(
                 "profile_image"
             )
-            if profile_image:
+            remove_profile_image = (
+                request.POST.get(
+                    "remove_profile_image",
+                    "",
+                ).strip()
+                in {
+                    "1",
+                    "on",
+                    "true",
+                }
+            )
+            if remove_profile_image:
+                if profile.profile_image:
+                    profile.profile_image.delete(
+                        save=False
+                    )
+                profile.profile_image = None
+            elif profile_image:
                 if profile.profile_image:
                     profile.profile_image.delete(
                         save=False
                     )
                 profile.profile_image = profile_image
-            remove_profile_image = (
-                request.POST.get(
-                    "remove_profile_image"
-                )
-                == "1"
-            )
-            if remove_profile_image and profile.profile_image:
-                profile.profile_image.delete(
-                    save=False
-                )
-                profile.profile_image = None
             profile.save()
             address_line1 = request.POST.get(
                 "address_line1",
@@ -325,6 +370,11 @@ def user_create(request, pk=None):
                 "address_label",
                 "",
             ).strip()
+            if not label:
+                label = request.POST.get(
+                    "label",
+                    "",
+                ).strip()
             address_type = request.POST.get(
                 "address_type",
                 UserAddress.AddressType.OTHER,
@@ -335,6 +385,17 @@ def user_create(request, pk=None):
                     "",
                 ).strip()
                 or city_id
+            )
+            remove_address = (
+                request.POST.get(
+                    "remove_address",
+                    "",
+                ).strip()
+                in {
+                    "1",
+                    "on",
+                    "true",
+                }
             )
             if address_line1:
                 address = (
@@ -372,12 +433,21 @@ def user_create(request, pk=None):
                 ).update(
                     is_default=False
                 )
+            elif remove_address:
+                UserAddress.objects.filter(
+                    user=saved_user
+                ).delete()
             messages.success(
                 request,
-                "User saved successfully.",
+                (
+                    "User created successfully."
+                    if pk is None
+                    else "User updated successfully."
+                ),
             )
             return redirect(
-                "user_list"
+                "user_profile",
+                user_id=saved_user.pk,
             )
     else:
         form = UserCreateForm(
@@ -386,6 +456,21 @@ def user_create(request, pk=None):
     cities = City.objects.all().order_by(
         "name"
     )
+    profile = None
+    address = None
+    if user_obj is not None:
+        profile, _ = UserProfile.objects.get_or_create(
+            user=user_obj
+        )
+        address = (
+            UserAddress.objects.filter(
+                user=user_obj,
+                is_default=True,
+            ).first()
+            or UserAddress.objects.filter(
+                user=user_obj
+            ).first()
+        )
     return render(
         request,
         "dashboard/users/user_create.html",
@@ -393,28 +478,37 @@ def user_create(request, pk=None):
             "form": form,
             "user_obj": user_obj,
             "selected_user": user_obj,
-           "page_title": (
-                "Edit User"
+            "profile": profile,
+            "address": address,
+            "page_title": (
+                ""
                 if user_obj
-                else "Add User"
+                else ""
             ),
+            "is_edit": user_obj is not None,
+            "cities": cities,
             "breadcrumb_items": [
                 {
                     "title": (
-                        "Edit User"
+                        ""
                         if user_obj
-                        else "Add User"
+                        else ""
                     ),
                     "url": (
-                        reverse("user_edit", args=[user_obj.id])
+                        reverse(
+                            "user_update",
+                            args=[user_obj.id],
+                        )
                         if user_obj
-                        else reverse("user_create")
+                        else reverse(
+                            "user_create"
+                        )
                     ),
                 },
             ],
-            "cities": cities,
         },
     )
+
 
 @login_required
 def user_delete(request, pk):
@@ -499,6 +593,8 @@ def user_profile(request, user_id):
             "user_obj": profile_user,
             "profile": profile,
             "address": address,
+            "profile_display_user": profile_user,
+            "is_profile_owner": profile_user.pk == request.user.pk,
         },
     )
 
@@ -1423,13 +1519,16 @@ def user_setting(request):
 def group_list(request):
     if not request.user.is_staff:
         raise PermissionDenied
+
     if request.method == "POST":
         group_id = request.POST.get("group_id")
+
         if not group_id:
             return JsonResponse({
                 "success": False,
                 "message": "Group ID is required."
             }, status=400)
+
         try:
             group = Group.objects.get(id=group_id)
         except Group.DoesNotExist:
@@ -1437,50 +1536,75 @@ def group_list(request):
                 "success": False,
                 "message": "Group not found."
             }, status=404)
+
         group_status, created = GroupStatus.objects.get_or_create(
             group=group,
             defaults={"is_active": True}
         )
+
         group_status.is_active = not group_status.is_active
         group_status.save(update_fields=["is_active", "updated_at"])
+
         return JsonResponse({
             "success": True,
             "group_id": group.id,
             "is_active": group_status.is_active,
             "status": "Active" if group_status.is_active else "Inactive"
         })
+
     query = request.GET.get("q", "").strip()
-    groups = Group.objects.all().order_by("name")
+
+    groups_queryset = Group.objects.all().order_by("name")
+
     if query:
-        groups = groups.filter(name__icontains=query)
-    groups = list(groups)
+        groups_queryset = groups_queryset.filter(
+            name__icontains=query
+        )
+
+    total_groups = groups_queryset.count()
+
+    groups = list(groups_queryset)
+
     group_ids = [group.pk for group in groups]
+
     statuses = {
         status.group_id: status
-        for status in GroupStatus.objects.filter(group_id__in=group_ids)
+        for status in GroupStatus.objects.filter(
+            group_id__in=group_ids
+        )
     }
+
     missing_groups = [
-        group for group in groups
+        group
+        for group in groups
         if group.pk not in statuses
     ]
+
     if missing_groups:
         GroupStatus.objects.bulk_create(
             [
-                GroupStatus(group=group, is_active=True)
+                GroupStatus(
+                    group=group,
+                    is_active=True
+                )
                 for group in missing_groups
             ],
             ignore_conflicts=True,
         )
-        statuses.update(
-            {
-                status.group_id: status
-                for status in GroupStatus.objects.filter(group_id__in=group_ids)
-            }
-        )
+
+        statuses.update({
+            status.group_id: status
+            for status in GroupStatus.objects.filter(
+                group_id__in=group_ids
+            )
+        })
+
     for group in groups:
         group.group_status = statuses.get(group.pk)
+
     context = {
         "groups": groups,
+        "total_groups": Group.objects.count(),
         "page_title": "Groups Management",
         "breadcrumb_items": [
             {
@@ -1489,7 +1613,14 @@ def group_list(request):
             },
         ],
         "total_users": User.objects.count(),
-        "assigned_users": User.objects.filter(groups__isnull=False).distinct().count(),
+        "assigned_users": User.objects.filter(
+            groups__isnull=False
+        ).distinct().count(),
         "total_permissions": Permission.objects.count(),
     }
-    return render(request, "dashboard/groups.html", context)
+
+    return render(
+        request,
+        "dashboard/groups.html",
+        context
+    )
