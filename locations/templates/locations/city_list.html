@@ -2,104 +2,157 @@
 {% block title %}Cities | Location Management | NandiRide{% endblock %}
 {% block content %}
 <section class="content">
-    <div class="container-fluid">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+    <div class="container-fluid py-3 py-md-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle flex-shrink-0 p-2">
+                        <i class="fas fa-city fs-5"></i>
+                    </span>
                     <div>
-                        <h3 class="card-title mb-1">
-                            <i class="fas fa-city me-2"></i>City Management
-                        </h3>
-                        <div class="text-muted small">
-                            Manage cities and their state and country hierarchy.
-                        </div>
+                        <h2 class="fw-bold mb-0">City Management</h2>
+                        <p class="text-body-secondary mb-0 small">
+                            Manage cities and their location hierarchy.
+                        </p>
                     </div>
-                    <a href="{% url 'city_create' %}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus me-1"></i>Add City
-                    </a>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'city_create' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i>Add City
+                </a>
+                <a href="{% url 'location_dashboard' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back
+                </a>
+            </div>
+        </div>
+        <div class="card card-primary card-outline shadow-sm">
+            <div class="card-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-filter text-primary"></i>
+                    <h5 class="card-title mb-0 fw-semibold">Search & Filters</h5>
                 </div>
             </div>
             <div class="card-body">
-                <form method="get" class="mb-4">
-                    <div class="row g-2">
-                        <div class="col-lg-4">
+                <form method="get" action="{% url 'city_list' %}" id="cityFilterForm">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-lg-4">
+                            <label for="citySearch" class="form-label fw-semibold">
+                                <i class="fas fa-search text-primary me-1"></i>Search City
+                            </label>
                             <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-search"></i>
+                                <span class="input-group-text bg-body border-primary-subtle">
+                                    <i class="fas fa-search text-primary"></i>
                                 </span>
-                                <input type="text"
+                                <input type="search"
+                                       id="citySearch"
                                        name="q"
                                        value="{{ request.GET.q|default:'' }}"
-                                       class="form-control"
-                                       placeholder="Search city name...">
+                                       class="form-control border-primary-subtle"
+                                       placeholder="Search city name..."
+                                       autocomplete="off"
+                                       oninput="searchCities()">
+                                <button type="button"
+                                        id="clearCitySearch"
+                                        class="btn btn-outline-secondary {% if not request.GET.q %}d-none{% endif %}"
+                                        onclick="clearCitySearch()"
+                                        title="Clear Search"
+                                        aria-label="Clear Search">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="col-lg-3">
-                            <select name="country" class="form-select" id="countryFilter">
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <label for="countryFilter" class="form-label fw-semibold">
+                                <i class="fas fa-globe text-primary me-1"></i>Country
+                            </label>
+                            <select name="country"
+                                    class="form-select border-primary-subtle"
+                                    id="countryFilter"
+                                    onchange="this.form.submit()">
                                 <option value="">All Countries</option>
                                 {% for country in countries %}
                                     <option value="{{ country.pk }}"
-                                            {% if request.GET.country == country.pk|stringformat:"s" %}selected{% endif %}>
+                                        {% if request.GET.country|stringformat:"s" == country.pk|stringformat:"s" %}selected{% endif %}>
                                         {{ country.name }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-lg-3">
-                            <select name="state" class="form-select" id="stateFilter">
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <label for="stateFilter" class="form-label fw-semibold">
+                                <i class="fas fa-map text-primary me-1"></i>State
+                            </label>
+                            <select name="state"
+                                    class="form-select border-primary-subtle"
+                                    id="stateFilter"
+                                    onchange="this.form.submit()">
                                 <option value="">All States</option>
                                 {% for state in states %}
                                     <option value="{{ state.pk }}"
-                                            {% if request.GET.state == state.pk|stringformat:"s" %}selected{% endif %}>
+                                        {% if request.GET.state|stringformat:"s" == state.pk|stringformat:"s" %}selected{% endif %}>
                                         {{ state.name }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-lg-2">
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary flex-grow-1">
-                                    <i class="fas fa-search me-1"></i>Search
-                                </button>
-                                <a href="{% url 'city_list' %}"
-                                   class="btn btn-secondary"
-                                   title="Reset Filters">
-                                    <i class="fas fa-sync-alt"></i>
-                                </a>
-                            </div>
+                        <div class="col-12 col-lg-2">
+                            <a href="{% url 'city_list' %}"
+                               class="btn btn-outline-secondary w-100"
+                               title="Reset Filters">
+                                <i class="fas fa-sync-alt me-1"></i>Reset
+                            </a>
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+        <div class="card card-primary card-outline shadow-sm mt-4">
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div>
+                        <h5 class="card-title mb-1 fw-semibold">
+                            <i class="fas fa-city text-primary me-2"></i>City Records
+                        </h5>
+                        <small class="text-body-secondary">
+                            View and manage registered cities.
+                        </small>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                        {{ cities|length }} Record{{ cities|length|pluralize }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th class="px-3">#</th>
                                 <th>City</th>
                                 <th>State</th>
                                 <th>Country</th>
                                 <th>Locations</th>
                                 <th>Created</th>
-                                <th class="text-end">Actions</th>
+                                <th class="text-end px-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for city in cities %}
                                 <tr>
-                                    <td>
+                                    <td class="px-3 text-body-secondary">
                                         {{ forloop.counter }}
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <span class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-2"
-                                                  style="width: 36px; height: 36px;">
-                                                <i class="fas fa-city text-white"></i>
+                                            <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle me-2 p-2 flex-shrink-0">
+                                                <i class="fas fa-city"></i>
                                             </span>
                                             <div>
                                                 <div class="fw-semibold">
                                                     {{ city.name }}
                                                 </div>
-                                                <small class="text-muted">
+                                                <small class="text-body-secondary">
                                                     City ID: {{ city.pk }}
                                                 </small>
                                             </div>
@@ -107,41 +160,44 @@
                                     </td>
                                     <td>
                                         <div class="fw-semibold">
-                                            <i class="fas fa-map me-1"></i>
+                                            <i class="fas fa-map text-primary me-1"></i>
                                             {{ city.state.name }}
                                         </div>
                                     </td>
                                     <td>
                                         <div class="fw-semibold">
-                                            <i class="fas fa-globe me-1"></i>
+                                            <i class="fas fa-globe text-primary me-1"></i>
                                             {{ city.state.country.name }}
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-success">
+                                        <span class="badge bg-primary-subtle text-primary">
                                             {{ city.locations.count }}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="text-muted small">
+                                        <span class="text-body-secondary small">
                                             {{ city.created_at|date:"d M Y" }}
                                         </span>
                                     </td>
-                                    <td class="text-end">
-                                        <div class="btn-group" role="group">
+                                    <td class="text-end px-3">
+                                        <div class="d-inline-flex align-items-center gap-1">
                                             <a href="{% url 'city_detail' city.pk %}"
-                                               class="btn btn-sm btn-outline-secondary"
-                                               title="View City">
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="View City"
+                                               aria-label="View City">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <a href="{% url 'city_edit' city.pk %}"
-                                               class="btn btn-sm btn-outline-primary"
-                                               title="Edit City">
+                                               class="btn btn-sm btn-outline-warning"
+                                               title="Edit City"
+                                               aria-label="Edit City">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <button type="button"
-                                                    class="btn btn-sm btn-outline-secondary"
+                                                    class="btn btn-sm btn-outline-danger"
                                                     title="Delete City"
+                                                    aria-label="Delete City"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#deleteCityModal{{ city.pk }}">
                                                 <i class="fas fa-trash"></i>
@@ -153,10 +209,12 @@
                                 <tr>
                                     <td colspan="7" class="text-center py-5">
                                         <div class="mb-3">
-                                            <i class="fas fa-city fa-3x text-muted"></i>
+                                            <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-3">
+                                                <i class="fas fa-city fa-2x"></i>
+                                            </span>
                                         </div>
                                         <h5 class="mb-1">No Cities Found</h5>
-                                        <p class="text-muted mb-3">
+                                        <p class="text-body-secondary mb-3">
                                             No cities match the current search or filters.
                                         </p>
                                         <a href="{% url 'city_create' %}" class="btn btn-primary btn-sm">
@@ -171,31 +229,36 @@
             </div>
             {% if is_paginated %}
                 <div class="card-footer">
-                    <nav aria-label="City pagination">
-                        <ul class="pagination pagination-sm mb-0 justify-content-end">
-                            {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link"
-                                       href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.country %}&country={{ request.GET.country|urlencode }}{% endif %}{% if request.GET.state %}&state={{ request.GET.state|urlencode }}{% endif %}">
-                                        Previous
-                                    </a>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                        <small class="text-body-secondary">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </small>
+                        <nav aria-label="City pagination">
+                            <ul class="pagination pagination-sm mb-0">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.country %}&country={{ request.GET.country|urlencode }}{% endif %}{% if request.GET.state %}&state={{ request.GET.state|urlencode }}{% endif %}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        {{ page_obj.number }}
+                                    </span>
                                 </li>
-                            {% endif %}
-                            <li class="page-item active">
-                                <span class="page-link">
-                                    {{ page_obj.number }}
-                                </span>
-                            </li>
-                            {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link"
-                                       href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.country %}&country={{ request.GET.country|urlencode }}{% endif %}{% if request.GET.state %}&state={{ request.GET.state|urlencode }}{% endif %}">
-                                        Next
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.country %}&country={{ request.GET.country|urlencode }}{% endif %}{% if request.GET.state %}&state={{ request.GET.state|urlencode }}{% endif %}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
             {% endif %}
         </div>
@@ -209,7 +272,8 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="deleteCityLabel{{ city.pk }}">
-                                <i class="fas fa-trash me-2"></i>Delete City
+                                <i class="fas fa-trash text-danger me-2"></i>
+                                Delete City
                             </h5>
                             <button type="button"
                                     class="btn-close"
@@ -228,13 +292,13 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button"
-                                    class="btn btn-secondary"
+                                    class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal">
-                                Cancel
+                                <i class="fas fa-times me-1"></i>Cancel
                             </button>
                             <form method="post" action="{% url 'city_delete' city.pk %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-danger">
                                     <i class="fas fa-trash me-1"></i>Delete
                                 </button>
                             </form>
@@ -245,4 +309,38 @@
         {% endfor %}
     </div>
 </section>
+<script>
+let citySearchTimer;
+function searchCities() {
+    const input = document.getElementById("citySearch");
+    const form = document.getElementById("cityFilterForm");
+    const clearButton = document.getElementById("clearCitySearch");
+    if (!input || !form) {
+        return;
+    }
+    const value = input.value.trim();
+    if (clearButton) {
+        clearButton.classList.toggle("d-none", value === "");
+    }
+    clearTimeout(citySearchTimer);
+    citySearchTimer = setTimeout(function() {
+        const currentValue = input.value.trim();
+        const currentQuery = new URLSearchParams(window.location.search).get("q") || "";
+        if (currentValue === currentQuery) {
+            return;
+        }
+        form.submit();
+    }, 700);
+}
+function clearCitySearch() {
+    const input = document.getElementById("citySearch");
+    const form = document.getElementById("cityFilterForm");
+    if (!input || !form) {
+        return;
+    }
+    clearTimeout(citySearchTimer);
+    input.value = "";
+    form.submit();
+}
+</script>
 {% endblock %}

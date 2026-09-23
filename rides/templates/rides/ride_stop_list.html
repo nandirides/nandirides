@@ -22,6 +22,9 @@
             <a href="{% url 'ride_stop_add' ride.pk %}" class="btn btn-primary">
                 <i class="bi bi-plus-lg me-1"></i>Add Stop
             </a>
+            <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary btn-sm px-3 text-nowrap">
+                <i class="fas fa-arrow-left me-1"></i>Back
+            </a>
         </div>
     </div>
     <div class="row g-3 mb-3">
@@ -164,7 +167,7 @@
                                             </td>
                                             <td class="text-end pe-3">
                                                 <div class="dropdown">
-                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                         <i class="bi bi-three-dots-vertical me-1"></i>Actions
                                                     </button>
                                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
@@ -310,13 +313,13 @@
                     <a href="{% url 'ride_stop_add' ride.pk %}" class="btn btn-primary">
                         <i class="bi bi-plus-lg me-1"></i>Add Stop
                     </a>
-                    <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-secondary">
+                    <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-primary">
                         <i class="bi bi-car-front me-1"></i>Ride Details
                     </a>
-                    <a href="{% url 'ride_list' %}" class="btn btn-outline-secondary">
+                    <a href="{% url 'ride_list' %}" class="btn btn-outline-primary">
                         <i class="bi bi-list-ul me-1"></i>All Rides
                     </a>
-                    <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-secondary">
+                    <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary">
                         <i class="bi bi-speedometer2 me-1"></i>Ride Dashboard
                     </a>
                 </div>

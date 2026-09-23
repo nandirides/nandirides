@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}NandiRide | {% if object %}Edit Tracking Point{% else %}Add Tracking Point{% endif %}{% endblock %}
 {% block content %}
+
 <div class="container-fluid py-3">
     {% if form.non_field_errors %}
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
@@ -28,11 +29,14 @@
         </div>
         <div class="col-xl-4 col-lg-5 mt-3 mt-lg-0">
             <div class="d-flex flex-wrap justify-content-lg-end gap-2">
-                <a href="{% url 'ride_tracking_list' ride.pk %}" class="btn btn-outline-secondary">
+                <a href="{% url 'ride_tracking_list' ride.pk %}" class="btn btn-outline-primary">
                     <i class="fas fa-location-crosshairs me-1"></i>Tracking
                 </a>
                 <a href="{% url 'ride_details' ride.pk %}" class="btn btn-primary">
                     <i class="fas fa-car-side me-1"></i>Ride Details
+                </a>
+                <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary btn-sm px-3 text-nowrap">
+                    <i class="fas fa-arrow-left me-1"></i>Back
                 </a>
             </div>
         </div>
@@ -179,7 +183,7 @@
                         </div>
                         <div class="border-top mt-4 pt-4">
                             <div class="d-flex flex-wrap gap-2 justify-content-end">
-                                <a href="{% url 'ride_tracking_list' ride.pk %}" class="btn btn-outline-secondary">
+                                <a href="{% url 'ride_tracking_list' ride.pk %}" class="btn btn-outline-primary">
                                     <i class="fas fa-arrow-left me-1"></i>Back to Tracking
                                 </a>
                                 <button type="submit" class="btn btn-primary">

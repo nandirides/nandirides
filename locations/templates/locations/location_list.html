@@ -2,162 +2,223 @@
 {% block title %}Locations | Location Management | NandiRide{% endblock %}
 {% block content %}
 <section class="content">
-    <div class="container-fluid">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+    <div class="container-fluid py-3 py-md-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle flex-shrink-0 p-2">
+                        <i class="fas fa-map-marker-alt fs-5"></i>
+                    </span>
                     <div>
-                        <h3 class="card-title mb-1">
-                            <i class="fas fa-map-marker-alt me-2"></i>Location Management
-                        </h3>
-                        <div class="text-muted small">
-                            Manage pickup and drop locations with geographic coordinates.
-                        </div>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="{% url 'location_import' %}" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-file-import me-1"></i>Import
-                        </a>
-                        <a href="{% url 'location_create' %}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus me-1"></i>Add Location
-                        </a>
+                        <h2 class="fw-bold mb-0">Location Management</h2>
+                        <p class="text-body-secondary mb-0 small">
+                            Manage addresses and mapped locations.
+                        </p>
                     </div>
                 </div>
             </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'location_import' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-file-import me-1"></i>Import
+                </a>
+                <a href="{% url 'location_create' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i>Add Location
+                </a>
+                <a href="{% url 'location_dashboard' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back
+                </a>
+            </div>
+        </div>
+        <div class="card card-primary card-outline shadow-sm">
+            <div class="card-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-filter text-primary"></i>
+                    <h5 class="card-title mb-0 fw-semibold">Search & Filters</h5>
+                </div>
+            </div>
             <div class="card-body">
-                <form method="get" class="mb-4">
-                    <div class="row g-2">
-                        <div class="col-xl-3 col-lg-6">
+                <form method="get"
+                      action="{% url 'location_list' %}"
+                      id="locationFilterForm">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-xl-3 col-lg-6">
+                            <label for="locationSearch" class="form-label fw-semibold">
+                                <i class="fas fa-search text-primary me-1"></i>Search Location
+                            </label>
                             <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-search"></i>
+                                <span class="input-group-text bg-body border-primary-subtle">
+                                    <i class="fas fa-search text-primary"></i>
                                 </span>
-                                <input type="text"
+                                <input type="search"
+                                       id="locationSearch"
                                        name="q"
                                        value="{{ request.GET.q|default:'' }}"
-                                       class="form-control"
-                                       placeholder="Search address...">
+                                       class="form-control border-primary-subtle"
+                                       placeholder="Search address..."
+                                       autocomplete="off"
+                                       oninput="searchLocations()">
+                                <button type="button"
+                                        id="clearLocationSearch"
+                                        class="btn btn-outline-secondary {% if not request.GET.q %}d-none{% endif %}"
+                                        onclick="clearLocationSearch()"
+                                        title="Clear Search"
+                                        aria-label="Clear Search">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="col-xl-2 col-lg-6">
-                            <select name="country" class="form-select" id="countryFilter">
+                        <div class="col-12 col-md-4 col-xl-2">
+                            <label for="countryFilter" class="form-label fw-semibold">
+                                <i class="fas fa-globe text-primary me-1"></i>Country
+                            </label>
+                            <select name="country"
+                                    class="form-select border-primary-subtle"
+                                    id="countryFilter"
+                                    onchange="this.form.submit()">
                                 <option value="">All Countries</option>
                                 {% for country in countries %}
                                     <option value="{{ country.pk }}"
-                                            {% if request.GET.country == country.pk|stringformat:"s" %}selected{% endif %}>
+                                        {% if request.GET.country|stringformat:"s" == country.pk|stringformat:"s" %}selected{% endif %}>
                                         {{ country.name }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-xl-2 col-lg-6">
-                            <select name="state" class="form-select" id="stateFilter">
+                        <div class="col-12 col-md-4 col-xl-2">
+                            <label for="stateFilter" class="form-label fw-semibold">
+                                <i class="fas fa-map text-primary me-1"></i>State
+                            </label>
+                            <select name="state"
+                                    class="form-select border-primary-subtle"
+                                    id="stateFilter"
+                                    onchange="this.form.submit()">
                                 <option value="">All States</option>
                                 {% for state in states %}
                                     <option value="{{ state.pk }}"
-                                            {% if request.GET.state == state.pk|stringformat:"s" %}selected{% endif %}>
+                                        {% if request.GET.state|stringformat:"s" == state.pk|stringformat:"s" %}selected{% endif %}>
                                         {{ state.name }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-xl-2 col-lg-6">
-                            <select name="city" class="form-select">
+                        <div class="col-12 col-md-4 col-xl-2">
+                            <label for="cityFilter" class="form-label fw-semibold">
+                                <i class="fas fa-city text-primary me-1"></i>City
+                            </label>
+                            <select name="city"
+                                    class="form-select border-primary-subtle"
+                                    id="cityFilter"
+                                    onchange="this.form.submit()">
                                 <option value="">All Cities</option>
                                 {% for city in cities %}
                                     <option value="{{ city.pk }}"
-                                            {% if request.GET.city == city.pk|stringformat:"s" %}selected{% endif %}>
+                                        {% if request.GET.city|stringformat:"s" == city.pk|stringformat:"s" %}selected{% endif %}>
                                         {{ city.name }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-xl-3 col-lg-12">
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary flex-grow-1">
-                                    <i class="fas fa-search me-1"></i>Filter
-                                </button>
-                                <a href="{% url 'location_list' %}"
-                                   class="btn btn-secondary"
-                                   title="Reset Filters">
-                                    <i class="fas fa-sync-alt"></i>
-                                </a>
-                            </div>
+                        <div class="col-12 col-xl-3">
+                            <a href="{% url 'location_list' %}"
+                               class="btn btn-outline-secondary w-100"
+                               title="Reset Filters">
+                                <i class="fas fa-sync-alt me-1"></i>Reset Filters
+                            </a>
                         </div>
                     </div>
                 </form>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <div class="info-box shadow-sm mb-0">
-                            <span class="info-box-icon bg-primary">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </span>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Total Locations</span>
-                                <span class="info-box-number">
-                                    {{ total_locations|default:locations|length }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="info-box shadow-sm mb-0">
-                            <span class="info-box-icon bg-info">
-                                <i class="fas fa-city"></i>
-                            </span>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Cities</span>
-                                <span class="info-box-number">
-                                    {{ total_cities|default:"0" }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="info-box shadow-sm mb-0">
-                            <span class="info-box-icon bg-success">
-                                <i class="fas fa-map"></i>
-                            </span>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Mapped Locations</span>
-                                <span class="info-box-number">
-                                    {{ mapped_locations|default:"0" }}
-                                </span>
-                            </div>
-                        </div>
+            </div>
+        </div>
+        <div class="row g-3 mt-1 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="info-box shadow-sm mb-0 h-100">
+                    <span class="info-box-icon bg-primary">
+                        <i class="fas fa-map-marker-alt text-white"></i>
+                    </span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Locations</span>
+                        <span class="info-box-number">
+                            {{ total_locations|default:"0" }}
+                        </span>
                     </div>
                 </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="info-box shadow-sm mb-0 h-100">
+                    <span class="info-box-icon bg-info">
+                        <i class="fas fa-city text-white"></i>
+                    </span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Cities</span>
+                        <span class="info-box-number">
+                            {{ total_cities|default:"0" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="info-box shadow-sm mb-0 h-100">
+                    <span class="info-box-icon bg-success">
+                        <i class="fas fa-map text-white"></i>
+                    </span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Mapped Locations</span>
+                        <span class="info-box-number">
+                            {{ mapped_locations|default:"0" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card card-primary card-outline shadow-sm">
+            <div class="card-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div>
+                        <h5 class="card-title mb-1 fw-semibold">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                            Location Records
+                        </h5>
+                        <small class="text-body-secondary">
+                            View and manage registered locations.
+                        </small>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                        {{ locations|length }} Record{{ locations|length|pluralize }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th class="px-3">#</th>
                                 <th>Address</th>
                                 <th>Country</th>
                                 <th>State</th>
                                 <th>City</th>
                                 <th>Coordinates</th>
                                 <th>Created</th>
-                                <th class="text-end">Actions</th>
+                                <th class="text-end px-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for location in locations %}
                                 <tr>
-                                    <td>
+                                    <td class="px-3 text-body-secondary">
                                         {{ forloop.counter }}
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <span class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-2"
-                                                  style="width: 36px; height: 36px;">
-                                                <i class="fas fa-map-marker-alt text-white"></i>
+                                            <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle me-2 p-2 flex-shrink-0">
+                                                <i class="fas fa-map-marker-alt"></i>
                                             </span>
-                                            <div>
-                                                <div class="fw-semibold">
+                                            <div class="min-w-0">
+                                                <div class="fw-semibold text-truncate"
+                                                     title="{{ location.address }}">
                                                     {{ location.address|truncatechars:45 }}
                                                 </div>
-                                                <small class="text-muted">
+                                                <small class="text-body-secondary">
                                                     Location ID: {{ location.pk }}
                                                 </small>
                                             </div>
@@ -166,70 +227,74 @@
                                     <td>
                                         {% if location.city %}
                                             <span class="fw-semibold">
-                                                <i class="fas fa-globe me-1"></i>
+                                                <i class="fas fa-globe text-primary me-1"></i>
                                                 {{ location.city.state.country.name }}
                                             </span>
                                         {% else %}
-                                            <span class="text-muted">N/A</span>
+                                            <span class="text-body-secondary">N/A</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if location.city %}
                                             <span class="fw-semibold">
-                                                <i class="fas fa-map me-1"></i>
+                                                <i class="fas fa-map text-primary me-1"></i>
                                                 {{ location.city.state.name }}
                                             </span>
                                         {% else %}
-                                            <span class="text-muted">N/A</span>
+                                            <span class="text-body-secondary">N/A</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if location.city %}
                                             <span class="fw-semibold">
-                                                <i class="fas fa-city me-1"></i>
+                                                <i class="fas fa-city text-primary me-1"></i>
                                                 {{ location.city.name }}
                                             </span>
                                         {% else %}
-                                            <span class="text-muted">N/A</span>
+                                            <span class="text-body-secondary">N/A</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         <div class="small">
                                             <div>
-                                                <span class="text-muted">Lat:</span>
+                                                <span class="text-body-secondary">Lat:</span>
                                                 {{ location.latitude }}
                                             </div>
                                             <div>
-                                                <span class="text-muted">Lng:</span>
+                                                <span class="text-body-secondary">Lng:</span>
                                                 {{ location.longitude }}
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="text-muted small">
+                                        <span class="text-body-secondary small">
                                             {{ location.created_at|date:"d M Y" }}
                                         </span>
                                     </td>
-                                    <td class="text-end">
-                                        <div class="btn-group" role="group">
+                                    <td class="text-end px-3">
+                                        <div class="d-inline-flex align-items-center gap-1">
                                             <a href="{% url 'location_detail' location.pk %}"
-                                               class="btn btn-sm btn-outline-secondary"
-                                               title="View Location">
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="View Location"
+                                               aria-label="View Location">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <a href="{% url 'location_map' location.pk %}"
-                                               class="btn btn-sm btn-outline-secondary"
-                                               title="View Map">
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="View Map"
+                                               aria-label="View Map">
                                                 <i class="fas fa-map-marked-alt"></i>
                                             </a>
                                             <a href="{% url 'location_edit' location.pk %}"
-                                               class="btn btn-sm btn-outline-primary"
-                                               title="Edit Location">
+                                               class="btn btn-sm btn-outline-warning"
+                                               title="Edit Location"
+                                               aria-label="Edit Location">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <button type="button"
-                                                    class="btn btn-sm btn-outline-secondary"
+                                                    class="btn btn-sm btn-outline-danger"
                                                     title="Delete Location"
+                                                    aria-label="Delete Location"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#deleteLocationModal{{ location.pk }}">
                                                 <i class="fas fa-trash"></i>
@@ -241,10 +306,12 @@
                                 <tr>
                                     <td colspan="8" class="text-center py-5">
                                         <div class="mb-3">
-                                            <i class="fas fa-map-marker-alt fa-3x text-muted"></i>
+                                            <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-3">
+                                                <i class="fas fa-map-marker-alt fa-2x"></i>
+                                            </span>
                                         </div>
                                         <h5 class="mb-1">No Locations Found</h5>
-                                        <p class="text-muted mb-3">
+                                        <p class="text-body-secondary mb-3">
                                             No locations match the current search or filters.
                                         </p>
                                         <a href="{% url 'location_create' %}" class="btn btn-primary btn-sm">
@@ -259,31 +326,36 @@
             </div>
             {% if is_paginated %}
                 <div class="card-footer">
-                    <nav aria-label="Location pagination">
-                        <ul class="pagination pagination-sm mb-0 justify-content-end">
-                            {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link"
-                                       href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.country %}&country={{ request.GET.country|urlencode }}{% endif %}{% if request.GET.state %}&state={{ request.GET.state|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city|urlencode }}{% endif %}">
-                                        Previous
-                                    </a>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                        <small class="text-body-secondary">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </small>
+                        <nav aria-label="Location pagination">
+                            <ul class="pagination pagination-sm mb-0">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.country %}&country={{ request.GET.country|urlencode }}{% endif %}{% if request.GET.state %}&state={{ request.GET.state|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city|urlencode }}{% endif %}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        {{ page_obj.number }}
+                                    </span>
                                 </li>
-                            {% endif %}
-                            <li class="page-item active">
-                                <span class="page-link">
-                                    {{ page_obj.number }}
-                                </span>
-                            </li>
-                            {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link"
-                                       href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.country %}&country={{ request.GET.country|urlencode }}{% endif %}{% if request.GET.state %}&state={{ request.GET.state|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city|urlencode }}{% endif %}">
-                                        Next
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.country %}&country={{ request.GET.country|urlencode }}{% endif %}{% if request.GET.state %}&state={{ request.GET.state|urlencode }}{% endif %}{% if request.GET.city %}&city={{ request.GET.city|urlencode }}{% endif %}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
             {% endif %}
         </div>
@@ -297,7 +369,8 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="deleteLocationLabel{{ location.pk }}">
-                                <i class="fas fa-trash me-2"></i>Delete Location
+                                <i class="fas fa-trash text-danger me-2"></i>
+                                Delete Location
                             </h5>
                             <button type="button"
                                     class="btn-close"
@@ -313,7 +386,7 @@
                                     {{ location.address }}
                                 </div>
                                 {% if location.city %}
-                                    <div class="small text-muted mt-1">
+                                    <div class="small text-body-secondary mt-1">
                                         {{ location.city.name }},
                                         {{ location.city.state.name }},
                                         {{ location.city.state.country.name }}
@@ -327,13 +400,14 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button"
-                                    class="btn btn-secondary"
+                                    class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal">
-                                Cancel
+                                <i class="fas fa-times me-1"></i>Cancel
                             </button>
-                            <form method="post" action="{% url 'location_delete' location.pk %}">
+                            <form method="post"
+                                  action="{% url 'location_delete' location.pk %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-danger">
                                     <i class="fas fa-trash me-1"></i>Delete
                                 </button>
                             </form>
@@ -344,4 +418,38 @@
         {% endfor %}
     </div>
 </section>
+<script>
+let locationSearchTimer;
+function searchLocations() {
+    const input = document.getElementById("locationSearch");
+    const form = document.getElementById("locationFilterForm");
+    const clearButton = document.getElementById("clearLocationSearch");
+    if (!input || !form) {
+        return;
+    }
+    const value = input.value.trim();
+    if (clearButton) {
+        clearButton.classList.toggle("d-none", value === "");
+    }
+    clearTimeout(locationSearchTimer);
+    locationSearchTimer = setTimeout(function() {
+        const currentValue = input.value.trim();
+        const currentQuery = new URLSearchParams(window.location.search).get("q") || "";
+        if (currentValue === currentQuery) {
+            return;
+        }
+        form.submit();
+    }, 700);
+}
+function clearLocationSearch() {
+    const input = document.getElementById("locationSearch");
+    const form = document.getElementById("locationFilterForm");
+    if (!input || !form) {
+        return;
+    }
+    clearTimeout(locationSearchTimer);
+    input.value = "";
+    form.submit();
+}
+</script>
 {% endblock %}

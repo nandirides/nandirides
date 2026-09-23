@@ -19,7 +19,7 @@ def pricing_dashboard(request):
     total_breakdowns = FareBreakdown.objects.count()
 
     context = {
-        "page_title": "Pricing Dashboard",
+        #"page_title": "Pricing Dashboard",
         "breadcrumb_items": [
             {
                 "title": "Pricing Dashboard",

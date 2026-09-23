@@ -11,7 +11,7 @@
                 Configure temporary surge pricing for a city and vehicle type.
             </p>
         </div>
-        <a href="{% url 'surge_list' %}" class="btn btn-outline-secondary">
+        <a href="{% url 'surge_list' %}" class="btn btn-outline-primary">
             <i class="bi bi-arrow-left me-1"></i>Back to Surge Pricing
         </a>
     </div>
@@ -112,10 +112,10 @@
                 </div>
             </div>
             <div class="card-footer d-flex flex-wrap justify-content-end gap-2">
-                <a href="{% url 'surge_list' %}" class="btn btn-outline-secondary">
+                <a href="{% url 'surge_list' %}" class="btn btn-outline-danger">
                     <i class="bi bi-x-lg me-1"></i>Cancel
                 </a>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-outline-primary">
                     {% if surge %}
                         <i class="bi bi-check-lg me-1"></i>Update Surge Pricing
                     {% else %}

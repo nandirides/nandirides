@@ -2,50 +2,106 @@
 {% load static %}
 {% block title %}{{ page_title }} | NandiRide{% endblock %}
 {% block content %}
-<div class="app-content">
-    <div class="container-fluid">
+<section class="content">
+    <div class="container-fluid py-3 py-md-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle flex-shrink-0 p-2">
+                        <i class="fas fa-ticket-alt fs-5"></i>
+                    </span>
+                    <div>
+                        <h3 class="fw-bold mb-1">Issue Details</h3>
+                        <p class="text-body-secondary mb-0 small">
+                            View and manage support ticket details.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <a href="{% url 'support_dashboard' %}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back
+                </a>
+            </div>
+        </div>
         <div class="row g-4">
             <div class="col-12 col-xl-8">
-                <div class="card shadow-sm">
+                <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header">
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-                            <h3 class="card-title fw-semibold"><i class="bi bi-chat-square-text me-2"></i>Issue Details</h3>
-                            <div class="d-flex gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-2">
+                                    <i class="fas fa-comments"></i>
+                                </span>
+                                <h5 class="card-title mb-0 fw-semibold">
+                                    Issue Details
+                                </h5>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
                                 {% if ticket.status == "open" %}
-                                    <span class="badge bg-warning text-dark">{{ ticket.get_status_display }}</span>
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                        {{ ticket.get_status_display }}
+                                    </span>
                                 {% elif ticket.status == "in_progress" %}
-                                    <span class="badge bg-info text-dark">{{ ticket.get_status_display }}</span>
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle">
+                                        {{ ticket.get_status_display }}
+                                    </span>
                                 {% elif ticket.status == "resolved" %}
-                                    <span class="badge bg-success">{{ ticket.get_status_display }}</span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                        {{ ticket.get_status_display }}
+                                    </span>
                                 {% else %}
-                                    <span class="badge bg-secondary">{{ ticket.get_status_display }}</span>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                        {{ ticket.get_status_display }}
+                                    </span>
                                 {% endif %}
                                 {% if ticket.priority == "urgent" %}
-                                    <span class="badge bg-danger">{{ ticket.get_priority_display }}</span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                        {{ ticket.get_priority_display }}
+                                    </span>
                                 {% elif ticket.priority == "high" %}
-                                    <span class="badge bg-warning text-dark">{{ ticket.get_priority_display }}</span>
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                        {{ ticket.get_priority_display }}
+                                    </span>
                                 {% elif ticket.priority == "medium" %}
-                                    <span class="badge bg-info text-dark">{{ ticket.get_priority_display }}</span>
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle">
+                                        {{ ticket.get_priority_display }}
+                                    </span>
                                 {% else %}
-                                    <span class="badge bg-secondary">{{ ticket.get_priority_display }}</span>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                        {{ ticket.get_priority_display }}
+                                    </span>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
-                        <h4 class="fw-semibold mb-3">{{ ticket.subject }}</h4>
-                        <div class="bg-body-tertiary rounded-3 p-4">
+                        <h4 class="fw-semibold mb-3 text-break">
+                            {{ ticket.subject }}
+                        </h4>
+                        <div class="bg-body-tertiary rounded-3 p-3 p-md-4">
                             <div class="text-body-secondary small mb-2">
-                                <i class="bi bi-calendar3 me-1"></i>Created {{ ticket.created_at|date:"d M Y, h:i A" }}
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                Created {{ ticket.created_at|date:"d M Y, h:i A" }}
                             </div>
-                            <div class="lh-lg">{{ ticket.description|linebreaksbr }}</div>
+                            <div class="lh-lg text-break">
+                                {{ ticket.description|linebreaksbr }}
+                            </div>
                         </div>
                     </div>
                 </div>
                 {% if perms.support.change_supportticket %}
-                    <div class="card shadow-sm mt-4">
+                    <div class="card card-primary card-outline shadow-sm mt-4">
                         <div class="card-header">
-                            <h3 class="card-title fw-semibold"><i class="bi bi-diagram-3 me-2"></i>Ticket Workflow</h3>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-2">
+                                    <i class="fas fa-project-diagram"></i>
+                                </span>
+                                <h5 class="card-title mb-0 fw-semibold">
+                                    Ticket Workflow
+                                </h5>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
@@ -53,14 +109,20 @@
                                     <form method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name="action" value="change_status">
-                                        <label class="form-label fw-semibold">Update Status</label>
+                                        <label class="form-label fw-semibold">
+                                            Update Status
+                                        </label>
                                         <div class="input-group">
                                             <select name="status" class="form-select">
                                                 {% for value,label in status_choices %}
-                                                    <option value="{{ value }}" {% if ticket.status == value %}selected{% endif %}>{{ label }}</option>
+                                                    <option value="{{ value }}" {% if ticket.status == value %}selected{% endif %}>
+                                                        {{ label }}
+                                                    </option>
                                                 {% endfor %}
                                             </select>
-                                            <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i></button>
+                                            <button class="btn btn-primary" type="submit" title="Update Status">
+                                                <i class="fas fa-check"></i>
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -68,23 +130,36 @@
                                     <form method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name="action" value="change_priority">
-                                        <label class="form-label fw-semibold">Update Priority</label>
+                                        <label class="form-label fw-semibold">
+                                            Update Priority
+                                        </label>
                                         <div class="input-group">
                                             <select name="priority" class="form-select">
                                                 {% for value,label in priority_choices %}
-                                                    <option value="{{ value }}" {% if ticket.priority == value %}selected{% endif %}>{{ label }}</option>
+                                                    <option value="{{ value }}" {% if ticket.priority == value %}selected{% endif %}>
+                                                        {{ label }}
+                                                    </option>
                                                 {% endfor %}
                                             </select>
-                                            <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i></button>
+                                            <button class="btn btn-primary" type="submit" title="Update Priority">
+                                                <i class="fas fa-check"></i>
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card shadow-sm mt-4">
+                    <div class="card card-primary card-outline shadow-sm mt-4">
                         <div class="card-header">
-                            <h3 class="card-title fw-semibold"><i class="bi bi-person-check me-2"></i>Ticket Assignment</h3>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-2">
+                                    <i class="fas fa-user-check"></i>
+                                </span>
+                                <h5 class="card-title mb-0 fw-semibold">
+                                    Ticket Assignment
+                                </h5>
+                            </div>
                         </div>
                         <div class="card-body">
                             <form method="post">
@@ -92,16 +167,24 @@
                                 <input type="hidden" name="action" value="assign_ticket">
                                 <div class="row g-3 align-items-end">
                                     <div class="col-12 col-md-9">
-                                        <label class="form-label fw-semibold">Assigned To</label>
+                                        <label class="form-label fw-semibold">
+                                            Assigned To
+                                        </label>
                                         <select name="assigned_to" class="form-select">
                                             <option value="">-- Unassigned --</option>
                                             {% for user in users %}
-                                                <option value="{{ user.pk }}" {% if ticket.assigned_to_id == user.pk %}selected{% endif %}>{{ user.get_full_name|default:user.username }}</option>
+                                                <option value="{{ user.pk }}" {% if ticket.assigned_to_id == user.pk %}selected{% endif %}>
+                                                    {{ user.get_full_name|default:user.username }}
+                                                </option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-person-check me-1"></i>Assign</button>
+                                        <button type="submit"
+                                                class="btn btn-primary w-100">
+                                            <i class="fas fa-user-check me-1"></i>
+                                            Assign
+                                        </button>
                                     </div>
                                 </div>
                             </form>
@@ -110,64 +193,158 @@
                 {% endif %}
             </div>
             <div class="col-12 col-xl-4">
-                <div class="card shadow-sm">
+                <div class="card card-primary card-outline shadow-sm">
                     <div class="card-header">
-                        <h3 class="card-title fw-semibold"><i class="bi bi-person me-2"></i>Customer</h3>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-2">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <h5 class="card-title mb-0 fw-semibold">
+                                Customer
+                            </h5>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="text-center">
-                            <div class="bg-secondary-subtle text-secondary rounded-circle d-inline-flex align-items-center justify-content-center fw-bold fs-3 mb-3" style="width:80px;height:80px;">
-                                {% if ticket.user.first_name %}{{ ticket.user.first_name|first|upper }}{% else %}{{ ticket.user.username|first|upper }}{% endif %}
+                            <span class="d-inline-flex align-items-center justify-content-center bg-secondary-subtle text-secondary rounded-circle fw-bold fs-3 mb-3"
+                                  style="width:80px;height:80px;">
+                                {% if ticket.user.first_name %}
+                                    {{ ticket.user.first_name|first|upper }}
+                                {% else %}
+                                    {{ ticket.user.username|first|upper }}
+                                {% endif %}
+                            </span>
+                            <h5 class="fw-semibold mb-1 text-break">
+                                {{ ticket.user.get_full_name|default:ticket.user.username }}
+                            </h5>
+                            <div class="text-body-secondary small text-break">
+                                @{{ ticket.user.username }}
                             </div>
-                            <h5 class="fw-semibold mb-1">{{ ticket.user.get_full_name|default:ticket.user.username }}</h5>
-                            <div class="text-body-secondary small">@{{ ticket.user.username }}</div>
                         </div>
                         <hr>
-                        <div class="d-flex justify-content-between gap-3 py-2">
-                            <span class="text-body-secondary">Email</span>
-                            <span class="fw-semibold text-break text-end">{{ ticket.user.email|default:"Not available" }}</span>
+                        <div class="d-flex flex-column flex-sm-row justify-content-between gap-1 py-2">
+                            <span class="text-body-secondary">
+                                Email
+                            </span>
+                            <span class="fw-semibold text-break text-sm-end">
+                                {{ ticket.user.email|default:"Not available" }}
+                            </span>
                         </div>
                     </div>
                 </div>
-                <div class="card shadow-sm mt-4">
+                <div class="card card-primary card-outline shadow-sm mt-4">
                     <div class="card-header">
-                        <h3 class="card-title fw-semibold"><i class="bi bi-info-circle me-2"></i>Ticket Information</h3>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-2">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                            <h5 class="card-title mb-0 fw-semibold">
+                                Ticket Information
+                            </h5>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex justify-content-between border-bottom py-2"><span class="text-body-secondary">Ticket Number</span><span class="fw-semibold">{{ ticket.ticket_number }}</span></div>
-                        <div class="d-flex justify-content-between border-bottom py-2"><span class="text-body-secondary">Category</span><span class="fw-semibold">{{ ticket.category.name }}</span></div>
-                        <div class="d-flex justify-content-between border-bottom py-2"><span class="text-body-secondary">Priority</span><span class="fw-semibold">{{ ticket.get_priority_display }}</span></div>
-                        <div class="d-flex justify-content-between border-bottom py-2"><span class="text-body-secondary">Status</span><span class="fw-semibold">{{ ticket.get_status_display }}</span></div>
-                        <div class="d-flex justify-content-between py-2"><span class="text-body-secondary">Created</span><span class="fw-semibold">{{ ticket.created_at|date:"d M Y" }}</span></div>
+                        <div class="d-flex justify-content-between gap-3 border-bottom py-2">
+                            <span class="text-body-secondary">
+                                Ticket Number
+                            </span>
+                            <span class="fw-semibold text-end text-break">
+                                {{ ticket.ticket_number }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3 border-bottom py-2">
+                            <span class="text-body-secondary">
+                                Category
+                            </span>
+                            <span class="fw-semibold text-end text-break">
+                                {{ ticket.category.name }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3 border-bottom py-2">
+                            <span class="text-body-secondary">
+                                Priority
+                            </span>
+                            <span class="fw-semibold text-end">
+                                {{ ticket.get_priority_display }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3 border-bottom py-2">
+                            <span class="text-body-secondary">
+                                Status
+                            </span>
+                            <span class="fw-semibold text-end">
+                                {{ ticket.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3 py-2">
+                            <span class="text-body-secondary">
+                                Created
+                            </span>
+                            <span class="fw-semibold text-end text-nowrap">
+                                {{ ticket.created_at|date:"d M Y" }}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 {% if ticket.ride %}
-                    <div class="card shadow-sm mt-4">
+                    <div class="card card-primary card-outline shadow-sm mt-4">
                         <div class="card-header">
-                            <h3 class="card-title fw-semibold"><i class="bi bi-car-front me-2"></i>Related Ride</h3>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-2">
+                                    <i class="fas fa-car"></i>
+                                </span>
+                                <h5 class="card-title mb-0 fw-semibold">
+                                    Related Ride
+                                </h5>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="bg-secondary-subtle text-secondary rounded-3 p-3"><i class="bi bi-car-front fs-4"></i></div>
-                                <div><div class="text-body-secondary small">Ride ID</div><div class="fw-semibold">#{{ ticket.ride.pk }}</div></div>
+                                <span class="d-inline-flex align-items-center justify-content-center bg-secondary-subtle text-secondary rounded-3 p-3 flex-shrink-0">
+                                    <i class="fas fa-car fs-4"></i>
+                                </span>
+                                <div>
+                                    <div class="text-body-secondary small">
+                                        Ride ID
+                                    </div>
+                                    <div class="fw-semibold">
+                                        #{{ ticket.ride.pk }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 {% endif %}
                 {% if perms.support.change_supportticket or perms.support.delete_supportticket %}
-                    <div class="card shadow-sm mt-4">
+                    <div class="card card-primary card-outline shadow-sm mt-4">
                         <div class="card-header">
-                            <h3 class="card-title fw-semibold"><i class="bi bi-gear me-2"></i>Ticket Actions</h3>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-2">
+                                    <i class="fas fa-cog"></i>
+                                </span>
+                                <h5 class="card-title mb-0 fw-semibold">
+                                    Ticket Actions
+                                </h5>
+                            </div>
                         </div>
                         <div class="card-body">
                             {% if perms.support.change_supportticket %}
-                                <a href="{% url 'ticket_edit' ticket.pk %}" class="btn btn-outline-primary w-100 mb-2"><i class="bi bi-pencil me-1"></i>Edit Ticket</a>
+                                <a href="{% url 'ticket_edit' ticket.pk %}"
+                                   class="btn btn-outline-primary w-100 mb-2">
+                                    <i class="fas fa-edit me-1"></i>
+                                    Edit Ticket
+                                </a>
                             {% endif %}
                             {% if perms.support.delete_supportticket %}
-                                <form method="post" onsubmit="return confirm('Are you sure you want to delete this ticket?');">
+                                <form method="post"
+                                      onsubmit="return confirm('Are you sure you want to delete this ticket?');">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="delete_ticket">
-                                    <button type="submit" class="btn btn-outline-danger w-100"><i class="bi bi-trash me-1"></i>Delete Ticket</button>
+                                    <button type="submit"
+                                            class="btn btn-outline-danger w-100">
+                                        <i class="fas fa-trash me-1"></i>
+                                        Delete Ticket
+                                    </button>
                                 </form>
                             {% endif %}
                         </div>
@@ -176,5 +353,5 @@
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}

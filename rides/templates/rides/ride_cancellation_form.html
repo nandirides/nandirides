@@ -1,359 +1,363 @@
 {% extends "base.html" %}
 {% block title %}NandiRide | Cancel Ride{% endblock %}
 {% block content %}
-
-<div class="container-fluid py-3">
-    <!-- Page Header -->
-    <div class="row align-items-center mb-4">
-        <div class="col-lg-8">
-            <div class="d-flex align-items-center">
-                <div class="me-3">
-                    <i class="fas fa-circle-xmark fa-2x text-danger"></i>
-                </div>
-                <div>
-                    <h3 class="fw-bold mb-1">Cancel Ride</h3>
-                    <p class="text-muted mb-0">
-                        Cancel ride {{ ride.ride_number }} and record the cancellation details
-                    </p>
+<section class="content">
+    <div class="container-fluid py-3 py-md-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-danger-subtle text-danger rounded-circle p-3 flex-shrink-0">
+                        <i class="fas fa-circle-xmark fs-4"></i>
+                    </span>
+                    <div>
+                        <h3 class="fw-bold mb-1">Cancel Ride</h3>
+                        <p class="text-body-secondary mb-0 small">
+                            Cancel ride {{ ride.ride_number }} and record the cancellation details
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-4 mt-3 mt-lg-0">
             <div class="d-flex justify-content-lg-end align-items-center gap-2 flex-wrap">
+                <a href="{% url 'ride_dashboard' %}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back
+                </a>
                 <span class="badge bg-danger px-3 py-2">
-                    <i class="fas fa-ban me-1"></i> Cancellation
+                    <i class="fas fa-ban me-1"></i>Cancellation
                 </span>
-                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-car me-1"></i> Ride Details
+                <a href="{% url 'ride_details' ride.pk %}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-car me-1"></i>Ride Details
                 </a>
             </div>
         </div>
-    </div>
-    <!-- Form Errors -->
-    {% if form.non_field_errors %}
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-triangle-exclamation me-2"></i>
-            <div>
-                {% for error in form.non_field_errors %}
-                    <div>{{ error }}</div>
-                {% endfor %}
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fas fa-triangle-exclamation me-2"></i>
+                <div>
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    {% endif %}
-    <div class="row g-3">
-        <!-- Cancellation Form -->
-        <div class="col-xl-8">
-            <div class="card card-outline card-danger shadow-sm">
-                <div class="card-header">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                        <div>
-                            <h5 class="card-title mb-1">
-                                <i class="fas fa-file-circle-xmark me-2"></i>
-                                Cancellation Details
-                            </h5>
-                            <small class="text-muted">
-                                Provide the reason and applicable cancellation charge
-                            </small>
+        {% endif %}
+        <div class="row g-3">
+            <div class="col-12 col-xl-8">
+                <div class="card card-outline card-danger shadow-sm">
+                    <div class="card-header">
+                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+                            <div>
+                                <h5 class="card-title mb-1 fw-semibold">
+                                    <i class="fas fa-file-circle-xmark me-2"></i>
+                                    Cancellation Details
+                                </h5>
+                                <small class="text-body-secondary">
+                                    Provide the reason and applicable cancellation charge
+                                </small>
+                            </div>
+                            <span class="badge bg-secondary px-3 py-2">
+                                {{ ride.get_status_display }}
+                            </span>
                         </div>
-                        <span class="badge bg-secondary px-3 py-2">
-                            {{ ride.get_status_display }}
-                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning d-flex align-items-start gap-3 shadow-sm" role="alert">
+                            <i class="fas fa-triangle-exclamation fa-lg mt-1"></i>
+                            <div>
+                                <div class="fw-bold">Cancellation Action</div>
+                                <div class="small mt-1">
+                                    Please review the ride information and provide accurate cancellation details
+                                    before confirming this action.
+                                </div>
+                            </div>
+                        </div>
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            <div class="row g-4">
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.cancelled_by.id_for_label }}"
+                                           class="form-label fw-semibold">
+                                        <i class="fas fa-user me-1 text-primary"></i>
+                                        Cancelled By
+                                    </label>
+                                    {{ form.cancelled_by }}
+                                    {% if form.cancelled_by.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.cancelled_by.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.reason.id_for_label }}"
+                                           class="form-label fw-semibold">
+                                        <i class="fas fa-list-check me-1 text-danger"></i>
+                                        Cancellation Reason
+                                    </label>
+                                    {{ form.reason }}
+                                    {% if form.reason.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.reason.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12">
+                                    <label for="{{ form.reason_text.id_for_label }}"
+                                           class="form-label fw-semibold">
+                                        <i class="fas fa-comment-dots me-1 text-info"></i>
+                                        Additional Details
+                                    </label>
+                                    {{ form.reason_text }}
+                                    {% if form.reason_text.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.reason_text.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Add any additional information that should be stored with this cancellation.
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="{{ form.cancellation_charge.id_for_label }}"
+                                           class="form-label fw-semibold">
+                                        <i class="fas fa-indian-rupee-sign me-1 text-warning"></i>
+                                        Cancellation Charge
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        {{ form.cancellation_charge }}
+                                    </div>
+                                    {% if form.cancellation_charge.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.cancellation_charge.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Enter 0 if no cancellation charge applies.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card border-0 bg-body-tertiary shadow-sm mt-4">
+                                <div class="card-body">
+                                    <div class="d-flex flex-wrap justify-content-end gap-2">
+                                        <a href="{% url 'ride_details' ride.pk %}"
+                                           class="btn btn-outline-primary">
+                                            <i class="fas fa-arrow-right me-1"></i>
+                                            Back to Ride
+                                        </a>
+                                        <button type="submit"
+                                                class="btn btn-danger">
+                                            <i class="fas fa-circle-xmark me-1"></i>
+                                            Confirm Cancellation
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-warning d-flex align-items-start gap-3 shadow-sm" role="alert">
-                        <i class="fas fa-triangle-exclamation fa-lg mt-1"></i>
-                        <div>
-                            <div class="fw-bold">Cancellation Action</div>
-                            <div class="small mt-1">
-                                Please review the ride information and provide accurate cancellation details
-                                before confirming this action.
+                <div class="card card-outline card-warning shadow-sm mt-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-1">
+                            <i class="fas fa-diagram-project me-2"></i>
+                            Cancellation Workflow
+                        </h5>
+                        <small class="text-body-secondary">
+                            Information recorded during ride cancellation
+                        </small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-4">
+                                <div class="card h-100 border-0 shadow-sm bg-body-tertiary">
+                                    <div class="card-body text-center">
+                                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary p-3 mb-3">
+                                            <i class="fas fa-user fa-lg"></i>
+                                        </span>
+                                        <h6 class="fw-bold">Cancelled By</h6>
+                                        <small class="text-body-secondary">
+                                            Record who initiated the cancellation
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="card h-100 border-0 shadow-sm bg-body-tertiary">
+                                    <div class="card-body text-center">
+                                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger p-3 mb-3">
+                                            <i class="fas fa-list-check fa-lg"></i>
+                                        </span>
+                                        <h6 class="fw-bold">Reason</h6>
+                                        <small class="text-body-secondary">
+                                            Store the applicable cancellation reason
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="card h-100 border-0 shadow-sm bg-body-tertiary">
+                                    <div class="card-body text-center">
+                                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning-emphasis p-3 mb-3">
+                                            <i class="fas fa-indian-rupee-sign fa-lg"></i>
+                                        </span>
+                                        <h6 class="fw-bold">Charge</h6>
+                                        <small class="text-body-secondary">
+                                            Record any applicable cancellation fee
+                                        </small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <label for="{{ form.cancelled_by.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-user me-1 text-primary"></i>
-                                    Cancelled By
-                                </label>
-                                {{ form.cancelled_by }}
-                                {% if form.cancelled_by.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.cancelled_by.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label for="{{ form.reason.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-list-check me-1 text-danger"></i>
-                                    Cancellation Reason
-                                </label>
-                                {{ form.reason }}
-                                {% if form.reason.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.reason.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="col-12">
-                                <label for="{{ form.reason_text.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-comment-dots me-1 text-info"></i>
-                                    Additional Details
-                                </label>
-                                {{ form.reason_text }}
-                                {% if form.reason_text.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.reason_text.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    Add any additional information that should be stored with this cancellation.
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="{{ form.cancellation_charge.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-indian-rupee-sign me-1 text-warning"></i>
-                                    Cancellation Charge
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">₹</span>
-                                    {{ form.cancellation_charge }}
-                                </div>
-                                {% if form.cancellation_charge.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.cancellation_charge.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    Enter 0 if no cancellation charge applies.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card border-0 bg-body-tertiary shadow-sm mt-4">
-                            <div class="card-body">
-                                <div class="d-flex flex-wrap justify-content-end gap-2">
-                                    <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-arrow-left me-1"></i>
-                                        Back to Ride
+                </div>
+            </div>
+            <div class="col-12 col-xl-4">
+                <div class="card card-outline card-primary shadow-sm mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-1">
+                            <i class="fas fa-car me-2"></i>
+                            Ride Information
+                        </h5>
+                        <small class="text-body-secondary">
+                            Review the ride before cancellation
+                        </small>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center gap-3 border-bottom pb-3 mb-3">
+                            <div>
+                                <small class="text-body-secondary">Ride Number</small>
+                                <div class="mt-1">
+                                    <a href="{% url 'ride_details' ride.pk %}"
+                                       class="fw-bold text-body text-decoration-none">
+                                        {{ ride.ride_number }}
                                     </a>
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="fas fa-circle-xmark me-1"></i>
-                                        Confirm Cancellation
-                                    </button>
+                                </div>
+                            </div>
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary p-2 flex-shrink-0">
+                                <i class="fas fa-route"></i>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-3 border-bottom pb-3 mb-3">
+                            <div>
+                                <small class="text-body-secondary">Passenger</small>
+                                <div class="fw-semibold mt-1">
+                                    {{ ride.passenger }}
+                                </div>
+                            </div>
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-info-subtle text-info p-2 flex-shrink-0">
+                                <i class="fas fa-user"></i>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-3 border-bottom pb-3 mb-3">
+                            <div>
+                                <small class="text-body-secondary">Driver</small>
+                                <div class="fw-semibold mt-1">
+                                    {{ ride.driver }}
+                                </div>
+                            </div>
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-success-subtle text-success p-2 flex-shrink-0">
+                                <i class="fas fa-user-tie"></i>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-3 border-bottom pb-3 mb-3">
+                            <div>
+                                <small class="text-body-secondary">Vehicle</small>
+                                <div class="fw-semibold mt-1">
+                                    {{ ride.vehicle }}
+                                </div>
+                            </div>
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning-emphasis p-2 flex-shrink-0">
+                                <i class="fas fa-car-side"></i>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-3">
+                            <div>
+                                <small class="text-body-secondary">Current Status</small>
+                                <div class="mt-2">
+                                    {% if ride.status == "completed" %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif ride.status == "cancelled" %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% elif ride.status == "started" %}
+                                        <span class="badge bg-primary">Started</span>
+                                    {% elif ride.status == "driver_arrived" %}
+                                        <span class="badge bg-info">Driver Arrived</span>
+                                    {% elif ride.status == "driver_arriving" %}
+                                        <span class="badge bg-warning text-dark">Driver Arriving</span>
+                                    {% elif ride.status == "driver_assigned" %}
+                                        <span class="badge bg-secondary">Driver Assigned</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            {{ ride.get_status_display }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <i class="fas fa-chart-simple text-body-secondary fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-outline card-info shadow-sm mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-route me-2"></i>
+                            Journey
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-start gap-3 border-bottom pb-3 mb-3">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success-subtle text-success p-2 flex-shrink-0">
+                                <i class="fas fa-location-dot"></i>
+                            </span>
+                            <div>
+                                <small class="text-body-secondary">Pickup</small>
+                                <div class="fw-semibold mt-1">
+                                    {{ ride.pickup_location }}
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
-            </div>
-            <!-- Cancellation Workflow -->
-            <div class="card card-outline card-warning shadow-sm mt-3">
-                <div class="card-header">
-                    <h5 class="card-title mb-1">
-                        <i class="fas fa-diagram-project me-2"></i>
-                        Cancellation Workflow
-                    </h5>
-                    <small class="text-muted">
-                        Information recorded during ride cancellation
-                    </small>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="card h-100 border-0 shadow-sm bg-body-tertiary">
-                                <div class="card-body text-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary p-3 mb-3">
-                                        <i class="fas fa-user fa-lg"></i>
-                                    </span>
-                                    <h6 class="fw-bold">Cancelled By</h6>
-                                    <small class="text-body-secondary">
-                                        Record who initiated the cancellation
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card h-100 border-0 shadow-sm bg-body-tertiary">
-                                <div class="card-body text-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger p-3 mb-3">
-                                        <i class="fas fa-list-check fa-lg"></i>
-                                    </span>
-                                    <h6 class="fw-bold">Reason</h6>
-                                    <small class="text-body-secondary">
-                                        Store the applicable cancellation reason
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card h-100 border-0 shadow-sm bg-body-tertiary">
-                                <div class="card-body text-center">
-                                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning-emphasis p-3 mb-3">
-                                        <i class="fas fa-indian-rupee-sign fa-lg"></i>
-                                    </span>
-                                    <h6 class="fw-bold">Charge</h6>
-                                    <small class="text-body-secondary">
-                                        Record any applicable cancellation fee
-                                    </small>
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger-subtle text-danger p-2 flex-shrink-0">
+                                <i class="fas fa-location-dot"></i>
+                            </span>
+                            <div>
+                                <small class="text-body-secondary">Destination</small>
+                                <div class="fw-semibold mt-1">
+                                    {{ ride.drop_location }}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <!-- Ride Information -->
-        <div class="col-xl-4">
-            <div class="card card-outline card-primary shadow-sm mb-3">
-                <div class="card-header">
-                    <h5 class="card-title mb-1">
-                        <i class="fas fa-car me-2"></i>
-                        Ride Information
-                    </h5>
-                    <small class="text-muted">
-                        Review the ride before cancellation
-                    </small>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-                        <div>
-                            <small class="text-body-secondary">Ride Number</small>
-                            <div class="mt-1">
-                                <a href="{% url 'ride_details' ride.pk %}" class="fw-bold text-body text-decoration-none">
-                                    {{ ride.ride_number }}
-                                </a>
-                            </div>
-                        </div>
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary p-2">
-                            <i class="fas fa-route"></i>
-                        </span>
+                <div class="card card-outline card-danger shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-triangle-exclamation me-2"></i>
+                            Important
+                        </h5>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-                        <div>
-                            <small class="text-body-secondary">Passenger</small>
-                            <div class="fw-semibold mt-1">
-                                {{ ride.passenger }}
+                    <div class="card-body">
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger p-2 flex-shrink-0">
+                                <i class="fas fa-ban"></i>
+                            </span>
+                            <div class="small text-body-secondary">
+                                Cancelling this ride will record a cancellation against the ride and
+                                update its status through the cancellation workflow.
                             </div>
-                        </div>
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-info-subtle text-info p-2">
-                            <i class="fas fa-user"></i>
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-                        <div>
-                            <small class="text-body-secondary">Driver</small>
-                            <div class="fw-semibold mt-1">
-                                {{ ride.driver }}
-                            </div>
-                        </div>
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-success-subtle text-success p-2">
-                            <i class="fas fa-user-tie"></i>
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-                        <div>
-                            <small class="text-body-secondary">Vehicle</small>
-                            <div class="fw-semibold mt-1">
-                                {{ ride.vehicle }}
-                            </div>
-                        </div>
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning-emphasis p-2">
-                            <i class="fas fa-car-side"></i>
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <small class="text-body-secondary">Current Status</small>
-                            <div class="mt-2">
-                                {% if ride.status == "completed" %}
-                                    <span class="badge bg-success">Completed</span>
-                                {% elif ride.status == "cancelled" %}
-                                    <span class="badge bg-danger">Cancelled</span>
-                                {% elif ride.status == "started" %}
-                                    <span class="badge bg-primary">Started</span>
-                                {% elif ride.status == "driver_arrived" %}
-                                    <span class="badge bg-info">Driver Arrived</span>
-                                {% elif ride.status == "driver_arriving" %}
-                                    <span class="badge bg-warning text-dark">Driver Arriving</span>
-                                {% elif ride.status == "driver_assigned" %}
-                                    <span class="badge bg-secondary">Driver Assigned</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">
-                                        {{ ride.get_status_display }}
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <i class="fas fa-chart-simple text-muted fa-lg"></i>
-                    </div>
-                </div>
-            </div>
-            <!-- Journey -->
-            <div class="card card-outline card-info shadow-sm mb-3">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-route me-2"></i>
-                        Journey
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-start gap-3 border-bottom pb-3 mb-3">
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success-subtle text-success p-2">
-                            <i class="fas fa-location-dot"></i>
-                        </span>
-                        <div>
-                            <small class="text-body-secondary">Pickup</small>
-                            <div class="fw-semibold mt-1">
-                                {{ ride.pickup_location }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-start gap-3">
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger-subtle text-danger p-2">
-                            <i class="fas fa-location-dot"></i>
-                        </span>
-                        <div>
-                            <small class="text-body-secondary">Destination</small>
-                            <div class="fw-semibold mt-1">
-                                {{ ride.drop_location }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Important Notice -->
-            <div class="card card-outline card-danger shadow-sm">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-triangle-exclamation me-2"></i>
-                        Important
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-start gap-3">
-                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger p-2">
-                            <i class="fas fa-ban"></i>
-                        </span>
-                        <div class="small text-body-secondary">
-                            Cancelling this ride will record a cancellation against the ride and
-                            update its status through the cancellation workflow.
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}

@@ -19,12 +19,15 @@
             </div>
         </div>
         <div class="col-md-4 mt-3 mt-md-0">
-            <div class="d-flex justify-content-md-end align-items-center gap-2">
+            <div class="d-flex justify-content-md-end align-items-center flex-wrap gap-2">
                 <span class="badge bg-warning text-dark px-3 py-2">
                     <i class="fas fa-star me-1"></i> Rating
                 </span>
-                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-secondary">
+                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-primary">
                     <i class="fas fa-car-side me-1"></i> Ride Details
+                </a>
+                <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary btn-sm px-3 text-nowrap">
+                    <i class="fas fa-arrow-left me-1"></i>Back
                 </a>
             </div>
         </div>
@@ -143,7 +146,7 @@
                                 <button type="submit" class="btn btn-warning">
                                     <i class="fas fa-star me-1"></i>Save Rating
                                 </button>
-                                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-secondary">
+                                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-primary">
                                     <i class="fas fa-arrow-left me-1"></i>Back to Ride
                                 </a>
                             </div>

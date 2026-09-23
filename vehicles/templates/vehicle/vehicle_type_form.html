@@ -2,6 +2,12 @@
 {% block title %}{% if form.instance.pk %}Edit Vehicle Type{% else %}Add Vehicle Type{% endif %} | NandiRide{% endblock %}
 {% block content %}
 <div class="app-content-header">
+    <div class="justify-content-end align-items-md-end">
+        <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-primary btn-sm px-3 text-nowrap">
+            <i class="bi bi-arrow-right me-1"></i>
+            Back
+        </a>
+    </div>
     <div class="container-fluid">
         <div class="row align-items-center">
             <div class="col-sm-6">
@@ -227,7 +233,7 @@
                                     <i class="bi bi-check-circle me-2"></i>
                                     {% if form.instance.pk %}Update Vehicle Type{% else %}Save Vehicle Type{% endif %}
                                 </button>
-                                <a href="{% url 'vehicle_type_list' %}" class="btn btn-outline-secondary">
+                                <a href="{% url 'vehicle_type_list' %}" class="btn btn-outline-danger">
                                     <i class="bi bi-x-circle me-2"></i>Cancel
                                 </a>
                             </div>

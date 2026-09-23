@@ -15,7 +15,7 @@
                 {% endif %}
             </p>
         </div>
-        <a href="{% if payment %}{% url 'payment_detail' payment.pk %}{% else %}{% url 'payment_list' %}{% endif %}" class="btn btn-outline-secondary">
+        <a href="{% if payment %}{% url 'payment_detail' payment.pk %}{% else %}{% url 'payment_list' %}{% endif %}" class="btn btn-outline-primary">
             <i class="bi bi-arrow-left me-1"></i>Back
         </a>
     </div>
@@ -127,7 +127,7 @@
                         </div>
                     </div>
                     <div class="card-footer d-flex justify-content-end gap-2">
-                        <a href="{% if payment %}{% url 'payment_detail' payment.pk %}{% else %}{% url 'payment_list' %}{% endif %}" class="btn btn-outline-secondary">
+                        <a href="{% if payment %}{% url 'payment_detail' payment.pk %}{% else %}{% url 'payment_list' %}{% endif %}" class="btn btn-outline-danger">
                             Cancel
                         </a>
                         <button type="submit" class="btn btn-primary">

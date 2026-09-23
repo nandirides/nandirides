@@ -5,10 +5,10 @@
 <div class="container-fluid py-3">
     <!-- Page Header -->
     <div class="row align-items-center mb-4">
-        <div class="col-md-8">
+        <div class="col-md-6">
             <div class="d-flex align-items-center">
                 <div class="me-3">
-                    <i class="fas fa-route fa-2x"></i>
+                    <i class="fas fa-route fa-2x text-primary"></i>
                 </div>
                 <div>
                     <h3 class="fw-bold mb-1">Rides</h3>
@@ -16,23 +16,26 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mt-3 mt-md-0">
-            <div class="d-flex justify-content-md-end align-items-center gap-2">
-                <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-gauge-high me-1"></i> Dashboard
+        <div class="col-md-6 mt-3 mt-md-0">
+            <div class="d-flex justify-content-md-end align-items-center flex-wrap gap-2">
+                <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-gauge-high me-1"></i>Ride Dashboard
                 </a>
                 <a href="{% url 'ride_add' %}" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i> Add Ride
+                    <i class="fas fa-plus me-1"></i>Add Ride
+                </a>
+                <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary btn-sm px-3 text-nowrap">
+                    <i class="fas fa-arrow-left me-1"></i>Back
                 </a>
             </div>
         </div>
     </div>
     <!-- Ride Statistics -->
-    <div class="row">
+    <div class="row g-3 mb-4">
         <div class="col-lg-3 col-md-6">
-            <div class="info-box shadow-sm">
+            <div class="info-box shadow-sm h-100 mb-0">
                 <span class="info-box-icon bg-primary">
-                    <i class="fas fa-route"></i>
+                    <i class="fas fa-route text-white"></i>
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Rides</span>
@@ -42,9 +45,9 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="info-box shadow-sm">
+            <div class="info-box shadow-sm h-100 mb-0">
                 <span class="info-box-icon bg-warning">
-                    <i class="fas fa-car-side"></i>
+                    <i class="fas fa-car-side text-white"></i>
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Active Rides</span>
@@ -54,9 +57,9 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="info-box shadow-sm">
+            <div class="info-box shadow-sm h-100 mb-0">
                 <span class="info-box-icon bg-success">
-                    <i class="fas fa-circle-check"></i>
+                    <i class="fas fa-circle-check text-white"></i>
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Completed</span>
@@ -66,9 +69,9 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="info-box shadow-sm">
+            <div class="info-box shadow-sm h-100 mb-0">
                 <span class="info-box-icon bg-danger">
-                    <i class="fas fa-circle-xmark"></i>
+                    <i class="fas fa-circle-xmark text-white"></i>
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Cancelled</span>
@@ -79,17 +82,16 @@
         </div>
     </div>
     <!-- Search and Filters -->
-    <div class="card card-outline card-primary shadow-sm mb-4">
-        <div class="card-header">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header py-3">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div>
-                    <h5 class="mb-1 fw-semibold">
-                        <i class="fas fa-filter me-2"></i>Ride Filters
+                    <h5 class="card-title mb-1 fw-semibold">
+                        <i class="fas fa-filter me-2 text-primary"></i>Ride Filters
                     </h5>
-                    <div class="small text-muted">Search and filter ride records instantly</div>
                 </div>
                 {% if search_query or selected_status %}
-                    <a href="{% url 'ride_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <a href="{% url 'ride_list' %}" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-rotate-left me-1"></i>Reset
                     </a>
                 {% endif %}
@@ -100,7 +102,7 @@
                 <div class="row g-3">
                     <div class="col-xl-6 col-lg-5">
                         <label for="rideSearch" class="form-label fw-semibold">
-                            <i class="fas fa-search me-1"></i> Search
+                            <i class="fas fa-search me-1"></i>Search
                         </label>
                         <div class="input-group">
                             <span class="input-group-text bg-body-tertiary">
@@ -113,14 +115,14 @@
                                 value="{{ search_query|default:'' }}"
                                 class="form-control"
                                 placeholder="Ride, request, passenger, driver, vehicle or location"
-                                oninput="this.form.submit()"
+                                oninput="autoSearchRides()"
                                 autocomplete="off"
                             >
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-4 col-md-6">
                         <label for="rideStatus" class="form-label fw-semibold">
-                            <i class="fas fa-circle-half-stroke me-1"></i> Status
+                            <i class="fas fa-circle-half-stroke me-1"></i>Status
                         </label>
                         <select
                             id="rideStatus"
@@ -138,7 +140,7 @@
                     </div>
                     <div class="col-xl-3 col-lg-3 col-md-6">
                         <label for="ridePerPage" class="form-label fw-semibold">
-                            <i class="fas fa-list-ol me-1"></i> Per Page
+                            <i class="fas fa-list-ol me-1"></i>Per Page
                         </label>
                         <select
                             id="ridePerPage"
@@ -157,45 +159,32 @@
         </div>
     </div>
     <!-- Rides Table -->
-    <div class="card card-outline card-success shadow-sm">
-        <div class="card-header">
+    <div class="card shadow-sm">
+        <div class="card-header py-3">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div>
-                    <h5 class="mb-1 fw-semibold">
-                        <i class="fas fa-list me-2"></i>All Rides
+                    <h5 class="card-title mb-1 fw-semibold">
+                        <i class="fas fa-list me-2 text-primary"></i>All Rides
                     </h5>
-                    <div class="small text-muted">
+                    <small class="text-body-secondary">
                         {% if page_obj %}
                             Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} rides
                         {% else %}
                             Ride records
                         {% endif %}
-                    </div>
+                    </small>
                 </div>
-                <span class="badge bg-success px-3 py-2">
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-2">
                     <i class="fas fa-database me-1"></i>
                     {{ page_obj.paginator.count|default:"0" }} Records
                 </span>
             </div>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Ride</th>
-                            <th>Request</th>
-                            <th>Passenger</th>
-                            <th>Driver</th>
-                            <th>Vehicle</th>
-                            <th>Route</th>
-                            <th>Schedule</th>
-                            <th>Status</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ride in page_obj %}
+            {% if page_obj %}
+                <div style="max-height:620px;overflow-y:auto;overflow-x:auto;">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light" style="position:sticky;top:0;z-index:2;">
                             <tr>
                                 <td>
                                     <a href="{% url 'ride_details' ride.pk %}" class="fw-semibold text-body text-decoration-none">
@@ -349,33 +338,204 @@
                                     </div>
                                 </td>
                             </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="9" class="text-center py-5">
-                                    <div class="py-3">
-                                        <div class="mb-3">
-                                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-body-tertiary border" style="width:80px;height:80px;">
-                                                <i class="fas fa-route fa-2x text-muted"></i>
-                                            </span>
-                                        </div>
-                                        <h5 class="fw-semibold">No rides found</h5>
-                                        <p class="text-muted mb-3">No ride records match the selected filters.</p>
-                                        <a href="{% url 'ride_add' %}" class="btn btn-primary">
-                                            <i class="fas fa-plus me-1"></i>Add Ride
+                        </thead>
+                        <tbody>
+                            {% for ride in page_obj %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <a href="{% url 'ride_details' ride.pk %}" class="fw-bold text-primary text-decoration-none">
+                                            <i class="fas fa-car-side me-1"></i>{{ ride.ride_number }}
                                         </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                                    </td>
+                                    <td>
+                                        {% if ride.ride_request %}
+                                            <a href="{% url 'ride_request_details' ride.ride_request.pk %}" class="fw-semibold text-body text-decoration-none">
+                                                {{ ride.ride_request.request_number }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-body-secondary">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if ride.passenger %}
+                                            <div class="fw-semibold text-body">
+                                                {% if ride.passenger.get_full_name %}
+                                                    {{ ride.passenger.get_full_name }}
+                                                {% else %}
+                                                    {{ ride.passenger.username }}
+                                                {% endif %}
+                                            </div>
+                                            <div class="small text-body-secondary">
+                                                {{ ride.passenger }}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-body-secondary">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if ride.driver %}
+                                            <div class="fw-semibold text-body">
+                                                <i class="fas fa-user-tie me-1 text-info"></i>{{ ride.driver }}
+                                            </div>
+                                        {% else %}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
+                                                Unassigned
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if ride.vehicle %}
+                                            <div class="fw-semibold text-body">
+                                                <i class="fas fa-car me-1 text-success"></i>{{ ride.vehicle }}
+                                            </div>
+                                            {% if ride.vehicle.vehicle_type %}
+                                                <div class="small text-body-secondary">
+                                                    {{ ride.vehicle.vehicle_type }}
+                                                </div>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-body-secondary">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="small text-body text-truncate" style="max-width:220px;" title="{{ ride.pickup_location }}">
+                                            <i class="fas fa-location-dot me-1 text-primary"></i>{{ ride.pickup_location }}
+                                        </div>
+                                        <div class="small text-body-secondary text-truncate mt-1" style="max-width:220px;" title="{{ ride.drop_location }}">
+                                            <i class="fas fa-location-arrow me-1 text-danger"></i>{{ ride.drop_location }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if ride.scheduled_at %}
+                                            <div class="small fw-semibold text-body">
+                                                {{ ride.scheduled_at|date:"d M Y" }}
+                                            </div>
+                                            <div class="small text-body-secondary">
+                                                {{ ride.scheduled_at|date:"h:i A" }}
+                                            </div>
+                                        {% else %}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
+                                                Not scheduled
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if ride.status == "driver_assigned" %}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
+                                                <i class="fas fa-user-check me-1"></i>{{ ride.get_status_display }}
+                                            </span>
+                                        {% elif ride.status == "driver_arriving" %}
+                                            <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle">
+                                                <i class="fas fa-car-side me-1"></i>{{ ride.get_status_display }}
+                                            </span>
+                                        {% elif ride.status == "driver_arrived" %}
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle">
+                                                <i class="fas fa-location-dot me-1"></i>{{ ride.get_status_display }}
+                                            </span>
+                                        {% elif ride.status == "started" %}
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle">
+                                                <i class="fas fa-play me-1"></i>{{ ride.get_status_display }}
+                                            </span>
+                                        {% elif ride.status == "completed" %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">
+                                                <i class="fas fa-circle-check me-1"></i>{{ ride.get_status_display }}
+                                            </span>
+                                        {% elif ride.status == "cancelled" %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle">
+                                                <i class="fas fa-circle-xmark me-1"></i>{{ ride.get_status_display }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
+                                                {{ ride.get_status_display }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <div class="dropdown">
+                                            <button
+                                                class="btn btn-sm btn-outline-primary dropdown-toggle"
+                                                type="button"
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false"
+                                            >
+                                                <i class="fas fa-ellipsis-vertical me-1"></i>Actions
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'ride_details' ride.pk %}">
+                                                        <i class="fas fa-eye me-2 text-primary"></i>View Details
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'ride_edit' ride.pk %}">
+                                                        <i class="fas fa-pen me-2 text-warning"></i>Edit Ride
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'ride_status_update' ride.pk %}">
+                                                        <i class="fas fa-arrows-rotate me-2 text-info"></i>Update Status
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'ride_assignment_list' ride.pk %}">
+                                                        <i class="fas fa-user-check me-2 text-success"></i>Assignments
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'ride_tracking_list' ride.pk %}">
+                                                        <i class="fas fa-location-dot me-2 text-info"></i>Tracking
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'ride_stop_list' ride.pk %}">
+                                                        <i class="fas fa-signs-post me-2 text-warning"></i>Stops
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'ride_cancellation_add' ride.pk %}">
+                                                        <i class="fas fa-circle-xmark me-2 text-danger"></i>Cancellation
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'ride_rating_add' ride.pk %}">
+                                                        <i class="fas fa-star me-2 text-warning"></i>Add Rating
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="{% url 'ride_delete' ride.pk %}">
+                                                        <i class="fas fa-trash me-2"></i>Delete Ride
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5 px-3">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary p-3 mb-3">
+                        <i class="fas fa-route fa-2x"></i>
+                    </span>
+                    <h5 class="fw-semibold">No rides found</h5>
+                    <p class="text-body-secondary mb-3">
+                        No ride records match the selected filters.
+                    </p>
+                    <a href="{% url 'ride_add' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Add Ride
+                    </a>
+                </div>
+            {% endif %}
         </div>
         <!-- Pagination -->
         {% if page_obj.has_other_pages %}
             <div class="card-footer bg-body-tertiary border-top">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <div class="small text-muted">
+                    <div class="small text-body-secondary">
                         Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
                     </div>
                     <nav aria-label="Ride pagination">
@@ -426,12 +586,12 @@
         {% endif %}
     </div>
     <!-- Ride Management Overview -->
-    <div class="row mt-4">
+    <div class="row g-3 mt-1">
         <div class="col-lg-4">
-            <div class="card card-outline card-primary shadow-sm h-100">
-                <div class="card-header">
+            <div class="card shadow-sm h-100">
+                <div class="card-header py-3">
                     <h6 class="mb-0 fw-semibold">
-                        <i class="fas fa-route me-2"></i>Ride Management
+                        <i class="fas fa-route me-2 text-primary"></i>Ride Management
                     </h6>
                 </div>
                 <div class="card-body">
@@ -439,24 +599,24 @@
                         <i class="fas fa-eye text-primary me-3 mt-1"></i>
                         <div>
                             <div class="fw-semibold">View Ride Details</div>
-                            <small class="text-muted">Inspect complete passenger, driver and journey information.</small>
+                            <small class="text-body-secondary">Inspect complete passenger, driver and journey information.</small>
                         </div>
                     </div>
                     <div class="d-flex align-items-start">
                         <i class="fas fa-pen text-warning me-3 mt-1"></i>
                         <div>
                             <div class="fw-semibold">Update Ride</div>
-                            <small class="text-muted">Modify ride assignments, schedule and trip information.</small>
+                            <small class="text-body-secondary">Modify ride assignments, schedule and trip information.</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 mt-3 mt-lg-0">
-            <div class="card card-outline card-success shadow-sm h-100">
-                <div class="card-header">
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header py-3">
                     <h6 class="mb-0 fw-semibold">
-                        <i class="fas fa-user-check me-2"></i>Driver Operations
+                        <i class="fas fa-user-check me-2 text-success"></i>Driver Operations
                     </h6>
                 </div>
                 <div class="card-body">
@@ -464,24 +624,24 @@
                         <i class="fas fa-user-tie text-success me-3 mt-1"></i>
                         <div>
                             <div class="fw-semibold">Assignments</div>
-                            <small class="text-muted">Manage driver assignments and assignment history.</small>
+                            <small class="text-body-secondary">Manage driver assignments and assignment history.</small>
                         </div>
                     </div>
                     <div class="d-flex align-items-start">
                         <i class="fas fa-location-dot text-info me-3 mt-1"></i>
                         <div>
                             <div class="fw-semibold">Live Tracking</div>
-                            <small class="text-muted">Review tracking points and ride location history.</small>
+                            <small class="text-body-secondary">Review tracking points and ride location history.</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 mt-3 mt-lg-0">
-            <div class="card card-outline card-warning shadow-sm h-100">
-                <div class="card-header">
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header py-3">
                     <h6 class="mb-0 fw-semibold">
-                        <i class="fas fa-shield-halved me-2"></i>Ride Controls
+                        <i class="fas fa-shield-halved me-2 text-warning"></i>Ride Controls
                     </h6>
                 </div>
                 <div class="card-body">
@@ -489,14 +649,14 @@
                         <i class="fas fa-signs-post text-warning me-3 mt-1"></i>
                         <div>
                             <div class="fw-semibold">Ride Stops</div>
-                            <small class="text-muted">Manage intermediate stops and their status.</small>
+                            <small class="text-body-secondary">Manage intermediate stops and their status.</small>
                         </div>
                     </div>
                     <div class="d-flex align-items-start">
                         <i class="fas fa-circle-xmark text-danger me-3 mt-1"></i>
                         <div>
                             <div class="fw-semibold">Cancellation & Rating</div>
-                            <small class="text-muted">Handle cancellations and passenger or driver ratings.</small>
+                            <small class="text-body-secondary">Handle cancellations and passenger or driver ratings.</small>
                         </div>
                     </div>
                 </div>
@@ -504,4 +664,16 @@
         </div>
     </div>
 </div>
+<script>
+let rideSearchTimer;
+function autoSearchRides() {
+    clearTimeout(rideSearchTimer);
+    rideSearchTimer = setTimeout(function () {
+        const form = document.getElementById("rideFilterForm");
+        if (form) {
+            form.submit();
+        }
+    }, 600);
+}
+</script>
 {% endblock %}

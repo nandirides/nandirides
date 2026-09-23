@@ -10,10 +10,10 @@
             <p class="text-body-secondary mb-0">View and manage complete driver information.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
-            <a href="{% url 'driver_list' %}" class="btn btn-outline-secondary">
+            <a href="{% url 'driver_list' %}" class="btn btn-outline-primary">
                 <i class="bi bi-arrow-left me-1"></i>Back
             </a>
-            <a href="{% url 'driver_edit' driver.pk %}" class="btn btn-primary">
+            <a href="{% url 'driver_edit' driver.pk %}" class="btn btn-outline-primary">
                 <i class="bi bi-pencil me-1"></i>Edit Driver
             </a>
             <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteDriverModal">
@@ -170,7 +170,7 @@
                             </h5>
                             <small class="text-body-secondary">Driver verification documents</small>
                         </div>
-                        <a href="{% url 'driver_document_create' driver.pk %}" class="btn btn-sm btn-primary">
+                        <a href="{% url 'driver_document_create'  driver_pk=driver.pk %}" class="btn btn-sm btn-primary">
                             <i class="bi bi-plus-lg me-1"></i>Add Document
                         </a>
                     </div>
@@ -257,7 +257,7 @@
                             <i class="bi bi-file-earmark-x fs-1 text-body-secondary"></i>
                             <h6 class="fw-semibold mt-3">No Documents</h6>
                             <p class="text-body-secondary mb-3">No documents have been uploaded for this driver.</p>
-                            <a href="{% url 'driver_document_create' driver.pk %}" class="btn btn-primary">
+                            <a href="{% url 'driver_document_create' driver_pk=driver.pk %}" class="btn btn-primary">
                                 <i class="bi bi-plus-lg me-1"></i>Add Document
                             </a>
                         </div>
@@ -440,7 +440,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-1"></i>Delete Driver
                     </button>
@@ -473,7 +473,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-1"></i>Delete Document
                     </button>

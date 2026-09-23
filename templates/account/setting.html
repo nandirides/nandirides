@@ -297,7 +297,7 @@
                                     </div>
                                 </div>
                                 <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
-                                    <button type="reset" class="btn btn-outline-secondary px-4">
+                                    <button type="reset" class="btn btn-outline-primary px-4">
                                         <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
                                     </button>
                                     <button type="submit" class="btn btn-primary px-4 shadow-sm">
@@ -697,7 +697,7 @@
                                             <button type="button" class="btn btn-outline-success btn-sm" id="addWalletMoneyButton" data-bs-toggle="modal" data-bs-target="#addWalletMoneyModal">
                                                 <i class="bi bi-plus-circle me-1"></i>Add Money
                                             </button>
-                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="walletTransactionsButton" data-bs-toggle="modal" data-bs-target="#walletTransactionsModal">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" id="walletTransactionsButton" data-bs-toggle="modal" data-bs-target="#walletTransactionsModal">
                                                 <i class="bi bi-clock-history me-1"></i>Transactions
                                             </button>
                                         </div>
@@ -728,7 +728,7 @@
                                                     <span class="fw-semibold">•••• •••• •••• <span id="cardLastFourDisplay">{{ payment_details.card_last_four }}</span></span>
                                                     <small class="text-body-secondary d-block mt-1">Expiry: <span id="cardExpiryDisplay">{{ payment_details.card_expiry|default:"-" }}</span></small>
                                                 </div>
-                                                <button type="button" class="btn btn-outline-secondary btn-sm rounded-circle" id="viewCardDetailsButton" data-bs-toggle="modal" data-bs-target="#viewCardDetailsModal" title="View saved card details" aria-label="View saved card details">
+                                                <button type="button" class="btn btn-outline-primary btn-sm rounded-circle" id="viewCardDetailsButton" data-bs-toggle="modal" data-bs-target="#viewCardDetailsModal" title="View saved card details" aria-label="View saved card details">
                                                     <i class="bi bi-eye"></i>
                                                 </button>
                                             </div>
@@ -817,15 +817,15 @@
                     <input type="number" id="walletAmountInput" class="form-control" min="1" step="0.01" placeholder="Enter amount">
                 </div>
                 <div class="d-flex gap-2 flex-wrap mt-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm wallet-quick-amount" data-amount="100">₹100</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm wallet-quick-amount" data-amount="500">₹500</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm wallet-quick-amount" data-amount="1000">₹1,000</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm wallet-quick-amount" data-amount="2000">₹2,000</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm wallet-quick-amount" data-amount="100">₹100</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm wallet-quick-amount" data-amount="500">₹500</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm wallet-quick-amount" data-amount="1000">₹1,000</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm wallet-quick-amount" data-amount="2000">₹2,000</button>
                 </div>
                 <small id="walletModalStatus" class="d-block mt-3 fw-semibold"></small>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-success" id="confirmWalletMoneyButton">
                     <i class="bi bi-plus-circle me-1"></i>Add Money
                 </button>
@@ -929,7 +929,7 @@
                         <i class="bi bi-shield-check me-1"></i>Wallet records are linked to your NandiRide account.
                     </small>
                 </div>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -982,7 +982,7 @@
                 <small id="cardModalStatus" class="d-block mt-3 fw-semibold"></small>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="saveCardButton">
                     <i class="bi bi-save me-1"></i>Save Card
                 </button>
@@ -1038,7 +1038,7 @@
                 {% endif %}
             </div>
             <div class="modal-footer border-top">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -1453,7 +1453,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             '<span class="fw-semibold">•••• •••• •••• <span id="cardLastFourDisplay">' + escapeHtml(lastFour) + '</span></span>' +
                             '<small class="text-body-secondary d-block mt-1">Expiry: <span id="cardExpiryDisplay">' + escapeHtml(expiry || "-") + '</span></small>' +
                         '</div>' +
-                        '<button type="button" class="btn btn-outline-secondary btn-sm rounded-circle" id="viewCardDetailsButton" data-bs-toggle="modal" data-bs-target="#viewCardDetailsModal" title="View saved card details" aria-label="View saved card details">' +
+                        '<button type="button" class="btn btn-outline-primary btn-sm rounded-circle" id="viewCardDetailsButton" data-bs-toggle="modal" data-bs-target="#viewCardDetailsModal" title="View saved card details" aria-label="View saved card details">' +
                             '<i class="bi bi-eye"></i>' +
                         '</button>' +
                     '</div>';

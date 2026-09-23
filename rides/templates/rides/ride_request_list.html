@@ -16,19 +16,22 @@
             </div>
         </div>
         <div class="col-md-4 mt-3 mt-md-0">
-            <div class="d-flex justify-content-md-end align-items-center gap-2">
+            <div class="d-flex justify-content-md-end align-items-center flex-wrap gap-2">
                 <span class="badge bg-success px-3 py-2">
                     <i class="fas fa-circle me-1"></i>Request Management
                 </span>
                 <a href="{% url 'ride_request_add' %}" class="btn btn-primary">
                     <i class="fas fa-plus me-1"></i> New Request
                 </a>
+                <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary btn-sm px-3 text-nowrap">
+                    <i class="fas fa-arrow-left me-1"></i>Back
+                </a>
             </div>
         </div>
     </div>
-    <div class="row">
+    <div class="row g-3 mb-3">
         <div class="col-lg-3 col-md-6">
-            <div class="info-box shadow-sm">
+            <div class="info-box shadow-sm h-100 mb-0">
                 <span class="info-box-icon bg-primary">
                     <i class="fas fa-clipboard-list"></i>
                 </span>
@@ -40,7 +43,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="info-box shadow-sm">
+            <div class="info-box shadow-sm h-100 mb-0">
                 <span class="info-box-icon bg-warning">
                     <i class="fas fa-hourglass-half"></i>
                 </span>
@@ -52,7 +55,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="info-box shadow-sm">
+            <div class="info-box shadow-sm h-100 mb-0">
                 <span class="info-box-icon bg-info">
                     <i class="fas fa-magnifying-glass"></i>
                 </span>
@@ -64,7 +67,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="info-box shadow-sm">
+            <div class="info-box shadow-sm h-100 mb-0">
                 <span class="info-box-icon bg-success">
                     <i class="fas fa-user-check"></i>
                 </span>
@@ -142,7 +145,7 @@
                 <div>
                     <h5 class="card-title fw-semibold mb-1">
                         <i class="fas fa-list me-2"></i>All Ride Requests
-                    </h5>
+                    </h5>&nbsp;
                     <div class="small text-muted">
                         {% if page_obj %}
                             Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} requests
@@ -193,16 +196,16 @@
                                                 <i class="fas fa-user"></i>
                                             </span>
                                         </div>
-                                        <div class="fw-semibold text-body">
+                                        <div class="fw-semibold text-body text-break">
                                             {{ request_item.passenger }}
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="small text-body">
+                                    <div class="small text-body text-break">
                                         <i class="fas fa-location-dot me-1"></i>{{ request_item.pickup_location }}
                                     </div>
-                                    <div class="small text-muted mt-1">
+                                    <div class="small text-muted mt-1 text-break">
                                         <i class="fas fa-arrow-down me-1"></i>{{ request_item.drop_location }}
                                     </div>
                                 </td>
@@ -246,11 +249,11 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-end">
-                                    <div class="btn-group">
+                                    <div class="btn-group" role="group" aria-label="Ride request actions">
                                         <a href="{% url 'ride_request_details' request_item.pk %}" class="btn btn-sm btn-outline-primary" title="View Request">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{% url 'ride_request_edit' request_item.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit Request">
+                                        <a href="{% url 'ride_request_edit' request_item.pk %}" class="btn btn-sm btn-outline-primary" title="Edit Request">
                                             <i class="fas fa-pen"></i>
                                         </a>
                                     </div>
@@ -321,7 +324,10 @@ let requestSearchTimer;
 function submitRequestSearch() {
     clearTimeout(requestSearchTimer);
     requestSearchTimer = setTimeout(function() {
-        document.getElementById("requestFilterForm").submit();
+        const form = document.getElementById("requestFilterForm");
+        if (form) {
+            form.submit();
+        }
     }, 500);
 }
 </script>
