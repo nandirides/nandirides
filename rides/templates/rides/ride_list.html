@@ -214,14 +214,16 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <div class="fw-semibold text-body">{{ ride.passenger }}</div>
+                                    <div class="fw-semibold text-body">{{ ride.passenger.get_full_name|default:ride.passenger }}</div>
                                     {% if ride.passenger.email %}
-                                        <div class="small text-muted">{{ ride.passenger.email }}</div>
+                                        <div class="small text-muted">
+                                            {{ ride.passenger.email }}</div>
                                     {% endif %}
                                 </td>
                                 <td>
                                     <div class="fw-semibold text-body">
-                                        <i class="fas fa-user-tie me-1 text-info"></i>{{ ride.driver }}
+                                        <i class="fas fa-user-tie me-1 text-info"></i>{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }}) 
+                                        
                                     </div>
                                 </td>
                                 <td>

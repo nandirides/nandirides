@@ -62,7 +62,9 @@
                                 </span>
                                 <div class="info-box-content">
                                     <span class="info-box-text">Passenger</span>
-                                    <span class="info-box-number text-wrap fs-6">{{ ride.passenger }}</span>
+                                    <span class="info-box-number text-wrap fs-6">
+                                    {{ ride.passenger.get_full_name|default:ride.passenger }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -73,7 +75,9 @@
                                 </span>
                                 <div class="info-box-content">
                                     <span class="info-box-text">Driver</span>
-                                    <span class="info-box-number text-wrap fs-6">{{ ride.driver }}</span>
+                                    <span class="info-box-number text-wrap fs-6">
+                                    {{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }})
+                                    </span>
                                 </div>
                             </div>
                         </div>

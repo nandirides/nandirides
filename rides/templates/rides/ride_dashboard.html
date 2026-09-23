@@ -424,10 +424,10 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="fw-semibold">{{ ride.passenger }}</span>
+                                            <span class="fw-semibold">{{ ride.passenger.get_full_name|default:ride.passenger }}</span>
                                         </td>
                                         <td>
-                                            <span class="fw-semibold">{{ ride.driver }}</span>
+                                            <span class="fw-semibold">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }})</span>
                                         </td>
                                         <td>
                                             <div class="small text-truncate" style="max-width:220px;">

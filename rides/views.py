@@ -1275,7 +1275,7 @@ def ride_rating_create(request, ride_pk):
                 "url": "ride_rating_add"
             },
         ],
-        "form": form,
+        # "form": form,
         "ride": ride,
     }
 
