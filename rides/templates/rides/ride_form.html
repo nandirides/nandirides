@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block title %}NandiRide | {{ page_title|default:"Ride" }}{% endblock %}
 {% block content %}
-
 <div class="container-fluid py-3 py-md-4">
     <!-- Page Header -->
     <div class="row align-items-center mb-4">
@@ -68,9 +67,15 @@
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <label for="{{ form.ride_number.id_for_label }}" class="form-label fw-semibold">
-                                    Ride Number
+                                    <i class="fas fa-hashtag me-1 text-primary"></i>Ride Number
                                 </label>
                                 {{ form.ride_number }}
+                                {% if not object %}
+                                    <div class="form-text">
+                                        <i class="fas fa-wand-magic-sparkles me-1"></i>
+                                        Ride number is generated automatically.
+                                    </div>
+                                {% endif %}
                                 {% if form.ride_number.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.ride_number.errors %}
@@ -81,7 +86,7 @@
                             </div>
                             <div class="col-12 col-md-6">
                                 <label for="{{ form.ride_request.id_for_label }}" class="form-label fw-semibold">
-                                    Ride Request
+                                    <i class="fas fa-clipboard-list me-1 text-primary"></i>Ride Request
                                 </label>
                                 {{ form.ride_request }}
                                 {% if form.ride_request.errors %}
@@ -89,6 +94,12 @@
                                         {% for error in form.ride_request.errors %}
                                             {{ error }}
                                         {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {% if not object %}
+                                    <div class="form-text">
+                                        <i class="fas fa-arrows-rotate me-1"></i>
+                                        Changing the request refreshes matching ride details and vehicles.
                                     </div>
                                 {% endif %}
                             </div>
@@ -143,7 +154,7 @@
                             <i class="fas fa-car me-2"></i>Vehicle
                         </h5>
                         <small class="text-body-secondary">
-                            Select the vehicle used for this ride
+                            Only vehicles matching the selected ride request vehicle type are available
                         </small>
                     </div>
                     <div class="card-body">
@@ -438,4 +449,23 @@
         </div>
     </form>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const rideRequestField = document.getElementById("id_ride_request");
+    if (!rideRequestField) {
+        return;
+    }
+    rideRequestField.addEventListener("change", function () {
+        const requestId = this.value;
+        const url = new URL(window.location.href);
+        if (requestId) {
+            url.searchParams.set("ride_request", requestId);
+        } else {
+            url.searchParams.delete("ride_request");
+        }
+        url.searchParams.delete("page");
+        window.location.href = url.toString();
+    });
+});
+</script>
 {% endblock %}
