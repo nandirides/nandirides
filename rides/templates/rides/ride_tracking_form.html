@@ -264,13 +264,13 @@
                     <div class="mb-3">
                         <div class="small text-body-secondary">Passenger</div>
                         <div class="fw-semibold mt-1">
-                            {{ ride.passenger }}
+                            {{ ride.passenger.get_full_name|default:ride.passenger }}
                         </div>
                     </div>
                     <div class="mb-3">
                         <div class="small text-body-secondary">Driver</div>
                         <div class="fw-semibold mt-1">
-                            {{ ride.driver }}
+                            {{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }}) 
                         </div>
                     </div>
                     <div>

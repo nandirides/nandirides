@@ -79,7 +79,7 @@
                                     <i class="fas fa-user-arrow-up me-1"></i>Customer
                                 </label><br>
                                 {{ form.from_user }}
-                                <small class="me-2">{{ ride.passenger }}</small>
+                                <small class="me-2">{{ ride.passenger.get_full_name|default:ride.passenger }}</small>
                                 {% if form.from_user.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.from_user.errors %}
@@ -95,8 +95,8 @@
                                 <label for="{{ form.to_user.id_for_label }}" class="form-label fw-semibold">
                                     <i class="fas fa-user-arrow-down me-1"></i>Driver
                                 </label><br>
-                                {{ form.to_user }}
-                                <small class="me-2">{{ ride.driver }}</small>
+                                 {{ form.to_user }}
+                                 <small class="me-2">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }})</small>
                                 {% if form.to_user.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.to_user.errors %}
@@ -221,11 +221,11 @@
                     </div>
                     <div class="mb-3">
                         <div class="small text-muted">Passenger</div>
-                        <div class="fw-semibold mt-1">{{ ride.passenger }}</div>
+                        <div class="fw-semibold mt-1">{{ ride.passenger.get_full_name|default:ride.passenger }}</div>
                     </div>
                     <div class="mb-3">
                         <div class="small text-muted">Driver</div>
-                        <div class="fw-semibold mt-1">{{ ride.driver }}</div>
+                        <div class="fw-semibold mt-1">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }})</div>
                     </div>
                     <div class="mb-3">
                         <div class="small text-muted">Vehicle</div>
