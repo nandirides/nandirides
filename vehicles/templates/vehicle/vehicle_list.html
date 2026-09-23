@@ -30,12 +30,15 @@
                     <div class="col-12 col-lg-6">
                         <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
                             {% if perms.vehicle.add_vehicle %}
-                            <a href="{% url 'vehicle_add' %}" class="btn btn-primary">
+                            <a href="{% url 'vehicle_add' %}" class="btn btn-outline-primary">
                                 <i class="bi bi-plus-circle me-1"></i>Add Vehicle
                             </a>
                             {% endif %}
-                            <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-secondary">
+                            <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-primary">
                                 <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                            </a>
+                            <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-right me-1"></i> Back
                             </a>
                         </div>
                     </div>
@@ -106,7 +109,7 @@
                                 <button type="submit" class="btn btn-primary flex-grow-1">
                                     <i class="bi bi-search me-1"></i>Filter
                                 </button>
-                                <a href="{% url 'vehicle_list' %}" class="btn btn-outline-secondary" title="Clear filters">
+                                <a href="{% url 'vehicle_list' %}" class="btn btn-outline-primary" title="Clear filters">
                                     <i class="bi bi-arrow-counterclockwise"></i>
                                 </a>
                             </div>
@@ -227,7 +230,7 @@
                                         {% if perms.vehicle.change_vehicle %}
                                         <a
                                             href="{% url 'vehicle_edit' vehicle.pk %}"
-                                            class="btn btn-sm btn-outline-secondary"
+                                            class="btn btn-sm btn-outline-primary"
                                             title="Edit Vehicle"
                                         >
                                             <i class="bi bi-pencil"></i>
@@ -332,7 +335,7 @@
             <div class="modal-footer justify-content-center">
                 <button
                     type="button"
-                    class="btn btn-outline-secondary"
+                    class="btn btn-outline-danger"
                     data-bs-dismiss="modal"
                 >
                     <i class="bi bi-x-circle me-1"></i>Cancel

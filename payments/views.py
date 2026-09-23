@@ -14,7 +14,7 @@ def payment_list(request):
     ).all().order_by("-id")
     context = {
         "payments": payments,
-        "page_title": "Payments",
+        #"page_title": "Payments",
         "breadcrumb_items": [
             {
                 "title": "Payments",

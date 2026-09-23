@@ -136,7 +136,7 @@
                         </div>
                         {% endif %}
                         <h6 class="mb-1 mt-2 fw-semibold">{{ user.get_full_name|default:user.get_username }}</h6>
-                        <p class="mb-1 small fw-medium">
+                        <p class="mb-1 small fw-medium badge text-white border">
                             {% if user.is_superuser %}
                             Super Administrator
                             {% elif user.is_staff %}
@@ -144,8 +144,8 @@
                             {% else %}
                             Web User
                             {% endif %}
-                        </p>
-                        <small class="opacity-75">Last Login {{ user.last_login|date:"d M Y, h:i A" }}</small>
+                        </p><br>
+                        <small class="opacity-100">Last Login {{ user.last_login|date:"d M Y, h:i A" }}</small>
                     </div>
                     <div class="p-3 bg-body">
                         <div class="d-flex gap-2">

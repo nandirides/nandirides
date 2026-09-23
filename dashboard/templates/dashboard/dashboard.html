@@ -33,7 +33,7 @@
         <div class="col-lg-3 col-md-6">
             <div class="info-box shadow-sm">
                 <span class="info-box-icon bg-primary">
-                    <i class="fas fa-users"></i>
+                    <i class="fas fa-users text-white"></i>
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Users</span>
@@ -48,7 +48,7 @@
         <div class="col-lg-3 col-md-6">
             <div class="info-box shadow-sm">
                 <span class="info-box-icon bg-success">
-                    <i class="fas fa-route"></i>
+                    <i class="fas fa-route text-white"></i>
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Rides</span>
@@ -63,7 +63,7 @@
         <div class="col-lg-3 col-md-6">
             <div class="info-box shadow-sm">
                 <span class="info-box-icon bg-warning">
-                    <i class="fas fa-car-side"></i>
+                    <i class="fas fa-car-side text-white"></i>
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Ongoing Rides</span>
@@ -78,7 +78,7 @@
         <div class="col-lg-3 col-md-6">
             <div class="info-box shadow-sm">
                 <span class="info-box-icon bg-info">
-                    <i class="fas fa-indian-rupee-sign"></i>
+                    <i class="fas fa-indian-rupee-sign text-white"></i>
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Revenue</span>
@@ -163,22 +163,22 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-xl-3 col-md-6 mb-2">
-                    <a href="{% url 'user_create' %}" class="btn btn-primary w-100">
+                    <a href="{% url 'user_create' %}" class="btn btn-outline-primary w-100">
                         <i class="fas fa-user-plus me-2"></i> Add User
                     </a>
                 </div>
                 <div class="col-xl-3 col-md-6 mb-2">
-                    <a href="{% url 'driver_create' %}" class="btn btn-secondary w-100">
+                    <a href="{% url 'driver_create' %}" class="btn btn-outline-primary w-100">
                         <i class="fas fa-id-card me-2"></i> Add Driver
                     </a>
                 </div>
                 <div class="col-xl-3 col-md-6 mb-2">
-                    <a href="{% url 'ride_list' %}" class="btn btn-outline-secondary w-100">
+                    <a href="{% url 'ride_list' %}" class="btn btn-outline-primary w-100">
                         <i class="fas fa-car me-2"></i> Manage Rides
                     </a>
                 </div>
                 <div class="col-xl-3 col-md-6 mb-2">
-                    <a href="{% url 'payment_list' %}" class="btn btn-outline-secondary w-100">
+                    <a href="{% url 'payment_list' %}" class="btn btn-outline-primary w-100">
                         <i class="fas fa-credit-card me-2"></i> Payments
                     </a>
                 </div>
@@ -196,7 +196,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div style="height:320px;">
+                    <div style="height:450px;">
                         <canvas id="rideAnalyticsChart"></canvas>
                     </div>
                 </div>
@@ -231,150 +231,216 @@
         </div>
     </div>
     <!-- Recent Rides -->
-    <div class="row">
-        <div class="col-xl-8">
-            <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-clock-rotate-left me-2"></i>
-                        Recent Rides
-                    </h5>
-                    <a href="{% url 'ride_list' %}" class="btn btn-sm btn-outline-secondary">
-                        View All
+   <div class="row g-3 mb-4">
+    <div class="col-xl-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <div>
+                        <h5 class="card-title mb-1 fw-semibold">
+                            <i class="fas fa-clock-rotate-left me-2 text-primary"></i>Recent Rides
+                        </h5>
+                    </div>
+                    <a href="{% url 'ride_list' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-list me-1"></i>View All
                     </a>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead>
+            </div>
+
+            <div class="card-body p-0">
+                <div style="max-height:320px;overflow-y:auto;overflow-x:auto;">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light" style="position:sticky;top:0;z-index:2;">
+                            <tr>
+                                <th class="ps-3">Ride</th>
+                                <th>Customer</th>
+                                <th>Driver</th>
+                                <th>Vehicle</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th class="text-end pe-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ride in recent_rides %}
                                 <tr>
-                                    <th>Ride</th>
-                                    <th>Customer</th>
-                                    <th>Driver</th>
-                                    <th>Vehicle</th>
-                                    <th>Type</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for ride in recent_rides %}
-                                    <tr>
-                                        <td class="fw-semibold">{{ ride.ride_number }}</td>
-                                        <td>
+                                    <td class="ps-3">
+                                        <a href="{% url 'ride_details' ride.pk %}" class="fw-bold text-primary text-decoration-none">
+                                            {{ ride.ride_number }}
+                                        </a>
+                                        <div class="small text-body-secondary">
+                                            {{ ride.ride_request.request_number }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="fw-semibold">
                                             {% if ride.passenger.get_full_name %}
                                                 {{ ride.passenger.get_full_name }}
                                             {% else %}
                                                 {{ ride.passenger.username }}
                                             {% endif %}
-                                        </td>
-                                        <td>
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="fw-semibold">
                                             {% if ride.driver.user.get_full_name %}
                                                 {{ ride.driver.user.get_full_name }}
                                             {% else %}
                                                 {{ ride.driver.user.username }}
                                             {% endif %}
-                                        </td>
-                                        <td>
-                                            <span class="fw-semibold">
-                                                {{ ride.vehicle.vehicle_number }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="fw-semibold">
+                                            {{ ride.vehicle.vehicle_number }}
+                                        </span>
+                                        <div class="small text-body-secondary text-truncate" style="max-width:150px;">
+                                            {{ ride.vehicle.brand }} {{ ride.vehicle.model }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="small fw-semibold">
+                                            {{ ride.ride_request.vehicle_type.name }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        {% if ride.status == "completed" %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">
+                                                <i class="fas fa-check me-1"></i>Completed
                                             </span>
-                                            <br>
-                                            <small class="text-muted">
-                                                {{ ride.vehicle.brand }}
-                                                {{ ride.vehicle.model }}
-                                            </small>
-                                        </td>
-                                        <td>{{ ride.ride_request.vehicle_type.name }}</td>
-                                        <td>
-                                            {% if ride.status == "completed" %}
-                                                <span class="badge bg-success">Completed</span>
-                                            {% elif ride.status == "cancelled" %}
-                                                <span class="badge bg-danger">Cancelled</span>
-                                            {% elif ride.status == "started" %}
-                                                <span class="badge bg-primary">Started</span>
-                                            {% elif ride.status == "driver_arrived" %}
-                                                <span class="badge bg-info">Driver Arrived</span>
-                                            {% elif ride.status == "driver_arriving" %}
-                                                <span class="badge bg-warning text-dark">Driver Arriving</span>
-                                            {% elif ride.status == "driver_assigned" %}
-                                                <span class="badge bg-secondary">Driver Assigned</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">
-                                                    {{ ride.get_status_display }}
-                                                </span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <a href="{% url 'ride_details' ride.pk %}" class="btn btn-sm btn-outline-secondary" title="View Ride">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">
-                                            <i class="fas fa-inbox fa-2x d-block mb-2"></i>
-                                            No rides available.
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                        {% elif ride.status == "cancelled" %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle">
+                                                <i class="fas fa-xmark me-1"></i>Cancelled
+                                            </span>
+                                        {% elif ride.status == "started" %}
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle">
+                                                <i class="fas fa-play me-1"></i>Started
+                                            </span>
+                                        {% elif ride.status == "driver_arrived" %}
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle">
+                                                <i class="fas fa-location-dot me-1"></i>Driver Arrived
+                                            </span>
+                                        {% elif ride.status == "driver_arriving" %}
+                                            <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle">
+                                                <i class="fas fa-car me-1"></i>Driver Arriving
+                                            </span>
+                                        {% elif ride.status == "driver_assigned" %}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
+                                                <i class="fas fa-user-check me-1"></i>Driver Assigned
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
+                                                {{ ride.get_status_display }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="text-end pe-3">
+                                        <a href="{% url 'ride_details' ride.pk %}" class="btn btn-sm btn-outline-primary" title="View Ride">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="text-center py-5">
+                                            <div class="text-body-secondary">
+                                                <i class="fas fa-car fa-2x mb-2"></i>
+                                                <div class="fw-semibold">No rides available</div>
+                                                <small>Recent ride activity will appear here.</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-        <!-- Ride Status -->
-        <div class="col-xl-4">
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-simple me-2"></i>
-                        Ride Status
-                    </h5>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <div>
+                        <h5 class="card-title mb-1 fw-semibold">
+                            <i class="fas fa-chart-simple me-2 text-primary"></i>Ride Status
+                        </h5>
+                    </div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle">
+                        Live
+                    </span>
                 </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Completed</span>
-                        <strong>{{ completed_rides }}</strong>
+            </div>
+
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold">Completed</span>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">
+                        {{ completed_rides }}
+                    </span>
+                </div>
+
+                <div class="progress mb-4" style="height:7px;">
+                    <div class="progress-bar bg-success"
+                         role="progressbar"
+                         style="width:{% if total_rides %}{% widthratio completed_rides total_rides 100 %}{% else %}0{% endif %}%">
                     </div>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" role="progressbar"
-                             style="width:{% if total_rides %}{% widthratio completed_rides total_rides 100 %}{% else %}0{% endif %}%">
-                        </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold">Ongoing</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle">
+                        {{ ongoing_rides }}
+                    </span>
+                </div>
+
+                <div class="progress mb-4" style="height:7px;">
+                    <div class="progress-bar bg-primary"
+                         role="progressbar"
+                         style="width:{% if total_rides %}{% widthratio ongoing_rides total_rides 100 %}{% else %}0{% endif %}%">
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Ongoing</span>
-                        <strong>{{ ongoing_rides }}</strong>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold">Cancelled</span>
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle">
+                        {{ cancelled_rides }}
+                    </span>
+                </div>
+
+                <div class="progress mb-4" style="height:7px;">
+                    <div class="progress-bar bg-danger"
+                         role="progressbar"
+                         style="width:{% if total_rides %}{% widthratio cancelled_rides total_rides 100 %}{% else %}0{% endif %}%">
                     </div>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-primary" role="progressbar"
-                             style="width:{% if total_rides %}{% widthratio ongoing_rides total_rides 100 %}{% else %}0{% endif %}%">
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Cancelled</span>
-                        <strong>{{ cancelled_rides }}</strong>
-                    </div>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-danger" role="progressbar"
-                             style="width:{% if total_rides %}{% widthratio cancelled_rides total_rides 100 %}{% else %}0{% endif %}%">
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Pending Requests</span>
-                        <strong>{{ pending_rides }}</strong>
-                    </div>
-                    <div class="progress">
-                        <div class="progress-bar bg-warning" role="progressbar"
-                             style="width:{% if total_ride_requests %}{% widthratio pending_rides total_ride_requests 100 %}{% else %}0{% endif %}%">
-                        </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold">Pending Requests</span>
+                    <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle">
+                        {{ pending_rides }}
+                    </span>
+                </div>
+
+                <div class="progress" style="height:7px;">
+                    <div class="progress-bar bg-warning"
+                         role="progressbar"
+                         style="width:{% if total_ride_requests %}{% widthratio pending_rides total_ride_requests 100 %}{% else %}0{% endif %}%">
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-header bg-body border-bottom d-flex justify-content-between align-items-center py-3">
             <div class="d-flex align-items-center gap-2">

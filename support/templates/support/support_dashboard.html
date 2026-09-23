@@ -78,7 +78,6 @@
                             <i class="bi bi-lightning-charge me-2 text-primary"></i>
                             Support Quick Access
                         </h5>
-                        <p class="text-body-secondary small mb-0">Access all support management sections</p>
                     </div>
                     <span class="badge text-bg-primary">Support Management</span>
                 </div>
@@ -86,7 +85,7 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12 col-sm-6 col-lg-3">
-                        <a href="{% url 'support_dashboard' %}" class="btn btn-primary w-100 py-3">
+                        <a href="{% url 'support_dashboard' %}" class="btn btn-outline-primary w-100 py-3">
                             <i class="bi bi-speedometer2 fs-5 me-2"></i>
                             Support Dashboard
                         </a>
@@ -110,7 +109,7 @@
                         </a>
                     </div>
                     <div class="col-12 col-sm-6 col-lg-3">
-                        <a href="{% url 'category_add' %}" class="btn btn-outline-secondary w-100 py-3">
+                        <a href="{% url 'category_add' %}" class="btn btn-outline-primary w-100 py-3">
                             <i class="bi bi-tag-fill fs-5 me-2"></i>
                             Add Category
                         </a>
@@ -140,7 +139,6 @@
                                     <i class="bi bi-ticket-detailed me-2 text-primary"></i>
                                     Recent Support Tickets
                                 </h5>
-                                <p class="text-body-secondary small mb-0">Latest customer support requests</p>
                             </div>
                             <a href="{% url 'ticket_list' %}" class="btn btn-primary btn-sm">
                                 View All
@@ -149,7 +147,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
+                        <div class="table-responsive"  style="max-height: 300px; overflow-y: auto;">
                             <table class="table table-hover align-middle mb-0">
                                 <thead>
                                     <tr>
@@ -231,7 +229,6 @@
                                     <i class="bi bi-tags me-2 text-primary"></i>
                                     Ticket Categories
                                 </h5>
-                                <p class="text-body-secondary small mb-0">Most active categories</p>
                             </div>
                             <a href="{% url 'category_list' %}" class="btn btn-sm btn-outline-primary">
                                 Manage
@@ -321,7 +318,6 @@
                                     <i class="bi bi-bar-chart me-2 text-primary"></i>
                                     Priority Overview
                                 </h5>
-                                <p class="text-body-secondary small mb-0">Current ticket priority distribution</p>
                             </div>
                             <span class="badge text-bg-light">{{ total_tickets }} Total</span>
                         </div>
@@ -375,7 +371,6 @@
                                     <i class="bi bi-people me-2 text-primary"></i>
                                     Agent Workload
                                 </h5>
-                                <p class="text-body-secondary small mb-0">Assigned support tickets by agent</p>
                             </div>
                             <span class="badge text-bg-light">Top 8</span>
                         </div>

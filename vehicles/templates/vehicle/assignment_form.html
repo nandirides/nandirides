@@ -9,17 +9,13 @@
                 {% if form.instance.pk %}Update the existing driver and vehicle assignment.{% else %}Assign a driver to a vehicle and manage the assignment period.{% endif %}
             </p>
         </div>
-    </div>
-    {% if messages %}
-    <div class="mb-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-            <i class="bi bi-info-circle me-2"></i>{{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="justify-content-end align-items-md-end">
+            <a href="{% url 'vehicle_dashboard' %}" class="btn btn-outline-primary btn-sm px-3 text-nowrap">
+                <i class="bi bi-arrow-right me-1"></i>
+                Back
+            </a>
         </div>
-        {% endfor %}
     </div>
-    {% endif %}
     <div class="row g-4">
         <div class="col-12 col-xl-8">
             <form method="post" novalidate>
@@ -124,7 +120,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
                         <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
-                            <a href="{% url 'assignment_list' %}" class="btn btn-outline-secondary">
+                            <a href="{% url 'assignment_list' %}" class="btn btn-outline-danger">
                                 <i class="bi bi-x-circle me-1"></i>Cancel
                             </a>
                             <button type="submit" class="btn btn-primary">

@@ -210,7 +210,7 @@ def driver_document_form(request, driver_pk, pk=None):
                 "url": (
                     reverse("ddriver_document_edit", args=[pk])
                     if pk
-                    else reverse("driver_document_create")
+                    else reverse("driver_document_create", kwargs={"driver_pk": driver.pk})
                 ),
             },
         ],

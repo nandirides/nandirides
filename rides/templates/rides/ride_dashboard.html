@@ -4,7 +4,7 @@
 
 <div class="container-fluid py-3">
     <div class="row align-items-center mb-4">
-        <div class="col-xl-8 col-lg-7">
+        <div class="col-xl-6 col-lg-6">
             <div class="d-flex align-items-center">
                 <div class="me-3">
                     <span class="d-inline-flex align-items-center justify-content-center rounded-4 bg-primary bg-opacity-10 text-primary p-3 shadow-sm">
@@ -24,7 +24,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-4 col-lg-5 mt-3 mt-lg-0">
+        <div class="col-xl-6 col-lg-6 mt-3 mt-lg-0">
             <div class="d-flex justify-content-lg-end flex-wrap gap-2">
                 <a href="{% url 'ride_request_list' %}" class="btn btn-primary shadow-sm">
                     <i class="fas fa-inbox me-1"></i>Requests
@@ -32,7 +32,7 @@
                 <a href="{% url 'ride_add' %}" class="btn btn-outline-primary shadow-sm">
                     <i class="fas fa-plus me-1"></i>New Ride
                 </a>
-                <a href="{% url 'ride_list' %}" class="btn btn-dark shadow-sm">
+                <a href="{% url 'ride_list' %}" class="btn btn-outline-primary shadow-sm">
                     <i class="fas fa-car me-1"></i>All Rides
                 </a>
             </div>
@@ -469,7 +469,7 @@
                                             {% endif %}
                                         </td>
                                         <td class="text-end pe-3">
-                                            <a href="{% url 'ride_details' ride.pk %}" class="btn btn-sm btn-outline-secondary" title="View Ride">
+                                            <a href="{% url 'ride_details' ride.pk %}" class="btn btn-sm btn-outline-primary" title="View Ride">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         </td>

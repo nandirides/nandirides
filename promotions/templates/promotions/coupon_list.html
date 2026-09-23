@@ -1,249 +1,339 @@
 {% extends "base.html" %}
 {% block title %}{{ page_title }}{% endblock %}
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-                <div>
-                    <h3 class="mb-1">{{ page_title }}</h3>
-                    <p class="text-body-secondary mb-0">Manage discount coupons and promotional offers.</p>
+<section class="content">
+    <div class="container-fluid py-3 py-md-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle flex-shrink-0 p-2">
+                        <i class="fas fa-ticket-alt fs-5"></i>
+                    </span>
+                    <div>
+                        <h3 class="fw-bold mb-1">{{ title }}</h3>
+                        <p class="text-body-secondary mb-0 small">
+                            Manage discount coupons and promotional offers.
+                        </p>
+                    </div>
                 </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
                 {% if perms.promotions.add_coupon %}
-                <a href="{% url 'coupon_create' %}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle me-1"></i>Add Coupon
+                    <a href="{% url 'coupon_create' %}"
+                       class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Add Coupon
+                    </a>
+                {% endif %}
+                <a href="{% url 'promotions_dashboard' %}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back
                 </a>
+            </div>
+        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-primary card-outline h-100 shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-3 me-3 flex-shrink-0">
+                            <i class="fas fa-ticket-alt fs-4"></i>
+                        </span>
+                        <div>
+                            <div class="text-body-secondary small">Total Coupons</div>
+                            <div class="fs-4 fw-bold">
+                                {{ total_coupons|default:"0" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-primary card-outline h-100 shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <span class="d-inline-flex align-items-center justify-content-center bg-success-subtle text-success rounded-circle p-3 me-3 flex-shrink-0">
+                            <i class="fas fa-check-circle fs-4"></i>
+                        </span>
+                        <div>
+                            <div class="text-body-secondary small">Active Coupons</div>
+                            <div class="fs-4 fw-bold">
+                                {{ active_coupons|default:"0" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-primary card-outline h-100 shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <span class="d-inline-flex align-items-center justify-content-center bg-secondary-subtle text-secondary rounded-circle p-3 me-3 flex-shrink-0">
+                            <i class="fas fa-pause-circle fs-4"></i>
+                        </span>
+                        <div>
+                            <div class="text-body-secondary small">Inactive Coupons</div>
+                            <div class="fs-4 fw-bold">
+                                {{ inactive_coupons|default:"0" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-primary card-outline h-100 shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <span class="d-inline-flex align-items-center justify-content-center bg-info-subtle text-info rounded-circle p-3 me-3 flex-shrink-0">
+                            <i class="fas fa-calendar-check fs-4"></i>
+                        </span>
+                        <div>
+                            <div class="text-body-secondary small">Available Now</div>
+                            <div class="fs-4 fw-bold" id="availableCoupons">
+                                0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card card-primary card-outline shadow-sm">
+            <div class="card-header">
+                <div class="row g-2 align-items-center">
+                    <div class="col-12 col-lg-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-2">
+                                <i class="fas fa-ticket-alt"></i>
+                            </span>
+                            <h5 class="card-title mb-0 fw-semibold">
+                                Coupon List
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="input-group">
+                            <span class="input-group-text bg-body border-primary-subtle">
+                                <i class="fas fa-search text-primary"></i>
+                            </span>
+                            <input
+                                type="search"
+                                id="couponSearch"
+                                class="form-control"
+                                placeholder="Search coupon..."
+                                oninput="filterCoupons()"
+                                autocomplete="off"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if coupons %}
+                    <div class="table-responsive">
+                        <div style="max-height: 260px; overflow-y: auto;">
+                            <table class="table table-hover align-middle mb-0"
+                                   id="couponTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-nowrap">#</th>
+                                        <th class="text-nowrap">Code</th>
+                                        <th class="text-nowrap">Name</th>
+                                        <th class="text-nowrap">Discount</th>
+                                        <th class="text-nowrap">Min Fare</th>
+                                        <th class="text-nowrap">Validity</th>
+                                        <th class="text-nowrap">Usage Limit</th>
+                                        <th class="text-nowrap">Status</th>
+                                        <th class="text-end text-nowrap">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for coupon in coupons %}
+                                        <tr
+                                            data-valid-from="{{ coupon.valid_from|date:'Y-m-d H:i:s' }}"
+                                            data-valid-to="{{ coupon.valid_to|date:'Y-m-d H:i:s' }}"
+                                            data-search="{{ coupon.code|lower }} {{ coupon.name|lower }} {{ coupon.discount_value|lower }} {{ coupon.minimum_fare|lower }}"
+                                        >
+                                            <td class="text-body-secondary">
+                                                {{ forloop.counter }}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                                    {{ coupon.code }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold text-nowrap">
+                                                    {{ coupon.name }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold text-nowrap">
+                                                    {% if coupon.discount_type == "percentage" %}
+                                                        {{ coupon.discount_value }}%
+                                                    {% else %}
+                                                        ₹{{ coupon.discount_value }}
+                                                    {% endif %}
+                                                </div>
+                                                {% if coupon.maximum_discount %}
+                                                    <small class="d-block text-body-secondary text-nowrap">
+                                                        Max ₹{{ coupon.maximum_discount }}
+                                                    </small>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-nowrap">
+                                                ₹{{ coupon.minimum_fare }}
+                                            </td>
+                                            <td>
+                                                <small class="d-block text-nowrap">
+                                                    <span class="fw-semibold">From:</span>
+                                                    {{ coupon.valid_from|date:"d M Y, h:i A" }}
+                                                </small>
+                                                <small class="d-block text-body-secondary text-nowrap">
+                                                    <span class="fw-semibold">To:</span>
+                                                    {{ coupon.valid_to|date:"d M Y, h:i A" }}
+                                                </small>
+                                            </td>
+                                            <td class="text-nowrap">
+                                                {% if coupon.usage_limit %}
+                                                    {{ coupon.usages.count }} / {{ coupon.usage_limit }}
+                                                {% else %}
+                                                    <span class="text-body-secondary">
+                                                        Unlimited
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if coupon.is_active %}
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                        <i class="fas fa-check-circle me-1"></i>Active
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                                        <i class="fas fa-pause-circle me-1"></i>Inactive
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex justify-content-end gap-1">
+                                                    <a
+                                                        href="{% url 'coupon_detail' coupon.pk %}"
+                                                        class="btn btn-sm btn-outline-primary"
+                                                        title="View"
+                                                        aria-label="View Coupon"
+                                                    >
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    {% if perms.promotions.change_coupon %}
+                                                        <a
+                                                            href="{% url 'coupon_edit' coupon.pk %}"
+                                                            class="btn btn-sm btn-outline-primary"
+                                                            title="Edit"
+                                                            aria-label="Edit Coupon"
+                                                        >
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <form
+                                                            method="post"
+                                                            action="{% url 'coupon_toggle' coupon.pk %}"
+                                                            class="d-inline"
+                                                        >
+                                                            {% csrf_token %}
+                                                            <button
+                                                                type="submit"
+                                                                class="btn btn-sm {% if coupon.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}"
+                                                                title="{% if coupon.is_active %}Deactivate{% else %}Activate{% endif %}"
+                                                                aria-label="{% if coupon.is_active %}Deactivate{% else %}Activate{% endif %} Coupon"
+                                                            >
+                                                                {% if coupon.is_active %}
+                                                                    <i class="fas fa-pause-circle"></i>
+                                                                {% else %}
+                                                                    <i class="fas fa-play-circle"></i>
+                                                                {% endif %}
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="noSearchResults"
+                         class="text-center py-5 d-none">
+                        <i class="fas fa-search fs-1 text-body-secondary"></i>
+                        <h5 class="mt-3">No Matching Coupons</h5>
+                        <p class="text-body-secondary mb-0">
+                            Try another search term.
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 px-3">
+                        <span class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle p-3">
+                            <i class="fas fa-ticket-alt fs-3"></i>
+                        </span>
+                        <h5 class="mt-3">No Coupons Found</h5>
+                        <p class="text-body-secondary mb-3">
+                            No promotional coupons have been created yet.
+                        </p>
+                        {% if perms.promotions.add_coupon %}
+                            <a href="{% url 'coupon_create' %}"
+                               class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Create Coupon
+                            </a>
+                        {% endif %}
+                    </div>
                 {% endif %}
             </div>
         </div>
     </div>
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-body-secondary mb-1">Total Coupons</p>
-                            <h3 class="mb-0">{{ total_coupons }}</h3>
-                        </div>
-                        <div class="fs-2 text-primary">
-                            <i class="bi bi-ticket-perforated"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-body-secondary mb-1">Active Coupons</p>
-                            <h3 class="mb-0">{{ active_coupons }}</h3>
-                        </div>
-                        <div class="fs-2 text-success">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-body-secondary mb-1">Inactive Coupons</p>
-                            <h3 class="mb-0">{{ inactive_coupons }}</h3>
-                        </div>
-                        <div class="fs-2 text-secondary">
-                            <i class="bi bi-pause-circle"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-body-secondary mb-1">Available Now</p>
-                            <h3 class="mb-0" id="availableCoupons">0</h3>
-                        </div>
-                        <div class="fs-2 text-info">
-                            <i class="bi bi-calendar-check"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <div class="row g-2 align-items-center">
-                <div class="col-12 col-md-6">
-                    <h5 class="mb-0">
-                        <i class="bi bi-ticket-perforated me-1"></i>Coupon List
-                    </h5>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" id="couponSearch" class="form-control" placeholder="Search coupon...">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="couponTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Discount</th>
-                            <th>Min Fare</th>
-                            <th>Validity</th>
-                            <th>Usage Limit</th>
-                            <th>Status</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for coupon in coupons %}
-                        <tr data-valid-from="{{ coupon.valid_from|date:'Y-m-d H:i:s' }}" data-valid-to="{{ coupon.valid_to|date:'Y-m-d H:i:s' }}">
-                            <td>{{ forloop.counter }}</td>
-                            <td>
-                                <span class="badge text-bg-dark">{{ coupon.code }}</span>
-                            </td>
-                            <td>
-                                <strong>{{ coupon.name }}</strong>
-                            </td>
-                            <td>
-                                {% if coupon.discount_type == "percentage" %}
-                                {{ coupon.discount_value }}%
-                                {% else %}
-                                ₹{{ coupon.discount_value }}
-                                {% endif %}
-                                {% if coupon.maximum_discount %}
-                                <small class="d-block text-body-secondary">
-                                    Max ₹{{ coupon.maximum_discount }}
-                                </small>
-                                {% endif %}
-                            </td>
-                            <td>₹{{ coupon.minimum_fare }}</td>
-                            <td>
-                                <small class="d-block">
-                                    <strong>From:</strong> {{ coupon.valid_from|date:"d M Y, h:i A" }}
-                                </small>
-                                <small class="d-block">
-                                    <strong>To:</strong> {{ coupon.valid_to|date:"d M Y, h:i A" }}
-                                </small>
-                            </td>
-                            <td>
-                                {% if coupon.usage_limit %}
-                                {{ coupon.usages.count }} / {{ coupon.usage_limit }}
-                                {% else %}
-                                <span class="text-body-secondary">Unlimited</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if coupon.is_active %}
-                                <span class="badge text-bg-success">Active</span>
-                                {% else %}
-                                <span class="badge text-bg-secondary">Inactive</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'coupon_detail' coupon.pk %}" class="btn btn-outline-primary" title="View">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    {% if perms.promotions.change_coupon %}
-                                    <a href="{% url 'coupon_edit' coupon.pk %}" class="btn btn-outline-secondary" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form method="post" action="{% url 'coupon_toggle' coupon.pk %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-outline-warning" title="{% if coupon.is_active %}Deactivate{% else %}Activate{% endif %}">
-                                            {% if coupon.is_active %}
-                                            <i class="bi bi-pause-circle"></i>
-                                            {% else %}
-                                            <i class="bi bi-play-circle"></i>
-                                            {% endif %}
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr id="emptyCouponRow">
-                            <td colspan="9" class="text-center py-5">
-                                <div class="fs-1 text-body-secondary mb-2">
-                                    <i class="bi bi-ticket-perforated"></i>
-                                </div>
-                                <h5>No Coupons Found</h5>
-                                <p class="text-body-secondary mb-3">No promotional coupons have been created yet.</p>
-                                {% if perms.promotions.add_coupon %}
-                                <a href="{% url 'coupon_create' %}" class="btn btn-primary">
-                                    <i class="bi bi-plus-circle me-1"></i>Create Coupon
-                                </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div id="noSearchResults" class="text-center py-4 d-none">
-                <i class="bi bi-search fs-2 text-body-secondary"></i>
-                <p class="text-body-secondary mb-0 mt-2">No coupons match your search.</p>
-            </div>
-        </div>
-    </div>
-</div>
+</section>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+function filterCoupons() {
     const searchInput = document.getElementById("couponSearch");
     const table = document.getElementById("couponTable");
-    const rows = table ? table.querySelectorAll("tbody tr:not(#emptyCouponRow)") : [];
     const noResults = document.getElementById("noSearchResults");
+    if (!searchInput || !table) {
+        return;
+    }
+    const searchValue = searchInput.value.toLowerCase().trim();
+    const rows = table.querySelectorAll("tbody tr");
+    let visibleCount = 0;
+    rows.forEach(function(row) {
+        const rowSearch = row.dataset.search || row.textContent.toLowerCase();
+        const visible = rowSearch.includes(searchValue);
+        row.classList.toggle("d-none", !visible);
+        if (visible) {
+            visibleCount++;
+        }
+    });
+    if (noResults) {
+        noResults.classList.toggle("d-none", visibleCount !== 0);
+    }
+}
+document.addEventListener("DOMContentLoaded", function() {
+    const table = document.getElementById("couponTable");
     const availableCoupons = document.getElementById("availableCoupons");
+    if (!table || !availableCoupons) {
+        return;
+    }
+    const rows = table.querySelectorAll("tbody tr");
     let availableCount = 0;
     const now = new Date();
-    rows.forEach(function (row) {
-        const from = row.dataset.validFrom ? new Date(row.dataset.validFrom) : null;
-        const to = row.dataset.validTo ? new Date(row.dataset.validTo) : null;
-        if (from && to && now >= from && now <= to) {
+    rows.forEach(function(row) {
+        const fromValue = row.dataset.validFrom;
+        const toValue = row.dataset.validTo;
+        if (!fromValue || !toValue) {
+            return;
+        }
+        const from = new Date(fromValue.replace(" ", "T"));
+        const to = new Date(toValue.replace(" ", "T"));
+        if (
+            !Number.isNaN(from.getTime()) &&
+            !Number.isNaN(to.getTime()) &&
+            now >= from &&
+            now <= to
+        ) {
             availableCount++;
         }
     });
-    if (availableCoupons) {
-        availableCoupons.textContent = availableCount;
-    }
-    if (searchInput) {
-        searchInput.addEventListener("input", function () {
-            const searchValue = this.value.toLowerCase().trim();
-            let visibleCount = 0;
-            rows.forEach(function (row) {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(searchValue)) {
-                    row.classList.remove("d-none");
-                    visibleCount++;
-                } else {
-                    row.classList.add("d-none");
-                }
-            });
-            if (noResults) {
-                noResults.classList.toggle("d-none", visibleCount !== 0);
-            }
-        });
-    }
+    availableCoupons.textContent = availableCount;
 });
 </script>
 {% endblock %}

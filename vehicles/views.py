@@ -773,7 +773,7 @@ def document_list(request):
         "-created_at",
     )
     context = {
-        "page_title": "Vehicle Documents",
+        #"page_title": "Vehicle Documents",
         "breadcrumb_items": [
             {
                 "title": "Vehicle Documents",
