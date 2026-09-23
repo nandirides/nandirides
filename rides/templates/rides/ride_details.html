@@ -104,7 +104,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Passenger</span>
-                    <span class="info-box-number text-truncate">{{ ride.passenger }}</span>
+                    <span class="info-box-number text-truncate">{{ ride.passenger.get_full_name|default:ride.passenger }}</span>
                     {% if ride.passenger.email %}
                         <span class="progress-description text-muted text-truncate">
                             {{ ride.passenger.email }}
@@ -120,7 +120,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Driver</span>
-                    <span class="info-box-number text-truncate">{{ ride.driver }}</span>
+                    <span class="info-box-number text-truncate">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }} ) </span>
                     <span class="progress-description text-success">
                         Assigned driver
                     </span>
@@ -485,7 +485,9 @@
                         </div>
                         <div class="mb-3">
                             <small class="text-muted d-block">Passenger</small>
-                            <div class="fw-semibold mt-1">{{ ride_request.passenger }}</div>
+                            <div class="fw-semibold mt-1">
+                                {% comment %} {{ ride_request.passenger }} {% endcomment %}
+                                {{ ride.passenger.get_full_name|default:ride.passenger }}</div>
                         </div>
                         <div class="mb-3">
                             <small class="text-muted d-block">Request Status</small>

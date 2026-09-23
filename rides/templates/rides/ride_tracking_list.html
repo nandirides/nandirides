@@ -48,7 +48,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Driver</span>
-                    <span class="info-box-number text-wrap">{{ ride.driver }}</span>
+                    <span class="info-box-number text-wrap">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }}) </span>
                 </div>
             </div>
         </div>
@@ -375,7 +375,7 @@
                     </div>
                     <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
                         <span class="text-body-secondary">Driver</span>
-                        <span class="fw-semibold text-end ms-2">{{ ride.driver }}</span>
+                        <span class="fw-semibold text-end ms-2">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }}) </span>
                     </div>
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="text-body-secondary">Ride Status</span>
