@@ -8,7 +8,7 @@
         <div class="col-md-8">
             <div class="d-flex align-items-center">
                 <div class="me-3">
-                    <i class="fas fa-clipboard-list fa-2x"></i>
+                    <i class="fas fa-clipboard-list fa-2x text-primary"></i>
                 </div>
                 <div>
                     <h3 class="fw-bold mb-1">Ride Request Details</h3>
@@ -83,21 +83,10 @@
         </div>
         <div class="card-body">
             <div class="row g-3">
-                <div class="col-lg-3 col-md-6">
-                    <div class="info-box shadow-sm h-100 mb-0">
-                        <span class="info-box-icon bg-primary">
-                            <i class="fas fa-hashtag"></i>
-                        </span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Request Number</span>
-                            <span class="info-box-number fs-6">{{ ride_request.request_number }}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="info-box shadow-sm h-100 mb-0">
                         <span class="info-box-icon bg-success">
-                            <i class="fas fa-user"></i>
+                            <i class="fas fa-user text-white"></i>
                         </span>
                         <div class="info-box-content">
                             <span class="info-box-text">Passenger</span>
@@ -105,10 +94,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="info-box shadow-sm h-100 mb-0">
                         <span class="info-box-icon bg-warning">
-                            <i class="fas fa-car"></i>
+                            <i class="fas fa-car text-white"></i>
                         </span>
                         <div class="info-box-content">
                             <span class="info-box-text">Vehicle Type</span>
@@ -116,10 +105,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="info-box shadow-sm h-100 mb-0">
                         <span class="info-box-icon bg-info">
-                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-signal text-white"></i>
                         </span>
                         <div class="info-box-content">
                             <span class="info-box-text">Current Status</span>
@@ -138,7 +127,7 @@
                 <div class="card-header">
                     <div>
                         <h5 class="mb-1 fw-semibold">
-                            <i class="fas fa-route me-2"></i>Journey Information
+                            <i class="fas fa-route me-2 text-primary"></i>Journey Information
                         </h5>
                         <div class="small text-muted">Pickup and destination details</div>
                     </div>
@@ -179,7 +168,7 @@
                 <div class="card-header">
                     <div>
                         <h5 class="mb-1 fw-semibold">
-                            <i class="fas fa-calculator me-2"></i>Estimated Trip
+                            <i class="fas fa-calculator me-2 text-primary"></i>Estimated Trip
                         </h5>
                         <div class="small text-muted">Values estimated when the request was created</div>
                     </div>
@@ -232,7 +221,7 @@
             <div class="card card-outline card-info shadow-sm mb-3">
                 <div class="card-header">
                     <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-calendar-days me-2"></i>Schedule Information
+                        <i class="fas fa-calendar-days me-2 text-primary"></i>Schedule Information
                     </h5>
                 </div>
                 <div class="card-body">
@@ -271,26 +260,22 @@
                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                             <div>
                                 <h5 class="mb-1 fw-semibold">
-                                    <i class="fas fa-car-side me-2"></i>Linked Ride
+                                    <i class="fas fa-car-side me-2 text-primary"></i>Linked Ride
                                 </h5>
-                                <div class="small text-muted">This request has been converted into a ride</div>
                             </div>
-                            <a href="{% url 'ride_details' ride_request.ride.pk %}" class="btn btn-success btn-sm">
-                                <i class="fas fa-eye me-1"></i>View Ride
-                            </a>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="small text-muted">Ride Number</div>
                                 <div class="fw-semibold mt-1">{{ ride_request.ride.ride_number }}</div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="small text-muted">Driver</div>
                                 <div class="fw-semibold mt-1">{{ ride_request.ride.driver }}</div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="small text-muted">Ride Status</div>
                                 <div class="mt-1">
                                     {% if ride_request.ride.status == "completed" %}
@@ -308,6 +293,11 @@
                                     {% endif %}
                                 </div>
                             </div>
+                            <div class="col-md-3">
+                                <a href="{% url 'ride_details' ride_request.ride.pk %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -319,7 +309,7 @@
             <div class="card card-outline card-primary shadow-sm mb-3">
                 <div class="card-header">
                     <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                        <i class="fas fa-bolt me-2 text-primary"></i>Quick Actions
                     </h5>
                 </div>
                 <div class="card-body">
@@ -346,7 +336,7 @@
             <div class="card card-outline card-warning shadow-sm mb-3">
                 <div class="card-header">
                     <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-diagram-project me-2"></i>Request Lifecycle
+                        <i class="fas fa-diagram-project me-2 text-primary"></i>Request Lifecycle
                     </h5>
                 </div>
                 <div class="card-body">
@@ -414,7 +404,7 @@
             <div class="card card-outline card-info shadow-sm mb-3">
                 <div class="card-header">
                     <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-user me-2"></i>Passenger
+                        <i class="fas fa-user me-2 text-primary"></i>Passenger
                     </h5>
                 </div>
                 <div class="card-body">
@@ -437,13 +427,13 @@
             <div class="card card-outline card-secondary shadow-sm">
                 <div class="card-header">
                     <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-circle-info me-2"></i>Request Information
+                        <i class="fas fa-circle-info me-2 text-primary"></i>Request Information
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between border-bottom py-2 gap-3">
                         <span class="text-muted">Request ID</span>
-                        <span class="fw-semibold text-end">#{{ ride_request.pk }}</span>
+                        <span class="fw-semibold text-end">{{ ride_request.pk }}</span>
                     </div>
                     <div class="d-flex justify-content-between border-bottom py-2 gap-3">
                         <span class="text-muted">Vehicle Type</span>

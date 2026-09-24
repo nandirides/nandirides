@@ -86,7 +86,6 @@
                     <h5 class="card-title fw-semibold mb-1">
                         <i class="fas fa-filter me-2"></i>Request Filters
                     </h5>
-                    <div class="small text-muted">Search and filter requests instantly</div>
                 </div>
                 <span class="badge bg-body-tertiary text-body border">
                     <i class="fas fa-bolt me-1"></i>Auto Apply
@@ -139,13 +138,13 @@
             </form>
         </div>
     </div>
-    <div class="card card-outline card-secondary shadow-sm">
+    <div class="card card-outline card-primary shadow-sm">
         <div class="card-header">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div>
-                    <h5 class="card-title fw-semibold mb-1">
+            <div class="justify-content-between align-items-center">
+                <div class="row">
+                    <h5 class="card-title fw-bold mb-1">
                         <i class="fas fa-list me-2"></i>All Ride Requests
-                    </h5>&nbsp;
+                    </h5>
                     <div class="small text-muted">
                         {% if page_obj %}
                             Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} requests
@@ -181,7 +180,7 @@
                             <tr>
                                 <td>
                                     <a href="{% url 'ride_request_details' request_item.pk %}" class="fw-semibold text-body text-decoration-none">
-                                        <i class="fas fa-hashtag small me-1"></i>{{ request_item.request_number }}
+                                        {{ request_item.request_number }}
                                     </a>
                                     {% if request_item.ride %}
                                         <div class="small text-muted mt-1">
