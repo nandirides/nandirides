@@ -629,7 +629,7 @@ def ride_create_edit(request, pk=None):
             )
     else:
         initial = {}
-        if source_request and not ride:
+        if source_request:
             initial = {
                 "ride_request": source_request.pk,
                 "passenger": source_request.passenger_id,
@@ -637,14 +637,10 @@ def ride_create_edit(request, pk=None):
                 "drop_location": source_request.drop_location_id,
                 "scheduled_at": source_request.scheduled_at,
             }
-            form = RideForm(
-                instance=ride,
-                initial=initial,
-            )
-        else:
-            form = RideForm(
-                instance=ride
-            )
+        form = RideForm(
+            instance=ride,
+            initial=initial,
+        )
     context = {
         "page_title": (
             "Edit Ride"
@@ -670,6 +666,7 @@ def ride_create_edit(request, pk=None):
         ],
         "form": form,
         "ride": ride,
+        "object": ride,
         "ride_request": (
             source_request
             or (

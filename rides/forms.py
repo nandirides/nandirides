@@ -1,6 +1,7 @@
+import uuid
 from django import forms
 from django.db.models import Q
-
+from django.utils import timezone
 from .models import (
     CancellationReason,
     Ride,
@@ -35,7 +36,8 @@ class RideRequestForm(forms.ModelForm):
             "request_number": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Enter request number",
+                    "placeholder": "Auto-generated request number",
+                    "readonly": True,
                 }
             ),
             "passenger": forms.Select(
@@ -94,39 +96,56 @@ class RideRequestForm(forms.ModelForm):
             ),
         }
 
+    def _generate_request_number(self):
+        while True:
+            timestamp = timezone.localtime().strftime("%Y%m%d%H%M%S")
+            suffix = uuid.uuid4().hex[:6].upper()
+            request_number = f"REQ-{timestamp}-{suffix}"
+            if not RideRequest.objects.filter(
+                request_number=request_number
+            ).exists():
+                return request_number
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            current_request_number = (
+                self.initial.get("request_number")
+                or getattr(self.instance, "request_number", "")
+            )
+            if not current_request_number:
+                self.initial["request_number"] = (
+                    self._generate_request_number()
+                )
+            self.fields["request_number"].widget.attrs["readonly"] = True
+
     def clean(self):
         cleaned_data = super().clean()
-
         pickup = cleaned_data.get("pickup_location")
         drop = cleaned_data.get("drop_location")
         distance = cleaned_data.get("estimated_distance")
         duration = cleaned_data.get("estimated_duration")
         fare = cleaned_data.get("estimated_fare")
-
         if pickup and drop and pickup == drop:
             self.add_error(
                 "drop_location",
                 "Pickup and drop location cannot be the same.",
             )
-
         if distance is not None and distance < 0:
             self.add_error(
                 "estimated_distance",
                 "Distance cannot be negative.",
             )
-
         if duration is not None and duration < 0:
             self.add_error(
                 "estimated_duration",
                 "Duration cannot be negative.",
             )
-
         if fare is not None and fare < 0:
             self.add_error(
                 "estimated_fare",
                 "Fare cannot be negative.",
             )
-
         return cleaned_data
 
 
@@ -150,7 +169,8 @@ class RideForm(forms.ModelForm):
             "ride_number": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Enter ride number",
+                    "placeholder": "Auto-generated ride number",
+                    "readonly": True,
                 }
             ),
             "ride_request": forms.Select(
@@ -213,13 +233,16 @@ class RideForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         current_request_id = (
             self.instance.ride_request_id
             if self.instance.pk
             else None
         )
-
+        current_vehicle_id = (
+            self.instance.vehicle_id
+            if self.instance.pk
+            else None
+        )
         self.fields["ride_request"].queryset = (
             RideRequest.objects
             .select_related(
@@ -233,7 +256,6 @@ class RideForm(forms.ModelForm):
             )
             .order_by("-requested_at")
         )
-
         self.fields["driver"].queryset = (
             Driver.objects
             .select_related("user")
@@ -243,13 +265,11 @@ class RideForm(forms.ModelForm):
                 "driver_code",
             )
         )
-
         self.fields["vehicle"].queryset = (
             Vehicle.objects
             .select_related("vehicle_type")
             .order_by("vehicle_number")
         )
-
         self.fields["passenger"].queryset = (
             self.fields["passenger"].queryset.order_by(
                 "first_name",
@@ -257,33 +277,99 @@ class RideForm(forms.ModelForm):
                 "username",
             )
         )
-
         self.fields["pickup_location"].queryset = (
             Location.objects.all().order_by("address")
         )
-
         self.fields["drop_location"].queryset = (
             Location.objects.all().order_by("address")
         )
-
         self.fields["ride_request"].empty_label = "Select ride request"
         self.fields["passenger"].empty_label = "Select passenger"
         self.fields["driver"].empty_label = "Select driver"
         self.fields["vehicle"].empty_label = "Select vehicle"
         self.fields["pickup_location"].empty_label = "Select pickup location"
         self.fields["drop_location"].empty_label = "Select drop location"
-
         self.fields["pickup_location"].label_from_instance = (
             lambda obj: obj.address or f"Location #{obj.pk}"
         )
-
         self.fields["drop_location"].label_from_instance = (
             lambda obj: obj.address or f"Location #{obj.pk}"
         )
+        if not self.instance.pk:
+            self.fields["ride_number"].initial = (
+                self._generate_ride_number()
+            )
+            self.fields["ride_number"].widget.attrs["readonly"] = True
+        selected_request_id = None
+        if self.is_bound:
+            selected_request_id = self.data.get("ride_request")
+        if not selected_request_id:
+            initial = kwargs.get("initial") or {}
+            selected_request_id = initial.get("ride_request")
+        if not selected_request_id:
+            selected_request_id = current_request_id
+        if selected_request_id:
+            selected_request = (
+                RideRequest.objects
+                .select_related("vehicle_type")
+                .filter(pk=selected_request_id)
+                .first()
+            )
+            if selected_request and selected_request.vehicle_type_id:
+                vehicle_queryset = (
+                    Vehicle.objects
+                    .select_related("vehicle_type")
+                    .filter(
+                        vehicle_type_id=selected_request.vehicle_type_id
+                    )
+                    .order_by("vehicle_number")
+                )
+                if current_vehicle_id:
+                    vehicle_queryset = (
+                        Vehicle.objects
+                        .select_related("vehicle_type")
+                        .filter(
+                            Q(
+                                vehicle_type_id=selected_request.vehicle_type_id
+                            )
+                            | Q(pk=current_vehicle_id)
+                        )
+                        .order_by("vehicle_number")
+                    )
+                self.fields["vehicle"].queryset = vehicle_queryset
+                self.fields["vehicle"].label_from_instance = (
+                    lambda obj: (
+                        f"{obj.vehicle_number} — {obj.vehicle_type.name}"
+                        if obj.vehicle_type
+                        else obj.vehicle_number
+                    )
+                )
+
+    def _generate_ride_number(self):
+        last_ride = (
+            Ride.objects
+            .exclude(ride_number__isnull=True)
+            .exclude(ride_number="")
+            .order_by("-id")
+            .first()
+        )
+        if not last_ride:
+            return "NR0001"
+        last_number = None
+        try:
+            ride_number = str(last_ride.ride_number).strip()
+            if ride_number.upper().startswith("NR"):
+                last_number = int(ride_number[2:])
+            else:
+                last_number = int(ride_number)
+        except (ValueError, TypeError):
+            last_number = None
+        if last_number is None:
+            return "NR0001"
+        return f"NR{last_number + 1}"
 
     def clean(self):
         cleaned_data = super().clean()
-
         ride_request = cleaned_data.get("ride_request")
         passenger = cleaned_data.get("passenger")
         driver = cleaned_data.get("driver")
@@ -292,26 +378,22 @@ class RideForm(forms.ModelForm):
         drop = cleaned_data.get("drop_location")
         distance = cleaned_data.get("distance_km")
         duration = cleaned_data.get("duration_minutes")
-
         if ride_request:
             if passenger and passenger != ride_request.passenger:
                 self.add_error(
                     "passenger",
                     "Passenger must match the selected ride request.",
                 )
-
             if pickup and pickup != ride_request.pickup_location:
                 self.add_error(
                     "pickup_location",
                     "Pickup location must match the selected ride request.",
                 )
-
             if drop and drop != ride_request.drop_location:
                 self.add_error(
                     "drop_location",
                     "Drop location must match the selected ride request.",
                 )
-
             if (
                 vehicle
                 and ride_request.vehicle_type
@@ -321,25 +403,21 @@ class RideForm(forms.ModelForm):
                     "vehicle",
                     "Selected vehicle must match the ride request vehicle type.",
                 )
-
         if pickup and drop and pickup == drop:
             self.add_error(
                 "drop_location",
                 "Pickup and drop location cannot be the same.",
             )
-
         if distance is not None and distance < 0:
             self.add_error(
                 "distance_km",
                 "Distance cannot be negative.",
             )
-
         if duration is not None and duration < 0:
             self.add_error(
                 "duration_minutes",
                 "Duration cannot be negative.",
             )
-
         return cleaned_data
 
 
@@ -362,37 +440,30 @@ class RideStatusForm(forms.Form):
         **kwargs,
     ):
         kwargs.pop("instance", None)
-
         super().__init__(*args, **kwargs)
-
         if allowed_statuses:
             allowed_values = {
                 value
                 for value, label in allowed_statuses
             }
-
             self.fields["status"].choices = [
                 (value, label)
                 for value, label in Ride.Status.choices
                 if value in allowed_values
             ]
-
         if current_status:
             self.initial["status"] = current_status
 
     def clean_status(self):
         value = self.cleaned_data.get("status")
-
         valid_statuses = {
             choice[0]
             for choice in self.fields["status"].choices
         }
-
         if value not in valid_statuses:
             raise forms.ValidationError(
                 "Please select a valid ride status."
             )
-
         return value
 
 
@@ -417,7 +488,6 @@ class RideStopForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "min": "1",
-                    "placeholder": "Enter stop order",
                 }
             ),
             "location": forms.Select(
@@ -447,25 +517,34 @@ class RideStopForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields["location"].queryset = (
-            Location.objects.all().order_by("address")
+        self.fields["ride"].queryset = (
+            Ride.objects
+            .select_related(
+                "passenger",
+                "driver",
+                "vehicle",
+            )
+            .order_by("-created_at")
         )
 
-        self.fields["location"].empty_label = "Select location"
+        self.fields["location"].queryset = (
+            Location.objects
+            .order_by("address")
+        )
 
         self.fields["location"].label_from_instance = (
-            lambda obj: obj.address or f"Location #{obj.pk}"
+            lambda obj: str(obj)
         )
 
     def clean_stop_order(self):
-        value = self.cleaned_data.get("stop_order")
+        stop_order = self.cleaned_data.get("stop_order")
 
-        if value is not None and value < 1:
+        if stop_order is not None and stop_order < 1:
             raise forms.ValidationError(
                 "Stop order must be at least 1."
             )
 
-        return value
+        return stop_order
 
     def clean(self):
         cleaned_data = super().clean()
@@ -484,7 +563,6 @@ class RideStopForm(forms.ModelForm):
             )
 
         return cleaned_data
-
 
 class RideDriverAssignmentForm(forms.ModelForm):
     class Meta:
@@ -536,7 +614,6 @@ class RideDriverAssignmentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.fields["driver"].queryset = (
             Driver.objects
             .select_related("user")
@@ -546,17 +623,14 @@ class RideDriverAssignmentForm(forms.ModelForm):
                 "driver_code",
             )
         )
-
         self.fields["driver"].empty_label = "Select driver"
 
     def clean(self):
         cleaned_data = super().clean()
-
         status = cleaned_data.get("status")
         accepted_at = cleaned_data.get("accepted_at")
         rejected_at = cleaned_data.get("rejected_at")
         rejection_reason = cleaned_data.get("rejection_reason")
-
         if (
             status == RideDriverAssignment.Status.ACCEPTED
             and not accepted_at
@@ -565,25 +639,21 @@ class RideDriverAssignmentForm(forms.ModelForm):
                 "accepted_at",
                 "Accepted time is required when assignment is accepted.",
             )
-
         if status == RideDriverAssignment.Status.REJECTED:
             if not rejected_at:
                 self.add_error(
                     "rejected_at",
                     "Rejected time is required when assignment is rejected.",
                 )
-
             if not rejection_reason:
                 self.add_error(
                     "rejection_reason",
                     "Rejection reason is required when assignment is rejected.",
                 )
-
         if status != RideDriverAssignment.Status.REJECTED:
             cleaned_data["rejection_reason"] = (
                 cleaned_data.get("rejection_reason") or ""
             )
-
         return cleaned_data
 
 
@@ -653,7 +723,6 @@ class RideTrackingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.fields["driver"].queryset = (
             Driver.objects
             .select_related("user")
@@ -663,48 +732,40 @@ class RideTrackingForm(forms.ModelForm):
                 "driver_code",
             )
         )
-
         self.fields["driver"].empty_label = "Select driver"
 
     def clean(self):
         cleaned_data = super().clean()
-
         latitude = cleaned_data.get("latitude")
         longitude = cleaned_data.get("longitude")
         speed = cleaned_data.get("speed")
         heading = cleaned_data.get("heading")
         accuracy = cleaned_data.get("accuracy")
-
         if latitude is not None and not -90 <= latitude <= 90:
             self.add_error(
                 "latitude",
                 "Latitude must be between -90 and 90.",
             )
-
         if longitude is not None and not -180 <= longitude <= 180:
             self.add_error(
                 "longitude",
                 "Longitude must be between -180 and 180.",
             )
-
         if speed is not None and speed < 0:
             self.add_error(
                 "speed",
                 "Speed cannot be negative.",
             )
-
         if heading is not None and not 0 <= heading <= 360:
             self.add_error(
                 "heading",
                 "Heading must be between 0 and 360.",
             )
-
         if accuracy is not None and accuracy < 0:
             self.add_error(
                 "accuracy",
                 "Accuracy cannot be negative.",
             )
-
         return cleaned_data
 
 
@@ -752,10 +813,8 @@ class CancellationReasonForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-
         charge_applicable = cleaned_data.get("charge_applicable")
         charge_amount = cleaned_data.get("charge_amount")
-
         if charge_applicable and (
             charge_amount is None or charge_amount <= 0
         ):
@@ -763,10 +822,8 @@ class CancellationReasonForm(forms.ModelForm):
                 "charge_amount",
                 "Enter a valid cancellation charge.",
             )
-
         if not charge_applicable:
             cleaned_data["charge_amount"] = 0
-
         return cleaned_data
 
 
@@ -815,23 +872,19 @@ class RideCancellationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.fields["reason"].queryset = (
             CancellationReason.objects
             .filter(is_active=True)
             .order_by("type", "reason")
         )
-
         self.fields["reason"].empty_label = "Select cancellation reason"
 
     def clean_cancellation_charge(self):
         value = self.cleaned_data.get("cancellation_charge")
-
         if value is not None and value < 0:
             raise forms.ValidationError(
                 "Cancellation charge cannot be negative."
             )
-
         return value
 
 
@@ -884,7 +937,6 @@ class RideRatingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.fields["ride"].queryset = (
             Ride.objects
             .select_related(
@@ -896,7 +948,6 @@ class RideRatingForm(forms.ModelForm):
             )
             .order_by("-created_at")
         )
-
         self.fields["from_user"].queryset = (
             self.fields["from_user"].queryset.order_by(
                 "first_name",
@@ -904,7 +955,6 @@ class RideRatingForm(forms.ModelForm):
                 "username",
             )
         )
-
         self.fields["to_user"].queryset = (
             self.fields["to_user"].queryset.order_by(
                 "first_name",
@@ -912,56 +962,46 @@ class RideRatingForm(forms.ModelForm):
                 "username",
             )
         )
-
         self.fields["ride"].empty_label = "Select ride"
         self.fields["from_user"].empty_label = "Select rating user"
         self.fields["to_user"].empty_label = "Select receiving user"
 
     def clean_rating(self):
         value = self.cleaned_data.get("rating")
-
         if value is None or not 1 <= value <= 5:
             raise forms.ValidationError(
                 "Rating must be between 1 and 5."
             )
-
         return value
 
     def clean(self):
         cleaned_data = super().clean()
-
         ride = cleaned_data.get("ride")
         from_user = cleaned_data.get("from_user")
         to_user = cleaned_data.get("to_user")
-
         if from_user and to_user and from_user == to_user:
             self.add_error(
                 "to_user",
                 "A user cannot rate themselves.",
             )
-
         if ride and from_user and to_user:
             passenger = ride.passenger
             driver_user = getattr(ride.driver, "user", None)
-
             allowed_users = {
                 user
                 for user in [passenger, driver_user]
                 if user is not None
             }
-
             if from_user not in allowed_users:
                 self.add_error(
                     "from_user",
                     "Only the passenger or assigned driver can give a rating for this ride.",
                 )
-
             if to_user not in allowed_users:
                 self.add_error(
                     "to_user",
                     "The rating recipient must be the passenger or assigned driver of this ride.",
                 )
-
             if (
                 from_user
                 and to_user
@@ -973,7 +1013,6 @@ class RideRatingForm(forms.ModelForm):
                     "to_user",
                     "A passenger rating should be given to the assigned driver.",
                 )
-
             if (
                 from_user
                 and to_user
@@ -985,5 +1024,4 @@ class RideRatingForm(forms.ModelForm):
                     "to_user",
                     "A driver rating should be given to the passenger.",
                 )
-
         return cleaned_data
