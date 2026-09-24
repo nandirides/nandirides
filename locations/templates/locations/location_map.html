@@ -130,11 +130,20 @@
 document.addEventListener("DOMContentLoaded", function () {
     const latitude = parseFloat("{{ location.latitude }}");
     const longitude = parseFloat("{{ location.longitude }}");
-    const map = L.map("locationMap").setView([latitude, longitude], 15);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap contributors"
-    }).addTo(map);
+    const map = L.map("locationMap", {
+        attributionControl: false
+    }).setView([latitude, longitude], 15);
+    // L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    //     maxZoom: 19,
+    //     attribution: "&copy; OpenStreetMap contributors"
+    // }).addTo(map);
+    L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3wf8_1_477b9c969e22fe3e205f303d",
+        {
+            subdomains: "abcd",
+            maxZoom: 20
+        }
+    ).addTo(map);
     const marker = L.marker([latitude, longitude]).addTo(map);
     marker.bindPopup(`
         <div>
