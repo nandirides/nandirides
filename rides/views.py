@@ -439,7 +439,7 @@ def ride_request_details(request, pk):
         .first()
     )
     context = {
-        "page_title": f"Ride Request {ride_request.request_number}",
+        #"page_title": f"Ride Request {ride_request.request_number}",
         "breadcrumb_items": [
             {
                 "title": "Ride Request",
