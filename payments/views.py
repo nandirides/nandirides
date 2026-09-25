@@ -2,14 +2,20 @@ import uuid
 from decimal import Decimal
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.views.decorators.http import require_POST
 
 from rides.forms import RideRequestForm
+from rides.models import RideRequest
+from locations.models import City, Location
+from vehicles.models import VehicleType
+from django.contrib.auth import get_user_model
 
 from .forms import RefundForm
 from .models import Payment, Refund
@@ -25,6 +31,95 @@ def _generate_payment_number():
 
 def _generate_transaction_id():
     return f"NRTXN{uuid.uuid4().hex.upper()}"
+
+
+def _normalize_ride_request_data(data):
+    """Normalize ride-request values before RideRequestForm validation.
+
+    City values can arrive as either database IDs or city names such as
+    "Haridwar". The RideRequest form expects a City relation, so convert
+    names to primary keys before validation and payment confirmation.
+    """
+    normalized = data.copy()
+    for field_name in ("pickup_city", "drop_city", "city_id"):
+        value = normalized.get(field_name)
+        if value in (None, ""):
+            continue
+        value = str(value).strip()
+        city = None
+        if value.isdigit():
+            city = City.objects.filter(pk=int(value)).first()
+        if city is None:
+            city = (
+                City.objects
+                .filter(name__iexact=value)
+                .order_by("state__country__name", "state__name", "name", "id")
+                .first()
+            )
+        if city:
+            normalized[field_name] = str(city.pk)
+    User = get_user_model()
+    for field_name in ("passenger", "user"):
+        value = normalized.get(field_name)
+        if value in (None, ""):
+            continue
+        value = str(value).strip()
+        user = None
+        if value.isdigit():
+            user = User.objects.filter(pk=int(value)).first()
+        if user is None:
+            user = User.objects.filter(username__iexact=value).first()
+        if user:
+            normalized[field_name] = str(user.pk)
+    value = normalized.get("vehicle_type")
+    if value not in (None, ""):
+        value = str(value).strip()
+        vehicle_type = None
+        if value.isdigit():
+            vehicle_type = VehicleType.objects.filter(pk=int(value)).first()
+        if vehicle_type is None:
+            vehicle_type = VehicleType.objects.filter(name__iexact=value).first()
+        if vehicle_type:
+            normalized["vehicle_type"] = str(vehicle_type.pk)
+    for field_name in ("pickup_location", "drop_location"):
+        if normalized.get(field_name) in (None, ""):
+            normalized[field_name] = ""
+    return normalized
+
+
+def _create_location_from_ride_request_data(data, prefix):
+    address = str(
+        data.get(f"{prefix}_address")
+        or data.get(f"{prefix}_location_address")
+        or ""
+    ).strip()
+    city_value = data.get(f"{prefix}_city") or data.get(f"{prefix}_city_name")
+    latitude = data.get(f"{prefix}_latitude")
+    longitude = (
+        data.get(f"{prefix}_longitude")
+        or data.get(f"{prefix}_lng")
+        or data.get(f"{prefix}_lon")
+    )
+    city = None
+    if city_value not in (None, ""):
+        city_value = str(city_value).strip()
+        if city_value.isdigit():
+            city = City.objects.filter(pk=int(city_value)).first()
+        if city is None:
+            city = City.objects.filter(name__iexact=city_value).first()
+    if not address:
+        address = city.name if city else f"{prefix.title()} Location"
+    try:
+        latitude = Decimal(str(latitude)) if latitude not in (None, "") else Decimal("0")
+        longitude = Decimal(str(longitude)) if longitude not in (None, "") else Decimal("0")
+    except (TypeError, ValueError, ArithmeticError):
+        return None
+    return Location.objects.create(
+        address=address,
+        city=city,
+        latitude=latitude,
+        longitude=longitude,
+    )
 
 
 def _payment_form_data(request):
@@ -197,8 +292,17 @@ def create_ride_payment(request):
             status=400,
         )
 
+    ride_request_data = _normalize_ride_request_data(
+        _payment_form_data(request)
+    )
+    validation_data = ride_request_data.copy()
+    for field_name in ("pickup_city", "drop_city", "city_id", "passenger", "vehicle_type"):
+        if field_name in ride_request_data:
+            validation_data[field_name] = ride_request_data[field_name]
+    validation_data["pickup_location"] = ""
+    validation_data["drop_location"] = ""
     form = RideRequestForm(
-        request.POST,
+        validation_data,
         request.FILES,
     )
 
@@ -236,7 +340,7 @@ def create_ride_payment(request):
             status=400,
         )
 
-    payment_data = _payment_form_data(request)
+    payment_data = ride_request_data
 
     card_data = {}
 
@@ -362,41 +466,122 @@ def confirm_ride_payment(request, pk):
                 status=400,
             )
 
-        form = RideRequestForm(
-            ride_request_data,
+        ride_request_data = _normalize_ride_request_data(
+            ride_request_data
         )
 
-        if not form.is_valid():
+        passenger_value = ride_request_data.get("passenger")
+        vehicle_type_value = ride_request_data.get("vehicle_type")
+        request_number = str(
+            ride_request_data.get("request_number") or ""
+        ).strip()
+        status = str(
+            ride_request_data.get("status") or RideRequest.Status.REQUESTED
+        ).strip()
+
+        UserModel = get_user_model()
+        passenger = None
+        if passenger_value not in (None, ""):
+            passenger = UserModel.objects.filter(pk=passenger_value).first()
+
+        if passenger is None:
             payment.status = Payment.Status.FAILED
             payment.metadata = {
                 **payment.metadata,
-                "ride_request_validation_errors": (
-                    form.errors.get_json_data()
-                ),
-            }
-
-            payment.save(
-                update_fields=[
-                    "status",
-                    "metadata",
-                    "updated_at",
-                ]
-            )
-
-            return JsonResponse(
-                {
-                    "success": False,
-                    "message": (
-                        "Ride request validation failed. "
-                        "Payment was not completed."
-                    ),
-                    "errors": form.errors.get_json_data(),
+                "ride_request_validation_errors": {
+                    "passenger": [{
+                        "message": "Selected passenger is no longer available.",
+                        "code": "invalid_choice",
+                    }]
                 },
-                status=400,
-            )
+            }
+            payment.save(update_fields=["status", "metadata", "updated_at"])
+            return JsonResponse({
+                "success": False,
+                "message": "Selected passenger is no longer available.",
+            }, status=400)
 
-        ride_request = form.save(
-            commit=False
+        vehicle_type = None
+        if vehicle_type_value not in (None, ""):
+            vehicle_type = (
+                ride_request_data.get("vehicle_type")
+            )
+            from vehicles.models import VehicleType
+            vehicle_type = VehicleType.objects.filter(pk=vehicle_type).first()
+
+        if vehicle_type is None:
+            payment.status = Payment.Status.FAILED
+            payment.metadata = {
+                **payment.metadata,
+                "ride_request_validation_errors": {
+                    "vehicle_type": [{
+                        "message": "Selected vehicle type is no longer available.",
+                        "code": "invalid_choice",
+                    }]
+                },
+            }
+            payment.save(update_fields=["status", "metadata", "updated_at"])
+            return JsonResponse({
+                "success": False,
+                "message": "Selected vehicle type is no longer available.",
+            }, status=400)
+
+        pickup_location = None
+        drop_location = None
+        pickup_location_value = ride_request_data.get("pickup_location")
+        drop_location_value = ride_request_data.get("drop_location")
+
+        if pickup_location_value not in (None, ""):
+            pickup_location = Location.objects.filter(pk=pickup_location_value).first()
+        if drop_location_value not in (None, ""):
+            drop_location = Location.objects.filter(pk=drop_location_value).first()
+
+        if not request_number:
+            timestamp = timezone.localtime().strftime("%Y%m%d%H%M%S")
+            request_number = f"REQ-{timestamp}-{uuid.uuid4().hex[:6].upper()}"
+
+        if status not in dict(RideRequest.Status.choices):
+            status = RideRequest.Status.REQUESTED
+
+        scheduled_at = ride_request_data.get("scheduled_at") or None
+        if scheduled_at:
+            scheduled_at = parse_datetime(str(scheduled_at))
+            if scheduled_at is not None and timezone.is_naive(scheduled_at):
+                scheduled_at = timezone.make_aware(scheduled_at)
+        distance = ride_request_data.get("estimated_distance") or None
+        duration = ride_request_data.get("estimated_duration") or None
+
+        try:
+            distance = Decimal(str(distance)) if distance not in (None, "") else None
+            duration = int(duration) if duration not in (None, "") else None
+        except (TypeError, ValueError, ArithmeticError):
+            payment.status = Payment.Status.FAILED
+            payment.metadata = {
+                **payment.metadata,
+                "ride_request_validation_errors": {
+                    "estimated_distance": [{
+                        "message": "Invalid distance or duration.",
+                        "code": "invalid",
+                    }]
+                },
+            }
+            payment.save(update_fields=["status", "metadata", "updated_at"])
+            return JsonResponse({
+                "success": False,
+                "message": "Invalid ride distance or duration.",
+            }, status=400)
+
+        ride_request = RideRequest(
+            request_number=request_number,
+            passenger=passenger,
+            pickup_location=pickup_location,
+            drop_location=drop_location,
+            vehicle_type=vehicle_type,
+            scheduled_at=scheduled_at,
+            estimated_distance=distance,
+            estimated_duration=duration,
+            estimated_fare=payment.amount,
+            status=status,
         )
 
         ride_request.user = request.user
@@ -405,6 +590,67 @@ def confirm_ride_payment(request, pk):
             ride_request.status = "requested"
 
         ride_request.estimated_fare = payment.amount
+
+        if not ride_request.pickup_location_id:
+            pickup_location = _create_location_from_ride_request_data(
+                ride_request_data,
+                "pickup",
+            )
+            if pickup_location is None:
+                payment.status = Payment.Status.FAILED
+                payment.metadata = {
+                    **payment.metadata,
+                    "ride_request_validation_errors": {
+                        "pickup_location": [
+                            {
+                                "message": "Pickup location could not be created.",
+                                "code": "invalid_location",
+                            }
+                        ]
+                    },
+                }
+                payment.save(
+                    update_fields=["status", "metadata", "updated_at"]
+                )
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Pickup location could not be created.",
+                    },
+                    status=400,
+                )
+            ride_request.pickup_location = pickup_location
+
+        if not ride_request.drop_location_id:
+            drop_location = _create_location_from_ride_request_data(
+                ride_request_data,
+                "drop",
+            )
+            if drop_location is None:
+                payment.status = Payment.Status.FAILED
+                payment.metadata = {
+                    **payment.metadata,
+                    "ride_request_validation_errors": {
+                        "drop_location": [
+                            {
+                                "message": "Drop location could not be created.",
+                                "code": "invalid_location",
+                            }
+                        ]
+                    },
+                }
+                payment.save(
+                    update_fields=["status", "metadata", "updated_at"]
+                )
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Drop location could not be created.",
+                    },
+                    status=400,
+                )
+            ride_request.drop_location = drop_location
+
         ride_request.save()
 
         payment_method = payment.payment_method
