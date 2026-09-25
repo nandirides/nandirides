@@ -19,6 +19,34 @@ from pricing.models import FareRule, SurgePricing
 from vehicles.models import Vehicle
 
 
+class CityModelChoiceField(forms.ModelChoiceField):
+    def to_python(self, value):
+        if value in self.empty_values:
+            return None
+        try:
+            return super().to_python(value)
+        except forms.ValidationError:
+            value = str(value).strip()
+            if not value:
+                return None
+            city = (
+                self.queryset
+                .filter(name__iexact=value)
+                .order_by(
+                    "state__country__name",
+                    "state__name",
+                    "name",
+                )
+                .first()
+            )
+            if city:
+                return city
+            raise forms.ValidationError(
+                self.error_messages["invalid_choice"],
+                code="invalid_choice",
+            )
+
+
 class RideRequestForm(forms.ModelForm):
     pickup_address = forms.CharField(
         required=False,
@@ -30,7 +58,6 @@ class RideRequestForm(forms.ModelForm):
             }
         ),
     )
-
     drop_address = forms.CharField(
         required=False,
         widget=forms.TextInput(
@@ -41,36 +68,31 @@ class RideRequestForm(forms.ModelForm):
             }
         ),
     )
-
     pickup_latitude = forms.DecimalField(
         required=False,
         max_digits=9,
         decimal_places=6,
         widget=forms.HiddenInput(),
     )
-
     pickup_longitude = forms.DecimalField(
         required=False,
         max_digits=9,
         decimal_places=6,
         widget=forms.HiddenInput(),
     )
-
     drop_latitude = forms.DecimalField(
         required=False,
         max_digits=9,
         decimal_places=6,
         widget=forms.HiddenInput(),
     )
-
     drop_longitude = forms.DecimalField(
         required=False,
         max_digits=9,
         decimal_places=6,
         widget=forms.HiddenInput(),
     )
-
-    pickup_city = forms.ModelChoiceField(
+    pickup_city = CityModelChoiceField(
         queryset=City.objects.select_related(
             "state",
             "state__country",
@@ -82,8 +104,7 @@ class RideRequestForm(forms.ModelForm):
         required=False,
         widget=forms.HiddenInput(),
     )
-
-    drop_city = forms.ModelChoiceField(
+    drop_city = CityModelChoiceField(
         queryset=City.objects.select_related(
             "state",
             "state__country",
@@ -174,7 +195,6 @@ class RideRequestForm(forms.ModelForm):
             timestamp = timezone.localtime().strftime("%Y%m%d%H%M%S")
             suffix = uuid.uuid4().hex[:6].upper()
             request_number = f"REQ-{timestamp}-{suffix}"
-
             if not RideRequest.objects.filter(
                 request_number=request_number
             ).exists():
@@ -227,7 +247,7 @@ class RideRequestForm(forms.ModelForm):
             )
         )
 
-        self.fields["pickup_location"].queryset = (
+        location_queryset = (
             Location.objects
             .select_related(
                 "city",
@@ -237,21 +257,70 @@ class RideRequestForm(forms.ModelForm):
             .order_by("address")
         )
 
-        self.fields["drop_location"].queryset = (
-            Location.objects
-            .select_related(
-                "city",
-                "city__state",
-                "city__state__country",
-            )
-            .order_by("address")
-        )
+        self.fields["pickup_location"].queryset = location_queryset
+        self.fields["drop_location"].queryset = location_queryset
 
         self.fields["pickup_location"].empty_label = None
         self.fields["drop_location"].empty_label = None
 
+        if self.is_bound:
+            pickup_location_id = self.data.get("pickup_location")
+            drop_location_id = self.data.get("drop_location")
+
+            if pickup_location_id:
+                pickup_location = (
+                    Location.objects
+                    .select_related(
+                        "city",
+                        "city__state",
+                        "city__state__country",
+                    )
+                    .filter(pk=pickup_location_id)
+                    .first()
+                )
+
+                if pickup_location:
+                    self.fields["pickup_location"].queryset = (
+                        Location.objects
+                        .select_related(
+                            "city",
+                            "city__state",
+                            "city__state__country",
+                        )
+                        .filter(pk=pickup_location_id)
+                        .order_by("address")
+                    )
+
+            if drop_location_id:
+                drop_location = (
+                    Location.objects
+                    .select_related(
+                        "city",
+                        "city__state",
+                        "city__state__country",
+                    )
+                    .filter(pk=drop_location_id)
+                    .first()
+                )
+
+                if drop_location:
+                    self.fields["drop_location"].queryset = (
+                        Location.objects
+                        .select_related(
+                            "city",
+                            "city__state",
+                            "city__state__country",
+                        )
+                        .filter(pk=drop_location_id)
+                        .order_by("address")
+                    )
+
     @staticmethod
-    def _validate_coordinates(latitude, longitude, prefix):
+    def _validate_coordinates(
+        latitude,
+        longitude,
+        prefix,
+    ):
         errors = {}
 
         if latitude is not None:
@@ -268,12 +337,17 @@ class RideRequestForm(forms.ModelForm):
 
         if (latitude is None) != (longitude is None):
             errors[f"{prefix}_latitude"] = (
-                f"{prefix.title()} latitude and longitude must be provided together."
+                f"{prefix.title()} latitude and longitude "
+                "must be provided together."
             )
 
         return errors
 
-    def _get_fare_rule(self, city, vehicle_type):
+    def _get_fare_rule(
+        self,
+        city,
+        vehicle_type,
+    ):
         if not city or not vehicle_type:
             return None
 
@@ -298,7 +372,11 @@ class RideRequestForm(forms.ModelForm):
             .first()
         )
 
-    def _get_surge_multiplier(self, city, vehicle_type):
+    def _get_surge_multiplier(
+        self,
+        city,
+        vehicle_type,
+    ):
         if not city or not vehicle_type:
             return Decimal("1")
 
@@ -323,7 +401,10 @@ class RideRequestForm(forms.ModelForm):
         if not surge:
             return Decimal("1")
 
-        multiplier = surge.multiplier or Decimal("1")
+        multiplier = (
+            surge.multiplier
+            or Decimal("1")
+        )
 
         if multiplier <= 0:
             return Decimal("1")
@@ -412,67 +493,31 @@ class RideRequestForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        pickup = cleaned_data.get(
-            "pickup_location"
-        )
-
-        drop = cleaned_data.get(
-            "drop_location"
-        )
+        pickup = cleaned_data.get("pickup_location")
+        drop = cleaned_data.get("drop_location")
 
         pickup_address = (
-            cleaned_data.get(
-                "pickup_address"
-            )
+            cleaned_data.get("pickup_address")
             or ""
         ).strip()
 
         drop_address = (
-            cleaned_data.get(
-                "drop_address"
-            )
+            cleaned_data.get("drop_address")
             or ""
         ).strip()
 
-        pickup_latitude = cleaned_data.get(
-            "pickup_latitude"
-        )
+        pickup_latitude = cleaned_data.get("pickup_latitude")
+        pickup_longitude = cleaned_data.get("pickup_longitude")
+        drop_latitude = cleaned_data.get("drop_latitude")
+        drop_longitude = cleaned_data.get("drop_longitude")
 
-        pickup_longitude = cleaned_data.get(
-            "pickup_longitude"
-        )
+        pickup_city = cleaned_data.get("pickup_city")
+        drop_city = cleaned_data.get("drop_city")
 
-        drop_latitude = cleaned_data.get(
-            "drop_latitude"
-        )
-
-        drop_longitude = cleaned_data.get(
-            "drop_longitude"
-        )
-
-        pickup_city = cleaned_data.get(
-            "pickup_city"
-        )
-
-        drop_city = cleaned_data.get(
-            "drop_city"
-        )
-
-        vehicle_type = cleaned_data.get(
-            "vehicle_type"
-        )
-
-        distance = cleaned_data.get(
-            "estimated_distance"
-        )
-
-        duration = cleaned_data.get(
-            "estimated_duration"
-        )
-
-        fare = cleaned_data.get(
-            "estimated_fare"
-        )
+        vehicle_type = cleaned_data.get("vehicle_type")
+        distance = cleaned_data.get("estimated_distance")
+        duration = cleaned_data.get("estimated_duration")
+        fare = cleaned_data.get("estimated_fare")
 
         pickup_coordinate_errors = (
             self._validate_coordinates(
@@ -596,21 +641,18 @@ class RideRequestForm(forms.ModelForm):
             and distance is not None
             and duration is not None
         ):
-            calculated_fare = (
-                self._calculate_fare(
-                    city=selected_city,
-                    vehicle_type=vehicle_type,
-                    distance=distance,
-                    duration=duration,
-                )
+            calculated_fare = self._calculate_fare(
+                city=selected_city,
+                vehicle_type=vehicle_type,
+                distance=distance,
+                duration=duration,
             )
 
             if calculated_fare is not None:
-                cleaned_data["estimated_fare"] = (
-                    calculated_fare
-                )
+                cleaned_data["estimated_fare"] = calculated_fare
 
         return cleaned_data
+
 
 class RideForm(forms.ModelForm):
     class Meta:
@@ -737,6 +779,15 @@ class RideForm(forms.ModelForm):
                 "user__first_name",
                 "user__last_name",
                 "driver_code",
+            )
+        )
+
+        self.fields["driver"].label_from_instance = (
+            lambda obj: (
+                f"{obj.user.get_full_name() or obj.user.username} "
+                f"({obj.driver_code}) "
+                if obj.user
+                else obj.driver_code
             )
         )
 
@@ -875,25 +926,19 @@ class RideForm(forms.ModelForm):
                 if selected_request.vehicle_type_id:
                     vehicle_queryset = (
                         Vehicle.objects
-                        .select_related(
-                            "vehicle_type"
-                        )
+                        .select_related("vehicle_type")
                         .filter(
                             vehicle_type_id=(
                                 selected_request.vehicle_type_id
                             )
                         )
-                        .order_by(
-                            "vehicle_number"
-                        )
+                        .order_by("vehicle_number")
                     )
 
                     if current_vehicle_id:
                         vehicle_queryset = (
                             Vehicle.objects
-                            .select_related(
-                                "vehicle_type"
-                            )
+                            .select_related("vehicle_type")
                             .filter(
                                 Q(
                                     vehicle_type_id=(
@@ -904,9 +949,7 @@ class RideForm(forms.ModelForm):
                                     pk=current_vehicle_id
                                 )
                             )
-                            .order_by(
-                                "vehicle_number"
-                            )
+                            .order_by("vehicle_number")
                         )
 
                     self.fields["vehicle"].queryset = (
@@ -919,7 +962,7 @@ class RideForm(forms.ModelForm):
                     )
 
         self.fields["passenger"].required = False
-        self.fields["vehicle"].required = False
+        self.fields["vehicle"].required = True
         self.fields["pickup_location"].required = False
         self.fields["drop_location"].required = False
         self.fields["scheduled_at"].required = False
@@ -946,29 +989,21 @@ class RideForm(forms.ModelForm):
         if not last_ride:
             return "NR0001"
 
-        last_number = None
-
         try:
             ride_number = str(
                 last_ride.ride_number
-            ).strip()
+            ).strip().upper()
 
-            if ride_number.upper().startswith("NR"):
-                last_number = int(
-                    ride_number[2:]
-                )
+            if ride_number.startswith("NR"):
+                numeric_part = ride_number[2:]
             else:
-                last_number = int(
-                    ride_number
-                )
+                numeric_part = ride_number
 
+            last_number = int(numeric_part)
         except (ValueError, TypeError):
-            last_number = None
+            last_number = 0
 
-        if last_number is None:
-            return "NR0001"
-
-        return f"NR{last_number + 1}"
+        return f"NR{last_number + 1:04d}"
 
     def clean(self):
         cleaned_data = super().clean()
@@ -977,7 +1012,15 @@ class RideForm(forms.ModelForm):
             "ride_request"
         )
 
+        vehicle = cleaned_data.get(
+            "vehicle"
+        )
+
         if not ride_request:
+            self.add_error(
+                "ride_request",
+                "Please select a ride request.",
+            )
             return cleaned_data
 
         cleaned_data["passenger"] = (
@@ -1004,46 +1047,51 @@ class RideForm(forms.ModelForm):
             ride_request.estimated_duration
         )
 
+        if not vehicle:
+            self.add_error(
+                "vehicle",
+                "Please select a vehicle.",
+            )
+        elif (
+            ride_request.vehicle_type_id
+            and vehicle.vehicle_type_id
+            != ride_request.vehicle_type_id
+        ):
+            self.add_error(
+                "vehicle",
+                (
+                    "Selected vehicle does not match "
+                    "the vehicle type of the ride request."
+                ),
+            )
+
         pickup = ride_request.pickup_location
         drop = ride_request.drop_location
 
-        if (
-            pickup
-            and drop
-            and pickup == drop
-        ):
+        if pickup and drop and pickup == drop:
             self.add_error(
                 "ride_request",
                 "Pickup and drop location cannot be the same.",
             )
 
-        distance = (
-            ride_request.estimated_distance
-        )
+        distance = ride_request.estimated_distance
 
-        if (
-            distance is not None
-            and distance < 0
-        ):
+        if distance is not None and distance < 0:
             self.add_error(
                 "ride_request",
                 "Ride request distance cannot be negative.",
             )
 
-        duration = (
-            ride_request.estimated_duration
-        )
+        duration = ride_request.estimated_duration
 
-        if (
-            duration is not None
-            and duration < 0
-        ):
+        if duration is not None and duration < 0:
             self.add_error(
                 "ride_request",
                 "Ride request duration cannot be negative.",
             )
 
-        return cleaned_data  
+        return cleaned_data
+
 
 class RideStatusForm(forms.Form):
     status = forms.ChoiceField(
@@ -1158,8 +1206,7 @@ class RideStopForm(forms.ModelForm):
         )
 
         self.fields["location"].queryset = (
-            Location.objects
-            .order_by("address")
+            Location.objects.order_by("address")
         )
 
         self.fields["location"].label_from_instance = (
@@ -1260,6 +1307,15 @@ class RideDriverAssignmentForm(forms.ModelForm):
                 "user__first_name",
                 "user__last_name",
                 "driver_code",
+            )
+        )
+
+        self.fields["driver"].label_from_instance = (
+            lambda obj: (
+                f"{obj.driver_code} "
+                f"{obj.user.get_full_name() or obj.user.username}"
+                if obj.user
+                else obj.driver_code
             )
         )
 
@@ -1384,6 +1440,15 @@ class RideTrackingForm(forms.ModelForm):
                 "user__first_name",
                 "user__last_name",
                 "driver_code",
+            )
+        )
+
+        self.fields["driver"].label_from_instance = (
+            lambda obj: (
+                f"{obj.driver_code} "
+                f"{obj.user.get_full_name() or obj.user.username}"
+                if obj.user
+                else obj.driver_code
             )
         )
 

@@ -1518,6 +1518,7 @@ def ride_create_edit(request, pk=None):
     )
 
     source_request = None
+
     if request_pk:
         source_request = (
             RideRequest.objects
@@ -1538,14 +1539,42 @@ def ride_create_edit(request, pk=None):
         )
 
         if form.is_valid():
-            selected_request = form.cleaned_data.get("ride_request")
+            selected_request = form.cleaned_data.get(
+                "ride_request"
+            )
+
+            selected_vehicle = form.cleaned_data.get(
+                "vehicle"
+            )
 
             if not selected_request:
                 form.add_error(
                     "ride_request",
                     "Please select a ride request.",
                 )
-            else:
+
+            if not selected_vehicle:
+                form.add_error(
+                    "vehicle",
+                    "Please select a vehicle.",
+                )
+
+            if (
+                selected_request
+                and selected_vehicle
+                and selected_request.vehicle_type_id
+                and selected_vehicle.vehicle_type_id
+                != selected_request.vehicle_type_id
+            ):
+                form.add_error(
+                    "vehicle",
+                    (
+                        "Selected vehicle does not match "
+                        "the vehicle type of the ride request."
+                    ),
+                )
+
+            if not form.errors:
                 source_request = (
                     RideRequest.objects
                     .filter(pk=selected_request.pk)
@@ -1558,22 +1587,61 @@ def ride_create_edit(request, pk=None):
                     .first()
                 )
 
-            if source_request:
-                saved_ride = form.save(commit=False)
-                saved_ride.ride_request = source_request
-                saved_ride.passenger = source_request.passenger
-                saved_ride.pickup_location = source_request.pickup_location
-                saved_ride.drop_location = source_request.drop_location
-                saved_ride.scheduled_at = source_request.scheduled_at
-                saved_ride.distance_km = source_request.estimated_distance
-                saved_ride.duration_minutes = source_request.estimated_duration
+                if not source_request:
+                    form.add_error(
+                        "ride_request",
+                        "Selected ride request could not be found.",
+                    )
+
+            if not form.errors and source_request:
+                saved_ride = form.save(
+                    commit=False
+                )
+
+                saved_ride.ride_request = (
+                    source_request
+                )
+
+                saved_ride.passenger = (
+                    source_request.passenger
+                )
+
+                saved_ride.vehicle = (
+                    selected_vehicle
+                )
+
+                saved_ride.pickup_location = (
+                    source_request.pickup_location
+                )
+
+                saved_ride.drop_location = (
+                    source_request.drop_location
+                )
+
+                saved_ride.scheduled_at = (
+                    source_request.scheduled_at
+                )
+
+                saved_ride.distance_km = (
+                    source_request.estimated_distance
+                )
+
+                saved_ride.duration_minutes = (
+                    source_request.estimated_duration
+                )
 
                 if not saved_ride.ride_number:
-                    saved_ride.ride_number = form._generate_ride_number()
+                    saved_ride.ride_number = (
+                        form._generate_ride_number()
+                    )
 
                 saved_ride.save()
+
                 form.save_m2m()
-                _sync_request_status_from_ride(saved_ride)
+
+                _sync_request_status_from_ride(
+                    saved_ride
+                )
 
                 messages.success(
                     request,
@@ -1587,6 +1655,7 @@ def ride_create_edit(request, pk=None):
                 )
     else:
         initial = {}
+
         selected_request = (
             source_request
             or (
@@ -1607,17 +1676,22 @@ def ride_create_edit(request, pk=None):
                 "duration_minutes": selected_request.estimated_duration,
             }
 
+            if ride and ride.vehicle_id:
+                initial["vehicle"] = (
+                    ride.vehicle_id
+                )
+
         form = RideForm(
             instance=ride,
             initial=initial,
         )
 
     context = {
-        "page_title": (
-            "Edit Ride"
-            if ride
-            else "Create Ride"
-        ),
+        # "page_title": (
+        #     "Edit Ride"
+        #     if ride
+        #     else "Create Ride"
+        # ),
         "breadcrumb_items": [
             {
                 "title": (
@@ -1649,13 +1723,11 @@ def ride_create_edit(request, pk=None):
         "is_edit": bool(ride),
     }
 
-    response = render(
+    return render(
         request,
         "rides/ride_form.html",
         context,
     )
-
-    return response
 
 @login_required
 def ride_status_update(request, pk):
