@@ -38,7 +38,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Rides</span>
-                    <span class="info-box-number">{{ total_count|default:"0" }}</span>
+                    <span class="info-box-number">{{ total_rides|default:"0" }}</span>
                     <span class="progress-description text-primary">All ride records</span>
                 </div>
             </div>
@@ -50,7 +50,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Active Rides</span>
-                    <span class="info-box-number">{{ active_count|default:"0" }}</span>
+                    <span class="info-box-number">{{ active_rides|default:"0" }}</span>
                     <span class="progress-description text-warning">Currently in progress</span>
                 </div>
             </div>
@@ -62,7 +62,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Completed</span>
-                    <span class="info-box-number">{{ completed_count|default:"0" }}</span>
+                    <span class="info-box-number">{{ completed_rides|default:"0" }}</span>
                     <span class="progress-description text-success">Successfully completed</span>
                 </div>
             </div>
@@ -74,7 +74,7 @@
                 </span>
                 <div class="info-box-content">
                     <span class="info-box-text">Cancelled</span>
-                    <span class="info-box-number">{{ cancelled_count|default:"0" }}</span>
+                    <span class="info-box-number">{{ cancelled_rides|default:"0" }}</span>
                     <span class="progress-description text-danger">Cancelled ride records</span>
                 </div>
             </div>
@@ -89,7 +89,7 @@
                         <i class="fas fa-filter me-2 text-primary"></i>Ride Filters
                     </h5>
                 </div>
-                {% if search_query or selected_status %}
+                {% if q or selected_status %}
                     <a href="{% url 'ride_list' %}" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-rotate-left me-1"></i>Reset
                     </a>
@@ -111,7 +111,7 @@
                                 type="search"
                                 id="rideSearch"
                                 name="q"
-                                value="{{ search_query|default:'' }}"
+                                value="{{ q|default:'' }}"
                                 class="form-control"
                                 placeholder="Ride, request, passenger, driver, vehicle or location"
                                 oninput="autoSearchRides()"
@@ -147,10 +147,10 @@
                             class="form-select"
                             onchange="this.form.submit()"
                         >
-                            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-                            <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
-                            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
-                            <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                            <option value="10" {% if request.GET.per_page == "10" %}selected{% endif %}>10</option>
+                            <option value="25" {% if request.GET.per_page == "25" %}selected{% endif %}>25</option>
+                            <option value="50" {% if request.GET.per_page == "50" %}selected{% endif %}>50</option>
+                            <option value="100" {% if request.GET.per_page == "100" %}selected{% endif %}>100</option>
                         </select>
                     </div>
                 </div>
@@ -181,9 +181,9 @@
         </div>
         <div class="card-body p-0">
             {% if page_obj %}
-                <div style="max-height:620px;overflow-y:auto;overflow-x:auto;">
+                <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light" style="position:sticky;top:0;z-index:2;">
+                        <thead class="table-light">
                             <tr>
                                 <th class="ps-3 text-nowrap">Ride</th>
                                 <th class="text-nowrap">Request</th>
@@ -201,7 +201,22 @@
                                 <tr>
                                     <td class="ps-3">
                                         <a href="{% url 'ride_details' pk=ride.pk %}" class="fw-bold text-primary text-decoration-none">
-                                            <i class="fas fa-car-side me-1"></i>{{ ride.ride_number }}
+                                            {% if ride.vehicle and ride.vehicle.vehicle_type %}
+                                                {% with vehicle_name=ride.vehicle.vehicle_type.name|lower %}
+                                                    {% if "bike" in vehicle_name or "motorcycle" in vehicle_name %}
+                                                        <i class="fas fa-motorcycle me-1"></i>
+                                                    {% elif "sedan" in vehicle_name %}
+                                                        <i class="fas fa-car-side me-1"></i>
+                                                    {% elif "auto" in vehicle_name %}
+                                                        <i class="fas fa-car-rear me-1"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-car me-1"></i>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            {% else %}
+                                                <i class="fas fa-car-side me-1"></i>
+                                            {% endif %}
+                                            {{ ride.ride_number }}
                                         </a>
                                         <div class="small text-body-secondary">ID #{{ ride.pk }}</div>
                                     </td>
@@ -225,7 +240,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="small text-body-secondary">
-                                                {{ ride.passenger }}
+                                                {{ ride.passenger.username }}
                                             </div>
                                         {% else %}
                                             <span class="text-body-secondary">—</span>
@@ -249,12 +264,27 @@
                                     </td>
                                     <td>
                                         {% if ride.vehicle %}
-                                            <div class="fw-semibold text-body">
-                                                <i class="fas fa-car me-1 text-success"></i>{{ ride.vehicle }}
-                                            </div>
                                             {% if ride.vehicle.vehicle_type %}
-                                                <div class="small text-body-secondary">
-                                                    {{ ride.vehicle.vehicle_type }}
+                                                {% with vehicle_name=ride.vehicle.vehicle_type.name|lower %}
+                                                    <div class="fw-semibold text-body">
+                                                        {% if "bike" in vehicle_name or "motorcycle" in vehicle_name %}
+                                                            <i class="fas fa-motorcycle me-1 text-success"></i>
+                                                        {% elif "sedan" in vehicle_name %}
+                                                            <i class="fas fa-car-side me-1 text-success"></i>
+                                                        {% elif "auto" in vehicle_name %}
+                                                            <i class="fas fa-car-rear me-1 text-success"></i>
+                                                        {% else %}
+                                                            <i class="fas fa-car me-1 text-success"></i>
+                                                        {% endif %}
+                                                        {{ ride.vehicle }}
+                                                    </div>
+                                                    <div class="small text-body-secondary">
+                                                        {{ ride.vehicle.vehicle_type }}
+                                                    </div>
+                                                {% endwith %}
+                                            {% else %}
+                                                <div class="fw-semibold text-body">
+                                                    <i class="fas fa-car me-1 text-success"></i>{{ ride.vehicle }}
                                                 </div>
                                             {% endif %}
                                         {% else %}
@@ -262,11 +292,21 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <div class="small text-body text-truncate" style="max-width:220px;" title="{{ ride.pickup_location }}">
-                                            <i class="fas fa-location-dot me-1 text-primary"></i>{{ ride.pickup_location }}
+                                        <div class="small text-body text-nowrap" title="{{ ride.pickup_location }}">
+                                            <i class="fas fa-location-dot me-1 text-primary"></i>
+                                            {% if ride.pickup_location.name %}
+                                                {{ ride.pickup_location.name|truncatechars:18 }}
+                                            {% else %}
+                                                {{ ride.pickup_location|truncatechars:18 }}
+                                            {% endif %}
                                         </div>
-                                        <div class="small text-body-secondary text-truncate mt-1" style="max-width:220px;" title="{{ ride.drop_location }}">
-                                            <i class="fas fa-location-arrow me-1 text-danger"></i>{{ ride.drop_location }}
+                                        <div class="small text-body-secondary text-nowrap" title="{{ ride.drop_location }}">
+                                            <i class="fas fa-location-arrow me-1 text-danger"></i>
+                                            {% if ride.drop_location.name %}
+                                                {{ ride.drop_location.name|truncatechars:18 }}
+                                            {% else %}
+                                                {{ ride.drop_location|truncatechars:18 }}
+                                            {% endif %}
                                         </div>
                                     </td>
                                     <td>
@@ -315,16 +355,18 @@
                                         {% endif %}
                                     </td>
                                     <td class="text-end pe-3">
-                                        <div class="d-flex flex-column align-items-end gap-1">
-                                            <div class="d-flex gap-1">
-                                                <a
-                                                    href="{% url 'ride_details' pk=ride.pk %}"
-                                                    class="btn btn-sm btn-outline-primary"
-                                                    title="View Details"
-                                                    data-bs-toggle="tooltip"
-                                                >
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
+                                        <div class="d-flex justify-content-end flex-wrap gap-1">
+                                            <!-- View: Always available -->
+                                            <a
+                                                href="{% url 'ride_details' pk=ride.pk %}"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="View Details"
+                                                data-bs-toggle="tooltip"
+                                            >
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if ride.status != "completed" and ride.status != "cancelled" %}
+                                                <!-- Edit: Active rides only -->
                                                 <a
                                                     href="{% url 'ride_edit' ride.pk %}"
                                                     class="btn btn-sm btn-outline-warning"
@@ -333,6 +375,7 @@
                                                 >
                                                     <i class="fas fa-pen"></i>
                                                 </a>
+                                                <!-- Status: Active rides only -->
                                                 <a
                                                     href="{% url 'ride_status_update' ride.pk %}"
                                                     class="btn btn-sm btn-outline-info"
@@ -341,16 +384,16 @@
                                                 >
                                                     <i class="fas fa-arrows-rotate"></i>
                                                 </a>
-                                            </div>
-                                            <div class="d-flex gap-1">
+                                                <!-- Assignment: Active rides only -->
                                                 <a
                                                     href="{% url 'ride_assignment_list' ride.pk %}"
                                                     class="btn btn-sm btn-outline-success"
-                                                    title="Assignments"
+                                                    title="Driver Assignment"
                                                     data-bs-toggle="tooltip"
                                                 >
                                                     <i class="fas fa-user-check"></i>
                                                 </a>
+                                                <!-- Tracking: Active rides -->
                                                 <a
                                                     href="{% url 'ride_tracking_list' ride.pk %}"
                                                     class="btn btn-sm btn-outline-info"
@@ -359,6 +402,7 @@
                                                 >
                                                     <i class="fas fa-location-dot"></i>
                                                 </a>
+                                                <!-- Stops: Active rides only -->
                                                 <a
                                                     href="{% url 'ride_stop_list' ride.pk %}"
                                                     class="btn btn-sm btn-outline-warning"
@@ -367,16 +411,26 @@
                                                 >
                                                     <i class="fas fa-signs-post"></i>
                                                 </a>
-                                            </div>
-                                            <div class="d-flex gap-1">
+                                                <!-- Cancellation: Active rides only -->
                                                 <a
                                                     href="{% url 'ride_cancellation_add' ride.pk %}"
                                                     class="btn btn-sm btn-outline-danger"
-                                                    title="Cancellation"
+                                                    title="Cancel Ride"
                                                     data-bs-toggle="tooltip"
                                                 >
                                                     <i class="fas fa-circle-xmark"></i>
                                                 </a>
+                                            {% elif ride.status == "completed" %}
+                                                <!-- Tracking: Completed rides -->
+                                                <a
+                                                    href="{% url 'ride_tracking_list' ride.pk %}"
+                                                    class="btn btn-sm btn-outline-info"
+                                                    title="Tracking"
+                                                    data-bs-toggle="tooltip"
+                                                >
+                                                    <i class="fas fa-location-dot"></i>
+                                                </a>
+                                                <!-- Rating: Completed rides -->
                                                 <a
                                                     href="{% url 'ride_rating_add' ride.pk %}"
                                                     class="btn btn-sm btn-outline-warning"
@@ -385,15 +439,34 @@
                                                 >
                                                     <i class="fas fa-star"></i>
                                                 </a>
+                                            {% elif ride.status == "cancelled" %}
+                                                <!-- Tracking: Cancelled rides -->
                                                 <a
-                                                    href="{% url 'ride_delete' ride.pk %}"
+                                                    href="{% url 'ride_tracking_list' ride.pk %}"
+                                                    class="btn btn-sm btn-outline-info"
+                                                    title="Tracking"
+                                                    data-bs-toggle="tooltip"
+                                                >
+                                                    <i class="fas fa-location-dot"></i>
+                                                </a>
+                                            {% endif %}
+                                            <!-- Delete: Direct icon action -->
+                                            <form
+                                                method="post"
+                                                action="{% url 'ride_delete' ride.pk %}"
+                                                class="d-inline"
+                                                onsubmit="return confirm('Are you sure you want to delete ride {{ ride.ride_number }}?');"
+                                            >
+                                                {% csrf_token %}
+                                                <button
+                                                    type="submit"
                                                     class="btn btn-sm btn-outline-danger"
                                                     title="Delete Ride"
                                                     data-bs-toggle="tooltip"
                                                 >
                                                     <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -446,7 +519,7 @@
                                 <li class="page-item">
                                     <a
                                         class="page-link"
-                                        href="?page=1{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}&per_page={{ per_page }}"
+                                        href="?page=1{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}"
                                     >
                                         <i class="fas fa-angles-left me-1"></i>First
                                     </a>
@@ -454,7 +527,7 @@
                                 <li class="page-item">
                                     <a
                                         class="page-link"
-                                        href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}&per_page={{ per_page }}"
+                                        href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}"
                                     >
                                         <i class="fas fa-angle-left me-1"></i>Previous
                                     </a>
@@ -467,17 +540,17 @@
                                 <li class="page-item">
                                     <a
                                         class="page-link"
-                                        href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}&per_page={{ per_page }}"
+                                        href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}"
                                     >
-                                        Next<i class="fas fa-angle-right ms-1"></i>
+                                        Next <i class="fas fa-angle-right ms-1"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
                                     <a
                                         class="page-link"
-                                        href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}&per_page={{ per_page }}"
+                                        href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}"
                                     >
-                                        Last<i class="fas fa-angles-right ms-1"></i>
+                                        Last <i class="fas fa-angles-right ms-1"></i>
                                     </a>
                                 </li>
                             {% endif %}
