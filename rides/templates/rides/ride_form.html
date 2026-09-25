@@ -13,7 +13,7 @@
                     <h3 class="fw-bold mb-1 text-break">{{ page_title|default:"Ride" }}</h3>
                     <p class="text-body-secondary mb-0">
                         {% if object %}
-                            Update ride details, driver, vehicle and journey information
+                            Update ride request, driver and ride status
                         {% else %}
                             Create a ride from a ride request
                         {% endif %}
@@ -49,7 +49,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     {% endif %}
-    <form method="post" novalidate>
+    <form method="post" novalidate id="rideForm">
         {% csrf_token %}
         <div class="row g-3">
             <div class="col-12 col-xl-8">
@@ -65,11 +65,19 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
+                            <!-- Ride Number -->
                             <div class="col-12 col-md-6">
-                                <label for="{{ form.ride_number.id_for_label }}" class="form-label fw-semibold">
+                                <label class="form-label fw-semibold">
                                     <i class="fas fa-hashtag me-1 text-primary"></i>Ride Number
                                 </label>
-                                {{ form.ride_number }}
+                                <input type="hidden" name="ride_number" id="id_ride_number" value="{% if object %}{{ object.ride_number|default:"" }}{% else %}{{ form.ride_number.value|default:form.ride_number.initial|default:"" }}{% endif %}">
+                                <div class="form-control bg-body-secondary" id="rideNumberDisplay">
+                                    {% if object %}
+                                        {{ object.ride_number|default:"—" }}
+                                    {% else %}
+                                        {{ form.ride_number.value|default:form.ride_number.initial|default:"Auto Generated" }}
+                                    {% endif %}
+                                </div>
                                 {% if not object %}
                                     <div class="form-text">
                                         <i class="fas fa-wand-magic-sparkles me-1"></i>
@@ -84,6 +92,7 @@
                                     </div>
                                 {% endif %}
                             </div>
+                            <!-- Ride Request -->
                             <div class="col-12 col-md-6">
                                 <label for="{{ form.ride_request.id_for_label }}" class="form-label fw-semibold">
                                     <i class="fas fa-clipboard-list me-1 text-primary"></i>Ride Request
@@ -99,7 +108,7 @@
                                 {% if not object %}
                                     <div class="form-text">
                                         <i class="fas fa-arrows-rotate me-1"></i>
-                                        Changing the request refreshes matching ride details and vehicles.
+                                        Select a ride request to load ride details.
                                     </div>
                                 {% endif %}
                             </div>
@@ -113,16 +122,31 @@
                             <i class="fas fa-users me-2"></i>Passenger & Driver
                         </h5>
                         <small class="text-body-secondary">
-                            Assign passenger and driver for this ride
+                            Passenger is automatically taken from the selected ride request.
                         </small>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
+                            <!-- Passenger -->
                             <div class="col-12 col-md-6">
-                                <label for="{{ form.passenger.id_for_label }}" class="form-label fw-semibold">
+                                <label class="form-label fw-semibold">
                                     Passenger
                                 </label>
-                                {{ form.passenger }}
+                                <div class="form-control bg-body-secondary" id="passengerDisplay">
+                                    {% if object and object.passenger %}
+                                        {{ object.passenger.get_full_name|default:object.passenger.username }}
+                                    {% elif form.passenger.value %}
+                                        {% for passenger in form.passenger.field.queryset %}
+                                            {% if passenger.pk|stringformat:"s" == form.passenger.value|stringformat:"s" %}
+                                                {{ passenger.get_full_name|default:passenger.username }}
+                                            {% endif %}
+                                        {% empty %}
+                                            —
+                                        {% endfor %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
                                 {% if form.passenger.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.passenger.errors %}
@@ -131,6 +155,7 @@
                                     </div>
                                 {% endif %}
                             </div>
+                            <!-- Driver -->
                             <div class="col-12 col-md-6">
                                 <label for="{{ form.driver.id_for_label }}" class="form-label fw-semibold">
                                     Driver
@@ -154,7 +179,7 @@
                             <i class="fas fa-car me-2"></i>Vehicle
                         </h5>
                         <small class="text-body-secondary">
-                            Only vehicles matching the selected ride request vehicle type are available
+                            Select the vehicle assigned to this ride.
                         </small>
                     </div>
                     <div class="card-body">
@@ -178,16 +203,31 @@
                             <i class="fas fa-route me-2"></i>Journey
                         </h5>
                         <small class="text-body-secondary">
-                            Pickup, destination and scheduled ride information
+                            Journey information is automatically carried from the selected ride request.
                         </small>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
+                            <!-- Pickup -->
                             <div class="col-12 col-md-6">
-                                <label for="{{ form.pickup_location.id_for_label }}" class="form-label fw-semibold">
+                                <label class="form-label fw-semibold">
                                     <i class="fas fa-location-dot me-1 text-primary"></i>Pickup Location
                                 </label>
-                                {{ form.pickup_location }}
+                                <div class="form-control bg-body-secondary text-truncate" id="pickupDisplay">
+                                    {% if object and object.pickup_location %}
+                                        {{ object.pickup_location }}
+                                    {% elif form.pickup_location.value %}
+                                        {% for location in form.pickup_location.field.queryset %}
+                                            {% if location.pk|stringformat:"s" == form.pickup_location.value|stringformat:"s" %}
+                                                {{ location }}
+                                            {% endif %}
+                                        {% empty %}
+                                            —
+                                        {% endfor %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
                                 {% if form.pickup_location.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.pickup_location.errors %}
@@ -196,11 +236,26 @@
                                     </div>
                                 {% endif %}
                             </div>
+                            <!-- Drop -->
                             <div class="col-12 col-md-6">
-                                <label for="{{ form.drop_location.id_for_label }}" class="form-label fw-semibold">
+                                <label class="form-label fw-semibold">
                                     <i class="fas fa-location-dot me-1 text-danger"></i>Drop Location
                                 </label>
-                                {{ form.drop_location }}
+                                <div class="form-control bg-body-secondary text-truncate" id="dropDisplay">
+                                    {% if object and object.drop_location %}
+                                        {{ object.drop_location }}
+                                    {% elif form.drop_location.value %}
+                                        {% for location in form.drop_location.field.queryset %}
+                                            {% if location.pk|stringformat:"s" == form.drop_location.value|stringformat:"s" %}
+                                                {{ location }}
+                                            {% endif %}
+                                        {% empty %}
+                                            —
+                                        {% endfor %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
                                 {% if form.drop_location.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.drop_location.errors %}
@@ -209,11 +264,20 @@
                                     </div>
                                 {% endif %}
                             </div>
+                            <!-- Scheduled At -->
                             <div class="col-12 col-md-6">
-                                <label for="{{ form.scheduled_at.id_for_label }}" class="form-label fw-semibold">
+                                <label class="form-label fw-semibold">
                                     Scheduled At
                                 </label>
-                                {{ form.scheduled_at }}
+                                <div class="form-control bg-body-secondary" id="scheduledAtDisplay">
+                                    {% if object and object.scheduled_at %}
+                                        {{ object.scheduled_at|date:"d M Y, h:i A" }}
+                                    {% elif form.scheduled_at.value %}
+                                        {{ form.scheduled_at.value }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
                                 {% if form.scheduled_at.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.scheduled_at.errors %}
@@ -222,6 +286,7 @@
                                     </div>
                                 {% endif %}
                             </div>
+                            <!-- Ride Status -->
                             <div class="col-12 col-md-6">
                                 <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
                                     Ride Status
@@ -245,18 +310,24 @@
                             <i class="fas fa-gauge-high me-2"></i>Trip Performance
                         </h5>
                         <small class="text-body-secondary">
-                            Actual distance and duration for the ride
+                            Distance, duration and fare are automatically carried from the ride request.
                         </small>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-12 col-md-6">
-                                <label for="{{ form.distance_km.id_for_label }}" class="form-label fw-semibold">
+                            <!-- Distance -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold">
                                     Distance
                                 </label>
-                                <div class="input-group">
-                                    {{ form.distance_km }}
-                                    <span class="input-group-text">km</span>
+                                <div class="form-control bg-body-secondary" id="distanceDisplay">
+                                    {% if object and object.distance_km %}
+                                        {{ object.distance_km }} km
+                                    {% elif form.distance_km.value %}
+                                        {{ form.distance_km.value }} km
+                                    {% else %}
+                                        —
+                                    {% endif %}
                                 </div>
                                 {% if form.distance_km.errors %}
                                     <div class="invalid-feedback d-block">
@@ -266,17 +337,45 @@
                                     </div>
                                 {% endif %}
                             </div>
-                            <div class="col-12 col-md-6">
-                                <label for="{{ form.duration_minutes.id_for_label }}" class="form-label fw-semibold">
+
+                            <!-- Duration -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold">
                                     Duration
                                 </label>
-                                <div class="input-group">
-                                    {{ form.duration_minutes }}
-                                    <span class="input-group-text">min</span>
+                                <div class="form-control bg-body-secondary" id="durationDisplay">
+                                    {% if object and object.duration_minutes %}
+                                        {{ object.duration_minutes }} min
+                                    {% elif form.duration_minutes.value %}
+                                        {{ form.duration_minutes.value }} min
+                                    {% else %}
+                                        —
+                                    {% endif %}
                                 </div>
                                 {% if form.duration_minutes.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.duration_minutes.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Fare -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold">
+                                    Fare
+                                </label>
+                                <div class="form-control bg-body-secondary fw-semibold" id="fareDisplay">
+                                {% if object and object.ride_request and object.ride_request.estimated_fare %}
+                                    ₹{{ object.ride_request.estimated_fare|floatformat:2 }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </div>
+                                {% if form.fare.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.fare.errors %}
                                             {{ error }}
                                         {% endfor %}
                                     </div>
@@ -294,10 +393,18 @@
                             <i class="fas fa-bolt me-2"></i>Actions
                         </h5>
                         <small class="text-body-secondary">
-                            Save or cancel ride changes
+                            Update the ride request, driver or ride status.
                         </small>
                     </div>
                     <div class="card-body">
+                        <div class="alert alert-primary py-2 mb-3">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fas fa-circle-info mt-1"></i>
+                                <div class="small">
+                                    Passenger, vehicle and journey details are automatically maintained from the ride request.
+                                </div>
+                            </div>
+                        </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-check-circle me-1"></i>
@@ -439,7 +546,7 @@
                             <div>
                                 <h6 class="fw-bold mb-1">Ride Management</h6>
                                 <p class="small text-body-secondary mb-0">
-                                    Keep passenger, driver, vehicle and journey information synchronized with the ride request.
+                                    Passenger and journey details are automatically maintained from the selected ride request. Vehicle can be selected separately.
                                 </p>
                             </div>
                         </div>
@@ -451,20 +558,151 @@
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    const rideForm = document.getElementById("rideForm");
     const rideRequestField = document.getElementById("id_ride_request");
-    if (!rideRequestField) {
+    const vehicleField = document.getElementById("id_vehicle");
+    if (!rideForm || !rideRequestField) {
         return;
     }
+
+    let loading = false;
+
+    const setDisplay = function (id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value || "—";
+        }
+    };
+
+    const syncFromResponse = function (html) {
+        const parser = new DOMParser();
+        const documentFromResponse = parser.parseFromString(html, "text/html");
+        const responseForm = documentFromResponse.getElementById("rideForm");
+        if (!responseForm) {
+            return;
+        }
+
+        const fieldsToCopy = [
+            "id_ride_request",
+            "id_driver",
+            "id_vehicle",
+            "id_status",
+        ];
+
+        fieldsToCopy.forEach(function (id) {
+            const current = document.getElementById(id);
+            const incoming = responseForm.querySelector("#" + id);
+            if (!current || !incoming) {
+                return;
+            }
+
+            if (id === "id_vehicle") {
+                const currentValue = current.value;
+                current.innerHTML = incoming.innerHTML;
+                if ([...current.options].some(function (option) {
+                    return option.value === currentValue;
+                })) {
+                    current.value = currentValue;
+                } else {
+                    current.value = incoming.value;
+                }
+            } else {
+                current.innerHTML = incoming.innerHTML;
+            }
+        });
+
+        const incomingPassenger = responseForm.querySelector("#passengerDisplay");
+        const incomingPickup = responseForm.querySelector("#pickupDisplay");
+        const incomingDrop = responseForm.querySelector("#dropDisplay");
+        const incomingScheduled = responseForm.querySelector("#scheduledAtDisplay");
+        const incomingDistance = responseForm.querySelector("#distanceDisplay");
+        const incomingDuration = responseForm.querySelector("#durationDisplay");
+        const incomingRideNumber = responseForm.querySelector("#rideNumberDisplay");
+        const incomingRideNumberInput = responseForm.querySelector("#id_ride_number");
+
+        if (incomingPassenger) setDisplay("passengerDisplay", incomingPassenger.textContent.trim());
+        if (incomingPickup) setDisplay("pickupDisplay", incomingPickup.textContent.trim());
+        if (incomingDrop) setDisplay("dropDisplay", incomingDrop.textContent.trim());
+        if (incomingScheduled) setDisplay("scheduledAtDisplay", incomingScheduled.textContent.trim());
+        if (incomingDistance) setDisplay("distanceDisplay", incomingDistance.textContent.trim());
+        if (incomingDuration) setDisplay("durationDisplay", incomingDuration.textContent.trim());
+        if (incomingRideNumber) setDisplay("rideNumberDisplay", incomingRideNumber.textContent.trim());
+        if (incomingRideNumberInput) {
+            const hiddenRideNumber = document.getElementById("id_ride_number");
+            if (hiddenRideNumber) hiddenRideNumber.value = incomingRideNumberInput.value;
+        }
+
+        const incomingErrors = responseForm.querySelectorAll(".is-invalid");
+        document.querySelectorAll(".is-invalid").forEach(function (element) {
+            element.classList.remove("is-invalid");
+        });
+        incomingErrors.forEach(function (incoming) {
+            const current = document.getElementById(incoming.id);
+            if (current) current.classList.add("is-invalid");
+        });
+    };
+
+    rideForm.addEventListener("submit", function () {
+        rideRequestField.disabled = false;
+        if (vehicleField) {
+            vehicleField.disabled = false;
+        }
+    });
+
     rideRequestField.addEventListener("change", function () {
+        if (loading) {
+            return;
+        }
+
         const requestId = this.value;
         const url = new URL(window.location.href);
-        if (requestId) {
-            url.searchParams.set("ride_request", requestId);
-        } else {
-            url.searchParams.delete("ride_request");
+
+        if (!requestId) {
+            setDisplay("passengerDisplay", "—");
+            setDisplay("pickupDisplay", "—");
+            setDisplay("dropDisplay", "—");
+            setDisplay("scheduledAtDisplay", "—");
+            setDisplay("distanceDisplay", "—");
+            setDisplay("durationDisplay", "—");
+            if (vehicleField) {
+                vehicleField.value = "";
+                vehicleField.innerHTML = '<option value="">Select vehicle</option>';
+            }
+            return;
         }
+
+        loading = true;
+        rideRequestField.disabled = true;
+        if (vehicleField) vehicleField.disabled = true;
+
+        url.searchParams.set("ride_request", requestId);
         url.searchParams.delete("page");
-        window.location.href = url.toString();
+
+        fetch(url.toString(), {
+            method: "GET",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "text/html",
+            },
+        })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error("Unable to load ride request details.");
+            }
+            return response.text();
+        })
+        .then(function (html) {
+            syncFromResponse(html);
+        })
+        .catch(function (error) {
+            console.error(error);
+            window.location.href = url.toString();
+        })
+        .finally(function () {
+            rideRequestField.disabled = false;
+            if (vehicleField) vehicleField.disabled = false;
+            loading = false;
+        });
     });
 });
 </script>
