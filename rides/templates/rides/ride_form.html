@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block title %}NandiRide | {{ page_title|default:"Ride" }}{% endblock %}
 {% block content %}
-
 <div class="container-fluid py-2">
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
         <div>
@@ -25,11 +24,9 @@
             <div class="col-lg-8">
                 <div class="card shadow-sm border-0 mb-3">
                     <div class="card-header bg-body d-flex align-items-center justify-content-between">
-                        <div>
-                            <h5 class="mb-0">Ride Request</h5>
-                            <small class="text-muted">Select the request associated with this ride.</small>
+                        <div class="d-flex">
+                            <i class="bi bi-receipt text-primary me-2"></i><h5 class="mb-0">Ride Request</h5>
                         </div>
-                        <i class="bi bi-receipt text-primary"></i>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -66,11 +63,9 @@
                 </div>
                 <div class="card shadow-sm border-0 mb-3">
                     <div class="card-header bg-body d-flex align-items-center justify-content-between">
-                        <div>
-                            <h5 class="mb-0">Passenger & Driver</h5>
-                            <small class="text-muted">Passenger is linked through the ride request.</small>
+                        <div class="d-flex">
+                            <i class="bi bi-person-badge text-primary me-2"></i><h5 class="mb-0">Passenger & Vehicle Type</h5>
                         </div>
-                        <i class="bi bi-person-badge text-primary"></i>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -84,9 +79,27 @@
                                 {% endif %}
                             </div>
                             <div class="col-md-6">
-                                <label for="{{ form.driver.id_for_label }}" class="form-label fw-semibold">
-                                    Driver
-                                </label>
+                                <label class="form-label fw-semibold">Vehicle Type</label>
+                                <div class="form-control bg-primary-subtle text-muted" id="vehicleTypeDisplay">—</div>
+                                {% if form.vehicle_type %}
+                                    <div class="d-none">
+                                        {{ form.vehicle_type }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div class="d-flex">
+                        <i class="bi bi-car-front text-primary me-2"></i><h5 class="mb-0">Driver & Vehicle Number</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.driver.id_for_label }}" class="form-label fw-semibold">Driver</label>
                                 {{ form.driver }}
                                 {% if form.driver.errors %}
                                     <div class="invalid-feedback d-block">
@@ -96,23 +109,8 @@
                                     </div>
                                 {% endif %}
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card shadow-sm border-0 mb-3">
-                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
-                        <div>
-                            <h5 class="mb-0">Vehicle</h5>
-                            <small class="text-muted">Vehicle is filtered according to the selected ride request type.</small>
-                        </div>
-                        <i class="bi bi-car-front text-primary"></i>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label for="{{ form.vehicle.id_for_label }}" class="form-label fw-semibold">
-                                    Vehicle
-                                </label>
+                            <div class="col-md-6">
+                                <label for="{{ form.vehicle.id_for_label }}" class="form-label fw-semibold">Vehicle</label>
                                 {{ form.vehicle }}
                                 {% if form.vehicle.errors %}
                                     <div class="invalid-feedback d-block">
@@ -127,11 +125,9 @@
                 </div>
                 <div class="card shadow-sm border-0 mb-3">
                     <div class="card-header bg-body d-flex align-items-center justify-content-between">
-                        <div>
-                            <h5 class="mb-0">Journey</h5>
-                            <small class="text-muted">Pickup, drop and scheduled ride information.</small>
+                        <div class="d-flex">
+                        <i class="bi bi-geo-alt text-primary me-2"></i><h5 class="mb-0">Journey</h5>
                         </div>
-                        <i class="bi bi-geo-alt text-primary"></i>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -204,11 +200,9 @@
                 </div>
                 <div class="card shadow-sm border-0 mb-3">
                     <div class="card-header bg-body d-flex align-items-center justify-content-between">
-                        <div>
-                            <h5 class="mb-0">Trip Performance</h5>
-                            <small class="text-muted">Distance, duration and fare are carried from the ride request.</small>
+                        <div class="d-flex">
+                        <i class="bi bi-speedometer2 text-primary me-2"></i><h5 class="mb-0">Trip Performance</h5>
                         </div>
-                        <i class="bi bi-speedometer2 text-primary"></i>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -331,6 +325,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const dropField = document.getElementById("id_drop_location");
     const scheduledField = document.getElementById("id_scheduled_at");
     const passengerField = document.getElementById("id_passenger");
+    const vehicleTypeField = document.getElementById("id_vehicle_type");
     const statusField = document.getElementById("id_status");
     const rideNumberField = document.getElementById("id_ride_number");
     const rideNumberDisplay = document.getElementById("rideNumberDisplay");
@@ -483,6 +478,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const clearRequestRelatedFields = function () {
         ensureRideNumber();
         setDisplay("passengerDisplay", "—");
+        setDisplay("vehicleTypeDisplay", "—");
         setDisplay("distanceDisplay", "—");
         setDisplay("durationDisplay", "—");
         setDisplay("fareDisplay", "—");
@@ -493,6 +489,7 @@ document.addEventListener("DOMContentLoaded", function () {
             dropDisplay.textContent = "—";
         }
         setFieldValue(passengerField, "");
+        setFieldValue(vehicleTypeField, "");
         setFieldValue(vehicleField, "");
         setFieldValue(pickupField, "");
         setFieldValue(dropField, "");
@@ -507,7 +504,9 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
         setDisplay("passengerDisplay", data.passenger);
+        setDisplay("vehicleTypeDisplay", data.vehicleTypeName);
         setFieldValue(passengerField, data.passengerId);
+        setFieldValue(vehicleTypeField, data.vehicleTypeId);
         setFieldValue(pickupField, data.pickupId);
         setFieldValue(dropField, data.dropId);
         if (pickupDisplay) {
@@ -535,6 +534,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const incomingRideNumber = responseForm.querySelector("#rideNumberDisplay");
         const incomingRideNumberField = responseForm.querySelector("#id_ride_number");
         const incomingPassenger = responseForm.querySelector("#id_passenger");
+        const incomingVehicleType = responseForm.querySelector("#id_vehicle_type");
         const incomingDriver = responseForm.querySelector("#id_driver");
         const incomingStatus = responseForm.querySelector("#id_status");
         const incomingPickup = responseForm.querySelector("#id_pickup_location");
@@ -545,6 +545,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const incomingDuration = responseForm.querySelector("#durationDisplay");
         const incomingFare = responseForm.querySelector("#fareDisplay");
         const incomingPassengerDisplay = responseForm.querySelector("#passengerDisplay");
+        const incomingVehicleTypeDisplay = responseForm.querySelector("#vehicleTypeDisplay");
         const incomingPickupDisplay = responseForm.querySelector("#pickupLocationDisplay");
         const incomingDropDisplay = responseForm.querySelector("#dropLocationDisplay");
         if (incomingRideNumber && incomingRideNumber.textContent.trim() && incomingRideNumber.textContent.trim() !== "—") {
@@ -559,6 +560,9 @@ document.addEventListener("DOMContentLoaded", function () {
         ensureRideNumber();
         if (incomingPassenger) {
             setFieldValue(passengerField, incomingPassenger.value);
+        }
+        if (incomingVehicleType) {
+            setFieldValue(vehicleTypeField, incomingVehicleType.value);
         }
         if (incomingDriver && driverField) {
             setFieldValue(driverField, incomingDriver.value);
@@ -599,6 +603,11 @@ document.addEventListener("DOMContentLoaded", function () {
             setDisplay("passengerDisplay", incomingPassengerDisplay.textContent.trim());
         } else if (data) {
             setDisplay("passengerDisplay", data.passenger);
+        }
+        if (incomingVehicleTypeDisplay && incomingVehicleTypeDisplay.textContent.trim() !== "—") {
+            setDisplay("vehicleTypeDisplay", incomingVehicleTypeDisplay.textContent.trim());
+        } else if (data) {
+            setDisplay("vehicleTypeDisplay", data.vehicleTypeName);
         }
         if (incomingPickupDisplay && incomingPickupDisplay.textContent.trim() !== "—") {
             if (pickupDisplay) {
