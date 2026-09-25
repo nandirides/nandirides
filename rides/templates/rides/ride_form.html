@@ -1,101 +1,56 @@
 {% extends "base.html" %}
 {% block title %}NandiRide | {{ page_title|default:"Ride" }}{% endblock %}
 {% block content %}
-<div class="container-fluid py-3 py-md-4">
-    <!-- Page Header -->
-    <div class="row align-items-center mb-4">
-        <div class="col-12 col-xl-7">
-            <div class="d-flex align-items-center gap-3">
-                <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary p-3 flex-shrink-0">
-                    <i class="fas fa-car-side fa-2x"></i>
-                </span>
-                <div>
-                    <h3 class="fw-bold mb-1 text-break">{{ page_title|default:"Ride" }}</h3>
-                    <p class="text-body-secondary mb-0">
-                        {% if object %}
-                            Update ride request, driver and ride status
-                        {% else %}
-                            Create a ride from a ride request
-                        {% endif %}
-                    </p>
-                </div>
+
+<div class="container-fluid py-2">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h3 class="mb-0">{{ page_title|default:"Ride" }}</h3>
+            </div>
+            <div class="text-muted small">
+                Create or update ride details.
             </div>
         </div>
-        <div class="col-12 col-xl-5 mt-3 mt-xl-0">
-            <div class="d-flex justify-content-xl-end align-items-center flex-wrap gap-2">
-                {% if object %}
-                    <span class="badge bg-warning text-dark px-3 py-2">
-                        <i class="fas fa-pen me-1"></i>Edit Mode
-                    </span>
-                {% else %}
-                    <span class="badge bg-success px-3 py-2">
-                        <i class="fas fa-plus me-1"></i>New Ride
-                    </span>
-                {% endif %}
-                <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary btn-sm text-nowrap">
-                    <i class="fas fa-arrow-left me-1"></i>Back
-                </a>
-            </div>
+        <div>
+            <a href="{% url 'ride_list' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-1"></i>
+                Back to Rides
+            </a>
         </div>
     </div>
-    <!-- Form Errors -->
-    {% if form.non_field_errors %}
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-triangle-exclamation me-2"></i>
-            <strong>Please correct the following:</strong>
-            {% for error in form.non_field_errors %}
-                <div class="mt-1">{{ error }}</div>
-            {% endfor %}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    {% endif %}
-    <form method="post" novalidate id="rideForm">
+    <form method="post" id="rideForm">
         {% csrf_token %}
         <div class="row g-3">
-            <div class="col-12 col-xl-8">
-                <!-- Ride Request -->
-                <div class="card card-outline card-primary shadow-sm">
-                    <div class="card-header">
-                        <h5 class="card-title mb-1">
-                            <i class="fas fa-link me-2"></i>Ride Request
-                        </h5>
-                        <small class="text-body-secondary">
-                            Select the passenger request from which this ride is created
-                        </small>
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-0">Ride Request</h5>
+                            <small class="text-muted">Select the request associated with this ride.</small>
+                        </div>
+                        <i class="bi bi-receipt text-primary"></i>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <!-- Ride Number -->
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold">
-                                    <i class="fas fa-hashtag me-1 text-primary"></i>Ride Number
-                                </label>
-                                <input type="hidden" name="ride_number" id="id_ride_number" value="{% if object %}{{ object.ride_number|default:"" }}{% else %}{{ form.ride_number.value|default:form.ride_number.initial|default:"" }}{% endif %}">
-                                <div class="form-control bg-body-secondary" id="rideNumberDisplay">
-                                    {% if object %}
-                                        {{ object.ride_number|default:"—" }}
-                                    {% else %}
-                                        {{ form.ride_number.value|default:form.ride_number.initial|default:"Auto Generated" }}
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ride Number</label>
+                                <div class="form-control bg-primary-subtle text-primary fw-bold border-0" id="rideNumberDisplay">
+                                    {% if form.ride_number.value %}
+                                        {{ form.ride_number.value }}
+                                    {% elif object and object.ride_number %}
+                                        {{ object.ride_number }}
                                     {% endif %}
                                 </div>
-                                {% if not object %}
-                                    <div class="form-text">
-                                        <i class="fas fa-wand-magic-sparkles me-1"></i>
-                                        Ride number is generated automatically.
-                                    </div>
-                                {% endif %}
-                                {% if form.ride_number.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.ride_number.errors %}
-                                            {{ error }}
-                                        {% endfor %}
+                                {% if form.ride_number %}
+                                    <div class="d-none">
+                                        {{ form.ride_number }}
                                     </div>
                                 {% endif %}
                             </div>
-                            <!-- Ride Request -->
-                            <div class="col-12 col-md-6">
+                            <div class="col-md-6">
                                 <label for="{{ form.ride_request.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-clipboard-list me-1 text-primary"></i>Ride Request
+                                    Ride Request
                                 </label>
                                 {{ form.ride_request }}
                                 {% if form.ride_request.errors %}
@@ -105,58 +60,30 @@
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-                                {% if not object %}
-                                    <div class="form-text">
-                                        <i class="fas fa-arrows-rotate me-1"></i>
-                                        Select a ride request to load ride details.
-                                    </div>
-                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Passenger & Driver -->
-                <div class="card card-outline card-success shadow-sm mt-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-1">
-                            <i class="fas fa-users me-2"></i>Passenger & Driver
-                        </h5>
-                        <small class="text-body-secondary">
-                            Passenger is automatically taken from the selected ride request.
-                        </small>
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-0">Passenger & Driver</h5>
+                            <small class="text-muted">Passenger is linked through the ride request.</small>
+                        </div>
+                        <i class="bi bi-person-badge text-primary"></i>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <!-- Passenger -->
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold">
-                                    Passenger
-                                </label>
-                                <div class="form-control bg-body-secondary" id="passengerDisplay">
-                                    {% if object and object.passenger %}
-                                        {{ object.passenger.get_full_name|default:object.passenger.username }}
-                                    {% elif form.passenger.value %}
-                                        {% for passenger in form.passenger.field.queryset %}
-                                            {% if passenger.pk|stringformat:"s" == form.passenger.value|stringformat:"s" %}
-                                                {{ passenger.get_full_name|default:passenger.username }}
-                                            {% endif %}
-                                        {% empty %}
-                                            —
-                                        {% endfor %}
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </div>
-                                {% if form.passenger.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.passenger.errors %}
-                                            {{ error }}
-                                        {% endfor %}
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Passenger</label>
+                                <div class="form-control bg-body-secondary text-muted" id="passengerDisplay">—</div>
+                                {% if form.passenger %}
+                                    <div class="d-none">
+                                        {{ form.passenger }}
                                     </div>
                                 {% endif %}
                             </div>
-                            <!-- Driver -->
-                            <div class="col-12 col-md-6">
+                            <div class="col-md-6">
                                 <label for="{{ form.driver.id_for_label }}" class="form-label fw-semibold">
                                     Driver
                                 </label>
@@ -172,61 +99,52 @@
                         </div>
                     </div>
                 </div>
-                <!-- Vehicle -->
-                <div class="card card-outline card-warning shadow-sm mt-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-1">
-                            <i class="fas fa-car me-2"></i>Vehicle
-                        </h5>
-                        <small class="text-body-secondary">
-                            Select the vehicle assigned to this ride.
-                        </small>
-                    </div>
-                    <div class="card-body">
-                        <label for="{{ form.vehicle.id_for_label }}" class="form-label fw-semibold">
-                            Vehicle
-                        </label>
-                        {{ form.vehicle }}
-                        {% if form.vehicle.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.vehicle.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-                <!-- Journey -->
-                <div class="card card-outline card-info shadow-sm mt-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-1">
-                            <i class="fas fa-route me-2"></i>Journey
-                        </h5>
-                        <small class="text-body-secondary">
-                            Journey information is automatically carried from the selected ride request.
-                        </small>
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-0">Vehicle</h5>
+                            <small class="text-muted">Vehicle is filtered according to the selected ride request type.</small>
+                        </div>
+                        <i class="bi bi-car-front text-primary"></i>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <!-- Pickup -->
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold">
-                                    <i class="fas fa-location-dot me-1 text-primary"></i>Pickup Location
+                            <div class="col-12">
+                                <label for="{{ form.vehicle.id_for_label }}" class="form-label fw-semibold">
+                                    Vehicle
                                 </label>
-                                <div class="form-control bg-body-secondary text-truncate" id="pickupDisplay">
-                                    {% if object and object.pickup_location %}
-                                        {{ object.pickup_location }}
-                                    {% elif form.pickup_location.value %}
-                                        {% for location in form.pickup_location.field.queryset %}
-                                            {% if location.pk|stringformat:"s" == form.pickup_location.value|stringformat:"s" %}
-                                                {{ location }}
-                                            {% endif %}
-                                        {% empty %}
-                                            —
+                                {{ form.vehicle }}
+                                {% if form.vehicle.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.vehicle.errors %}
+                                            {{ error }}
                                         {% endfor %}
-                                    {% else %}
-                                        —
-                                    {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-0">Journey</h5>
+                            <small class="text-muted">Pickup, drop and scheduled ride information.</small>
+                        </div>
+                        <i class="bi bi-geo-alt text-primary"></i>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <div class="rounded-3 bg-primary-subtle p-3 h-100">
+                                    <div class="d-flex align-items-center gap-2 mb-2 text-primary">
+                                        <i class="fas fa-location-dot"></i>
+                                        <span class="small fw-semibold">Pickup Location</span>
+                                    </div>
+                                    <div class="fw-semibold text-body-secondary text-break" id="pickupLocationDisplay">—</div>
+                                </div>
+                                <div class="d-none">
+                                    {{ form.pickup_location }}
                                 </div>
                                 {% if form.pickup_location.errors %}
                                     <div class="invalid-feedback d-block">
@@ -236,25 +154,16 @@
                                     </div>
                                 {% endif %}
                             </div>
-                            <!-- Drop -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold">
-                                    <i class="fas fa-location-dot me-1 text-danger"></i>Drop Location
-                                </label>
-                                <div class="form-control bg-body-secondary text-truncate" id="dropDisplay">
-                                    {% if object and object.drop_location %}
-                                        {{ object.drop_location }}
-                                    {% elif form.drop_location.value %}
-                                        {% for location in form.drop_location.field.queryset %}
-                                            {% if location.pk|stringformat:"s" == form.drop_location.value|stringformat:"s" %}
-                                                {{ location }}
-                                            {% endif %}
-                                        {% empty %}
-                                            —
-                                        {% endfor %}
-                                    {% else %}
-                                        —
-                                    {% endif %}
+                                <div class="rounded-3 bg-danger-subtle p-3 h-100">
+                                    <div class="d-flex align-items-center gap-2 mb-2 text-danger">
+                                        <i class="fas fa-location-dot"></i>
+                                        <span class="small fw-semibold">Drop Location</span>
+                                    </div>
+                                    <div class="fw-semibold text-body-secondary text-break" id="dropLocationDisplay">—</div>
+                                </div>
+                                <div class="d-none">
+                                    {{ form.drop_location }}
                                 </div>
                                 {% if form.drop_location.errors %}
                                     <div class="invalid-feedback d-block">
@@ -264,20 +173,11 @@
                                     </div>
                                 {% endif %}
                             </div>
-                            <!-- Scheduled At -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold">
+                                <label for="{{ form.scheduled_at.id_for_label }}" class="form-label fw-semibold">
                                     Scheduled At
                                 </label>
-                                <div class="form-control bg-body-secondary" id="scheduledAtDisplay">
-                                    {% if object and object.scheduled_at %}
-                                        {{ object.scheduled_at|date:"d M Y, h:i A" }}
-                                    {% elif form.scheduled_at.value %}
-                                        {{ form.scheduled_at.value }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </div>
+                                {{ form.scheduled_at }}
                                 {% if form.scheduled_at.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.scheduled_at.errors %}
@@ -286,7 +186,6 @@
                                     </div>
                                 {% endif %}
                             </div>
-                            <!-- Ride Status -->
                             <div class="col-12 col-md-6">
                                 <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
                                     Ride Status
@@ -303,254 +202,130 @@
                         </div>
                     </div>
                 </div>
-                <!-- Trip Performance -->
-                <div class="card card-outline card-secondary shadow-sm mt-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-1">
-                            <i class="fas fa-gauge-high me-2"></i>Trip Performance
-                        </h5>
-                        <small class="text-body-secondary">
-                            Distance, duration and fare are automatically carried from the ride request.
-                        </small>
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-0">Trip Performance</h5>
+                            <small class="text-muted">Distance, duration and fare are carried from the ride request.</small>
+                        </div>
+                        <i class="bi bi-speedometer2 text-primary"></i>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <!-- Distance -->
                             <div class="col-12 col-md-4">
-                                <label class="form-label fw-semibold">
-                                    Distance
-                                </label>
-                                <div class="form-control bg-body-secondary" id="distanceDisplay">
-                                    {% if object and object.distance_km %}
-                                        {{ object.distance_km }} km
-                                    {% elif form.distance_km.value %}
-                                        {{ form.distance_km.value }} km
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </div>
-                                {% if form.distance_km.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.distance_km.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
+                                <label class="form-label fw-semibold">Distance</label>
+                                <div class="form-control bg-body-secondary text-muted fw-semibold" id="distanceDisplay">—</div>
                             </div>
-
-                            <!-- Duration -->
                             <div class="col-12 col-md-4">
-                                <label class="form-label fw-semibold">
-                                    Duration
-                                </label>
-                                <div class="form-control bg-body-secondary" id="durationDisplay">
-                                    {% if object and object.duration_minutes %}
-                                        {{ object.duration_minutes }} min
-                                    {% elif form.duration_minutes.value %}
-                                        {{ form.duration_minutes.value }} min
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </div>
-                                {% if form.duration_minutes.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.duration_minutes.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
+                                <label class="form-label fw-semibold">Duration</label>
+                                <div class="form-control bg-body-secondary text-muted fw-semibold" id="durationDisplay">—</div>
                             </div>
-
-                            <!-- Fare -->
                             <div class="col-12 col-md-4">
-                                <label class="form-label fw-semibold">
-                                    Fare
-                                </label>
-                                <div class="form-control bg-body-secondary fw-semibold" id="fareDisplay">
-                                {% if object and object.ride_request and object.ride_request.estimated_fare %}
-                                    ₹{{ object.ride_request.estimated_fare|floatformat:2 }}
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </div>
-                                {% if form.fare.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.fare.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
+                                <label class="form-label fw-semibold">Fare</label>
+                                <div class="form-control bg-body-secondary text-muted fw-semibold" id="fareDisplay">—</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-xl-4">
-                <!-- Actions -->
-                <div class="card card-outline card-primary shadow-sm">
-                    <div class="card-header">
-                        <h5 class="card-title mb-1">
-                            <i class="fas fa-bolt me-2"></i>Actions
-                        </h5>
-                        <small class="text-body-secondary">
-                            Update the ride request, driver or ride status.
-                        </small>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-primary py-2 mb-3">
-                            <div class="d-flex align-items-start gap-2">
-                                <i class="fas fa-circle-info mt-1"></i>
-                                <div class="small">
-                                    Passenger, vehicle and journey details are automatically maintained from the ride request.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-check-circle me-1"></i>
-                                {% if object %}Update Ride{% else %}Create Ride{% endif %}
-                            </button>
-                            <a href="{% url 'ride_list' %}" class="btn btn-outline-primary">
-                                <i class="fas fa-arrow-left me-1"></i>Back to Rides
-                            </a>
-                            {% if object %}
-                                <a href="{% url 'ride_details' object.pk %}" class="btn btn-outline-primary">
-                                    <i class="fas fa-eye me-1"></i>View Ride
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <!-- Edit Timeline -->
+            <div class="col-lg-4">
                 {% if object %}
-                    <div class="card shadow-sm mt-3">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-clock-rotate-left me-2"></i>Ride Timeline
-                            </h5>
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header bg-body">
+                            <h5 class="mb-0">Edit Timeline</h5>
                         </div>
                         <div class="card-body">
-                            <div class="mb-3 p-3 rounded-3 bg-primary-subtle">
-                                <small class="text-body-secondary d-block">Scheduled At</small>
-                                <div class="fw-semibold mt-1">
-                                    {% if object.scheduled_at %}
-                                        {{ object.scheduled_at|date:"d M Y, h:i A" }}
-                                    {% else %}
-                                        Not scheduled
-                                    {% endif %}
+                            <div class="small">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Created</span>
+                                    <span class="fw-semibold">{{ object.created_at|date:"d M Y, h:i A" }}</span>
                                 </div>
-                            </div>
-                            <div class="mb-3 p-3 rounded-3 bg-warning-subtle">
-                                <small class="text-body-secondary d-block">Started At</small>
-                                <div class="fw-semibold mt-1">
-                                    {% if object.started_at %}
-                                        {{ object.started_at|date:"d M Y, h:i A" }}
-                                    {% else %}
-                                        Not started
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="mb-3 p-3 rounded-3 bg-info-subtle">
-                                <small class="text-body-secondary d-block">Arrived At</small>
-                                <div class="fw-semibold mt-1">
-                                    {% if object.arrived_at %}
-                                        {{ object.arrived_at|date:"d M Y, h:i A" }}
-                                    {% else %}
-                                        Not arrived
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="p-3 rounded-3 bg-success-subtle">
-                                <small class="text-body-secondary d-block">Completed At</small>
-                                <div class="fw-semibold mt-1">
-                                    {% if object.completed_at %}
-                                        {{ object.completed_at|date:"d M Y, h:i A" }}
-                                    {% else %}
-                                        Not completed
-                                    {% endif %}
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Updated</span>
+                                    <span class="fw-semibold">{{ object.updated_at|date:"d M Y, h:i A" }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 {% endif %}
-                <!-- Ride Status Flow -->
-                <div class="card shadow-sm mt-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-diagram-project me-2"></i>Ride Status Flow
-                        </h5>
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body">
+                        <h5 class="mb-0">Ride Status Flow</h5>
                     </div>
                     <div class="card-body">
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item bg-transparent px-0">
-                                <span class="badge bg-primary me-2">1</span>Driver Assigned
+                        <div class="small">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-secondary">1</span>
+                                <span>Driver Assigned</span>
                             </div>
-                            <div class="list-group-item bg-transparent px-0">
-                                <span class="badge bg-info me-2">2</span>Driver Arriving
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-secondary">2</span>
+                                <span>Driver Arriving</span>
                             </div>
-                            <div class="list-group-item bg-transparent px-0">
-                                <span class="badge bg-warning text-dark me-2">3</span>Driver Arrived
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-secondary">3</span>
+                                <span>Driver Arrived</span>
                             </div>
-                            <div class="list-group-item bg-transparent px-0">
-                                <span class="badge bg-primary me-2">4</span>Started
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-secondary">4</span>
+                                <span>Started</span>
                             </div>
-                            <div class="list-group-item bg-transparent px-0">
-                                <span class="badge bg-success me-2">5</span>Completed
-                            </div>
-                            <div class="list-group-item bg-transparent px-0">
-                                <span class="badge bg-danger me-2">6</span>Cancelled
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-success">5</span>
+                                <span>Completed</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Source Request -->
                 {% if object and object.ride_request %}
-                    <div class="card card-outline card-info shadow-sm mt-3">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-clipboard-check me-2"></i>Source Request
-                            </h5>
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header bg-body">
+                            <h5 class="mb-0">Source Request</h5>
                         </div>
                         <div class="card-body">
-                            <div class="mb-3">
-                                <small class="text-body-secondary d-block">Request Number</small>
-                                <div class="fw-semibold mt-1">
-                                    {{ object.ride_request.request_number }}
+                            <div class="small">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Request</span>
+                                    <span class="fw-semibold">#{{ object.ride_request.pk }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Vehicle Type</span>
+                                    <span class="fw-semibold">{{ object.ride_request.vehicle_type }}</span>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <small class="text-body-secondary d-block">Request Status</small>
-                                <div class="mt-1">
-                                    {% if object.ride_request.status == "completed" %}
-                                        <span class="badge bg-success">{{ object.ride_request.get_status_display }}</span>
-                                    {% elif object.ride_request.status == "cancelled" %}
-                                        <span class="badge bg-danger">{{ object.ride_request.get_status_display }}</span>
-                                    {% elif object.ride_request.status == "accepted" %}
-                                        <span class="badge bg-primary">{{ object.ride_request.get_status_display }}</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">{{ object.ride_request.get_status_display }}</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <a href="{% url 'ride_request_details' object.ride_request.pk %}" class="btn btn-outline-primary btn-sm w-100">
-                                <i class="fas fa-eye me-1"></i>View Request
-                            </a>
                         </div>
                     </div>
                 {% endif %}
-                <!-- Form Information -->
-                <div class="card shadow-sm mt-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-body">
+                        <h5 class="mb-0">Form Information</h5>
+                    </div>
                     <div class="card-body">
-                        <div class="d-flex align-items-start gap-3">
-                            <i class="fas fa-circle-info text-info fs-4"></i>
-                            <div>
-                                <h6 class="fw-bold mb-1">Ride Management</h6>
-                                <p class="small text-body-secondary mb-0">
-                                    Passenger and journey details are automatically maintained from the selected ride request. Vehicle can be selected separately.
-                                </p>
-                            </div>
+                        <div class="small text-muted">
+                            Select a ride request first. Related passenger, vehicle, journey and fare details will then be loaded automatically.
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm border-0 mt-3">
+            <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="mb-0">Actions</h5>
+                    <small class="text-muted">Review the ride details before saving.</small>
+                </div>
+                <i class="bi bi-check2-circle text-primary"></i>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
+                    <a href="{% url 'ride_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2-circle me-1"></i>
+                        {{ submit_text|default:"Save Ride" }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -558,132 +333,314 @@
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const rideForm = document.getElementById("rideForm");
-    const rideRequestField = document.getElementById("id_ride_request");
+    const requestField = document.getElementById("id_ride_request");
     const vehicleField = document.getElementById("id_vehicle");
-    if (!rideForm || !rideRequestField) {
+    const driverField = document.getElementById("id_driver");
+    const pickupField = document.getElementById("id_pickup_location");
+    const dropField = document.getElementById("id_drop_location");
+    const scheduledField = document.getElementById("id_scheduled_at");
+    const passengerField = document.getElementById("id_passenger");
+    const statusField = document.getElementById("id_status");
+    const rideNumberField = document.getElementById("id_ride_number");
+    const rideNumberDisplay = document.getElementById("rideNumberDisplay");
+    const pickupDisplay = document.getElementById("pickupLocationDisplay");
+    const dropDisplay = document.getElementById("dropLocationDisplay");
+    const rideForm = document.getElementById("rideForm");
+    if (!requestField || !vehicleField || !rideForm) {
         return;
     }
-
-    let loading = false;
-
+    const generateRideNumber = function () {
+        const now = new Date();
+        const year = now.getFullYear().toString().slice(-2);
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
+        return "NR" + year + month + day + hours + minutes + seconds + milliseconds;
+    };
+    const ensureRideNumber = function () {
+        if (!rideNumberField || !rideNumberDisplay) {
+            return;
+        }
+        let rideNumber = String(rideNumberField.value || "").trim();
+        const displayedNumber = String(rideNumberDisplay.textContent || "").trim();
+        if (!rideNumber && displayedNumber && displayedNumber !== "—") {
+            rideNumber = displayedNumber;
+            rideNumberField.value = rideNumber;
+        }
+        if (!rideNumber && {{ object|yesno:"false,true" }}) {
+            rideNumber = "{% if object and object.ride_number %}{{ object.ride_number|escapejs }}{% endif %}";
+            rideNumber = String(rideNumber || "").trim();
+            if (rideNumber) {
+                rideNumberField.value = rideNumber;
+            }
+        }
+        if (!rideNumber) {
+            rideNumber = generateRideNumber();
+            rideNumberField.value = rideNumber;
+        }
+        rideNumberDisplay.textContent = rideNumber;
+    };
     const setDisplay = function (id, value) {
         const element = document.getElementById(id);
         if (element) {
-            element.textContent = value || "—";
+            const cleanValue = value ? String(value).trim() : "";
+            element.textContent = cleanValue || "—";
         }
     };
-
-    const syncFromResponse = function (html) {
-        const parser = new DOMParser();
-        const documentFromResponse = parser.parseFromString(html, "text/html");
-        const responseForm = documentFromResponse.getElementById("rideForm");
-        if (!responseForm) {
+    const setFieldValue = function (field, value) {
+        if (field) {
+            field.value = value || "";
+        }
+    };
+    const setVehicleOptions = function (sourceVehicleField, preferredVehicleId) {
+        if (!sourceVehicleField) {
             return;
         }
-
-        const fieldsToCopy = [
-            "id_ride_request",
-            "id_driver",
-            "id_vehicle",
-            "id_status",
-        ];
-
-        fieldsToCopy.forEach(function (id) {
-            const current = document.getElementById(id);
-            const incoming = responseForm.querySelector("#" + id);
-            if (!current || !incoming) {
+        const sourceOptions = Array.from(sourceVehicleField.options);
+        vehicleField.innerHTML = "";
+        const emptyOption = document.createElement("option");
+        emptyOption.value = "";
+        emptyOption.textContent = "Select vehicle";
+        vehicleField.appendChild(emptyOption);
+        let selectedValue = preferredVehicleId || "";
+        sourceOptions.forEach(function (sourceOption) {
+            if (!sourceOption.value) {
                 return;
             }
-
-            if (id === "id_vehicle") {
-                const currentValue = current.value;
-                current.innerHTML = incoming.innerHTML;
-                if ([...current.options].some(function (option) {
-                    return option.value === currentValue;
-                })) {
-                    current.value = currentValue;
-                } else {
-                    current.value = incoming.value;
-                }
-            } else {
-                current.innerHTML = incoming.innerHTML;
+            const option = document.createElement("option");
+            option.value = sourceOption.value;
+            option.textContent = sourceOption.textContent;
+            if (sourceOption.disabled) {
+                option.disabled = true;
             }
+            if (String(sourceOption.value) === String(selectedValue)) {
+                option.selected = true;
+            }
+            vehicleField.appendChild(option);
         });
-
-        const incomingPassenger = responseForm.querySelector("#passengerDisplay");
-        const incomingPickup = responseForm.querySelector("#pickupDisplay");
-        const incomingDrop = responseForm.querySelector("#dropDisplay");
-        const incomingScheduled = responseForm.querySelector("#scheduledAtDisplay");
+        if (selectedValue) {
+            vehicleField.value = selectedValue;
+        }
+    };
+    const requestData = {
+        {% for request in form.ride_request.field.queryset %}
+        "{{ request.pk }}": {
+            passenger: "{% if request.passenger %}{{ request.passenger.get_full_name|default:request.passenger.username|escapejs }}{% endif %}",
+            passengerId: "{% if request.passenger %}{{ request.passenger.pk }}{% endif %}",
+            vehicleTypeId: "{% if request.vehicle_type %}{{ request.vehicle_type.pk }}{% endif %}",
+            vehicleTypeName: "{% if request.vehicle_type %}{{ request.vehicle_type|escapejs }}{% endif %}",
+            pickupId: "{% if request.pickup_location %}{{ request.pickup_location.pk }}{% endif %}",
+            pickupName: "{% if request.pickup_location %}{{ request.pickup_location|escapejs }}{% endif %}",
+            dropId: "{% if request.drop_location %}{{ request.drop_location.pk }}{% endif %}",
+            dropName: "{% if request.drop_location %}{{ request.drop_location|escapejs }}{% endif %}",
+            scheduled: "{% if request.scheduled_at %}{{ request.scheduled_at|date:'Y-m-d\\TH:i' }}{% endif %}",
+            distance: "{% if request.estimated_distance != None %}{{ request.estimated_distance|floatformat:2 }} km{% endif %}",
+            duration: "{% if request.estimated_duration != None %}{{ request.estimated_duration }} min{% endif %}",
+            fare: "{% if request.estimated_fare != None %}₹{{ request.estimated_fare|floatformat:2 }}{% endif %}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+    const allVehicleOptions = Array.from(vehicleField.options).map(function (option) {
+        return {
+            value: option.value,
+            text: option.text,
+            disabled: option.disabled
+        };
+    });
+    const clearVehicleOptions = function () {
+        vehicleField.innerHTML = "";
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "Select vehicle";
+        vehicleField.appendChild(option);
+        vehicleField.value = "";
+    };
+    const filterVehicles = function (vehicleTypeId, preferredVehicleId) {
+        if (!vehicleTypeId) {
+            clearVehicleOptions();
+            return;
+        }
+        const currentValue = preferredVehicleId || "";
+        vehicleField.innerHTML = "";
+        const emptyOption = document.createElement("option");
+        emptyOption.value = "";
+        emptyOption.textContent = "Select vehicle";
+        vehicleField.appendChild(emptyOption);
+        let matchedVehicle = false;
+        allVehicleOptions.forEach(function (item) {
+            if (!item.value) {
+                return;
+            }
+            const option = document.createElement("option");
+            option.value = item.value;
+            option.textContent = item.text;
+            if (String(item.value) === String(currentValue)) {
+                option.selected = true;
+                matchedVehicle = true;
+            }
+            vehicleField.appendChild(option);
+        });
+        if (matchedVehicle) {
+            vehicleField.value = currentValue;
+        } else {
+            vehicleField.value = "";
+        }
+    };
+    const clearRequestRelatedFields = function () {
+        ensureRideNumber();
+        setDisplay("passengerDisplay", "—");
+        setDisplay("distanceDisplay", "—");
+        setDisplay("durationDisplay", "—");
+        setDisplay("fareDisplay", "—");
+        if (pickupDisplay) {
+            pickupDisplay.textContent = "—";
+        }
+        if (dropDisplay) {
+            dropDisplay.textContent = "—";
+        }
+        setFieldValue(passengerField, "");
+        setFieldValue(vehicleField, "");
+        setFieldValue(pickupField, "");
+        setFieldValue(dropField, "");
+        setFieldValue(scheduledField, "");
+        clearVehicleOptions();
+    };
+    const applyRequestData = function (requestId) {
+        ensureRideNumber();
+        const data = requestData[String(requestId)];
+        if (!data) {
+            clearRequestRelatedFields();
+            return;
+        }
+        setDisplay("passengerDisplay", data.passenger);
+        setFieldValue(passengerField, data.passengerId);
+        setFieldValue(pickupField, data.pickupId);
+        setFieldValue(dropField, data.dropId);
+        if (pickupDisplay) {
+            pickupDisplay.textContent = data.pickupName || "—";
+        }
+        if (dropDisplay) {
+            dropDisplay.textContent = data.dropName || "—";
+        }
+        setFieldValue(scheduledField, data.scheduled);
+        setDisplay("distanceDisplay", data.distance);
+        setDisplay("durationDisplay", data.duration);
+        setDisplay("fareDisplay", data.fare);
+        filterVehicles(data.vehicleTypeId, "");
+    };
+    const syncFromResponse = function (html, requestId) {
+        const parser = new DOMParser();
+        const responseDocument = parser.parseFromString(html, "text/html");
+        const responseForm = responseDocument.getElementById("rideForm");
+        const data = requestData[String(requestId)];
+        ensureRideNumber();
+        if (!responseForm) {
+            applyRequestData(requestId);
+            return;
+        }
+        const incomingRideNumber = responseForm.querySelector("#rideNumberDisplay");
+        const incomingRideNumberField = responseForm.querySelector("#id_ride_number");
+        const incomingPassenger = responseForm.querySelector("#id_passenger");
+        const incomingDriver = responseForm.querySelector("#id_driver");
+        const incomingStatus = responseForm.querySelector("#id_status");
+        const incomingPickup = responseForm.querySelector("#id_pickup_location");
+        const incomingDrop = responseForm.querySelector("#id_drop_location");
+        const incomingScheduled = responseForm.querySelector("#id_scheduled_at");
+        const incomingVehicle = responseForm.querySelector("#id_vehicle");
         const incomingDistance = responseForm.querySelector("#distanceDisplay");
         const incomingDuration = responseForm.querySelector("#durationDisplay");
-        const incomingRideNumber = responseForm.querySelector("#rideNumberDisplay");
-        const incomingRideNumberInput = responseForm.querySelector("#id_ride_number");
-
-        if (incomingPassenger) setDisplay("passengerDisplay", incomingPassenger.textContent.trim());
-        if (incomingPickup) setDisplay("pickupDisplay", incomingPickup.textContent.trim());
-        if (incomingDrop) setDisplay("dropDisplay", incomingDrop.textContent.trim());
-        if (incomingScheduled) setDisplay("scheduledAtDisplay", incomingScheduled.textContent.trim());
-        if (incomingDistance) setDisplay("distanceDisplay", incomingDistance.textContent.trim());
-        if (incomingDuration) setDisplay("durationDisplay", incomingDuration.textContent.trim());
-        if (incomingRideNumber) setDisplay("rideNumberDisplay", incomingRideNumber.textContent.trim());
-        if (incomingRideNumberInput) {
-            const hiddenRideNumber = document.getElementById("id_ride_number");
-            if (hiddenRideNumber) hiddenRideNumber.value = incomingRideNumberInput.value;
+        const incomingFare = responseForm.querySelector("#fareDisplay");
+        const incomingPassengerDisplay = responseForm.querySelector("#passengerDisplay");
+        const incomingPickupDisplay = responseForm.querySelector("#pickupLocationDisplay");
+        const incomingDropDisplay = responseForm.querySelector("#dropLocationDisplay");
+        if (incomingRideNumber && incomingRideNumber.textContent.trim() && incomingRideNumber.textContent.trim() !== "—") {
+            const responseRideNumber = incomingRideNumber.textContent.trim();
+            setDisplay("rideNumberDisplay", responseRideNumber);
+            setFieldValue(rideNumberField, responseRideNumber);
         }
-
-        const incomingErrors = responseForm.querySelectorAll(".is-invalid");
-        document.querySelectorAll(".is-invalid").forEach(function (element) {
-            element.classList.remove("is-invalid");
-        });
-        incomingErrors.forEach(function (incoming) {
-            const current = document.getElementById(incoming.id);
-            if (current) current.classList.add("is-invalid");
-        });
-    };
-
-    rideForm.addEventListener("submit", function () {
-        rideRequestField.disabled = false;
-        if (vehicleField) {
-            vehicleField.disabled = false;
+        if (incomingRideNumberField && incomingRideNumberField.value) {
+            setFieldValue(rideNumberField, incomingRideNumberField.value);
+            setDisplay("rideNumberDisplay", incomingRideNumberField.value);
         }
-    });
-
-    rideRequestField.addEventListener("change", function () {
-        if (loading) {
-            return;
+        ensureRideNumber();
+        if (incomingPassenger) {
+            setFieldValue(passengerField, incomingPassenger.value);
         }
-
-        const requestId = this.value;
-        const url = new URL(window.location.href);
-
-        if (!requestId) {
-            setDisplay("passengerDisplay", "—");
-            setDisplay("pickupDisplay", "—");
-            setDisplay("dropDisplay", "—");
-            setDisplay("scheduledAtDisplay", "—");
-            setDisplay("distanceDisplay", "—");
-            setDisplay("durationDisplay", "—");
-            if (vehicleField) {
-                vehicleField.value = "";
-                vehicleField.innerHTML = '<option value="">Select vehicle</option>';
+        if (incomingDriver && driverField) {
+            setFieldValue(driverField, incomingDriver.value);
+        }
+        if (incomingStatus && statusField) {
+            setFieldValue(statusField, incomingStatus.value);
+        }
+        if (incomingPickup) {
+            setFieldValue(pickupField, incomingPickup.value);
+        }
+        if (incomingDrop) {
+            setFieldValue(dropField, incomingDrop.value);
+        }
+        if (incomingScheduled) {
+            setFieldValue(scheduledField, incomingScheduled.value);
+        }
+        if (incomingVehicle) {
+            setVehicleOptions(incomingVehicle, incomingVehicle.value);
+        } else if (data) {
+            filterVehicles(data.vehicleTypeId, "");
+        }
+        if (incomingDistance && incomingDistance.textContent.trim() !== "—") {
+            setDisplay("distanceDisplay", incomingDistance.textContent.trim());
+        } else if (data) {
+            setDisplay("distanceDisplay", data.distance);
+        }
+        if (incomingDuration && incomingDuration.textContent.trim() !== "—") {
+            setDisplay("durationDisplay", incomingDuration.textContent.trim());
+        } else if (data) {
+            setDisplay("durationDisplay", data.duration);
+        }
+        if (incomingFare && incomingFare.textContent.trim() !== "—") {
+            setDisplay("fareDisplay", incomingFare.textContent.trim());
+        } else if (data) {
+            setDisplay("fareDisplay", data.fare);
+        }
+        if (incomingPassengerDisplay && incomingPassengerDisplay.textContent.trim() !== "—") {
+            setDisplay("passengerDisplay", incomingPassengerDisplay.textContent.trim());
+        } else if (data) {
+            setDisplay("passengerDisplay", data.passenger);
+        }
+        if (incomingPickupDisplay && incomingPickupDisplay.textContent.trim() !== "—") {
+            if (pickupDisplay) {
+                pickupDisplay.textContent = incomingPickupDisplay.textContent.trim();
             }
+        } else if (data && pickupDisplay) {
+            pickupDisplay.textContent = data.pickupName || "—";
+        }
+        if (incomingDropDisplay && incomingDropDisplay.textContent.trim() !== "—") {
+            if (dropDisplay) {
+                dropDisplay.textContent = incomingDropDisplay.textContent.trim();
+            }
+        } else if (data && dropDisplay) {
+            dropDisplay.textContent = data.dropName || "—";
+        }
+    };
+    requestField.addEventListener("change", function () {
+        const requestId = this.value;
+        ensureRideNumber();
+        if (!requestId) {
+            clearRequestRelatedFields();
             return;
         }
-
-        loading = true;
-        rideRequestField.disabled = true;
-        if (vehicleField) vehicleField.disabled = true;
-
+        requestField.disabled = true;
+        vehicleField.disabled = true;
+        applyRequestData(requestId);
+        const url = new URL(window.location.href);
         url.searchParams.set("ride_request", requestId);
-        url.searchParams.delete("page");
-
         fetch(url.toString(), {
             method: "GET",
             headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "Accept": "text/html",
-            },
+                "X-Requested-With": "XMLHttpRequest"
+            }
         })
         .then(function (response) {
             if (!response.ok) {
@@ -692,18 +649,33 @@ document.addEventListener("DOMContentLoaded", function () {
             return response.text();
         })
         .then(function (html) {
-            syncFromResponse(html);
+            syncFromResponse(html, requestId);
         })
         .catch(function (error) {
             console.error(error);
-            window.location.href = url.toString();
+            applyRequestData(requestId);
         })
         .finally(function () {
-            rideRequestField.disabled = false;
-            if (vehicleField) vehicleField.disabled = false;
-            loading = false;
+            requestField.disabled = false;
+            vehicleField.disabled = false;
+            ensureRideNumber();
         });
     });
+    rideForm.addEventListener("submit", function () {
+        ensureRideNumber();
+    });
+    ensureRideNumber();
+    const initialRequestId = requestField.value;
+    if (!initialRequestId) {
+        ensureRideNumber();
+    } else {
+        const selectedRequest = requestData[String(initialRequestId)];
+        if (selectedRequest) {
+            applyRequestData(initialRequestId);
+        } else {
+            ensureRideNumber();
+        }
+    }
 });
 </script>
 {% endblock %}
