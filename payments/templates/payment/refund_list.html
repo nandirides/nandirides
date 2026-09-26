@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title|default:"Refunds" }}{% endblock %}
+{% block content %}
+<div class="container-fluid py-3 py-md-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <div class="rounded-3 bg-primary-subtle text-primary p-2">
+                    <i class="fas fa-rotate-left"></i>
+                </div>
+                <h4 class="mb-0 fw-bold">Refunds</h4>
+            </div>
+            <p class="text-body-secondary mb-0">View and manage all payment refund transactions.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'payment_list' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 bg-primary-subtle">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between gap-3">
+                        <div class="min-width-0">
+                            <small class="text-primary-emphasis fw-semibold d-block mb-1">Total Refunds</small>
+                            <h4 class="mb-0 fw-bold text-primary">{{ total_refunds }}</h4>
+                            <small class="text-primary-emphasis">All records</small>
+                        </div>
+                        <div class="rounded-circle bg-body text-primary p-3 flex-shrink-0 shadow-sm">
+                            <i class="fas fa-rotate-left fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 bg-warning-subtle">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between gap-3">
+                        <div>
+                            <small class="text-warning-emphasis fw-semibold d-block mb-1">Pending</small>
+                            <h4 class="mb-0 fw-bold text-warning-emphasis">{{ pending_refunds }}</h4>
+                            <small class="text-warning-emphasis">Awaiting completion</small>
+                        </div>
+                        <div class="rounded-circle bg-body text-warning-emphasis p-3 flex-shrink-0 shadow-sm">
+                            <i class="fas fa-clock fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 bg-success-subtle">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between gap-3">
+                        <div>
+                            <small class="text-success-emphasis fw-semibold d-block mb-1">Refund Completed</small>
+                            <h4 class="mb-0 fw-bold text-success">{{ processed_refunds }}</h4>
+                            <small class="text-success-emphasis">Successfully processed</small>
+                        </div>
+                        <div class="rounded-circle bg-body text-success p-3 flex-shrink-0 shadow-sm">
+                            <i class="fas fa-circle-check fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 bg-info-subtle">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between gap-3">
+                        <div class="min-width-0">
+                            <small class="text-info-emphasis fw-semibold d-block mb-1">Total Refund Amount</small>
+                            <h4 class="mb-0 fw-bold text-info text-break">₹{{ total_refund_amount|floatformat:2 }}</h4>
+                            <small class="text-info-emphasis">Total refund value</small>
+                        </div>
+                        <div class="rounded-circle bg-body text-info p-3 flex-shrink-0 shadow-sm">
+                            <i class="fas fa-indian-rupee-sign fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-header border-0 py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                <div>
+                    <h5 class="mb-1 fw-semibold">
+                        <i class="fas fa-list-ul text-primary me-2"></i>Refund History
+                    </h5>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
+                        {{ total_refunds }} Records
+                    </span>
+                    {% if page_obj %}
+                    <span class="badge rounded-pill bg-body-secondary text-body border px-3 py-2">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if refunds %}
+            <div class="d-none d-xl-block">
+                <table class="table table-hover align-middle mb-0" style="table-layout:fixed;width:100%;">
+                    <colgroup>
+                        <col style="width:3%;">
+                        <col style="width:9%;">
+                        <col style="width:11%;">
+                        <col style="width:10%;">
+                        <col style="width:14%;">
+                        <col style="width:10%;">
+                        <col style="width:9%;">
+                        <col style="width:10%;">
+                        <col style="width:09%;">
+                        <col style="width:8%;">
+                    </colgroup>
+                    <thead class="table-secondary">
+                        <tr>
+                            <th class="px-3">#</th>
+                            <th>Payment</th>
+                            <th>Customer</th>
+                            <th>Refund Amount</th>
+                            <th>Reason</th>
+                            <th>Reference</th>
+                            <th>Status</th>
+                            <th>Requested</th>
+                            <th>Processed</th>
+                            <th class="text-center px-2">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for refund in refunds %}
+                        <tr>
+                            <td class="px-3 fw-semibold text-body-secondary">
+                                {{ refund.id }}
+                            </td>
+                            <td>
+                                {% if refund.payment %}
+                                <a href="{% url 'payment_detail' refund.payment.pk %}" class="text-decoration-none fw-semibold text-primary text-break">
+                                    {{ refund.payment.payment_number }}
+                                </a>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if refund.payment.user %}
+                                <span class="fw-semibold text-break d-block">
+                                    {{ refund.payment.user.get_full_name|default:refund.payment.user.username }}
+                                </span>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="fw-bold text-success text-nowrap">
+                                    ₹{{ refund.refund_amount|floatformat:2 }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if refund.reason %}
+                                <span class="d-block text-break" style="word-break:break-word;">
+                                    {{ refund.reason }}
+                                </span>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if refund.refund_reference %}
+                                <span class="d-block small text-break" style="word-break:break-word;">
+                                    {{ refund.refund_reference }}
+                                </span>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if refund.status|lower == "processed" or refund.status|lower == "completed" or refund.status|lower == "success" %}
+                                <span class="badge rounded-pill bg-success-subtle text-success px-2 py-2 text-wrap">
+                                    <i class="fas fa-check-circle me-1"></i>Completed
+                                </span>
+                                {% elif refund.status|lower == "pending" %}
+                                <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis px-2 py-2 text-wrap">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                                {% elif refund.status|lower == "failed" %}
+                                <span class="badge rounded-pill bg-danger-subtle text-danger px-2 py-2 text-wrap">
+                                    <i class="fas fa-circle-xmark me-1"></i>Failed
+                                </span>
+                                {% else %}
+                                <span class="badge rounded-pill bg-secondary-subtle text-secondary px-2 py-2 text-wrap">
+                                    {{ refund.status|title }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if refund.requested_at %}
+                                <span class="small text-body-secondary d-block">
+                                    {{ refund.requested_at|date:"d M Y" }}
+                                </span>
+                                <span class="small text-body-secondary d-block">
+                                    {{ refund.requested_at|date:"h:i A" }}
+                                </span>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if refund.processed_at %}
+                                <span class="small text-body-secondary d-block">
+                                    {{ refund.processed_at|date:"d M Y" }}
+                                </span>
+                                <span class="small text-body-secondary d-block">
+                                    {{ refund.processed_at|date:"h:i A" }}
+                                </span>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center px-2">
+                                {% if refund.payment %}
+                                <div class="d-flex justify-content-center gap-1">
+                                    <a href="{% url 'payment_detail' refund.payment.pk %}" class="btn btn-sm btn-outline-primary" title="View Payment">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'refund_edit' refund.payment.pk refund.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit Refund">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                </div>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-xl-none">
+                <div class="p-3">
+                    {% for refund in refunds %}
+                    <div class="border rounded-3 p-3 mb-3 bg-body shadow-sm">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                            <div class="min-width-0">
+                                <small class="text-body-secondary d-block mb-1">Refund #{{ refund.id }}</small>
+                                {% if refund.payment %}
+                                <a href="{% url 'payment_detail' refund.payment.pk %}" class="fw-semibold text-primary text-decoration-none text-break">
+                                    {{ refund.payment.payment_number }}
+                                </a>
+                                {% else %}
+                                <span class="text-body-secondary">No Payment</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex-shrink-0">
+                                {% if refund.status|lower == "processed" or refund.status|lower == "completed" or refund.status|lower == "success" %}
+                                <span class="badge rounded-pill bg-success-subtle text-success">
+                                    <i class="fas fa-check-circle me-1"></i>Completed
+                                </span>
+                                {% elif refund.status|lower == "pending" %}
+                                <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                                {% elif refund.status|lower == "failed" %}
+                                <span class="badge rounded-pill bg-danger-subtle text-danger">
+                                    <i class="fas fa-circle-xmark me-1"></i>Failed
+                                </span>
+                                {% else %}
+                                <span class="badge rounded-pill bg-secondary-subtle text-secondary">
+                                    {{ refund.status|title }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <small class="text-body-secondary d-block">Customer</small>
+                                <span class="fw-semibold text-break">
+                                    {% if refund.payment.user %}
+                                    {{ refund.payment.user.get_full_name|default:refund.payment.user.username }}
+                                    {% else %}
+                                    —
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-body-secondary d-block">Amount</small>
+                                <span class="fw-bold text-success">
+                                    ₹{{ refund.refund_amount|floatformat:2 }}
+                                </span>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-body-secondary d-block mb-1">Reason</small>
+                                {% if refund.reason %}
+                                <span class="text-break">{{ refund.reason }}</span>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <small class="text-body-secondary d-block mb-1">Reference</small>
+                                {% if refund.refund_reference %}
+                                <span class="small text-break">{{ refund.refund_reference }}</span>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-6">
+                                <small class="text-body-secondary d-block">Requested</small>
+                                {% if refund.requested_at %}
+                                <span class="small text-body-secondary">
+                                    {{ refund.requested_at|date:"d M Y, h:i A" }}
+                                </span>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-6">
+                                <small class="text-body-secondary d-block">Processed</small>
+                                {% if refund.processed_at %}
+                                <span class="small text-body-secondary">
+                                    {{ refund.processed_at|date:"d M Y, h:i A" }}
+                                </span>
+                                {% else %}
+                                <span class="text-body-secondary">—</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
+                            {% if refund.payment %}
+                            <a href="{% url 'payment_detail' refund.payment.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>View Payment
+                            </a>
+                            <a href="{% url 'refund_edit' refund.payment.pk refund.pk %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-pen me-1"></i>Edit
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-5 px-3">
+                <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center p-4 mb-3">
+                    <i class="fas fa-rotate-left fa-2x"></i>
+                </div>
+                <h5 class="fw-semibold mb-2">No Refunds Found</h5>
+                <p class="text-body-secondary mb-0">There are no refund records available yet.</p>
+            </div>
+            {% endif %}
+        </div>
+        {% if page_obj and page_obj.paginator.num_pages > 1 %}
+        <div class="card-footer border-0 py-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <div class="small text-body-secondary text-center text-md-start">
+                    Showing
+                    <strong>{{ page_obj.start_index }}</strong>
+                    to
+                    <strong>{{ page_obj.end_index }}</strong>
+                    of
+                    <strong>{{ page_obj.paginator.count }}</strong>
+                    refunds
+                </div>
+                <nav aria-label="Refund pagination">
+                    <ul class="pagination pagination-sm mb-0 flex-wrap justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                <i class="fas fa-chevron-left"></i>
+                            </span>
+                        </li>
+                        {% endif %}
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if num == page_obj.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,198 +1,116 @@
 {% extends "base.html" %}
-{% block title %}{{ page_title }}{% endblock %}
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h3 class="mb-1">
-                <i class="bi bi-arrow-counterclockwise me-2"></i>Payments
-            </h3>
-            <p class="text-body-secondary mb-0">
-                {% if refund %}
-                    Update the refund record for this payment.
-                {% else %}
-                    Create a refund record for this payment.
-                {% endif %}
-            </p>
+            <h4 class="mb-1 fw-bold">{{ page_title }}</h4>
+            <p class="text-muted mb-0">Manage payment refund details.</p>
         </div>
-        <a href="{% url 'payment_detail' payment.pk %}" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-left me-1"></i>Back to Payment
+        <a href="{% url 'payment_detail' payment.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Payment
         </a>
     </div>
-    <div class="row justify-content-center">
-        <div class="col-12 col-xl-9">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-receipt-cutoff me-2"></i>
-                        {% if refund %}
-                            Edit Refund
-                        {% else %}
-                            Add Refund
-                        {% endif %}
-                    </h5>
+    <div class="row g-4">
+        <div class="col-xl-4 col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-semibold">Payment Information</h5>
                 </div>
-                <div class="card-body border-bottom">
-                    <div class="row g-3">
-                        <div class="col-12 col-sm-6 col-lg-3">
-                            <div class="text-body-secondary small">Payment Number</div>
-                            <div class="fw-semibold text-break">
-                                {{ payment.payment_number }}
-                            </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-3">
-                            <div class="text-body-secondary small">Payment Amount</div>
-                            <div class="fw-bold">
-                                ₹{{ payment.amount }}
-                            </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-3">
-                            <div class="text-body-secondary small">Payment Method</div>
-                            <div class="fw-semibold">
-                                {{ payment.get_payment_method_display }}
-                            </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-3">
-                            <div class="text-body-secondary small">Payment Status</div>
-                            <div>
-                                {% if payment.status == "success" %}
-                                    <span class="badge text-bg-success">
-                                        <i class="bi bi-check-circle me-1"></i>Success
-                                    </span>
-                                {% elif payment.status == "pending" %}
-                                    <span class="badge text-bg-warning">
-                                        <i class="bi bi-clock me-1"></i>Pending
-                                    </span>
-                                {% elif payment.status == "failed" %}
-                                    <span class="badge text-bg-danger">
-                                        <i class="bi bi-x-circle me-1"></i>Failed
-                                    </span>
-                                {% elif payment.status == "refunded" %}
-                                    <span class="badge text-bg-info">
-                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Refunded
-                                    </span>
-                                {% else %}
-                                    <span class="badge text-bg-secondary">
-                                        {{ payment.get_status_display }}
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="text-body-secondary small">Customer</div>
-                            <div class="fw-semibold text-break">
-                                {% if payment.user.get_full_name %}
-                                    {{ payment.user.get_full_name }}
-                                {% else %}
-                                    {{ payment.user.username }}
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="text-body-secondary small">Ride</div>
-                            <div class="fw-semibold">
-                                {% if payment.ride %}
-                                    Ride #{{ payment.ride.pk }}
-                                {% else %}
-                                    <span class="text-body-secondary">Not available</span>
-                                {% endif %}
-                            </div>
-                        </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Payment Number</small>
+                        <span class="fw-semibold">{{ payment.payment_number }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Customer</small>
+                        <span class="fw-semibold">{{ payment.user.get_full_name|default:payment.user.username }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Payment Amount</small>
+                        <span class="fw-bold fs-5">₹{{ payment.amount|floatformat:2 }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Payment Method</small>
+                        <span>{{ payment.get_payment_method_display }}</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Payment Status</small>
+                        {% if payment.status == "success" %}
+                        <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">Successful</span>
+                        {% elif payment.status == "refunded" %}
+                        <span class="badge rounded-pill bg-info-subtle text-info px-3 py-2">Refunded</span>
+                        {% elif payment.status == "pending" %}
+                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 py-2">Pending</span>
+                        {% else %}
+                        <span class="badge rounded-pill bg-danger-subtle text-danger px-3 py-2">{{ payment.get_status_display }}</span>
+                        {% endif %}
                     </div>
                 </div>
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="card-body">
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <div class="fw-semibold mb-1">Please correct the following error:</div>
-                                {% for error in form.non_field_errors %}
-                                    <div>{{ error }}</div>
-                                {% endfor %}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endif %}
-                        <div class="alert alert-info d-flex align-items-start gap-2" role="alert">
-                            <i class="bi bi-info-circle fs-5"></i>
-                            <div>
-                                <div class="fw-semibold">Refund Information</div>
-                                <div class="small">
-                                    The refund amount cannot be greater than the original payment amount.
-                                </div>
-                            </div>
-                        </div>
+            </div>
+        </div>
+        <div class="col-xl-8 col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-1 fw-semibold">{{ page_title }}</h5>
+                    <small class="text-muted">Enter the refund information below.</small>
+                </div>
+                <div class="card-body">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <form method="post" novalidate>
+                        {% csrf_token %}
                         <div class="row g-3">
-                            <div class="col-12 col-md-6">
-                                <label for="{{ form.refund_amount.id_for_label }}" class="form-label">
-                                    Refund Amount
-                                </label>
+                            <div class="col-md-6">
+                                <label for="{{ form.refund_amount.id_for_label }}" class="form-label fw-semibold">Refund Amount <span class="text-danger">*</span></label>
                                 {{ form.refund_amount }}
                                 {% for error in form.refund_amount.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ error }}
-                                    </div>
+                                <div class="text-danger small mt-1">{{ error }}</div>
                                 {% endfor %}
+                                <small class="text-muted">Maximum refundable amount: ₹{{ payment.amount|floatformat:2 }}</small>
                             </div>
-                            <div class="col-12 col-md-6">
-                                <label for="{{ form.status.id_for_label }}" class="form-label">
-                                    Refund Status
-                                </label>
+                            <div class="col-md-6">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
                                 {{ form.status }}
                                 {% for error in form.status.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ error }}
-                                    </div>
+                                <div class="text-danger small mt-1">{{ error }}</div>
                                 {% endfor %}
                             </div>
                             <div class="col-12">
-                                <label for="{{ form.reason.id_for_label }}" class="form-label">
-                                    Refund Reason
-                                </label>
+                                <label for="{{ form.reason.id_for_label }}" class="form-label fw-semibold">Refund Reason</label>
                                 {{ form.reason }}
                                 {% for error in form.reason.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ error }}
-                                    </div>
+                                <div class="text-danger small mt-1">{{ error }}</div>
                                 {% endfor %}
                             </div>
-                            <div class="col-12 col-md-6">
-                                <label for="{{ form.refund_reference.id_for_label }}" class="form-label">
-                                    Refund Reference
-                                </label>
+                            <div class="col-md-6">
+                                <label for="{{ form.refund_reference.id_for_label }}" class="form-label fw-semibold">Refund Reference</label>
                                 {{ form.refund_reference }}
                                 {% for error in form.refund_reference.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ error }}
-                                    </div>
+                                <div class="text-danger small mt-1">{{ error }}</div>
                                 {% endfor %}
                             </div>
-                            <div class="col-12 col-md-6">
-                                <label for="{{ form.processed_at.id_for_label }}" class="form-label">
-                                    Processed At
-                                </label>
+                            <div class="col-md-6">
+                                <label for="{{ form.processed_at.id_for_label }}" class="form-label fw-semibold">Processed At</label>
                                 {{ form.processed_at }}
                                 {% for error in form.processed_at.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ error }}
-                                    </div>
+                                <div class="text-danger small mt-1">{{ error }}</div>
                                 {% endfor %}
                             </div>
                         </div>
-                    </div>
-                    <div class="card-footer d-flex flex-wrap justify-content-end gap-2">
-                        <a href="{% url 'payment_detail' payment.pk %}" class="btn btn-outline-danger">
-                            <i class="bi bi-x-lg me-1"></i>Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-lg me-1"></i>
-                            {% if refund %}
-                                Update Refund
-                            {% else %}
-                                Save Refund
-                            {% endif %}
-                        </button>
-                    </div>
-                </form>
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <a href="{% url 'payment_detail' payment.pk %}" class="btn btn-light border">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-1"></i>
+                                {% if refund %}Update Refund{% else %}Create Refund{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

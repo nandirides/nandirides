@@ -1,321 +1,440 @@
 {% extends "base.html" %}
 {% block title %}NandiRide | Add Ride Rating{% endblock %}
 {% block content %}
-
-<div class="container-fluid py-3">
-    <!-- Page Header -->
-    <div class="row align-items-center mb-4">
-        <div class="col-md-8">
-            <div class="d-flex align-items-center">
-                <div class="me-3">
-                    <i class="fas fa-star fa-2x"></i>
-                </div>
-                <div>
-                    <h3 class="fw-bold mb-1">Add Ride Rating</h3>
-                    <p class="text-muted mb-0">
-                        Add passenger or driver feedback for {{ ride.ride_number }}
-                    </p>
+<div class="container-fluid py-2">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+        <div class="d-flex align-items-center">
+            <div class="rounded-3 bg-warning-subtle text-warning d-flex align-items-center justify-content-center me-2 shadow-sm" style="width:46px;height:46px;">
+                <i class="fas fa-star"></i>
+            </div>
+            <div>
+                <h4 class="fw-bold mb-0 text-body">Add Ride Rating</h4>
+                <div class="small text-body-secondary">
+                    Add passenger or driver feedback for
+                    <span class="fw-semibold text-body">{{ ride.ride_number }}</span>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mt-3 mt-md-0">
-            <div class="d-flex justify-content-md-end align-items-center flex-wrap gap-2">
-                <span class="badge bg-warning text-dark px-3 py-2">
-                    <i class="fas fa-star me-1"></i> Rating
-                </span>
-                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-primary">
-                    <i class="fas fa-car-side me-1"></i> Ride Details
-                </a>
-                <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary btn-sm px-3 text-nowrap">
-                    <i class="fas fa-arrow-left me-1"></i>Back
-                </a>
-            </div>
+        <div class="d-flex flex-wrap gap-2">
+            <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-2">
+                <i class="fas fa-circle-check me-1"></i>Completed
+            </span>
+            <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-primary btn-sm rounded-3 px-2">
+                <i class="fas fa-car-side me-1"></i>Ride Details
+            </a>
         </div>
     </div>
     {% if form.non_field_errors %}
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-3" role="alert">
-            <i class="fas fa-triangle-exclamation me-2"></i>
-            {% for error in form.non_field_errors %}
-                <div>{{ error }}</div>
-            {% endfor %}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="alert alert-danger border-0 shadow-sm rounded-3 py-2 px-3 mb-3">
+            <div class="d-flex align-items-start">
+                <i class="fas fa-circle-exclamation me-2 mt-1"></i>
+                <div class="small">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     {% endif %}
-    <div class="row">
-        <!-- Rating Form -->
-        <div class="col-xl-8">
-            <div class="card card-outline card-warning shadow-sm">
-                <div class="card-header">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <div>
-                            <h5 class="mb-1 fw-semibold">
-                                <i class="fas fa-comment-dots me-2"></i>Rating & Review
-                            </h5>
-                            <div class="small text-muted">
-                                Record feedback between the passenger and driver
+    <div class="row g-3">
+        <div class="col-12 col-xl-8">
+            <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                <div class="card-header bg-body border-0 p-2 p-md-3">
+                    <div class="d-flex justify-content-between align-items-center gap-2 rounded-3 border border-warning-subtle bg-warning-subtle bg-opacity-25 p-2">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center me-2" style="width:36px;height:36px;">
+                                <i class="fas fa-comment-dots small"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0">Rating &amp; Review</h6>
+                                <div class="small text-body-secondary">
+                                    Record feedback between passenger and driver
+                                </div>
                             </div>
                         </div>
                         {% if ride.status == "completed" %}
-                            <span class="badge bg-success">
+                            <span class="badge rounded-pill bg-success px-2 py-1">
                                 <i class="fas fa-circle-check me-1"></i>{{ ride.get_status_display }}
                             </span>
                         {% elif ride.status == "cancelled" %}
-                            <span class="badge bg-danger">
+                            <span class="badge rounded-pill bg-danger px-2 py-1">
                                 <i class="fas fa-circle-xmark me-1"></i>{{ ride.get_status_display }}
                             </span>
                         {% else %}
-                            <span class="badge bg-secondary">
+                            <span class="badge rounded-pill bg-secondary px-2 py-1">
                                 {{ ride.get_status_display }}
                             </span>
                         {% endif %}
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-2 p-md-3 pt-1">
                     <form method="post" novalidate>
                         {% csrf_token %}
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="{{ form.from_user.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-user-arrow-up me-1"></i>Customer
-                                </label><br>
-                                {{ form.from_user }}
-                                <small class="me-2">{{ ride.passenger.get_full_name|default:ride.passenger }}</small>
-                                {% if form.from_user.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.from_user.errors %}
-                                            {{ error }}
-                                        {% endfor %}
+                        {% if form.ride %}
+                            {{ form.ride.as_hidden }}
+                        {% endif %}
+                        {% if form.from_user %}
+                            {{ form.from_user.as_hidden }}
+                        {% endif %}
+                        {% if form.to_user %}
+                            {{ form.to_user.as_hidden }}
+                        {% endif %}
+                        <div class="row g-2">
+                            <div class="col-12 col-md-6">
+                                <div class="border border-primary-subtle rounded-3 bg-primary-subtle bg-opacity-10 p-2 h-100">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-2" style="width:30px;height:30px;">
+                                            <i class="fas fa-user small"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold small">Customer</div>
+                                            <small class="text-body-secondary">Customer giving the rating</small>
+                                        </div>
                                     </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    User giving the rating.
+                                    <div class="bg-body rounded-3 border p-2 shadow-sm">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width:38px;height:38px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="fw-semibold small text-body text-break">
+                                                    {{ ride.passenger.get_full_name|default:ride.passenger }}
+                                                </div>
+                                                {% if ride.passenger.email %}
+                                                    <div class="small text-body-secondary text-break">
+                                                        <i class="fas fa-envelope me-1"></i>{{ ride.passenger.email }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if form.from_user.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.from_user.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <label for="{{ form.to_user.id_for_label }}" class="form-label fw-bold">
-                                    <i class="fas fa-user-arrow-down me-1"></i>Driver
-                                </label><br>
-                                 {{ form.to_user }}
-                                 <small class="me-2">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }})</small>
-                                {% if form.to_user.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.to_user.errors %}
-                                            {{ error }}
-                                        {% endfor %}
+                            <div class="col-12 col-md-6">
+                                <div class="border border-success-subtle rounded-3 bg-success-subtle bg-opacity-10 p-2 h-100">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center me-2" style="width:30px;height:30px;">
+                                            <i class="fas fa-user-tie small"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold small">Driver</div>
+                                            <small class="text-body-secondary">Driver receiving the rating</small>
+                                        </div>
                                     </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    Driver receiving the rating.
+                                    <div class="bg-body rounded-3 border p-2 shadow-sm">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width:38px;height:38px;">
+                                                <i class="fas fa-user-tie"></i>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="fw-semibold small text-body text-break">
+                                                    {{ ride.driver.user.get_full_name|default:ride.driver.user.username }}
+                                                </div>
+                                                <div class="small text-body-secondary">
+                                                    <i class="fas fa-id-badge me-1"></i>{{ ride.driver }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if form.to_user.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.to_user.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="col-12">
-                                <label for="{{ form.rating.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-star me-1"></i>Rating
-                                </label>
-                                {{ form.rating }}
-                                {% if form.rating.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.rating.errors %}
-                                            {{ error }}
-                                        {% endfor %}
+                                <div class="border border-warning-subtle rounded-3 bg-warning-subtle bg-opacity-10 p-2 p-md-3">
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-warning-subtle text-warning-emphasis d-flex align-items-center justify-content-center me-2" style="width:32px;height:32px;">
+                                                <i class="fas fa-star small"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Rating</div>
+                                                <small class="text-body-secondary">Customer giving the rating</small>
+                                            </div>
+                                        </div>
+                                        <span id="ratingBadge" class="badge rounded-pill bg-body text-warning-emphasis border border-warning-subtle px-2 py-1">
+                                            Select rating
+                                        </span>
                                     </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    Select a rating from 1 to 5.
+                                    <div class="bg-body rounded-3 border border-warning-subtle p-2 shadow-sm">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="d-flex align-items-center flex-shrink-0" id="ratingStars">
+                                                <button type="button" class="btn btn-link text-warning p-0 me-1 rating-star text-decoration-none" data-value="1" aria-label="1 star">
+                                                    <i class="far fa-star fa-lg"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-link text-warning p-0 me-1 rating-star text-decoration-none" data-value="2" aria-label="2 stars">
+                                                    <i class="far fa-star fa-lg"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-link text-warning p-0 me-1 rating-star text-decoration-none" data-value="3" aria-label="3 stars">
+                                                    <i class="far fa-star fa-lg"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-link text-warning p-0 me-1 rating-star text-decoration-none" data-value="4" aria-label="4 stars">
+                                                    <i class="far fa-star fa-lg"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-link text-warning p-0 rating-star text-decoration-none" data-value="5" aria-label="5 stars">
+                                                    <i class="far fa-star fa-lg"></i>
+                                                </button>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div id="ratingText" class="fw-semibold small text-body">
+                                                    Select rating
+                                                </div>
+                                                <small class="text-body-secondary">
+                                                    Click stars to select 1 to 5.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-none">
+                                        {{ form.rating }}
+                                    </div>
+                                    {% if form.rating.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.rating.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="col-12">
-                                <label for="{{ form.review.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-message me-1"></i>Review
-                                </label>
-                                {{ form.review }}
-                                {% if form.review.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.review.errors %}
-                                            {{ error }}
-                                        {% endfor %}
+                                <div class="border border-primary-subtle rounded-3 bg-primary-subtle bg-opacity-10 p-2 p-md-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-2" style="width:32px;height:32px;">
+                                            <i class="fas fa-message small"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">Review</div>
+                                            <small class="text-body-secondary">Share additional feedback about the ride</small>
+                                        </div>
                                     </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    Add optional feedback about the ride experience.
+                                    <div class="bg-body rounded-3 border shadow-sm p-1">
+                                        {{ form.review }}
+                                    </div>
+                                    {% if form.review.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.review.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="small text-body-secondary mt-1">
+                                        <i class="fas fa-circle-info me-1"></i>
+                                        Add optional feedback about the ride experience.
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="border-top mt-4 pt-3">
-                            <div class="d-flex flex-wrap gap-2">
-                                <button type="submit" class="btn btn-warning">
-                                    <i class="fas fa-star me-1"></i>Save Rating
-                                </button>
-                                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-primary">
+                        <div class="border-top mt-3 pt-3">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-primary btn-sm rounded-3 px-3">
                                     <i class="fas fa-arrow-left me-1"></i>Back to Ride
                                 </a>
+                                <button type="submit" class="btn btn-warning btn-sm rounded-3 px-3 fw-semibold shadow-sm">
+                                    <i class="fas fa-star me-1"></i>Save Rating
+                                </button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
-            <!-- Rating Information -->
-            <div class="card card-outline card-primary shadow-sm mt-3">
-                <div class="card-header">
-                    <h6 class="mb-0 fw-semibold">
-                        <i class="fas fa-circle-info me-2"></i>Rating Information
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="bg-body-tertiary rounded-3 p-3 h-100">
-                                <div class="text-primary mb-2">
-                                    <i class="fas fa-user-check fa-lg"></i>
-                                </div>
-                                <div class="fw-semibold">From User</div>
-                                <small class="text-muted">
-                                    The passenger or driver who is submitting the feedback.
-                                </small>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="bg-body-tertiary rounded-3 p-3 h-100">
-                                <div class="text-success mb-2">
-                                    <i class="fas fa-user-tag fa-lg"></i>
-                                </div>
-                                <div class="fw-semibold">To User</div>
-                                <small class="text-muted">
-                                    The passenger or driver receiving the feedback.
-                                </small>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="bg-body-tertiary rounded-3 p-3 h-100">
-                                <div class="text-warning mb-2">
-                                    <i class="fas fa-star-half-stroke fa-lg"></i>
-                                </div>
-                                <div class="fw-semibold">Rating Scale</div>
-                                <small class="text-muted">
-                                    Ratings are recorded on a scale from 1 to 5.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
-        <!-- Sidebar -->
-        <div class="col-xl-4 mt-3 mt-xl-0">
-            <!-- Ride Information -->
-            <div class="card card-outline card-primary shadow-sm mb-3">
-                <div class="card-header">
-                    <h5 class="mb-1 fw-semibold">
-                        <i class="fas fa-car-side me-2"></i>Ride Information
-                    </h5>
-                    <div class="small text-muted">
-                        Ride associated with this rating
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-3 mb-3">
+                <div class="card-header bg-body border-0 p-2 p-md-3">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-2" style="width:34px;height:34px;">
+                            <i class="fas fa-car-side small"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Ride Information</h6>
+                            <small class="text-body-secondary">Associated ride</small>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="small text-muted">Ride Number</div>
-                        <a href="{% url 'ride_details' ride.pk %}" class="fw-semibold text-body text-decoration-none">
+                <div class="card-body pt-0 p-2 p-md-3">
+                    <div class="rounded-3 bg-primary-subtle bg-opacity-10 border border-primary-subtle p-2 mb-2">
+                        <div class="small text-body-secondary">Ride Number</div>
+                        <a href="{% url 'ride_details' ride.pk %}" class="fw-bold text-primary text-decoration-none">
                             {{ ride.ride_number }}
                         </a>
                     </div>
-                    <div class="mb-3">
-                        <div class="small text-muted">Passenger</div>
-                        <div class="fw-semibold mt-1">{{ ride.passenger.get_full_name|default:ride.passenger }}</div>
+                    <div class="d-flex justify-content-between py-2 border-bottom gap-2">
+                        <span class="small text-body-secondary">Passenger</span>
+                        <span class="fw-semibold small text-end">{{ ride.passenger.get_full_name|default:ride.passenger }}</span>
                     </div>
-                    <div class="mb-3">
-                        <div class="small text-muted">Driver</div>
-                        <div class="fw-semibold mt-1">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }})</div>
+                    <div class="d-flex justify-content-between py-2 border-bottom gap-2">
+                        <span class="small text-body-secondary">Driver</span>
+                        <span class="fw-semibold small text-end">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }}</span>
                     </div>
-                    <div class="mb-3">
-                        <div class="small text-muted">Vehicle</div>
-                        <div class="fw-semibold mt-1">{{ ride.vehicle }}</div>
-                    </div>
-                    <div>
-                        <div class="small text-muted">Ride Status</div>
-                        <div class="mt-1">
-                            {% if ride.status == "completed" %}
-                                <span class="badge bg-success-subtle text-success">
-                                    <i class="fas fa-circle-check me-1"></i>{{ ride.get_status_display }}
-                                </span>
-                            {% elif ride.status == "cancelled" %}
-                                <span class="badge bg-danger-subtle text-danger">
-                                    <i class="fas fa-circle-xmark me-1"></i>{{ ride.get_status_display }}
-                                </span>
-                            {% else %}
-                                <span class="badge bg-secondary-subtle text-secondary">
-                                    {{ ride.get_status_display }}
-                                </span>
-                            {% endif %}
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center pt-2 gap-2">
+                        <span class="small text-body-secondary">Status</span>
+                        {% if ride.status == "completed" %}
+                            <span class="badge bg-success-subtle text-success-emphasis rounded-pill">Completed</span>
+                        {% elif ride.status == "cancelled" %}
+                            <span class="badge bg-danger-subtle text-danger rounded-pill">Cancelled</span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary rounded-pill">{{ ride.get_status_display }}</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            <!-- Journey -->
-            <div class="card card-outline card-info shadow-sm mb-3">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-route me-2"></i>Journey
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-start mb-3">
-                        <div class="me-3 text-success">
-                            <i class="fas fa-location-dot fa-lg"></i>
+            <div class="card border-0 shadow-sm rounded-3 mb-3">
+                <div class="card-header bg-body border-0 p-2 p-md-3">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-info-subtle text-info d-flex align-items-center justify-content-center me-2" style="width:34px;height:34px;">
+                            <i class="fas fa-route small"></i>
                         </div>
                         <div>
-                            <div class="small text-muted">Pickup</div>
-                            <div class="fw-semibold mt-1">{{ ride.pickup_location }}</div>
+                            <h6 class="fw-bold mb-0">Journey</h6>
+                            <small class="text-body-secondary">Ride route</small>
                         </div>
                     </div>
-                    <div class="border-start ms-2 ps-4 mb-3"></div>
+                </div>
+                <div class="card-body pt-0 p-2 p-md-3">
                     <div class="d-flex align-items-start">
-                        <div class="me-3 text-danger">
-                            <i class="fas fa-location-dot fa-lg"></i>
+                        <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center flex-shrink-0 me-2" style="width:28px;height:28px;">
+                            <i class="fas fa-location-dot small"></i>
                         </div>
-                        <div>
-                            <div class="small text-muted">Destination</div>
-                            <div class="fw-semibold mt-1">{{ ride.drop_location }}</div>
+                        <div class="min-w-0">
+                            <div class="small text-body-secondary">Pickup</div>
+                            <div class="fw-semibold small mt-1 text-break">{{ ride.pickup_location }}</div>
+                        </div>
+                    </div>
+                    <div class="border-start ms-2 my-1" style="height:18px;"></div>
+                    <div class="d-flex align-items-start">
+                        <div class="rounded-circle bg-danger-subtle text-danger d-flex align-items-center justify-content-center flex-shrink-0 me-2" style="width:28px;height:28px;">
+                            <i class="fas fa-location-dot small"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="small text-body-secondary">Destination</div>
+                            <div class="fw-semibold small mt-1 text-break">{{ ride.drop_location }}</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Rating Guide -->
-            <div class="card card-outline card-warning shadow-sm">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-star-half-stroke me-2"></i>Rating Guide
-                    </h5>
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-body border-0 p-2 p-md-3">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center me-2" style="width:34px;height:34px;">
+                            <i class="fas fa-star-half-stroke small"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Rating Guide</h6>
+                            <small class="text-body-secondary">Rating scale</small>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center py-2 border-bottom">
+                <div class="card-body pt-0 p-2 p-md-3">
+                    <div class="d-flex align-items-center py-1 border-bottom">
                         <span class="text-warning me-3">★</span>
-                        <span class="fw-semibold">1</span>
-                        <span class="text-muted ms-2">Very Poor</span>
+                        <span class="small text-body-secondary">1 - Very Poor</span>
                     </div>
-                    <div class="d-flex align-items-center py-2 border-bottom">
+                    <div class="d-flex align-items-center py-1 border-bottom">
                         <span class="text-warning me-3">★★</span>
-                        <span class="fw-semibold">2</span>
-                        <span class="text-muted ms-2">Poor</span>
+                        <span class="small text-body-secondary">2 - Poor</span>
                     </div>
-                    <div class="d-flex align-items-center py-2 border-bottom">
+                    <div class="d-flex align-items-center py-1 border-bottom">
                         <span class="text-warning me-3">★★★</span>
-                        <span class="fw-semibold">3</span>
-                        <span class="text-muted ms-2">Average</span>
+                        <span class="small text-body-secondary">3 - Average</span>
                     </div>
-                    <div class="d-flex align-items-center py-2 border-bottom">
+                    <div class="d-flex align-items-center py-1 border-bottom">
                         <span class="text-warning me-3">★★★★</span>
-                        <span class="fw-semibold">4</span>
-                        <span class="text-muted ms-2">Good</span>
+                        <span class="small text-body-secondary">4 - Good</span>
                     </div>
-                    <div class="d-flex align-items-center pt-2">
+                    <div class="d-flex align-items-center pt-1">
                         <span class="text-warning me-3">★★★★★</span>
-                        <span class="fw-semibold">5</span>
-                        <span class="text-muted ms-2">Excellent</span>
+                        <span class="small text-body-secondary">5 - Excellent</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const ratingSelect = document.getElementById("{{ form.rating.id_for_label }}");
+    const ratingStars = document.getElementById("ratingStars");
+    const stars = document.querySelectorAll(".rating-star");
+    const ratingText = document.getElementById("ratingText");
+    const ratingBadge = document.getElementById("ratingBadge");
+    const ratingLabels = {
+        1: "Very Poor",
+        2: "Poor",
+        3: "Average",
+        4: "Good",
+        5: "Excellent"
+    };
+    function updateStars(value) {
+        value = parseInt(value) || 0;
+        stars.forEach(function (star) {
+            const starValue = parseInt(star.dataset.value);
+            const icon = star.querySelector("i");
+            if (starValue <= value) {
+                icon.classList.remove("far");
+                icon.classList.add("fas");
+            } else {
+                icon.classList.remove("fas");
+                icon.classList.add("far");
+            }
+        });
+        if (value > 0) {
+            ratingText.textContent = value + " / 5 - " + ratingLabels[value];
+            ratingBadge.textContent = value + " / 5 - " + ratingLabels[value];
+        } else {
+            ratingText.textContent = "Select rating";
+            ratingBadge.textContent = "Select rating";
+        }
+    }
+    stars.forEach(function (star) {
+        star.addEventListener("click", function () {
+            const value = parseInt(this.dataset.value);
+            if (ratingSelect) {
+                ratingSelect.value = value;
+                ratingSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+            updateStars(value);
+        });
+        star.addEventListener("mouseenter", function () {
+            const value = parseInt(this.dataset.value);
+            stars.forEach(function (item) {
+                const itemValue = parseInt(item.dataset.value);
+                const icon = item.querySelector("i");
+                if (itemValue <= value) {
+                    icon.classList.remove("far");
+                    icon.classList.add("fas");
+                } else {
+                    icon.classList.remove("fas");
+                    icon.classList.add("far");
+                }
+            });
+            ratingText.textContent = value + " / 5 - " + ratingLabels[value];
+        });
+    });
+    if (ratingStars) {
+        ratingStars.addEventListener("mouseleave", function () {
+            const value = ratingSelect ? parseInt(ratingSelect.value) || 0 : 0;
+            updateStars(value);
+        });
+    }
+    if (ratingSelect) {
+        ratingSelect.addEventListener("change", function () {
+            updateStars(this.value);
+        });
+        updateStars(ratingSelect.value);
+    }
+});
+</script>
 {% endblock %}
