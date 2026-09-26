@@ -74,6 +74,146 @@ GEOCODING_TIMEOUT = 8
 ROUTING_TIMEOUT = 8
 
 
+def _create_notifications_for_users(
+    users,
+    notification_type,
+    title,
+    message,
+    reference_type=None,
+    reference_id=None,
+):
+    from support.models import Notification
+
+    unique_users = []
+    seen_user_ids = set()
+
+    for user in users:
+        if not user or not user.is_active:
+            continue
+
+        if user.pk in seen_user_ids:
+            continue
+
+        seen_user_ids.add(user.pk)
+        unique_users.append(user)
+
+    if not unique_users:
+        return 0
+
+    notification_fields = {
+        field.name
+        for field in Notification._meta.get_fields()
+        if getattr(field, "concrete", False)
+    }
+
+    notifications = []
+
+    for user in unique_users:
+        data = {
+            "user": user,
+            "title": title,
+            "message": message,
+        }
+
+        if "notification_type" in notification_fields:
+            data["notification_type"] = notification_type
+
+        if "reference_type" in notification_fields:
+            data["reference_type"] = reference_type
+
+        if "reference_id" in notification_fields:
+            data["reference_id"] = reference_id
+
+        if "is_read" in notification_fields:
+            data["is_read"] = False
+
+        notifications.append(
+            Notification(**data)
+        )
+
+    Notification.objects.bulk_create(
+        notifications
+    )
+
+    return len(notifications)
+
+
+def _get_notification_users(actor=None):
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+
+    users = list(
+        User.objects.filter(
+            is_active=True,
+            is_staff=True,
+        ).order_by("pk")
+    )
+
+    if actor and actor.is_active:
+        users.append(actor)
+
+    unique_users = []
+    seen_user_ids = set()
+
+    for user in users:
+        if user.pk in seen_user_ids:
+            continue
+
+        seen_user_ids.add(user.pk)
+        unique_users.append(user)
+
+    return unique_users
+
+
+def _create_ride_request_notifications(
+    ride_request,
+    actor=None,
+):
+    if ride_request is None:
+        return 0
+
+    users = _get_notification_users(
+        actor=actor
+    )
+
+    return _create_notifications_for_users(
+        users=users,
+        notification_type="ride_request",
+        title="New Ride Request",
+        message=(
+            f"New ride request "
+            f"{ride_request.request_number} "
+            f"has been created."
+        ),
+        reference_type="ride_request",
+        reference_id=ride_request.pk,
+    )
+
+
+def _create_ride_notifications(
+    ride,
+    actor=None,
+):
+    if ride is None:
+        return 0
+
+    users = _get_notification_users(
+        actor=actor
+    )
+
+    return _create_notifications_for_users(
+        users=users,
+        notification_type="ride",
+        title="New Ride Created",
+        message=(
+            f"New ride {ride.ride_number} "
+            f"has been created successfully."
+        ),
+        reference_type="ride",
+        reference_id=ride.pk,
+    )
+
 def _paginate(request, queryset, default_per_page=15):
     try:
         per_page = int(request.GET.get("per_page", default_per_page))
@@ -1351,20 +1491,16 @@ def ride_request_create_edit(request, pk=None):
                 )
 
             if not form.errors:
-                pickup_location = (
-                    _get_or_create_form_location(
-                        cleaned_data,
-                        "pickup",
-                        pickup_data,
-                    )
+                pickup_location = _get_or_create_form_location(
+                    cleaned_data,
+                    "pickup",
+                    pickup_data,
                 )
 
-                drop_location = (
-                    _get_or_create_form_location(
-                        cleaned_data,
-                        "drop",
-                        drop_data,
-                    )
+                drop_location = _get_or_create_form_location(
+                    cleaned_data,
+                    "drop",
+                    drop_data,
                 )
 
             if (
@@ -1479,13 +1615,11 @@ def ride_request_create_edit(request, pk=None):
                     "estimated_duration"
                 )
 
-                calculated_fare = (
-                    _calculate_request_fare(
-                        form,
-                        city,
-                        distance,
-                        duration,
-                    )
+                calculated_fare = _calculate_request_fare(
+                    form,
+                    city,
+                    distance,
+                    duration,
                 )
 
                 if calculated_fare is not None:
@@ -1494,6 +1628,8 @@ def ride_request_create_edit(request, pk=None):
                     ] = calculated_fare
 
             if not form.errors:
+                is_new_request = ride_request is None
+
                 saved_request = form.save(
                     commit=False
                 )
@@ -1540,6 +1676,20 @@ def ride_request_create_edit(request, pk=None):
                 saved_request.save()
 
                 # -------------------------------------------------
+                # NOTIFICATION FOR ALL ACTIVE ADMIN USERS
+                # -------------------------------------------------
+                # Notification is created only for a NEW request.
+                # Editing an existing request does not create a
+                # duplicate "New Ride Request" notification.
+                # -------------------------------------------------
+                if is_new_request:
+                    _create_ride_request_notifications(
+                        saved_request,
+                        actor=request.user,
+                    )
+
+
+                # -------------------------------------------------
                 # AUTOMATIC REFUND FOR CANCELLED RIDE REQUEST
                 # -------------------------------------------------
                 refund = None
@@ -1582,7 +1732,7 @@ def ride_request_create_edit(request, pk=None):
                             f"Ride request "
                             f"{saved_request.request_number} "
                             f"has been "
-                            f"{'updated' if ride_request else 'created'} "
+                            f"{'created' if is_new_request else 'updated'} "
                             f"successfully."
                         ),
                     )
@@ -1632,6 +1782,7 @@ def ride_request_create_edit(request, pk=None):
         "rides/ride_request_form.html",
         context,
     )
+
 
 
 @login_required
@@ -2064,15 +2215,11 @@ def ride_create_edit(request, pk=None):
                     saved_ride
                 )
 
-                messages.success(
-                    request,
-                    (
-                        f"Ride {saved_ride.ride_number} "
-                        f"has been "
-                        f"{'updated' if ride else 'created'} "
-                        f"successfully."
-                    ),
-                )
+                if ride is None:
+                    _create_ride_notifications(
+                        saved_ride,
+                        actor=request.user,
+                    )
 
                 return redirect(
                     "ride_details",
@@ -2624,10 +2771,10 @@ def ride_tracking_list(request, ride_pk):
     )
 
     context = {
-        "page_title": (
-            f"Tracking - "
-            f"{ride.ride_number}"
-        ),
+        # "page_title": (
+        #     f"Tracking - "
+        #     f"{ride.ride_number}"
+        # ),
         "breadcrumb_items": [
             {
                 "title": "Tracking",
@@ -3241,3 +3388,260 @@ def ride_dashboard(request):
         "rides/ride_dashboard.html",
         context,
     )
+
+@login_required
+def ride_tracking_latest(request, ride_pk):
+    ride = get_object_or_404(
+        _ride_queryset(),
+        pk=ride_pk,
+    )
+
+    latest_tracking = (
+        ride.tracking_points
+        .select_related("driver")
+        .order_by("-recorded_at")
+        .first()
+    )
+
+    if not latest_tracking:
+        return JsonResponse({
+            "success": True,
+            "has_tracking": False,
+            "ride_id": ride.pk,
+            "ride_number": ride.ride_number,
+            "ride_status": ride.status,
+            "ride_status_display": ride.get_status_display(),
+        })
+
+    return JsonResponse({
+        "success": True,
+        "has_tracking": True,
+        "ride_id": ride.pk,
+        "ride_number": ride.ride_number,
+        "ride_status": ride.status,
+        "ride_status_display": ride.get_status_display(),
+        "tracking": {
+            "id": latest_tracking.pk,
+            "latitude": float(latest_tracking.latitude),
+            "longitude": float(latest_tracking.longitude),
+            "speed": (
+                float(latest_tracking.speed)
+                if latest_tracking.speed is not None
+                else None
+            ),
+            "heading": (
+                float(latest_tracking.heading)
+                if latest_tracking.heading is not None
+                else None
+            ),
+            "accuracy": (
+                float(latest_tracking.accuracy)
+                if latest_tracking.accuracy is not None
+                else None
+            ),
+            "recorded_at": (
+                latest_tracking.recorded_at.isoformat()
+            ),
+        },
+    })
+
+
+@login_required
+def ride_tracking_live_update(request, ride_pk):
+    if request.method != "POST":
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Only POST requests are allowed.",
+            },
+            status=405,
+        )
+
+    ride = get_object_or_404(
+        _ride_queryset(),
+        pk=ride_pk,
+    )
+
+    allowed_statuses = {
+        Ride.Status.DRIVER_ASSIGNED,
+        Ride.Status.DRIVER_ARRIVING,
+        Ride.Status.DRIVER_ARRIVED,
+        Ride.Status.STARTED,
+    }
+
+    if ride.status not in allowed_statuses:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": (
+                    "Live tracking is not available "
+                    "for this ride status."
+                ),
+            },
+            status=400,
+        )
+
+    if not ride.driver_id:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "No driver is assigned to this ride.",
+            },
+            status=400,
+        )
+
+    driver_user_id = getattr(
+        ride.driver,
+        "user_id",
+        None,
+    )
+
+    if (
+        not request.user.is_staff
+        and request.user.id != driver_user_id
+    ):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": (
+                    "You are not authorized to "
+                    "send GPS data for this ride."
+                ),
+            },
+            status=403,
+        )
+
+    try:
+        data = json.loads(
+            request.body.decode("utf-8")
+        )
+    except (
+        json.JSONDecodeError,
+        UnicodeDecodeError,
+    ):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Invalid GPS request data.",
+            },
+            status=400,
+        )
+
+    def decimal_value(value):
+        if value is None:
+            return None
+
+        try:
+            return Decimal(str(value))
+        except (
+            InvalidOperation,
+            ValueError,
+            TypeError,
+        ):
+            return None
+
+    latitude = decimal_value(
+        data.get("latitude")
+    )
+
+    longitude = decimal_value(
+        data.get("longitude")
+    )
+
+    speed = decimal_value(
+        data.get("speed")
+    )
+
+    heading = decimal_value(
+        data.get("heading")
+    )
+
+    accuracy = decimal_value(
+        data.get("accuracy")
+    )
+
+    if latitude is None or longitude is None:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": (
+                    "Latitude and longitude are required."
+                ),
+            },
+            status=400,
+        )
+
+    if (
+        latitude < Decimal("-90")
+        or latitude > Decimal("90")
+    ):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Latitude must be between -90 and 90.",
+            },
+            status=400,
+        )
+
+    if (
+        longitude < Decimal("-180")
+        or longitude > Decimal("180")
+    ):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Longitude must be between -180 and 180.",
+            },
+            status=400,
+        )
+
+    if speed is not None and speed < 0:
+        speed = None
+
+    if (
+        heading is not None
+        and (
+            heading < Decimal("0")
+            or heading > Decimal("360")
+        )
+    ):
+        heading = None
+
+    if accuracy is not None and accuracy < 0:
+        accuracy = None
+
+    tracking = RideTracking.objects.create(
+        ride=ride,
+        driver=ride.driver,
+        latitude=latitude,
+        longitude=longitude,
+        speed=speed,
+        heading=heading,
+        accuracy=accuracy,
+    )
+
+    return JsonResponse({
+        "success": True,
+        "message": "GPS location recorded.",
+        "tracking": {
+            "id": tracking.pk,
+            "latitude": float(tracking.latitude),
+            "longitude": float(tracking.longitude),
+            "speed": (
+                float(tracking.speed)
+                if tracking.speed is not None
+                else None
+            ),
+            "heading": (
+                float(tracking.heading)
+                if tracking.heading is not None
+                else None
+            ),
+            "accuracy": (
+                float(tracking.accuracy)
+                if tracking.accuracy is not None
+                else None
+            ),
+            "recorded_at": tracking.recorded_at.isoformat(),
+        },
+    })

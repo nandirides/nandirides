@@ -16,6 +16,7 @@ from locations.models import City, Location
 from vehicles.models import VehicleType
 from .forms import RefundForm
 from .models import Payment, Refund
+
 def _generate_payment_number():
     return (
         f"NRPAY"
@@ -730,6 +731,8 @@ def confirm_ride_payment(request, pk):
                 "updated_at",
             ]
         )
+
+
     return JsonResponse(
         {
             "success": True,

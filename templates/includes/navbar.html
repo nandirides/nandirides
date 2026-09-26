@@ -304,5 +304,132 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+    const notificationStatusUrl = "{% url 'notification_status' %}";
+    const notificationBadge = document.getElementById("notification-badge");
+    const notificationList = document.getElementById("notification-list");
+
+    function updateNotificationBadge(count) {
+        let badge = document.getElementById("notification-badge");
+
+        if (count > 0) {
+            if (!badge) {
+                badge = document.createElement("span");
+                badge.id = "notification-badge";
+                badge.className = "notification-badge";
+                const bellWrapper = document.querySelector(".notification-bell-wrapper");
+                if (bellWrapper) {
+                    bellWrapper.appendChild(badge);
+                }
+            }
+
+            badge.innerHTML =
+                count +
+                '<span class="visually-hidden">unread notifications</span>';
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    function renderNotifications(data) {
+        if (!notificationList) {
+            return;
+        }
+
+        notificationList.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            notificationList.innerHTML = `
+                <div class="text-center py-4 text-body-secondary">
+                    <i class="bi bi-bell-slash fs-3 d-block mb-2"></i>
+                    No new notifications
+                </div>
+            `;
+            return;
+        }
+
+        data.forEach(function (notification) {
+            const item = document.createElement("a");
+
+            item.href = notification.url;
+            item.className =
+                "dropdown-item notification-item py-3 border-bottom";
+
+            const unreadDot = notification.is_read
+                ? ""
+                : '<span class="notification-unread-dot"></span>';
+
+            item.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <div class="notification-item-icon me-3">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <div class="flex-grow-1 notification-content">
+                        <div class="fw-semibold text-body notification-title">
+                            ${escapeNotificationHtml(notification.title)}
+                        </div>
+                        <small class="text-body-secondary notification-message">
+                            ${escapeNotificationHtml(notification.message)}
+                        </small>
+                        <small class="d-block text-body-secondary mt-1 notification-time">
+                            ${escapeNotificationHtml(notification.created_at)}
+                        </small>
+                    </div>
+                    ${unreadDot}
+                </div>
+            `;
+
+            notificationList.appendChild(item);
+        });
+    }
+
+    function escapeNotificationHtml(value) {
+        const div = document.createElement("div");
+        div.textContent = value || "";
+        return div.innerHTML;
+    }
+
+    function refreshNotifications() {
+        fetch(notificationStatusUrl, {
+            method: "GET",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json"
+            },
+            credentials: "same-origin",
+            cache: "no-store"
+        })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error(
+                    "Notification request failed: " +
+                    response.status
+                );
+            }
+
+            return response.json();
+        })
+        .then(function (data) {
+            updateNotificationBadge(
+                Number(data.unread_count || 0)
+            );
+
+            renderNotifications(
+                data.notifications || []
+            );
+        })
+        .catch(function (error) {
+            console.error(
+                "Notification refresh error:",
+                error
+            );
+        });
+    }
+
+    refreshNotifications();
+
+    setInterval(
+        refreshNotifications,
+        10000
+    );
 });
 </script>

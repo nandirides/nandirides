@@ -2,405 +2,1425 @@
 {% block title %}NandiRide | Ride Tracking{% endblock %}
 {% block content %}
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <div class="container-fluid py-3">
     <div class="row align-items-center mb-3">
-        <div class="col-xl-8 col-lg-7">
+        <div class="col-xl-6 col-lg-5">
             <div class="d-flex align-items-center gap-3">
                 <div>
                     <h3 class="mb-1 fw-semibold">
-                        <i class="fas fa-location-dot me-2"></i>Ride Tracking
+                        <i class="fas fa-location-dot text-success me-2"></i>Ride Tracking
                     </h3>
                     <div class="text-body-secondary">
-                        GPS tracking history for {{ ride.ride_number }}
+                        Live GPS tracking for {{ ride.ride_number }}
                     </div>
                 </div>
-                <span class="badge text-bg-primary">
-                    <i class="fas fa-satellite-dish me-1"></i>Tracking
+                <span id="liveStatusBadge" class="badge text-bg-secondary live-status-badge">
+                    <span id="liveStatusDot" class="live-status-dot">
+                        <span class="live-status-wave wave-1"></span>
+                        <span class="live-status-wave wave-2"></span>
+                        <span class="live-status-wave wave-3"></span>
+                        <span class="live-status-core"></span>
+                    </span>
+                    <span id="liveStatusText">Waiting</span>
                 </span>
             </div>
         </div>
-        <div class="col-xl-4 col-lg-5 mt-3 mt-lg-0">
+        <div class="col-xl-6 col-lg-7 mt-3 mt-lg-0">
             <div class="d-flex flex-wrap justify-content-lg-end gap-2">
                 <a href="{% url 'ride_details' ride.pk %}" class="btn btn-outline-primary">
                     <i class="fas fa-car-side me-1"></i>Ride Details
                 </a>
-                <a href="{% url 'ride_tracking_add' ride.pk %}" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i>Add Tracking Point
-                </a>
+                <button type="button" id="startLiveTrackingButton" class="btn btn-success" onclick="startDriverTracking()">
+                    <i class="fas fa-satellite-dish me-1"></i>Start Live GPS
+                </button>
+                <button type="button" id="stopLiveTrackingButton" class="btn btn-outline-danger d-none" onclick="stopDriverTracking()">
+                    <i class="fas fa-stop me-1"></i>Stop GPS
+                </button>
+                <!-- <a href="{% url 'ride_tracking_add' ride.pk %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add Point
+                </a> -->
                 <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary btn-sm px-3 text-nowrap">
                     <i class="fas fa-arrow-left me-1"></i>Back
                 </a>
             </div>
         </div>
     </div>
-    <div class="row g-3 mb-3">
-        <div class="col-xl-3 col-md-6">
-            <div class="info-box shadow-sm h-100 mb-0">
-                <span class="info-box-icon bg-primary">
-                    <i class="fas fa-car-side"></i>
-                </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Ride</span>
-                    <span class="info-box-number">{{ ride.ride_number }}</span>
-                </div>
+
+<div class="row g-3 mb-3">
+    <div class="col-xl-3 col-md-6">
+        <div class="info-box shadow-sm h-100 mb-0">
+            <span class="info-box-icon bg-primary">
+                <i class="fas fa-car-side text-white"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Ride</span>
+                <span class="info-box-number">{{ ride.ride_number }}</span>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="info-box shadow-sm h-100 mb-0">
-                <span class="info-box-icon bg-success">
-                    <i class="fas fa-user-tie"></i>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="info-box shadow-sm h-100 mb-0">
+            <span class="info-box-icon bg-success">
+                <i class="fas fa-user-tie text-white"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Driver</span>
+                <span class="info-box-number text-wrap">
+                    {{ ride.driver.user.get_full_name|default:ride.driver.user.username }}
+                    ({{ ride.driver }})
                 </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Driver</span>
-                    <span class="info-box-number text-wrap">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }}) </span>
-                </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="info-box shadow-sm h-100 mb-0">
-                <span class="info-box-icon bg-warning">
-                    <i class="fas fa-wave-square"></i>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="info-box shadow-sm h-100 mb-0">
+            <span class="info-box-icon bg-warning">
+                <i class="fas fa-wave-square text-white"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Ride Status</span>
+                <span id="rideStatusValue" class="info-box-number text-wrap">
+                    {{ ride.get_status_display }}
                 </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Ride Status</span>
-                    <span class="info-box-number text-wrap">{{ ride.get_status_display }}</span>
-                </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="info-box shadow-sm h-100 mb-0">
-                <span class="info-box-icon bg-info">
-                    <i class="fas fa-location-crosshairs"></i>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="info-box shadow-sm h-100 mb-0">
+            <span class="info-box-icon bg-info">
+                <i class="fas fa-location-crosshairs text-white"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Tracking Points</span>
+                <span id="trackingCount" class="info-box-number">
+                    {{ tracking_count }}
                 </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Tracking Points</span>
-                    <span class="info-box-number">{{ tracking_points|length }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-xl-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div>
+                        <h5 class="mb-1 fw-semibold">
+                            <i class="fas fa-map-location-dot me-2"></i>
+                            Live Ride Map
+                        </h5>
+                        <div class="small text-body-secondary">
+                            Pickup, destination, route and live driver location
+                        </div>
+                    </div>
+                    <span id="gpsAccuracyBadge" class="badge text-bg-secondary">
+                        GPS waiting
+                    </span>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                <div id="liveRideMap" style="width:100%;height:500px;"></div>
+            </div>
+
+            <div class="card-footer">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge text-bg-success">P</span>
+                            <div>
+                                <div class="fw-semibold">Pickup</div>
+                                <div class="small text-body-secondary">
+                                    {{ ride.pickup_location }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge text-bg-danger">D</span>
+                            <div>
+                                <div class="fw-semibold">Destination</div>
+                                <div class="small text-body-secondary">
+                                    {{ ride.drop_location }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge text-bg-primary">
+                                <i class="fas fa-car"></i>
+                            </span>
+                            <div>
+                                <div class="fw-semibold">Driver</div>
+                                <div id="mapDriverStatus" class="small text-body-secondary">
+                                    Waiting for GPS
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row g-3">
-        <div class="col-xl-8">
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                        <div>
-                            <h5 class="mb-1 fw-semibold">
-                                <i class="fas fa-timeline me-2"></i>Tracking History
-                            </h5>
-                            <div class="small text-body-secondary">
-                                Recorded GPS locations for this ride
-                            </div>
-                        </div>
-                        <span class="badge text-bg-info">
-                            {{ tracking_points|length }} Point{{ tracking_points|length|pluralize }}
-                        </span>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    {% if tracking_points %}
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-3">#</th>
-                                        <th>Driver</th>
-                                        <th>Latitude</th>
-                                        <th>Longitude</th>
-                                        <th>Speed</th>
-                                        <th>Heading</th>
-                                        <th>Accuracy</th>
-                                        <th>Recorded At</th>
-                                        <th class="text-end pe-3">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for point in tracking_points %}
-                                        <tr>
-                                            <td class="ps-3 fw-semibold">
-                                                {{ forloop.counter }}
-                                            </td>
-                                            <td>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <span class="badge rounded-circle text-bg-success p-2">
-                                                        <i class="fas fa-user-tie"></i>
-                                                    </span>
-                                                    <div class="fw-semibold">
-                                                        {{ point.driver }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="font-monospace small">
-                                                    {{ point.latitude }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="font-monospace small">
-                                                    {{ point.longitude }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                {% if point.speed != None %}
-                                                    <span class="badge text-bg-light border">
-                                                        {{ point.speed }} km/h
-                                                    </span>
-                                                {% else %}
-                                                    <span class="text-body-secondary">—</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if point.heading != None %}
-                                                    <span class="badge text-bg-light border">
-                                                        {{ point.heading }}°
-                                                    </span>
-                                                {% else %}
-                                                    <span class="text-body-secondary">—</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if point.accuracy != None %}
-                                                    {{ point.accuracy }} m
-                                                {% else %}
-                                                    <span class="text-body-secondary">—</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="fw-semibold">
-                                                    {{ point.recorded_at|date:"d M Y" }}
-                                                </div>
-                                                <div class="small text-body-secondary">
-                                                    {{ point.recorded_at|date:"h:i:s A" }}
-                                                </div>
-                                            </td>
-                                            <td class="text-end pe-3">
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <i class="fas fa-ellipsis-vertical"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                                        <li>
-                                                            <a class="dropdown-item text-danger" href="{% url 'ride_tracking_delete' point.pk %}">
-                                                                <i class="fas fa-trash-can me-2"></i>Delete
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="text-center py-5 px-3">
-                            <div class="mb-3">
-                                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-body-tertiary p-4">
-                                    <i class="fas fa-location-dot display-6 text-body-secondary"></i>
-                                </span>
-                            </div>
-                            <h5 class="fw-semibold">No Tracking Data</h5>
-                            <p class="text-body-secondary mb-4">
-                                No GPS tracking points have been recorded for this ride yet.
-                            </p>
-                            <a href="{% url 'ride_tracking_add' ride.pk %}" class="btn btn-primary">
-                                <i class="fas fa-plus me-1"></i>Add First Tracking Point
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
-                {% if is_paginated %}
-                    <div class="card-footer bg-body-tertiary">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                            <div class="small text-body-secondary">
-                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                            </div>
-                            <nav aria-label="Tracking pagination">
-                                <ul class="pagination pagination-sm mb-0">
-                                    {% if page_obj.has_previous %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
-                                                <i class="fas fa-chevron-left me-1"></i>Previous
-                                            </a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled">
-                                            <span class="page-link">
-                                                <i class="fas fa-chevron-left me-1"></i>Previous
-                                            </span>
-                                        </li>
-                                    {% endif %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ page_obj.number }}</span>
-                                    </li>
-                                    {% if page_obj.has_next %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
-                                                Next<i class="fas fa-chevron-right ms-1"></i>
-                                            </a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled">
-                                            <span class="page-link">
-                                                Next<i class="fas fa-chevron-right ms-1"></i>
-                                            </span>
-                                        </li>
-                                    {% endif %}
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-        <div class="col-xl-4">
-            <div class="card shadow-sm mb-3">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-route me-2"></i>Journey
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="text-success">
-                            <i class="fas fa-circle-dot mt-1"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="small text-body-secondary">Pickup</div>
-                            <div class="fw-semibold mt-1">
-                                {{ ride.pickup_location }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border-start ms-1 my-2" style="height: 25px;"></div>
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="text-danger">
-                            <i class="fas fa-location-dot mt-1"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="small text-body-secondary">Destination</div>
-                            <div class="fw-semibold mt-1">
-                                {{ ride.drop_location }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-2 mt-3">
-                        <div class="col-6">
-                            <div class="border rounded-3 p-3 h-100 bg-body-tertiary">
-                                <div class="small text-body-secondary">Distance</div>
-                                <div class="fw-semibold mt-1">
-                                    {{ ride.distance_km }} km
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="border rounded-3 p-3 h-100 bg-body-tertiary">
-                                <div class="small text-body-secondary">Duration</div>
-                                <div class="fw-semibold mt-1">
-                                    {{ ride.duration_minutes }} min
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
+    <div class="col-xl-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-1 fw-semibold">
+                    <i class="fas fa-satellite-dish me-2"></i>
+                    Live GPS Data
+                </h5>
+                <div class="small text-body-secondary">
+                    Latest driver coordinates
                 </div>
             </div>
-            <div class="card shadow-sm mb-3">
-                <div class="card-header">
-                    <h5 class="mb-1 fw-semibold">
-                        <i class="fas fa-map-pin me-2"></i>Latest Location
-                    </h5>
+
+            <div class="card-body">
+                <div class="border rounded-3 p-3 bg-body-tertiary mb-3">
                     <div class="small text-body-secondary">
-                        Most recently recorded GPS point
+                        <i class="fas fa-location-crosshairs me-1"></i>
+                        Driver Coordinates
+                    </div>
+                    <div id="liveCoordinates" class="font-monospace fw-semibold mt-1">
+                        Waiting...
                     </div>
                 </div>
-                <div class="card-body">
-                    {% if latest_tracking %}
-                        <div class="border rounded-3 p-3 bg-body-tertiary mb-3">
-                            <div class="small text-body-secondary">
-                                <i class="fas fa-crosshairs me-1"></i>Coordinates
-                            </div>
-                            <div class="font-monospace fw-semibold mt-1 text-break">
-                                {{ latest_tracking.latitude }}, {{ latest_tracking.longitude }}
-                            </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <div class="small text-body-secondary">Speed</div>
+                            <div id="liveSpeed" class="fw-semibold mt-1">—</div>
                         </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <div class="border rounded-3 p-3 h-100">
-                                    <div class="small text-body-secondary">Speed</div>
-                                    <div class="fw-semibold mt-1">
-                                        {% if latest_tracking.speed != None %}
-                                            {{ latest_tracking.speed }} km/h
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="border rounded-3 p-3 h-100">
-                                    <div class="small text-body-secondary">Accuracy</div>
-                                    <div class="fw-semibold mt-1">
-                                        {% if latest_tracking.accuracy != None %}
-                                            {{ latest_tracking.accuracy }} m
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="small text-body-secondary">Last Recorded</div>
-                            <div class="fw-semibold mt-1">
-                                {{ latest_tracking.recorded_at|date:"d M Y, h:i:s A" }}
-                            </div>
-                        </div>
-                    {% else %}
-                        <div class="text-center py-3">
-                            <i class="fas fa-location-dot display-6 text-body-secondary"></i>
-                            <div class="fw-semibold mt-3">No Latest Location</div>
-                            <div class="small text-body-secondary mt-1">
-                                Tracking data will appear here once recorded.
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="card shadow-sm mb-3">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-circle-info me-2"></i>Tracking Overview
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
-                        <span class="text-body-secondary">Total Points</span>
-                        <span class="badge text-bg-primary">{{ tracking_points|length }}</span>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
-                        <span class="text-body-secondary">Driver</span>
-                        <span class="fw-semibold text-end ms-2">{{ ride.driver.user.get_full_name|default:ride.driver.user.username }} ({{ ride.driver }}) </span>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between">
-                        <span class="text-body-secondary">Ride Status</span>
-                        <span class="badge text-bg-secondary">{{ ride.get_status_display }}</span>
+                    <div class="col-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <div class="small text-body-secondary">Heading</div>
+                            <div id="liveHeading" class="fw-semibold mt-1">—</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="card card-outline card-info shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-start gap-3">
-                        <i class="fas fa-lightbulb fs-4 text-info"></i>
-                        <div>
-                            <div class="fw-semibold">Tracking Information</div>
-                            <div class="small text-body-secondary mt-1">
-                                GPS records contain the driver's location, speed, heading and accuracy at the recorded time.
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <div class="small text-body-secondary">Accuracy</div>
+                            <div id="liveAccuracy" class="fw-semibold mt-1">—</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <div class="small text-body-secondary">Points</div>
+                            <div id="livePointCount" class="fw-semibold mt-1">
+                                {{ tracking_count }}
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="border rounded-3 p-3 bg-body-tertiary">
+                    <div class="small text-body-secondary">Last GPS Update</div>
+                    <div id="liveLastUpdate" class="fw-semibold mt-1">
+                        Waiting for GPS...
+                    </div>
+                </div>
+
+                <div id="gpsMessage" class="alert alert-info mt-3 mb-0 small">
+                    <i class="fas fa-circle-info me-1"></i>
+                    Start Live GPS to send the driver's current location.
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="row g-3">
+    <div class="col-xl-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div>
+                        <h5 class="mb-1 fw-semibold">
+                            <i class="fas fa-timeline me-2"></i>
+                            Tracking History
+                        </h5>
+                        <div class="small text-body-secondary">
+                            Recorded GPS locations for this ride
+                        </div>
+                    </div>
+                    <span class="badge text-bg-info">
+                        {{ tracking_count }} Point{{ tracking_count|pluralize }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                {% if tracking_points %}
+                    <div class="table-responsive" style="max-height:730px;overflow-y:auto;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">#</th>
+                                    <th>Driver</th>
+                                    <th>Latitude</th>
+                                    <th>Longitude</th>
+                                    <th>Speed</th>
+                                    <th>Heading</th>
+                                    <th>Accuracy</th>
+                                    <th>Recorded At</th>
+                                    <th class="text-end pe-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for point in tracking_points %}
+                                    <tr>
+                                        <td class="ps-3 fw-semibold">{{ forloop.counter }}</td>
+                                        <td>
+                                            <span class="badge text-bg-success me-1">
+                                                <i class="fas fa-car"></i>
+                                            </span>
+                                            {{ point.driver }}
+                                        </td>
+                                        <td class="font-monospace small">{{ point.latitude }}</td>
+                                        <td class="font-monospace small">{{ point.longitude }}</td>
+                                        <td>
+                                            {% if point.speed != None %}
+                                                {{ point.speed }} km/h
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if point.heading != None %}
+                                                {{ point.heading }}°
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if point.accuracy != None %}
+                                                {{ point.accuracy }} m
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">
+                                                {{ point.recorded_at|date:"d M Y" }}
+                                            </div>
+                                            <div class="small text-body-secondary">
+                                                {{ point.recorded_at|date:"h:i:s A" }}
+                                            </div>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <form method="post" action="{% url 'ride_tracking_delete' point.pk %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this tracking point?');">
+                                                    <i class="fas fa-trash-can"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 px-3">
+                        <i class="fas fa-location-dot display-6 text-body-secondary"></i>
+                        <h5 class="fw-semibold mt-3">No Tracking Data</h5>
+                        <p class="text-body-secondary mb-4">
+                            No GPS tracking points have been recorded for this ride yet.
+                        </p>
+                        <a href="{% url 'ride_tracking_add' ride.pk %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Add First Tracking Point
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if is_paginated %}
+                <div class="card-footer bg-body-tertiary">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="small text-body-secondary">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            Previous
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_obj.number }}</span>
+                                </li>
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            Next
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header">
+                <h5 class="mb-0 fw-semibold">
+                    <i class="fas fa-route me-2"></i>Journey
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="text-success">
+                        <i class="fas fa-circle-dot mt-1"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="small text-body-secondary">Pickup</div>
+                        <div class="fw-semibold mt-1">
+                            {{ ride.pickup_location }}
+                        </div>
+                        <div class="small font-monospace text-body-secondary" id="pickupCoordinates">
+                            Loading coordinates...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-start ms-1 my-2" style="height:25px;"></div>
+
+                <div class="d-flex align-items-start gap-3">
+                    <div class="text-danger">
+                        <i class="fas fa-location-dot mt-1"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="small text-body-secondary">Destination</div>
+                        <div class="fw-semibold mt-1">
+                            {{ ride.drop_location }}
+                        </div>
+                        <div class="small font-monospace text-body-secondary" id="dropCoordinates">
+                            Loading coordinates...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-2 mt-3">
+                    <div class="col-6">
+                        <div class="border rounded-3 p-3 h-100 bg-body-tertiary">
+                            <div class="small text-body-secondary">Distance</div>
+                            <div class="fw-semibold mt-1">{{ ride.distance_km }} km</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded-3 p-3 h-100 bg-body-tertiary">
+                            <div class="small text-body-secondary">Duration</div>
+                            <div class="fw-semibold mt-1">{{ ride.duration_minutes }} min</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-header">
+                <h5 class="mb-1 fw-semibold">
+                    <i class="fas fa-map-pin me-2"></i>Latest Driver Location
+                </h5>
+                <div class="small text-body-secondary">
+                    Most recently recorded GPS point
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="border rounded-3 p-3 bg-body-tertiary">
+                    <div class="small text-body-secondary">Coordinates</div>
+                    <div id="latestCoordinates" class="font-monospace fw-semibold mt-1">
+                        Waiting...
+                    </div>
+                    <div class="row g-2 mt-3">
+                        <div class="col-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <div class="small text-body-secondary">Speed</div>
+                                <div id="latestSpeed" class="fw-semibold mt-1">—</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <div class="small text-body-secondary">Accuracy</div>
+                                <div id="latestAccuracy" class="fw-semibold mt-1">—</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="small text-body-secondary">Last Recorded</div>
+                        <div id="latestRecordedAt" class="fw-semibold mt-1">
+                            Waiting...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0 fw-semibold">
+                    <i class="fas fa-circle-info me-2"></i>Tracking Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between border-bottom pb-3 mb-3">
+                    <span class="text-body-secondary">Total Points</span>
+                    <span id="overviewTrackingCount" class="badge text-bg-primary">
+                        {{ tracking_count }}
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom pb-3 mb-3">
+                    <span class="text-body-secondary">Driver</span>
+                    <span class="fw-semibold text-end ms-2">
+                        {{ ride.driver.user.get_full_name|default:ride.driver.user.username }}
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-body-secondary">Ride Status</span>
+                    <span id="overviewRideStatus" class="badge text-bg-secondary">
+                        {{ ride.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+(function () {
+    "use strict";
+
+    const pickupLatitude = Number("{{ ride.pickup_location.latitude|default:'' }}");
+    const pickupLongitude = Number("{{ ride.pickup_location.longitude|default:'' }}");
+    const dropLatitude = Number("{{ ride.drop_location.latitude|default:'' }}");
+    const dropLongitude = Number("{{ ride.drop_location.longitude|default:'' }}");
+
+    const pickupAddress = "{{ ride.pickup_location.address|default:ride.pickup_location|escapejs }}";
+    const dropAddress = "{{ ride.drop_location.address|default:ride.drop_location|escapejs }}";
+    const driverName = "{{ ride.driver.user.get_full_name|default:ride.driver.user.username|escapejs }}";
+
+    const latestUrl = "{% url 'ride_tracking_latest' ride.pk %}";
+    const liveUpdateUrl = "{% url 'ride_tracking_live_update' ride.pk %}";
+    const csrfToken = "{{ csrf_token }}";
+
+    const startButton = document.getElementById("startLiveTrackingButton");
+    const stopButton = document.getElementById("stopLiveTrackingButton");
+    const liveStatusBadge = document.getElementById("liveStatusBadge");
+    const liveStatusText = document.getElementById("liveStatusText");
+    const gpsMessage = document.getElementById("gpsMessage");
+    const liveCoordinates = document.getElementById("liveCoordinates");
+    const liveSpeed = document.getElementById("liveSpeed");
+    const liveHeading = document.getElementById("liveHeading");
+    const liveAccuracy = document.getElementById("liveAccuracy");
+    const livePointCount = document.getElementById("livePointCount");
+    const liveLastUpdate = document.getElementById("liveLastUpdate");
+    const latestCoordinates = document.getElementById("latestCoordinates");
+    const latestSpeed = document.getElementById("latestSpeed");
+    const latestAccuracy = document.getElementById("latestAccuracy");
+    const latestRecordedAt = document.getElementById("latestRecordedAt");
+    const trackingCount = document.getElementById("trackingCount");
+    const overviewTrackingCount = document.getElementById("overviewTrackingCount");
+    const rideStatusValue = document.getElementById("rideStatusValue");
+    const overviewRideStatus = document.getElementById("overviewRideStatus");
+    const gpsAccuracyBadge = document.getElementById("gpsAccuracyBadge");
+    const mapDriverStatus = document.getElementById("mapDriverStatus");
+    const pickupCoordinates = document.getElementById("pickupCoordinates");
+    const dropCoordinates = document.getElementById("dropCoordinates");
+
+    let map = null;
+    let pickupMarker = null;
+    let dropMarker = null;
+    let driverMarker = null;
+    let accuracyCircle = null;
+    let routeLine = null;
+    let watchId = null;
+    let refreshTimer = null;
+    let routeLoaded = false;
+    let lastSentAt = 0;
+    let lastSentCoordinates = null;
+
+    const GPS_SEND_INTERVAL = 5000;
+    const ADMIN_REFRESH_INTERVAL = 5000;
+
+    function setLiveStatus(text, state) {
+        liveStatusText.textContent = text;
+
+        if (state === "live") {
+            liveStatusBadge.className = "badge text-bg-success";
+        } else if (state === "warning") {
+            liveStatusBadge.className = "badge text-bg-warning";
+        } else {
+            liveStatusBadge.className = "badge text-bg-secondary";
+        }
+    }
+
+    function showGpsMessage(message, type) {
+        gpsMessage.className = "alert alert-" + type + " mt-3 mb-0 small";
+        gpsMessage.innerHTML = '<i class="fas fa-circle-info me-1"></i>' + message;
+    }
+
+    function formatNumber(value, digits) {
+        if (value === null || value === undefined || value === "") {
+            return "—";
+        }
+
+        const number = Number(value);
+
+        if (!Number.isFinite(number)) {
+            return "—";
+        }
+
+        return number.toFixed(digits);
+    }
+
+    function formatDate(value) {
+        if (!value) {
+            return "—";
+        }
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return value;
+        }
+
+        return date.toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+        });
+    }
+
+    function createPopupTitle(title, icon) {
+        return '<div class="fw-bold"><i class="fas ' + icon + ' me-1"></i>' + title + '</div>';
+    }
+
+    function initializeMap() {
+        let initialLatitude = 26.8467;
+        let initialLongitude = 80.9462;
+
+        if (
+            Number.isFinite(pickupLatitude) &&
+            Number.isFinite(pickupLongitude)
+        ) {
+            initialLatitude = pickupLatitude;
+            initialLongitude = pickupLongitude;
+        } else if (
+            Number.isFinite(dropLatitude) &&
+            Number.isFinite(dropLongitude)
+        ) {
+            initialLatitude = dropLatitude;
+            initialLongitude = dropLongitude;
+        }
+
+        map = L.map("liveRideMap", { attributionControl: false
+            }).setView(
+                [initialLatitude, initialLongitude],
+                13
+            );
+
+        L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3wf8_1_477b9c969e22fe3e205f303d",
+        {
+            subdomains: "abcd",
+            maxZoom: 20
+        }
+        ).addTo(map);
+
+        createPickupMarker();
+        createDropMarker();
+        drawInitialRoute();
+
+        setTimeout(function () {
+            map.invalidateSize();
+        }, 300);
+    }
+
+    function createPickupMarker() {
+        if (
+            !Number.isFinite(pickupLatitude) ||
+            !Number.isFinite(pickupLongitude)
+        ) {
+            pickupCoordinates.textContent = "Coordinates unavailable";
+            return;
+        }
+
+        pickupCoordinates.textContent =
+            pickupLatitude.toFixed(6) +
+            ", " +
+            pickupLongitude.toFixed(6);
+
+        pickupMarker = L.marker(
+            [pickupLatitude, pickupLongitude]
+        ).addTo(map);
+
+        pickupMarker.bindTooltip(
+            createPopupTitle("Pickup", "fa-circle-dot") +
+            "<div class=\"mt-1\">" +
+            pickupAddress +
+            "</div>" +
+            "<div class=\"font-monospace small mt-1\">" +
+            "Lat: " +
+            pickupLatitude.toFixed(6) +
+            "<br>Lng: " +
+            pickupLongitude.toFixed(6) +
+            "</div>",
+            {
+                direction: "top",
+                sticky: true
+            }
+        );
+
+        pickupMarker.bindPopup(
+            createPopupTitle("Pickup", "fa-circle-dot") +
+            "<div class=\"mt-2\">" +
+            pickupAddress +
+            "</div>" +
+            "<hr class=\"my-2\">" +
+            "<div class=\"font-monospace small\">" +
+            "Latitude: " +
+            pickupLatitude.toFixed(6) +
+            "<br>" +
+            "Longitude: " +
+            pickupLongitude.toFixed(6) +
+            "</div>"
+        );
+    }
+
+    function createDropMarker() {
+        if (
+            !Number.isFinite(dropLatitude) ||
+            !Number.isFinite(dropLongitude)
+        ) {
+            dropCoordinates.textContent = "Coordinates unavailable";
+            return;
+        }
+
+        dropCoordinates.textContent =
+            dropLatitude.toFixed(6) +
+            ", " +
+            dropLongitude.toFixed(6);
+
+        dropMarker = L.marker(
+            [dropLatitude, dropLongitude]
+        ).addTo(map);
+
+        dropMarker.bindTooltip(
+            createPopupTitle("Destination", "fa-location-dot") +
+            "<div class=\"mt-1\">" +
+            dropAddress +
+            "</div>" +
+            "<div class=\"font-monospace small mt-1\">" +
+            "Lat: " +
+            dropLatitude.toFixed(6) +
+            "<br>Lng: " +
+            dropLongitude.toFixed(6) +
+            "</div>",
+            {
+                direction: "top",
+                sticky: true
+            }
+        );
+
+        dropMarker.bindPopup(
+            createPopupTitle("Destination", "fa-location-dot") +
+            "<div class=\"mt-2\">" +
+            dropAddress +
+            "</div>" +
+            "<hr class=\"my-2\">" +
+            "<div class=\"font-monospace small\">" +
+            "Latitude: " +
+            dropLatitude.toFixed(6) +
+            "<br>" +
+            "Longitude: " +
+            dropLongitude.toFixed(6) +
+            "</div>"
+        );
+    }
+
+    async function drawRoute() {
+        if (routeLoaded) {
+            return;
+        }
+
+        if (
+            !Number.isFinite(pickupLatitude) ||
+            !Number.isFinite(pickupLongitude) ||
+            !Number.isFinite(dropLatitude) ||
+            !Number.isFinite(dropLongitude)
+        ) {
+            return;
+        }
+
+        try {
+            const routeUrl =
+                "https://router.project-osrm.org/route/v1/driving/" +
+                pickupLongitude +
+                "," +
+                pickupLatitude +
+                ";" +
+                dropLongitude +
+                "," +
+                dropLatitude +
+                "?overview=full&geometries=geojson";
+
+            const response = await fetch(routeUrl);
+
+            if (!response.ok) {
+                throw new Error("Route request failed");
+            }
+
+            const data = await response.json();
+
+            if (
+                !data.routes ||
+                !data.routes.length ||
+                !data.routes[0].geometry
+            ) {
+                throw new Error("No route found");
+            }
+
+            const coordinates =
+                data.routes[0].geometry.coordinates.map(function (item) {
+                    return [item[1], item[0]];
+                });
+
+            routeLine = L.polyline(
+                coordinates,
+                {
+                    weight: 5,
+                    opacity: 0.85
+                }
+            ).addTo(map);
+
+            routeLine.bindTooltip(
+                "Pickup → Destination<br>" +
+                "Road Route: " +
+                (data.routes[0].distance / 1000).toFixed(2) +
+                " km<br>" +
+                "Estimated: " +
+                Math.round(data.routes[0].duration / 60) +
+                " min",
+                {
+                    sticky: true
+                }
+            );
+
+            routeLoaded = true;
+
+            const bounds = L.latLngBounds(coordinates);
+
+            if (driverMarker) {
+                bounds.extend(driverMarker.getLatLng());
+            }
+
+            map.fitBounds(bounds, {
+                padding: [40, 40]
+            });
+
+        } catch (error) {
+            console.error("Route error:", error);
+        }
+    }
+
+    function drawInitialRoute() {
+        drawRoute();
+    }
+
+    function createDriverMarkerIcon() {
+        return L.divIcon({
+            className: "live-driver-marker-wrapper",
+            html: `
+                <div class="live-driver-marker">
+                    <span class="driver-wave wave-1"></span>
+                    <span class="driver-wave wave-2"></span>
+                    <span class="driver-wave wave-3"></span>
+                    <span class="driver-icon">
+                        <i class="fas fa-car"></i>
+                    </span>
+                </div>
+            `,
+            iconSize: [44, 44],
+            iconAnchor: [22, 22],
+            tooltipAnchor: [0, -22],
+            popupAnchor: [0, -22]
+        });
+    }
+
+    function updateDriverMarker(tracking, moveMap) {
+        if (!tracking) {
+            return;
+        }
+
+        const latitude = Number(tracking.latitude);
+        const longitude = Number(tracking.longitude);
+
+        if (
+            !Number.isFinite(latitude) ||
+            !Number.isFinite(longitude)
+        ) {
+            return;
+        }
+
+        const position = [latitude, longitude];
+
+        const speedText =
+            tracking.speed !== null &&
+            tracking.speed !== undefined
+                ? formatNumber(tracking.speed, 1) + " km/h"
+                : "—";
+
+        const headingText =
+            tracking.heading !== null &&
+            tracking.heading !== undefined
+                ? formatNumber(tracking.heading, 0) + "°"
+                : "—";
+
+        const accuracyText =
+            tracking.accuracy !== null &&
+            tracking.accuracy !== undefined
+                ? formatNumber(tracking.accuracy, 1) + " m"
+                : "—";
+
+        const driverTooltip =
+            createPopupTitle("Driver GPS", "fa-car") +
+            "<div class=\"mt-1\">" +
+            driverName +
+            "</div>" +
+            "<div class=\"font-monospace small mt-1\">" +
+            "Latitude: " +
+            latitude.toFixed(6) +
+            "<br>" +
+            "Longitude: " +
+            longitude.toFixed(6) +
+            "</div>" +
+            "<div class=\"small mt-1\">" +
+            "Speed: " +
+            speedText +
+            "<br>" +
+            "Heading: " +
+            headingText +
+            "<br>" +
+            "Accuracy: " +
+            accuracyText +
+            "</div>";
+
+        if (!driverMarker) {
+            driverMarker = L.marker(
+                position,
+                {
+                    icon: createDriverMarkerIcon(),
+                    zIndexOffset: 1000
+                }
+            ).addTo(map);
+
+            driverMarker.bindTooltip(
+                driverTooltip,
+                {
+                    direction: "top",
+                    sticky: true
+                }
+            );
+
+            driverMarker.bindPopup(
+                driverTooltip
+            );
+        } else {
+            driverMarker.setLatLng(position);
+            driverMarker.setTooltipContent(driverTooltip);
+            driverMarker.setPopupContent(driverTooltip);
+        }
+
+        if (!accuracyCircle) {
+            accuracyCircle = L.circle(
+                position,
+                {
+                    radius:
+                        Number(tracking.accuracy) || 30,
+                    weight: 1,
+                    fillOpacity: 0.08
+                }
+            ).addTo(map);
+        } else {
+            accuracyCircle.setLatLng(position);
+
+            if (
+                tracking.accuracy !== null &&
+                tracking.accuracy !== undefined
+            ) {
+                accuracyCircle.setRadius(
+                    Number(tracking.accuracy)
+                );
+            }
+        }
+
+        mapDriverStatus.textContent =
+            latitude.toFixed(6) +
+            ", " +
+            longitude.toFixed(6);
+
+        if (moveMap) {
+            map.panTo(
+                position,
+                {
+                    animate: true,
+                    duration: 0.5
+                }
+            );
+        }
+    }
+
+    function updateTrackingUI(tracking, count) {
+        if (!tracking) {
+            return;
+        }
+
+        const latitude = Number(tracking.latitude);
+        const longitude = Number(tracking.longitude);
+
+        if (
+            !Number.isFinite(latitude) ||
+            !Number.isFinite(longitude)
+        ) {
+            return;
+        }
+
+        liveCoordinates.textContent =
+            latitude.toFixed(6) +
+            ", " +
+            longitude.toFixed(6);
+
+        liveSpeed.textContent =
+            tracking.speed !== null &&
+            tracking.speed !== undefined
+                ? formatNumber(tracking.speed, 1) + " km/h"
+                : "—";
+
+        liveHeading.textContent =
+            tracking.heading !== null &&
+            tracking.heading !== undefined
+                ? formatNumber(tracking.heading, 0) + "°"
+                : "—";
+
+        liveAccuracy.textContent =
+            tracking.accuracy !== null &&
+            tracking.accuracy !== undefined
+                ? formatNumber(tracking.accuracy, 1) + " m"
+                : "—";
+
+        const formattedDate =
+            formatDate(tracking.recorded_at);
+
+        liveLastUpdate.textContent = formattedDate;
+        latestCoordinates.textContent =
+            latitude.toFixed(6) +
+            ", " +
+            longitude.toFixed(6);
+
+        latestSpeed.textContent =
+            tracking.speed !== null &&
+            tracking.speed !== undefined
+                ? formatNumber(tracking.speed, 1) + " km/h"
+                : "—";
+
+        latestAccuracy.textContent =
+            tracking.accuracy !== null &&
+            tracking.accuracy !== undefined
+                ? formatNumber(tracking.accuracy, 1) + " m"
+                : "—";
+
+        latestRecordedAt.textContent =
+            formattedDate;
+
+        if (
+            count !== undefined &&
+            count !== null
+        ) {
+            trackingCount.textContent = count;
+            overviewTrackingCount.textContent = count;
+            livePointCount.textContent = count;
+        }
+    }
+
+    async function fetchLatestTracking(moveMap) {
+        try {
+            const response = await fetch(
+                latestUrl,
+                {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    cache: "no-store"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    "Unable to fetch latest tracking."
+                );
+            }
+
+            const data = await response.json();
+
+            if (data.ride_status_display) {
+                rideStatusValue.textContent =
+                    data.ride_status_display;
+
+                overviewRideStatus.textContent =
+                    data.ride_status_display;
+            }
+
+            if (!data.has_tracking) {
+                setLiveStatus(
+                    "Waiting",
+                    "offline"
+                );
+                return;
+            }
+
+            updateTrackingUI(
+                data.tracking,
+                data.tracking_count
+            );
+
+            updateDriverMarker(
+                data.tracking,
+                moveMap
+            );
+
+            setLiveStatus(
+                "Live",
+                "live"
+            );
+
+            if (
+                data.tracking.accuracy !== null &&
+                data.tracking.accuracy !== undefined
+            ) {
+                gpsAccuracyBadge.textContent =
+                    "Accuracy " +
+                    formatNumber(
+                        data.tracking.accuracy,
+                        1
+                    ) +
+                    " m";
+            }
+
+            showGpsMessage(
+                "Latest driver GPS location received successfully.",
+                "success"
+            );
+
+        } catch (error) {
+            console.error(error);
+
+            setLiveStatus(
+                "Connection issue",
+                "warning"
+            );
+        }
+    }
+
+    async function sendLocation(position) {
+        const now = Date.now();
+
+        const latitude =
+            Number(position.coords.latitude);
+
+        const longitude =
+            Number(position.coords.longitude);
+
+        const speed =
+            position.coords.speed !== null
+                ? Number(position.coords.speed) * 3.6
+                : null;
+
+        const heading =
+            position.coords.heading !== null
+                ? Number(position.coords.heading)
+                : null;
+
+        const accuracy =
+            position.coords.accuracy !== null
+                ? Number(position.coords.accuracy)
+                : null;
+
+        if (
+            !Number.isFinite(latitude) ||
+            !Number.isFinite(longitude)
+        ) {
+            return;
+        }
+
+        if (
+            now - lastSentAt <
+            GPS_SEND_INTERVAL
+        ) {
+            return;
+        }
+
+        if (
+            lastSentCoordinates &&
+            Math.abs(
+                lastSentCoordinates.latitude -
+                latitude
+            ) < 0.000001 &&
+            Math.abs(
+                lastSentCoordinates.longitude -
+                longitude
+            ) < 0.000001
+        ) {
+            lastSentAt = now;
+            return;
+        }
+
+        lastSentAt = now;
+
+        lastSentCoordinates = {
+            latitude: latitude,
+            longitude: longitude
+        };
+
+        try {
+            const response = await fetch(
+                liveUpdateUrl,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken,
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        latitude: latitude,
+                        longitude: longitude,
+                        speed: speed,
+                        heading: heading,
+                        accuracy: accuracy
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.message ||
+                    "GPS update failed."
+                );
+            }
+
+            updateTrackingUI(
+                data.tracking,
+                data.tracking_count
+            );
+
+            updateDriverMarker(
+                data.tracking,
+                true
+            );
+
+            setLiveStatus(
+                "Live",
+                "live"
+            );
+
+            showGpsMessage(
+                "Your live GPS location is being shared with NandiRide.",
+                "success"
+            );
+
+            if (
+                accuracy !== null &&
+                Number.isFinite(accuracy)
+            ) {
+                gpsAccuracyBadge.textContent =
+                    "GPS ±" +
+                    accuracy.toFixed(1) +
+                    " m";
+            }
+
+        } catch (error) {
+            console.error(error);
+
+            showGpsMessage(
+                error.message ||
+                "Unable to send GPS location.",
+                "danger"
+            );
+
+            setLiveStatus(
+                "GPS Error",
+                "warning"
+            );
+        }
+    }
+
+    function gpsError(error) {
+        let message =
+            "Unable to get your GPS location.";
+
+        if (
+            error &&
+            error.code ===
+            error.PERMISSION_DENIED
+        ) {
+            message =
+                "GPS permission was denied. Please allow location access in your browser.";
+        } else if (
+            error &&
+            error.code ===
+            error.POSITION_UNAVAILABLE
+        ) {
+            message =
+                "Your GPS location is currently unavailable.";
+        } else if (
+            error &&
+            error.code ===
+            error.TIMEOUT
+        ) {
+            message =
+                "GPS request timed out. Trying again...";
+        }
+
+        showGpsMessage(
+            message,
+            "warning"
+        );
+
+        setLiveStatus(
+            "GPS unavailable",
+            "warning"
+        );
+    }
+
+    function startDriverTracking() {
+        if (!navigator.geolocation) {
+            showGpsMessage(
+                "This browser does not support GPS location.",
+                "danger"
+            );
+            return;
+        }
+
+        if (watchId !== null) {
+            return;
+        }
+
+        startButton.classList.add("d-none");
+        stopButton.classList.remove("d-none");
+
+        setLiveStatus(
+            "Starting GPS",
+            "warning"
+        );
+
+        showGpsMessage(
+            "Requesting your current GPS location...",
+            "info"
+        );
+
+        watchId =
+            navigator.geolocation.watchPosition(
+                sendLocation,
+                gpsError,
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 2000,
+                    timeout: 15000
+                }
+            );
+    }
+
+    function stopDriverTracking() {
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(
+                watchId
+            );
+
+            watchId = null;
+        }
+
+        startButton.classList.remove("d-none");
+        stopButton.classList.add("d-none");
+
+        setLiveStatus(
+            "Stopped",
+            "offline"
+        );
+
+        showGpsMessage(
+            "Live GPS tracking has been stopped.",
+            "info"
+        );
+    }
+
+    window.startDriverTracking =
+        startDriverTracking;
+
+    window.stopDriverTracking =
+        stopDriverTracking;
+
+    initializeMap();
+
+    fetchLatestTracking(true);
+
+    refreshTimer =
+        window.setInterval(
+            function () {
+                if (watchId === null) {
+                    fetchLatestTracking(false);
+                }
+            },
+            ADMIN_REFRESH_INTERVAL
+        );
+
+    window.addEventListener(
+        "beforeunload",
+        function () {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(
+                    watchId
+                );
+            }
+
+            if (refreshTimer) {
+                window.clearInterval(
+                    refreshTimer
+                );
+            }
+        }
+    );
+})();
+</script>
+
 {% endblock %}

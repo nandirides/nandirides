@@ -10,6 +10,7 @@ from django.utils import timezone
 from .forms import SupportCategoryForm, SupportTicketForm
 from .models import SupportCategory, SupportTicket, Notification, AuditLog
 from django.urls import reverse
+from django.http import JsonResponse
 
 User = get_user_model()
 def support_permission(permission):
@@ -674,7 +675,16 @@ def notification_read(request, pk):
             "ticket_detail",
             pk=notification.reference_id,
         )
+    if (
+        notification.reference_type == "ride_request"
+        and notification.reference_id
+    ):
+        return redirect(
+            "ride_request_details",
+            pk=notification.reference_id,
+        )
     return redirect("notification_list")
+
 @login_required
 @support_permission("support.change_notification")
 def notification_read_all(request):
@@ -691,3 +701,60 @@ def notification_read_all(request):
             "All notifications marked as read.",
         )
     return redirect("notification_list")
+
+@login_required
+@support_permission("support.view_notification")
+def notification_status(request):
+    notifications = Notification.objects.filter(
+        user=request.user
+    ).order_by("-created_at")[:10]
+
+    unread_count = Notification.objects.filter(
+        user=request.user,
+        is_read=False,
+    ).count()
+
+    notification_data = []
+
+    for notification in notifications:
+        if (
+            notification.reference_type == "ride_request"
+            and notification.reference_id
+        ):
+            url = reverse(
+                "notification_read",
+                args=[notification.pk],
+            )
+        elif (
+            notification.reference_type == "support_ticket"
+            and notification.reference_id
+        ):
+            url = reverse(
+                "notification_read",
+                args=[notification.pk],
+            )
+        else:
+            url = reverse(
+                "notification_read",
+                args=[notification.pk],
+            )
+
+        notification_data.append({
+            "id": notification.pk,
+            "title": notification.title,
+            "message": notification.message,
+            "is_read": notification.is_read,
+            "created_at": (
+                notification.created_at.strftime(
+                    "%d %b %Y, %I:%M %p"
+                )
+                if notification.created_at
+                else ""
+            ),
+            "url": url,
+        })
+
+    return JsonResponse({
+        "unread_count": unread_count,
+        "notifications": notification_data,
+    })

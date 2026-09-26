@@ -146,6 +146,10 @@ urlpatterns = [
     # RIDE TRACKING
     # ============================================================
 
+   # ============================================================
+# RIDE TRACKING
+# ============================================================
+
     path(
         "rides/<int:ride_pk>/tracking/",
         rides_views.ride_tracking_list,
@@ -155,6 +159,16 @@ urlpatterns = [
         "rides/<int:ride_pk>/tracking/add/",
         rides_views.ride_tracking_create,
         name="ride_tracking_add",
+    ),
+    path(
+        "rides/<int:ride_pk>/tracking/latest/",
+        rides_views.ride_tracking_latest,
+        name="ride_tracking_latest",
+    ),
+    path(
+        "rides/<int:ride_pk>/tracking/live-update/",
+        rides_views.ride_tracking_live_update,
+        name="ride_tracking_live_update",
     ),
     path(
         "rides/tracking/<int:pk>/delete/",
@@ -505,6 +519,11 @@ path(
         "support/notifications/read-all/",
         support_views.notification_read_all,
         name="notification_read_all",
+    ),
+    path(
+        "support/notifications/status/",
+        support_views.notification_status,
+        name="notification_status",
     ),
 
     # ============================================================
