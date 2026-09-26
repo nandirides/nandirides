@@ -11,9 +11,11 @@
                 Payment {{ payment.payment_number }}
             </p>
         </div>
-        <a href="{% url 'payment_list' %}" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-left me-1"></i>Back to Payments
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'payment_list' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Payments
+            </a>
+        </div>
     </div>
     <div class="row g-3">
         <div class="col-12 col-xl-8">
@@ -149,12 +151,14 @@
     </div>
     <div class="card mt-3">
         <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <h5 class="mb-0">
-                <i class="bi bi-arrow-counterclockwise me-2"></i>Refund History
-            </h5>
-            <a href="{% url 'refund_create' payment.pk %}" class="btn btn-sm btn-primary">
-                <i class="bi bi-plus-lg me-1"></i>Add Refund
-            </a>
+            <div>
+                <h5 class="mb-1">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>Refund History
+                </h5>
+                <small class="text-body-secondary">
+                    Refund transactions for this payment
+                </small>
+            </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -194,11 +198,21 @@
                                 </td>
                                 <td>
                                     {% if refund.status == "pending" %}
-                                        <span class="badge text-bg-warning">Pending</span>
+                                        <span class="badge text-bg-warning">
+                                            <i class="bi bi-clock me-1"></i>Pending
+                                        </span>
                                     {% elif refund.status == "processed" %}
-                                        <span class="badge text-bg-success">Processed</span>
+                                        <span class="badge text-bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Refund Completed
+                                        </span>
                                     {% elif refund.status == "failed" %}
-                                        <span class="badge text-bg-danger">Failed</span>
+                                        <span class="badge text-bg-danger">
+                                            <i class="bi bi-x-circle me-1"></i>Failed
+                                        </span>
+                                    {% elif refund.status == "completed" or refund.status == "success" %}
+                                        <span class="badge text-bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Refund Completed
+                                        </span>
                                     {% else %}
                                         <span class="badge text-bg-secondary">
                                             {{ refund.status|title }}
@@ -231,9 +245,14 @@
                                     <p class="text-body-secondary mb-3">
                                         No refund has been recorded for this payment.
                                     </p>
-                                    <a href="{% url 'refund_create' payment.pk %}" class="btn btn-primary">
-                                        <i class="bi bi-plus-lg me-1"></i>Add Refund
-                                    </a>
+                                    <div class="d-flex justify-content-center flex-wrap gap-2">
+                                        <a href="{% url 'refund_list' %}" class="btn btn-outline-success">
+                                            <i class="bi bi-list-ul me-1"></i>View Refund List
+                                        </a>
+                                        <a href="{% url 'refund_create' payment.pk %}" class="btn btn-primary">
+                                            <i class="bi bi-plus-lg me-1"></i>Add Refund
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}

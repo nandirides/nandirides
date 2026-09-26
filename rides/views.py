@@ -2,6 +2,7 @@ from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 from urllib.request import Request as UrlRequest, urlopen
 import json
+import uuid
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -40,9 +41,11 @@ except (ImportError, ModuleNotFoundError):
     City = None
 
 try:
-    from payments.models import Payment
+    from payments.models import Payment, Refund
 except (ImportError, ModuleNotFoundError):
     Payment = None
+    Refund = None
+
 
 RIDE_REQUEST_ACTIVE_STATUSES = [
     RideRequest.Status.REQUESTED,
@@ -836,6 +839,200 @@ def _allowed_next_statuses(ride):
     )
 
 
+def _payment_for_ride(ride):
+    if Payment is None:
+        return None
+
+    try:
+        payment_field_names = {
+            field.name
+            for field in Payment._meta.get_fields()
+        }
+
+        if "ride" in payment_field_names:
+            payment = (
+                Payment.objects
+                .filter(ride=ride)
+                .order_by("-pk")
+                .first()
+            )
+
+            if payment:
+                return payment
+
+        if "ride_request" in payment_field_names:
+            ride_request = getattr(
+                ride,
+                "ride_request",
+                None,
+            )
+
+            if ride_request:
+                return (
+                    Payment.objects
+                    .filter(
+                        ride_request=ride_request
+                    )
+                    .order_by("-pk")
+                    .first()
+                )
+    except Exception:
+        return None
+
+    return None
+
+
+def _refund_payment_for_cancelled_request(
+    ride_request,
+    ride=None,
+):
+    """
+    Automatically create a full local refund for a successful payment.
+
+    This is intentionally a demo/local refund flow:
+    - no external payment gateway is called
+    - Refund DB record is created
+    - Payment status becomes refunded
+    - duplicate refund records are prevented
+    """
+
+    if (
+        Payment is None
+        or Refund is None
+        or ride_request is None
+    ):
+        return None
+
+    payment = None
+
+    try:
+        payment_field_names = {
+            field.name
+            for field in Payment._meta.get_fields()
+        }
+
+        # First preference: payment directly linked to RideRequest.
+        if "ride_request" in payment_field_names:
+            payment = (
+                Payment.objects
+                .filter(
+                    ride_request=ride_request
+                )
+                .order_by("-pk")
+                .first()
+            )
+
+        # Fallback: payment linked to the Ride.
+        if (
+            payment is None
+            and ride is not None
+            and "ride" in payment_field_names
+        ):
+            payment = (
+                Payment.objects
+                .filter(
+                    ride=ride
+                )
+                .order_by("-pk")
+                .first()
+            )
+
+    except Exception:
+        return None
+
+    if not payment:
+        return None
+
+    try:
+        # Prevent duplicate refunds.
+        existing_refund = (
+            Refund.objects
+            .filter(
+                payment=payment
+            )
+            .order_by("-pk")
+            .first()
+        )
+
+        if existing_refund:
+            payment_status = str(
+                getattr(
+                    payment,
+                    "status",
+                    "",
+                )
+            ).lower()
+
+            if payment_status != "refunded":
+                payment.status = "refunded"
+                payment.save(
+                    update_fields=["status"]
+                )
+
+            return existing_refund
+
+        # Only successful payments are refundable.
+        payment_status = str(
+            getattr(
+                payment,
+                "status",
+                "",
+            )
+        ).lower()
+
+        if payment_status != "success":
+            return None
+
+        refund_amount = _safe_decimal(
+            getattr(
+                payment,
+                "amount",
+                None,
+            )
+        )
+
+        if (
+            refund_amount is None
+            or refund_amount <= 0
+        ):
+            return None
+
+        now = timezone.now()
+
+        payment_number = getattr(
+            payment,
+            "payment_number",
+            str(payment.pk),
+        )
+
+        refund = Refund.objects.create(
+            payment=payment,
+            refund_amount=refund_amount,
+            reason=(
+                "Automatic full refund generated because "
+                f"ride request {ride_request.request_number} "
+                "was cancelled."
+            ),
+            refund_reference=(
+                f"RF-{payment_number}-"
+                f"{uuid.uuid4().hex[:12].upper()}"
+            ),
+            status="processed",
+            processed_at=now,
+        )
+
+        payment.status = "refunded"
+
+        payment.save(
+            update_fields=["status"]
+        )
+
+        return refund
+
+    except Exception:
+        return None
+
+
 def _sync_request_status_from_ride(ride):
     try:
         ride_request = ride.ride_request
@@ -864,38 +1061,11 @@ def _sync_request_status_from_ride(ride):
             update_fields=["status"]
         )
 
-
-def _payment_for_ride(ride):
-    if Payment is None:
-        return None
-
-    try:
-        payment_field_names = {
-            field.name
-            for field in Payment._meta.get_fields()
-        }
-
-        if "ride" in payment_field_names:
-            return (
-                Payment.objects
-                .filter(ride=ride)
-                .order_by("-pk")
-                .first()
-            )
-
-        if "ride_request" in payment_field_names:
-            return (
-                Payment.objects
-                .filter(
-                    ride_request=ride.ride_request
-                )
-                .order_by("-pk")
-                .first()
-            )
-    except Exception:
-        return None
-
-    return None
+    if ride.status == Ride.Status.CANCELLED:
+        _refund_payment_for_cancelled_request(
+            ride_request,
+            ride=ride,
+        )
 
 
 @login_required
@@ -963,37 +1133,111 @@ def ride_request_list(request):
 @login_required
 def ride_request_fare_preview(request):
     if request.method != "GET":
-        return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Invalid request method.",
+            },
+            status=405,
+        )
 
-    vehicle_type_id = request.GET.get("vehicle_type", "").strip()
-    city_name = request.GET.get("city_name", "").strip()
-    city_id = request.GET.get("city_id", "").strip()
-    distance = _safe_decimal(request.GET.get("distance"))
-    duration = request.GET.get("duration", "").strip()
+    vehicle_type_id = request.GET.get(
+        "vehicle_type",
+        "",
+    ).strip()
+
+    city_name = request.GET.get(
+        "city_name",
+        "",
+    ).strip()
+
+    city_id = request.GET.get(
+        "city_id",
+        "",
+    ).strip()
+
+    distance = _safe_decimal(
+        request.GET.get("distance")
+    )
+
+    duration = request.GET.get(
+        "duration",
+        "",
+    ).strip()
 
     try:
-        duration_value = int(duration) if duration else None
+        duration_value = (
+            int(duration)
+            if duration
+            else None
+        )
     except (TypeError, ValueError):
         duration_value = None
 
-    if not vehicle_type_id or distance is None or duration_value is None:
-        return JsonResponse({"success": False, "message": "Vehicle, city, distance and duration are required."}, status=400)
+    if (
+        not vehicle_type_id
+        or distance is None
+        or duration_value is None
+    ):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": (
+                    "Vehicle, city, distance and duration "
+                    "are required."
+                ),
+            },
+            status=400,
+        )
 
     city = None
+
     if city_id and City:
         try:
-            city = City.objects.filter(pk=city_id).first()
+            city = (
+                City.objects
+                .filter(pk=city_id)
+                .first()
+            )
         except (TypeError, ValueError):
             city = None
+
     if not city and city_name:
-        city = _resolve_city(city_name)
+        city = _resolve_city(
+            city_name
+        )
+
     if not city:
-        return JsonResponse({"success": False, "message": "Pricing city could not be identified for this location."}, status=404)
+        return JsonResponse(
+            {
+                "success": False,
+                "message": (
+                    "Pricing city could not be identified "
+                    "for this location."
+                ),
+            },
+            status=404,
+        )
 
     form = RideRequestForm()
-    vehicle_type = form.fields["vehicle_type"].queryset.filter(pk=vehicle_type_id).first()
+
+    vehicle_type = (
+        form.fields["vehicle_type"]
+        .queryset
+        .filter(pk=vehicle_type_id)
+        .first()
+    )
+
     if not vehicle_type:
-        return JsonResponse({"success": False, "message": "Selected vehicle type is invalid."}, status=400)
+        return JsonResponse(
+            {
+                "success": False,
+                "message": (
+                    "Selected vehicle type is invalid."
+                ),
+            },
+            status=400,
+        )
 
     fare = form._calculate_fare(
         city=city,
@@ -1003,20 +1247,34 @@ def ride_request_fare_preview(request):
     )
 
     if fare is None:
-        return JsonResponse({"success": False, "message": "No active fare rule is configured for this vehicle and location."}, status=404)
+        return JsonResponse(
+            {
+                "success": False,
+                "message": (
+                    "No active fare rule is configured "
+                    "for this vehicle and location."
+                ),
+            },
+            status=404,
+        )
 
-    return JsonResponse({
-        "success": True,
-        "fare": str(fare),
-        "city": city.name,
-        "vehicle_type": str(vehicle_type),
-    })
+    return JsonResponse(
+        {
+            "success": True,
+            "fare": str(fare),
+            "city": city.name,
+            "vehicle_type": str(vehicle_type),
+        }
+    )
 
 
 @login_required
 @transaction.atomic
 def ride_request_create_edit(request, pk=None):
-    if request.method == "GET" and request.GET.get("fare_preview") == "1":
+    if (
+        request.method == "GET"
+        and request.GET.get("fare_preview") == "1"
+    ):
         return ride_request_fare_preview(request)
 
     ride_request = (
@@ -1053,12 +1311,15 @@ def ride_request_create_edit(request, pk=None):
             pickup_latitude = pickup_data.get(
                 "latitude"
             )
+
             pickup_longitude = pickup_data.get(
                 "longitude"
             )
+
             drop_latitude = drop_data.get(
                 "latitude"
             )
+
             drop_longitude = drop_data.get(
                 "longitude"
             )
@@ -1069,7 +1330,11 @@ def ride_request_create_edit(request, pk=None):
             ):
                 form.add_error(
                     "pickup_address",
-                    "Pickup location could not be found. Please enter a more specific address or select the pickup point on the map.",
+                    (
+                        "Pickup location could not be found. "
+                        "Please enter a more specific address "
+                        "or select the pickup point on the map."
+                    ),
                 )
 
             if (
@@ -1078,20 +1343,28 @@ def ride_request_create_edit(request, pk=None):
             ):
                 form.add_error(
                     "drop_address",
-                    "Destination could not be found. Please enter a more specific address or select the destination on the map.",
+                    (
+                        "Destination could not be found. "
+                        "Please enter a more specific address "
+                        "or select the destination on the map."
+                    ),
                 )
 
             if not form.errors:
-                pickup_location = _get_or_create_form_location(
-                    cleaned_data,
-                    "pickup",
-                    pickup_data,
+                pickup_location = (
+                    _get_or_create_form_location(
+                        cleaned_data,
+                        "pickup",
+                        pickup_data,
+                    )
                 )
 
-                drop_location = _get_or_create_form_location(
-                    cleaned_data,
-                    "drop",
-                    drop_data,
+                drop_location = (
+                    _get_or_create_form_location(
+                        cleaned_data,
+                        "drop",
+                        drop_data,
+                    )
                 )
 
             if (
@@ -1103,16 +1376,23 @@ def ride_request_create_edit(request, pk=None):
             ):
                 form.add_error(
                     None,
-                    "Pickup and destination locations could not be determined.",
+                    (
+                        "Pickup and destination locations "
+                        "could not be determined."
+                    ),
                 )
 
             if (
                 not form.errors
-                and pickup_location.pk == drop_location.pk
+                and pickup_location.pk
+                == drop_location.pk
             ):
                 form.add_error(
                     None,
-                    "Pickup and drop locations must be different.",
+                    (
+                        "Pickup and drop locations "
+                        "must be different."
+                    ),
                 )
 
             route = None
@@ -1151,7 +1431,11 @@ def ride_request_create_edit(request, pk=None):
                     ):
                         form.add_error(
                             None,
-                            "Route could not be calculated. Please select valid pickup and destination locations again.",
+                            (
+                                "Route could not be calculated. "
+                                "Please select valid pickup and "
+                                "destination locations again."
+                            ),
                         )
 
             if not form.errors:
@@ -1195,11 +1479,13 @@ def ride_request_create_edit(request, pk=None):
                     "estimated_duration"
                 )
 
-                calculated_fare = _calculate_request_fare(
-                    form,
-                    city,
-                    distance,
-                    duration,
+                calculated_fare = (
+                    _calculate_request_fare(
+                        form,
+                        city,
+                        distance,
+                        duration,
+                    )
                 )
 
                 if calculated_fare is not None:
@@ -1253,16 +1539,59 @@ def ride_request_create_edit(request, pk=None):
 
                 saved_request.save()
 
-                messages.success(
-                    request,
-                    f"Ride request {saved_request.request_number} has been "
-                    f"{'updated' if ride_request else 'created'} successfully.",
-                )
+                # -------------------------------------------------
+                # AUTOMATIC REFUND FOR CANCELLED RIDE REQUEST
+                # -------------------------------------------------
+                refund = None
+
+                if (
+                    saved_request.status
+                    == RideRequest.Status.CANCELLED
+                ):
+                    linked_ride = (
+                        Ride.objects
+                        .filter(
+                            ride_request=saved_request
+                        )
+                        .order_by("-pk")
+                        .first()
+                    )
+
+                    refund = (
+                        _refund_payment_for_cancelled_request(
+                            saved_request,
+                            ride=linked_ride,
+                        )
+                    )
+
+                if refund:
+                    messages.success(
+                        request,
+                        (
+                            f"Ride request "
+                            f"{saved_request.request_number} "
+                            f"has been updated successfully. "
+                            f"₹{refund.refund_amount} refund "
+                            f"has been processed automatically."
+                        ),
+                    )
+                else:
+                    messages.success(
+                        request,
+                        (
+                            f"Ride request "
+                            f"{saved_request.request_number} "
+                            f"has been "
+                            f"{'updated' if ride_request else 'created'} "
+                            f"successfully."
+                        ),
+                    )
 
                 return redirect(
                     "ride_request_details",
                     pk=saved_request.pk,
                 )
+
     else:
         form = RideRequestForm(
             instance=ride_request
@@ -1327,6 +1656,43 @@ def ride_request_details(request, pk):
         .first()
     )
 
+    payment = None
+    refund = None
+    refunds = []
+
+    if Payment is not None:
+        try:
+            payment = (
+                Payment.objects
+                .filter(
+                    ride_request=ride_request
+                )
+                .order_by("-pk")
+                .first()
+            )
+
+            if payment and Refund is not None:
+                refunds = list(
+                    Refund.objects
+                    .filter(
+                        payment=payment
+                    )
+                    .order_by(
+                        "-requested_at",
+                        "-pk",
+                    )
+                )
+
+                refund = (
+                    refunds[0]
+                    if refunds
+                    else None
+                )
+        except Exception:
+            payment = None
+            refund = None
+            refunds = []
+
     context = {
         "breadcrumb_items": [
             {
@@ -1337,6 +1703,10 @@ def ride_request_details(request, pk):
         "ride_request": ride_request,
         "ride": ride,
         "linked_ride": ride,
+        "payment": payment,
+        "refund": refund,
+        "refund_details": refund,
+        "refunds": refunds,
     }
 
     return render(
@@ -1364,7 +1734,10 @@ def ride_request_delete(request, pk):
     ).exists():
         messages.error(
             request,
-            "This ride request cannot be deleted because a ride is linked to it.",
+            (
+                "This ride request cannot be deleted "
+                "because a ride is linked to it."
+            ),
         )
 
         return redirect(
@@ -1387,6 +1760,7 @@ def ride_request_delete(request, pk):
 
 
 @login_required
+@transaction.atomic
 def ride_request_status_update(request, pk):
     ride_request = get_object_or_404(
         RideRequest,
@@ -1420,17 +1794,61 @@ def ride_request_status_update(request, pk):
             pk=ride_request.pk,
         )
 
+    old_status = ride_request.status
+
     ride_request.status = new_status
 
     ride_request.save(
-        update_fields=["status"]
+        update_fields=[
+            "status",
+            "updated_at",
+        ]
     )
 
-    messages.success(
-        request,
-        f"Ride request {ride_request.request_number} status updated to "
-        f"{ride_request.get_status_display()}.",
-    )
+    # -------------------------------------------------
+    # AUTOMATIC REFUND WHEN STATUS IS CANCELLED
+    # -------------------------------------------------
+    refund = None
+
+    if (
+        new_status == RideRequest.Status.CANCELLED
+        and old_status != RideRequest.Status.CANCELLED
+    ):
+        linked_ride = (
+            Ride.objects
+            .filter(
+                ride_request=ride_request
+            )
+            .order_by("-pk")
+            .first()
+        )
+
+        refund = _refund_payment_for_cancelled_request(
+            ride_request,
+            ride=linked_ride,
+        )
+
+    if refund:
+        messages.success(
+            request,
+            (
+                f"Ride request "
+                f"{ride_request.request_number} "
+                f"status updated to "
+                f"{ride_request.get_status_display()}. "
+                f"₹{refund.refund_amount} refund "
+                f"has been processed automatically."
+            ),
+        )
+    else:
+        messages.success(
+            request,
+            (
+                f"Ride request "
+                f"{ride_request.request_number} status updated to "
+                f"{ride_request.get_status_display()}."
+            ),
+        )
 
     return redirect(
         "ride_request_details",
@@ -1468,7 +1886,7 @@ def ride_list(request):
     )
 
     context = {
-        "page_title": "Rides",
+        #"page_title": "Rides",
         "breadcrumb_items": [
             {
                 "title": "Rides",
@@ -1590,7 +2008,10 @@ def ride_create_edit(request, pk=None):
                 if not source_request:
                     form.add_error(
                         "ride_request",
-                        "Selected ride request could not be found.",
+                        (
+                            "Selected ride request "
+                            "could not be found."
+                        ),
                     )
 
             if not form.errors and source_request:
@@ -1645,8 +2066,12 @@ def ride_create_edit(request, pk=None):
 
                 messages.success(
                     request,
-                    f"Ride {saved_ride.ride_number} has been "
-                    f"{'updated' if ride else 'created'} successfully.",
+                    (
+                        f"Ride {saved_ride.ride_number} "
+                        f"has been "
+                        f"{'updated' if ride else 'created'} "
+                        f"successfully."
+                    ),
                 )
 
                 return redirect(
@@ -1687,11 +2112,6 @@ def ride_create_edit(request, pk=None):
         )
 
     context = {
-        # "page_title": (
-        #     "Edit Ride"
-        #     if ride
-        #     else "Create Ride"
-        # ),
         "breadcrumb_items": [
             {
                 "title": (
@@ -1728,6 +2148,7 @@ def ride_create_edit(request, pk=None):
         "rides/ride_form.html",
         context,
     )
+
 
 @login_required
 def ride_status_update(request, pk):
@@ -1768,7 +2189,10 @@ def ride_status_update(request, pk):
             ):
                 messages.error(
                     request,
-                    "This status transition is not allowed from the current ride status.",
+                    (
+                        "This status transition is not allowed "
+                        "from the current ride status."
+                    ),
                 )
             else:
                 old_status = ride.status
@@ -1793,9 +2217,11 @@ def ride_status_update(request, pk):
 
                 messages.success(
                     request,
-                    f"Ride {ride.ride_number} changed from "
-                    f"{dict(Ride.Status.choices).get(old_status, old_status)} to "
-                    f"{ride.get_status_display()}.",
+                    (
+                        f"Ride {ride.ride_number} changed from "
+                        f"{dict(Ride.Status.choices).get(old_status, old_status)} "
+                        f"to {ride.get_status_display()}."
+                    ),
                 )
 
                 return redirect(
@@ -1907,6 +2333,32 @@ def ride_details(request, pk):
         ride
     )
 
+    refunds = []
+
+    refund = None
+
+    if payment and Refund is not None:
+        try:
+            refunds = list(
+                Refund.objects
+                .filter(
+                    payment=payment
+                )
+                .order_by(
+                    "-requested_at",
+                    "-pk",
+                )
+            )
+
+            refund = (
+                refunds[0]
+                if refunds
+                else None
+            )
+        except Exception:
+            refunds = []
+            refund = None
+
     context = {
         "page_title": f"Ride {ride.ride_number}",
         "breadcrumb_items": [
@@ -1924,6 +2376,9 @@ def ride_details(request, pk):
         "ratings": ratings,
         "cancellation": cancellation,
         "payment": payment,
+        "refund": refund,
+        "refund_details": refund,
+        "refunds": refunds,
         "allowed_next_statuses": _allowed_next_statuses(
             ride
         ),
@@ -1950,7 +2405,10 @@ def ride_assignment_list(request, ride_pk):
     )
 
     context = {
-        "page_title": f"Driver Assignments - {ride.ride_number}",
+        "page_title": (
+            f"Driver Assignments - "
+            f"{ride.ride_number}"
+        ),
         "breadcrumb_items": [
             {
                 "title": "Driver Assignment",
@@ -2036,7 +2494,10 @@ def ride_assignment_create(request, ride_pk):
         form = RideDriverAssignmentForm()
 
     context = {
-        "page_title": f"Assign Driver - {ride.ride_number}",
+        "page_title": (
+            f"Assign Driver - "
+            f"{ride.ride_number}"
+        ),
         "breadcrumb_items": [
             {
                 "title": "Assign Driver",
@@ -2091,7 +2552,10 @@ def ride_assignment_edit(request, pk):
         )
 
     context = {
-        "page_title": f"Edit Assignment - {assignment.ride.ride_number}",
+        "page_title": (
+            f"Edit Assignment - "
+            f"{assignment.ride.ride_number}"
+        ),
         "breadcrumb_items": [
             {
                 "title": "Edit Assignment",
@@ -2160,7 +2624,10 @@ def ride_tracking_list(request, ride_pk):
     )
 
     context = {
-        "page_title": f"Tracking - {ride.ride_number}",
+        "page_title": (
+            f"Tracking - "
+            f"{ride.ride_number}"
+        ),
         "breadcrumb_items": [
             {
                 "title": "Tracking",
@@ -2284,78 +2751,105 @@ def ride_cancellation_create(request, ride_pk):
         _ride_queryset(),
         pk=ride_pk,
     )
-
     if ride.status == Ride.Status.CANCELLED:
         messages.info(
             request,
             "This ride has already been cancelled.",
         )
-
         return redirect(
             "ride_details",
             pk=ride.pk,
         )
-
     if ride.status == Ride.Status.COMPLETED:
         messages.error(
             request,
             "A completed ride cannot be cancelled.",
         )
-
         return redirect(
             "ride_details",
             pk=ride.pk,
         )
-
     existing_cancellation = (
         RideCancellation.objects
         .filter(ride=ride)
         .first()
     )
-
     if existing_cancellation:
         messages.info(
             request,
             "This ride already has a cancellation record.",
         )
-
         return redirect(
             "ride_details",
             pk=ride.pk,
         )
-
     if request.method == "POST":
+        post_data = request.POST.copy()
+        post_data["ride"] = str(ride.pk)
+        post_data["cancelled_by"] = str(request.user.pk)
         form = RideCancellationForm(
-            request.POST
+            post_data
         )
-
         if form.is_valid():
             cancellation = form.save(
                 commit=False
             )
-
             cancellation.ride = ride
             cancellation.cancelled_by = request.user
             cancellation.save()
-
             ride.status = Ride.Status.CANCELLED
-
             ride.save(
                 update_fields=[
                     "status",
                     "updated_at",
                 ]
             )
-
             _sync_request_status_from_ride(
                 ride
             )
-
-            messages.success(
-                request,
-                f"Ride {ride.ride_number} has been cancelled successfully.",
-            )
-
+            refund = None
+            if (
+                Payment is not None
+                and Refund is not None
+            ):
+                payment = _payment_for_ride(
+                    ride
+                )
+                if payment:
+                    try:
+                        refund = (
+                            Refund.objects
+                            .filter(
+                                payment=payment,
+                                status__in=[
+                                    "processed",
+                                    "completed",
+                                    "success",
+                                ],
+                            )
+                            .order_by("-pk")
+                            .first()
+                        )
+                    except Exception:
+                        refund = None
+            if refund:
+                messages.success(
+                    request,
+                    (
+                        f"Ride {ride.ride_number} has been "
+                        f"cancelled successfully. "
+                        f"₹{refund.refund_amount} refund "
+                        f"has been processed."
+                    ),
+                )
+            else:
+                messages.success(
+                    request,
+                    (
+                        f"Ride {ride.ride_number} has been "
+                        f"cancelled successfully."
+                    ),
+                )
             return redirect(
                 "ride_details",
                 pk=ride.pk,
@@ -2363,12 +2857,15 @@ def ride_cancellation_create(request, ride_pk):
     else:
         form = RideCancellationForm(
             initial={
+                "ride": ride.pk,
                 "cancelled_by": request.user.pk,
             }
         )
-
     context = {
-        "page_title": f"Cancel Ride - {ride.ride_number}",
+        "page_title": (
+            f"Cancel Ride - "
+            f"{ride.ride_number}"
+        ),
         "breadcrumb_items": [
             {
                 "title": "Cancel Ride",
@@ -2378,7 +2875,6 @@ def ride_cancellation_create(request, ride_pk):
         "form": form,
         "ride": ride,
     }
-
     return render(
         request,
         "rides/ride_cancellation_form.html",
@@ -2392,59 +2888,68 @@ def ride_rating_create(request, ride_pk):
         _ride_queryset(),
         pk=ride_pk,
     )
-
-    if request.method == "POST":
-        form = RideRatingForm(
-            request.POST
+    passenger = ride.passenger
+    driver_user = None
+    if ride.driver_id:
+        try:
+            driver_user = ride.driver.user
+        except AttributeError:
+            driver_user = None
+    if not passenger:
+        messages.error(
+            request,
+            "This ride does not have a passenger.",
         )
-
+        return redirect(
+            "ride_details",
+            pk=ride.pk,
+        )
+    if not driver_user:
+        messages.error(
+            request,
+            "This ride does not have an assigned driver.",
+        )
+        return redirect(
+            "ride_details",
+            pk=ride.pk,
+        )
+    if request.method == "POST":
+        post_data = request.POST.copy()
+        post_data["ride"] = str(ride.pk)
+        post_data["from_user"] = str(passenger.pk)
+        post_data["to_user"] = str(driver_user.pk)
+        form = RideRatingForm(
+            post_data
+        )
         if form.is_valid():
             rating = form.save(
                 commit=False
             )
-
             rating.ride = ride
-
-            if not rating.from_user_id:
-                rating.from_user = request.user
-
-            if (
-                not rating.to_user_id
-                and ride.driver_id
-            ):
-                try:
-                    rating.to_user = ride.driver.user
-                except AttributeError:
-                    pass
-
+            rating.from_user = passenger
+            rating.to_user = driver_user
             rating.save()
-
             messages.success(
                 request,
                 "Ride rating has been added successfully.",
             )
-
             return redirect(
                 "ride_details",
                 pk=ride.pk,
             )
     else:
-        initial = {
-            "from_user": request.user.pk
-        }
-
-        if ride.driver_id:
-            try:
-                initial["to_user"] = ride.driver.user.pk
-            except AttributeError:
-                pass
-
         form = RideRatingForm(
-            initial=initial
+            initial={
+                "ride": ride.pk,
+                "from_user": passenger.pk,
+                "to_user": driver_user.pk,
+            }
         )
-
     context = {
-        "page_title": f"Rate Ride - {ride.ride_number}",
+        "page_title": (
+            f"Rate Ride - "
+            f"{ride.ride_number}"
+        ),
         "breadcrumb_items": [
             {
                 "title": "Rate Ride",
@@ -2454,13 +2959,11 @@ def ride_rating_create(request, ride_pk):
         "form": form,
         "ride": ride,
     }
-
     return render(
         request,
         "rides/ride_rating_form.html",
         context,
     )
-
 
 @login_required
 def ride_stop_list(request, ride_pk):
@@ -2476,7 +2979,10 @@ def ride_stop_list(request, ride_pk):
     )
 
     context = {
-        "page_title": f"Ride Stops - {ride.ride_number}",
+        "page_title": (
+            f"Ride Stops - "
+            f"{ride.ride_number}"
+        ),
         "breadcrumb_items": [
             {
                 "title": "Ride Stops",
@@ -2534,7 +3040,10 @@ def ride_stop_create(request, ride_pk):
         )
 
     context = {
-        "page_title": f"Add Stop - {ride.ride_number}",
+        "page_title": (
+            f"Add Stop - "
+            f"{ride.ride_number}"
+        ),
         "breadcrumb_items": [
             {
                 "title": "Add Stop",
@@ -2588,7 +3097,10 @@ def ride_stop_edit(request, pk):
         )
 
     context = {
-        "page_title": f"Edit Stop - {stop.ride.ride_number}",
+        "page_title": (
+            f"Edit Stop - "
+            f"{stop.ride.ride_number}"
+        ),
         "breadcrumb_items": [
             {
                 "title": "Edit Stop",

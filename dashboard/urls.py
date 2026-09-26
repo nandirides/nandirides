@@ -307,6 +307,11 @@ urlpatterns = [
         name="refund_edit",
     ),
     path(
+        "payments/refunds/",
+        payment_views.refund_list,
+        name="refund_list",
+    ),
+    path(
     "payments/ride/create/",
     payment_views.create_ride_payment,
     name="create_ride_payment",
