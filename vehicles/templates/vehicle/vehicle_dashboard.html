@@ -179,6 +179,10 @@
                     </div>
                     <div class="card-body p-4">
                         <div class="d-grid gap-2">
+                             <a href="{% url 'assignment_list' %}" class="btn btn-outline-primary d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-list-ul me-2"></i>All Driver Vehicle Assignment</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
                             {% if perms.vehicles.add_vehicle %}
                             <a href="{% url 'vehicle_add' %}" class="btn btn-outline-primary d-flex align-items-center justify-content-between">
                                 <span><i class="bi bi-plus-circle me-2"></i>Add Vehicle</span>
