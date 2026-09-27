@@ -292,3 +292,127 @@ body {
         min-height: 350px;
     }
 }
+
+.live-driver-marker {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.live-driver-marker .driver-wave {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    border: 2px solid rgba(220, 53, 69, 0.65);
+    border-radius: 50%;
+    animation: driverWave 1.8s ease-out infinite;
+}
+.live-driver-marker .driver-wave.wave-2 {
+    animation-delay: 0.6s;
+}
+.live-driver-marker .driver-wave.wave-3 {
+    animation-delay: 1.2s;
+}
+.live-driver-marker .driver-icon {
+    position: relative;
+    z-index: 5;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #dc3545;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    border: 2px solid #fff;
+}
+@keyframes driverWave {
+    0% {
+        transform: scale(0.7);
+        opacity: 0.9;
+    }
+    70% {
+        transform: scale(2.1);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(2.1);
+        opacity: 0;
+    }
+}
+.live-status-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+    padding: 6px 10px;
+    overflow: visible;
+}
+.live-status-dot {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.live-status-core {
+    position: relative;
+    z-index: 5;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+.live-status-wave {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(.6);
+    opacity: 0;
+    pointer-events: none;
+}
+.live-status-wave.wave-1 {
+    animation: liveStatusWave 1.8s ease-out infinite;
+}
+.live-status-wave.wave-2 {
+    animation: liveStatusWave 1.8s ease-out .6s infinite;
+}
+.live-status-wave.wave-3 {
+    animation: liveStatusWave 1.8s ease-out 1.2s infinite;
+}
+@keyframes liveStatusWave {
+    0% {
+        transform: translate(-50%, -50%) scale(.6);
+        opacity: .9;
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(2.4);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2.4);
+        opacity: 0;
+    }
+}
+    .live-status-badge.text-bg-success .live-status-core,
+    .live-status-badge.text-bg-success .live-status-wave {
+        color: #fff;
+    }
+    .live-status-badge.text-bg-warning .live-status-core,
+    .live-status-badge.text-bg-warning .live-status-wave {
+        color: #212529;
+    }
+    .live-status-badge.text-bg-secondary .live-status-core,
+    .live-status-badge.text-bg-secondary .live-status-wave {
+        color: #fff;
+    }
