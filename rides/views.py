@@ -424,31 +424,53 @@ def _get_geocoder_city_name(geocoder_result):
 
     address = geocoder_result.get("address") or {}
 
-    city_name = (
-        address.get("city")
-        or address.get("town")
-        or address.get("municipality")
-        or address.get("village")
-        or address.get("suburb")
-        or address.get("city_district")
-        or ""
-    )
+    for key in (
+        "city",
+        "municipality",
+        "town",
+        "city_district",
+        "district",
+        "county",
+        "village",
+        "locality",
+        "suburb",
+        "hamlet",
+    ):
+        value = str(address.get(key) or "").strip()
+        if value:
+            return value
 
-    return str(city_name).strip()
+    return ""
 
 
 def _resolve_city(city_name):
     if not City or not city_name:
         return None
 
-    city_name = str(city_name).strip()
+    normalized_name = " ".join(
+        str(city_name)
+        .replace(",", " ")
+        .split()
+    ).strip()
 
-    if not city_name:
+    if not normalized_name:
         return None
+
+    aliases = {
+        "chandigarh city": "Chandigarh",
+        "chandigarh ut": "Chandigarh",
+        "chandigarh union territory": "Chandigarh",
+        "chandigarh district": "Chandigarh",
+    }
+
+    lookup_name = aliases.get(
+        normalized_name.lower(),
+        normalized_name,
+    )
 
     city = (
         City.objects
-        .filter(name__iexact=city_name)
+        .filter(name__iexact=lookup_name)
         .order_by("pk")
         .first()
     )
@@ -458,10 +480,79 @@ def _resolve_city(city_name):
 
     return (
         City.objects
-        .filter(name__icontains=city_name)
+        .filter(name__icontains=lookup_name)
         .order_by("pk")
         .first()
     )
+
+
+def _resolve_city_from_geocoder(geocoder_result):
+    if not City or not geocoder_result:
+        return None
+
+    address = geocoder_result.get("address") or {}
+    country_name = str(address.get("country") or "").strip()
+    state_name = str(address.get("state") or "").strip()
+
+    candidates = []
+    for key in (
+        "city", "municipality", "town", "city_district",
+        "district", "county", "village", "locality",
+        "suburb", "hamlet",
+    ):
+        value = str(address.get(key) or "").strip()
+        if value and value not in candidates:
+            candidates.append(value)
+
+    if state_name and state_name not in candidates:
+        candidates.append(state_name)
+
+    if (
+        state_name
+        and country_name
+        and country_name.lower() in {"india", "in"}
+    ):
+        try:
+            same_name_city = (
+                City.objects
+                .filter(
+                    name__iexact=state_name,
+                    state__name__iexact=state_name,
+                    state__country__name__iexact="India",
+                )
+                .order_by("pk")
+                .first()
+            )
+        except Exception:
+            same_name_city = None
+
+        if same_name_city:
+            return same_name_city
+
+    for candidate in candidates:
+        if state_name and country_name:
+            try:
+                city = (
+                    City.objects
+                    .filter(
+                        name__iexact=candidate,
+                        state__name__iexact=state_name,
+                        state__country__name__iexact=country_name,
+                    )
+                    .order_by("pk")
+                    .first()
+                )
+            except Exception:
+                city = None
+
+            if city:
+                return city
+
+        city = _resolve_city(candidate)
+        if city:
+            return city
+
+    return None
 
 
 def _resolve_form_location_data(cleaned_data, prefix):
@@ -1141,36 +1232,23 @@ def ride_request_fare_preview(request):
             status=405,
         )
 
-    vehicle_type_id = request.GET.get(
-        "vehicle_type",
-        "",
-    ).strip()
-
-    city_name = request.GET.get(
-        "city_name",
-        "",
-    ).strip()
-
-    city_id = request.GET.get(
-        "city_id",
-        "",
-    ).strip()
-
-    distance = _safe_decimal(
-        request.GET.get("distance")
+    vehicle_type_id = request.GET.get("vehicle_type", "").strip()
+    city_name = request.GET.get("city_name", "").strip()
+    city_id = request.GET.get("city_id", "").strip()
+    pickup_address = request.GET.get("pickup_address", "").strip()
+    pickup_latitude = _safe_decimal(
+        request.GET.get("pickup_latitude")
+        or request.GET.get("latitude")
     )
-
-    duration = request.GET.get(
-        "duration",
-        "",
-    ).strip()
+    pickup_longitude = _safe_decimal(
+        request.GET.get("pickup_longitude")
+        or request.GET.get("longitude")
+    )
+    distance = _safe_decimal(request.GET.get("distance"))
+    duration = request.GET.get("duration", "").strip()
 
     try:
-        duration_value = (
-            int(duration)
-            if duration
-            else None
-        )
+        duration_value = int(duration) if duration else None
     except (TypeError, ValueError):
         duration_value = None
 
@@ -1193,18 +1271,44 @@ def ride_request_fare_preview(request):
     city = None
 
     if city_id and City:
-        try:
-            city = (
-                City.objects
-                .filter(pk=city_id)
-                .first()
-            )
-        except (TypeError, ValueError):
-            city = None
+        city_id_value = str(city_id).strip()
+
+        if city_id_value.isdigit():
+            try:
+                city = (
+                    City.objects
+                    .filter(pk=int(city_id_value))
+                    .first()
+                )
+            except (TypeError, ValueError):
+                city = None
+        else:
+            city = _resolve_city(city_id_value)
 
     if not city and city_name:
-        city = _resolve_city(
-            city_name
+        city = _resolve_city(city_name)
+
+    geocoder_result = None
+
+    if (
+        not city
+        and pickup_latitude is not None
+        and pickup_longitude is not None
+    ):
+        geocoder_result = _reverse_geocode(
+            pickup_latitude,
+            pickup_longitude,
+        )
+        city = _resolve_city_from_geocoder(
+            geocoder_result
+        )
+
+    if not city and pickup_address:
+        geocoder_result = _geocode_address(
+            pickup_address
+        )
+        city = _resolve_city_from_geocoder(
+            geocoder_result
         )
 
     if not city:
@@ -1232,9 +1336,7 @@ def ride_request_fare_preview(request):
         return JsonResponse(
             {
                 "success": False,
-                "message": (
-                    "Selected vehicle type is invalid."
-                ),
+                "message": "Selected vehicle type is invalid.",
             },
             status=400,
         )
@@ -1263,6 +1365,7 @@ def ride_request_fare_preview(request):
             "success": True,
             "fare": str(fare),
             "city": city.name,
+            "city_id": city.pk,
             "vehicle_type": str(vehicle_type),
         }
     )

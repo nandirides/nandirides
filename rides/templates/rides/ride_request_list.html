@@ -145,13 +145,6 @@
                     <h5 class="card-title fw-bold mb-1">
                         <i class="fas fa-list me-2"></i>All Ride Requests
                     </h5>
-                    <div class="small text-muted">
-                        {% if page_obj %}
-                            Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} requests
-                        {% else %}
-                            Ride request records
-                        {% endif %}
-                    </div>
                 </div>
                 {% if selected_status %}
                     <span class="badge bg-primary">
@@ -280,8 +273,15 @@
             <div class="card-footer bg-body-tertiary">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <div class="small text-muted">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        {% if page_obj %}
+                          <i class="fas fa-file-lines text-primary me-1"></i>  Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} requests
+                        {% else %}
+                            Ride request records
+                        {% endif %}
                     </div>
+                    <!-- <div class="small text-muted">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </div> -->
                     <nav aria-label="Ride request pagination">
                         <ul class="pagination pagination-sm mb-0">
                             {% if page_obj.has_previous %}

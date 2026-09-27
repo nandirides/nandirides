@@ -20,7 +20,7 @@
                 <div class="col-lg-6">
                     <div class="d-flex justify-content-lg-end align-items-center flex-wrap gap-2">
                         <a href="{% url 'ride_request_add' %}" class="btn btn-outline-primary px-3 shadow-sm">
-                            <i class="fas fa-plus me-1"></i>Create Ride Request
+                            <i class="fas fa-plus me-1"></i>Create Request
                         </a>
                         <a href="{% url 'ride_add' %}" class="btn btn-outline-primary px-3 shadow-sm">
                             <i class="fas fa-plus me-1"></i>Add Ride
@@ -198,14 +198,7 @@
                         <i class="fas fa-list"></i>
                     </span>
                     <div>
-                        <h5 class="card-title mb-1 fw-semibold">All Rides</h5>&nbsp;
-                        <small class="text-body-secondary">
-                            {% if page_obj %}
-                                Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} rides
-                            {% else %}
-                                Ride records
-                            {% endif %}
-                        </small>
+                        <h5 class="card-title mb-1 fw-semibold">All Rides</h5>
                     </div>
                 </div>
                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">
@@ -547,10 +540,17 @@
         {% if page_obj.has_other_pages %}
             <div class="card-footer bg-body-tertiary border-top py-3">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <div class="small text-body-secondary">
+                        <small class="text-body-secondary">
+                            {% if page_obj %}
+                               <i class="fas fa-file-lines text-primary me-1"></i> Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} rides
+                            {% else %}
+                                Ride records
+                            {% endif %}
+                        </small>
+                    <!-- <div class="small text-body-secondary">
                         <i class="fas fa-file-lines me-1"></i>
                         Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                    </div>
+                    </div> -->
                     <nav aria-label="Ride pagination">
                         <ul class="pagination pagination-sm mb-0">
                             {% if page_obj.has_previous %}
