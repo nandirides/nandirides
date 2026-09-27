@@ -19,7 +19,7 @@
         <div>
             <a href="{% url 'ride_list' %}" class="btn btn-outline-primary">
                 <i class="bi bi-arrow-left me-1"></i>
-                Back to Rides
+                Back
             </a>
         </div>
     </div>
@@ -82,13 +82,13 @@
                     <div class="card-header bg-body d-flex align-items-center justify-content-between">
                         <div class="d-flex">
                             <i class="bi bi-person-badge text-primary me-2"></i>
-                            <h5 class="mb-0">Passenger & Vehicle Type</h5>
+                            <h5 class="mb-0">Customer & Vehicle Type</h5>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Passenger</label>
+                                <label class="form-label fw-semibold">Customer</label>
                                 <div class="form-control bg-primary-subtle text-muted" id="passengerDisplay">—</div>
                                 {% if form.passenger %}
                                     <div class="d-none">
@@ -222,7 +222,7 @@
                     <div class="card-header bg-body d-flex align-items-center justify-content-between">
                         <div class="d-flex">
                             <i class="bi bi-speedometer2 text-primary me-2"></i>
-                            <h5 class="mb-0">Trip Performance</h5>
+                            <h5 class="mb-0">Trip Details</h5>
                         </div>
                     </div>
                     <div class="card-body">
