@@ -1137,7 +1137,7 @@ def notification_status(request):
                 "reference_type": notification.reference_type,
                 "reference_id": notification.reference_id,
                 "created_at": (
-                    notification.created_at.strftime(
+                    timezone.localtime(notification.created_at).strftime(
                         "%d %b %Y, %I:%M %p"
                     )
                     if notification.created_at

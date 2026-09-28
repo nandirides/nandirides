@@ -1,4 +1,4 @@
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from urllib.parse import urlencode
 from urllib.request import Request as UrlRequest, urlopen
 import json
@@ -33,7 +33,9 @@ from .models import (
     RideStop,
     RideTracking,
 )
+from django.views.decorators.http import require_POST
 from locations.models import Location
+from promotions.models import Coupon, CouponUsage
 
 try:
     from locations.models import City
@@ -73,6 +75,266 @@ GEOCODING_USER_AGENT = "NandiRide/1.0 Django Ride Management"
 GEOCODING_TIMEOUT = 8
 ROUTING_TIMEOUT = 8
 
+
+
+# def _validate_coupon(coupon_code, fare, user):
+#     now = timezone.now()
+
+#     try:
+#         coupon = Coupon.objects.get(
+#             code__iexact=coupon_code,
+#             is_active=True,
+#         )
+#     except Coupon.DoesNotExist:
+#         return (
+#             None,
+#             Decimal("0.00"),
+#             "Invalid or inactive coupon code.",
+#         )
+
+#     if now < coupon.valid_from:
+#         return (
+#             None,
+#             Decimal("0.00"),
+#             "This coupon is not active yet.",
+#         )
+
+#     if now > coupon.valid_to:
+#         return (
+#             None,
+#             Decimal("0.00"),
+#             "This coupon has expired.",
+#         )
+
+#     if fare < coupon.minimum_fare:
+#         return (
+#             None,
+#             Decimal("0.00"),
+#             f"Minimum fare of ₹{coupon.minimum_fare:.2f} is required for this coupon.",
+#         )
+
+#     total_usage = CouponUsage.objects.filter(
+#         coupon=coupon,
+#     ).count()
+
+#     if (
+#         coupon.usage_limit is not None
+#         and total_usage >= coupon.usage_limit
+#     ):
+#         return (
+#             None,
+#             Decimal("0.00"),
+#             "This coupon usage limit has been reached.",
+#         )
+
+#     user_usage = CouponUsage.objects.filter(
+#         coupon=coupon,
+#         user=user,
+#     ).count()
+
+#     if (
+#         coupon.per_user_limit is not None
+#         and user_usage >= coupon.per_user_limit
+#     ):
+#         return (
+#             None,
+#             Decimal("0.00"),
+#             "You have already used this coupon the maximum allowed times.",
+#         )
+
+#     if coupon.discount_type == Coupon.DiscountType.PERCENTAGE:
+#         discount = (
+#             fare
+#             * coupon.discount_value
+#             / Decimal("100")
+#         ).quantize(
+#             Decimal("0.01")
+#         )
+
+#     elif coupon.discount_type == Coupon.DiscountType.FIXED:
+#         discount = coupon.discount_value.quantize(
+#             Decimal("0.01")
+#         )
+
+#     else:
+#         return (
+#             None,
+#             Decimal("0.00"),
+#             "Invalid coupon discount type.",
+#         )
+
+#     if (
+#         coupon.maximum_discount is not None
+#         and discount > coupon.maximum_discount
+#     ):
+#         discount = coupon.maximum_discount
+
+#     if discount > fare:
+#         discount = fare
+
+#     discount = discount.quantize(
+#         Decimal("0.01")
+#     )
+
+#     return (
+#         coupon,
+#         discount,
+#         f"Coupon {coupon.code} applied successfully.",
+#     )
+
+@login_required
+@require_POST
+def apply_coupon(request):
+    coupon_code = str(
+        request.POST.get("coupon_code", "")
+    ).strip().upper()
+
+    fare_value = str(
+        request.POST.get("fare", "0")
+    ).strip()
+
+    if not coupon_code:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Please enter a coupon code.",
+            },
+            status=400,
+        )
+
+    try:
+        fare = Decimal(fare_value)
+    except Exception:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Invalid fare amount.",
+            },
+            status=400,
+        )
+
+    if fare <= 0:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Invalid fare amount.",
+            },
+            status=400,
+        )
+
+    fare = fare.quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    now = timezone.now()
+
+    coupon = (
+        Coupon.objects
+        .filter(
+            code__iexact=coupon_code,
+            is_active=True,
+            valid_from__lte=now,
+            valid_to__gte=now,
+        )
+        .first()
+    )
+
+    if not coupon:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Invalid or expired coupon.",
+            },
+            status=400,
+        )
+
+    if fare < coupon.minimum_fare:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": (
+                    f"Minimum fare of ₹{coupon.minimum_fare:.2f} "
+                    "is required for this coupon."
+                ),
+            },
+            status=400,
+        )
+
+    total_usage = CouponUsage.objects.filter(
+        coupon=coupon
+    ).count()
+
+    if (
+        coupon.usage_limit is not None
+        and total_usage >= coupon.usage_limit
+    ):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "This coupon usage limit has been reached.",
+            },
+            status=400,
+        )
+
+    user_usage = CouponUsage.objects.filter(
+        coupon=coupon,
+        user=request.user,
+    ).count()
+
+    if user_usage >= coupon.per_user_limit:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "You have already used this coupon.",
+            },
+            status=400,
+        )
+
+    if coupon.discount_type == Coupon.DiscountType.PERCENTAGE:
+        discount = (
+            fare * coupon.discount_value
+        ) / Decimal("100")
+
+        if coupon.maximum_discount is not None:
+            discount = min(
+                discount,
+                coupon.maximum_discount,
+            )
+
+    else:
+        discount = coupon.discount_value
+
+    discount = min(
+        discount,
+        fare,
+    )
+
+    discount = discount.quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    final_amount = (
+        fare - discount
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    if final_amount < 0:
+        final_amount = Decimal("0.00")
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Coupon applied successfully.",
+            "coupon_code": coupon.code,
+            "original_amount": f"{fare:.2f}",
+            "discount": f"{discount:.2f}",
+            "final_amount": f"{final_amount:.2f}",
+        }
+    )
 
 def _paginate(request, queryset, default_per_page=15):
     try:

@@ -226,7 +226,7 @@
 
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="{{ form.estimated_distance.id_for_label }}" class="form-label fw-semibold">
                                     Distance
                                 </label>
@@ -241,7 +241,7 @@
                                 {% endfor %}
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="{{ form.estimated_duration.id_for_label }}" class="form-label fw-semibold">
                                     Duration
                                 </label>
@@ -256,7 +256,7 @@
                                 {% endfor %}
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label for="{{ form.estimated_fare.id_for_label }}" class="form-label fw-semibold">
                                     Estimated Fare
                                 </label>
@@ -272,6 +272,62 @@
                                     {{ error }}
                                 </div>
                                 {% endfor %}
+                            </div>
+                            <input type="hidden" id="couponFare" value="0">
+                            <div class="mt-3">
+                                <label for="couponCode" class="form-label fw-semibold">
+                                    <i class="bi bi-ticket-perforated-fill text-primary me-1"></i>
+                                    Apply Coupon
+                                </label>
+
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        id="couponCode"
+                                        name="coupon_code"
+                                        class="form-control"
+                                        placeholder="Enter coupon code"
+                                        autocomplete="off"
+                                    >
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-primary"
+                                        id="applyCouponBtn"
+                                        onclick="applyCoupon()"
+                                    >
+                                        <i class="bi bi-check2-circle me-1"></i>
+                                        Apply
+                                    </button>
+                                </div>
+
+                                <div id="couponStatus" class="small mt-2 text-muted">
+                                    Have a coupon? Enter the code to get a discount.
+                                </div>
+
+                                <div
+                                    id="couponDetails"
+                                    class="border rounded-3 p-3 mt-2 d-none bg-light"
+                                >
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Original Fare</span>
+                                        <strong id="couponOriginalFare">₹0.00</strong>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Coupon Discount</span>
+                                        <strong class="text-success" id="couponDiscount">
+                                            -₹0.00
+                                        </strong>
+                                    </div>
+
+                                    <div class="border-top pt-2 d-flex justify-content-between">
+                                        <span class="fw-semibold">Final Fare</span>
+                                        <strong class="text-primary" id="couponFinalFare">
+                                            ₹0.00
+                                        </strong>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1068,6 +1124,8 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
 <script>
 (function () {
@@ -1095,12 +1153,307 @@
         return Number.isFinite(amount) ? amount : 0;
     }
 
+    function getBaseFare() {
+        const couponFare = document.getElementById("couponFare");
+
+        if (couponFare) {
+            const value = parseFloat(couponFare.value || "0");
+
+            if (Number.isFinite(value) && value > 0) {
+                return value;
+            }
+        }
+
+        const estimatedFare = document.getElementById("id_estimated_fare");
+
+        if (estimatedFare) {
+            const value = parseFloat(estimatedFare.value || "0");
+
+            if (Number.isFinite(value) && value > 0) {
+                return value;
+            }
+        }
+
+        return getAmount();
+    }
+
+    function getCouponCode() {
+        const input = document.getElementById("couponCode");
+
+        return input
+            ? String(input.value || "").trim().toUpperCase()
+            : "";
+    }
+
+    function setCouponStatus(message, type) {
+        const status = document.getElementById("couponStatus");
+
+        if (!status) {
+            return;
+        }
+
+        status.textContent = message || "";
+
+        status.className =
+            "small mt-2 " +
+            (
+                type === "success"
+                    ? "text-success fw-semibold"
+                    : type === "danger"
+                        ? "text-danger"
+                        : "text-muted"
+            );
+    }
+
+    function updateCouponFare(fare) {
+        const couponFare = document.getElementById("couponFare");
+
+        if (couponFare) {
+            couponFare.value = Number(fare || 0).toFixed(2);
+        }
+    }
+
+    function resetCoupon() {
+        const details = document.getElementById("couponDetails");
+        const finalFare = document.getElementById("finalFare");
+        const baseFare = getBaseFare();
+
+        updateCouponFare(baseFare);
+
+        if (finalFare) {
+            finalFare.value = baseFare.toFixed(2);
+        }
+
+        if (details) {
+            details.classList.add("d-none");
+        }
+
+        setCouponStatus(
+            "Have a coupon? Enter the code to get a discount.",
+            "muted"
+        );
+    }
+
+    async function applyCoupon() {
+        const input = document.getElementById("couponCode");
+        const status = document.getElementById("couponStatus");
+        const details = document.getElementById("couponDetails");
+        const original = document.getElementById("couponOriginalFare");
+        const discount = document.getElementById("couponDiscount");
+        const final = document.getElementById("couponFinalFare");
+        const button = document.getElementById("applyCouponBtn");
+
+        const code = input
+            ? String(input.value || "").trim().toUpperCase()
+            : "";
+
+        const fare = getBaseFare();
+
+        if (!code) {
+            setCouponStatus(
+                "Please enter a coupon code.",
+                "danger"
+            );
+
+            if (details) {
+                details.classList.add("d-none");
+            }
+
+            return false;
+        }
+
+        if (!fare || fare <= 0) {
+            setCouponStatus(
+                "Please calculate the fare first.",
+                "danger"
+            );
+
+            if (details) {
+                details.classList.add("d-none");
+            }
+
+            return false;
+        }
+
+        if (button) {
+            button.disabled = true;
+
+            button.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-1"></span>Applying...';
+        }
+
+        setCouponStatus(
+            "Validating coupon...",
+            "muted"
+        );
+
+        const formData = new FormData();
+
+        formData.append(
+            "coupon_code",
+            code
+        );
+
+        formData.append(
+            "fare",
+            fare.toFixed(2)
+        );
+
+        const csrfToken =
+            document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+            )?.value || "";
+
+        if (csrfToken) {
+            formData.append(
+                "csrfmiddlewaretoken",
+                csrfToken
+            );
+        }
+
+        try {
+            const response = await fetch(
+                "{% url 'apply_coupon' %}",
+                {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    },
+                    body: formData
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message ||
+                    "Coupon could not be applied."
+                );
+            }
+
+            const originalAmount = Number(
+                data.original_amount || fare
+            );
+
+            const couponDiscountAmount = Number(
+                data.discount || 0
+            );
+
+            const finalAmount = Number(
+                data.final_amount || fare
+            );
+
+            if (original) {
+                original.textContent =
+                    "₹" + originalAmount.toFixed(2);
+            }
+
+            if (discount) {
+                discount.textContent =
+                    "-₹" + couponDiscountAmount.toFixed(2);
+            }
+
+            if (final) {
+                final.textContent =
+                    "₹" + finalAmount.toFixed(2);
+            }
+
+            if (details) {
+                details.classList.remove("d-none");
+            }
+
+            if (input) {
+                input.value =
+                    data.coupon_code || code;
+            }
+
+            updateCouponFare(finalAmount);
+
+            const finalFareInput =
+                document.getElementById("finalFare");
+
+            if (finalFareInput) {
+                finalFareInput.value =
+                    finalAmount.toFixed(2);
+            }
+
+            const paymentAmount =
+                document.getElementById("paymentAmount");
+
+            if (paymentAmount) {
+                paymentAmount.textContent =
+                    "₹" + finalAmount.toFixed(2);
+            }
+
+            updatePaymentAmounts();
+
+            const upiMethod =
+                document.getElementById("paymentMethodUpi");
+
+            if (
+                upiMethod &&
+                upiMethod.checked
+            ) {
+                generatePaymentQr();
+            }
+
+            setCouponStatus(
+                data.message ||
+                "Coupon applied successfully.",
+                "success"
+            );
+
+            return true;
+
+        } catch (error) {
+            console.error(
+                "Coupon error:",
+                error
+            );
+
+            if (details) {
+                details.classList.add("d-none");
+            }
+
+            setCouponStatus(
+                error.message ||
+                "Unable to apply coupon. Please try again.",
+                "danger"
+            );
+
+            return false;
+
+        } finally {
+            if (button) {
+                button.disabled = false;
+
+                button.innerHTML =
+                    '<i class="bi bi-check2-circle me-1"></i>Apply';
+            }
+        }
+    }
+
+    function getUpiId() {
+        const input =
+            document.getElementById("paymentUpiId");
+
+        return input
+            ? String(input.value || "").trim()
+            : "";
+    }
+
     function updatePaymentAmounts() {
         const amount = getAmount();
         const amountText = "₹" + amount.toFixed(2);
 
-        const qrAmount = document.getElementById("paymentQrAmount");
-        const walletAmount = document.getElementById("walletPaymentAmount");
+        const qrAmount =
+            document.getElementById("paymentQrAmount");
+
+        const walletAmount =
+            document.getElementById("walletPaymentAmount");
 
         if (qrAmount) {
             qrAmount.textContent = amountText;
@@ -1111,16 +1464,9 @@
         }
     }
 
-    function getUpiId() {
-        const input = document.getElementById("paymentUpiId");
-
-        return input
-            ? String(input.value || "").trim()
-            : "";
-    }
-
     function generatePaymentQr() {
-        const container = document.getElementById("paymentQrCode");
+        const container =
+            document.getElementById("paymentQrCode");
 
         if (!container) {
             return;
@@ -1134,37 +1480,56 @@
         container.innerHTML = "";
 
         if (!upiId) {
-            container.innerHTML = `
-                <div class="text-center text-secondary">
-                    <i class="bi bi-qr-code fs-1 d-block mb-2"></i>
-                    <small>Enter UPI ID</small>
-                </div>
-            `;
+            container.innerHTML =
+                '<div class="text-center text-secondary">' +
+                    '<i class="bi bi-qr-code fs-1 d-block mb-2"></i>' +
+                    '<small>Enter UPI ID</small>' +
+                '</div>';
+
             return;
         }
 
         if (typeof QRCode === "undefined") {
-            container.innerHTML = `
-                <div class="text-center text-danger">
-                    <i class="bi bi-exclamation-triangle fs-3 d-block mb-2"></i>
-                    <small>QR generator unavailable</small>
-                </div>
-            `;
+            container.innerHTML =
+                '<div class="text-center text-danger">' +
+                    '<i class="bi bi-exclamation-triangle fs-3 d-block mb-2"></i>' +
+                    '<small>QR generator unavailable</small>' +
+                '</div>';
+
             return;
         }
 
-        const paymentIdElement = document.getElementById("ridePaymentId");
+        const paymentIdElement =
+            document.getElementById("ridePaymentId");
 
         const paymentId = paymentIdElement
-            ? String(paymentIdElement.value || "").trim()
+            ? String(
+                paymentIdElement.value || ""
+            ).trim()
             : "";
 
-        const params = new URLSearchParams();
+        const params =
+            new URLSearchParams();
 
-        params.set("pa", upiId);
-        params.set("pn", "NandiRide");
-        params.set("am", amount.toFixed(2));
-        params.set("cu", "INR");
+        params.set(
+            "pa",
+            upiId
+        );
+
+        params.set(
+            "pn",
+            "NandiRide"
+        );
+
+        params.set(
+            "am",
+            amount.toFixed(2)
+        );
+
+        params.set(
+            "cu",
+            "INR"
+        );
 
         params.set(
             "tn",
@@ -1173,27 +1538,30 @@
                 : "NandiRide Ride Payment"
         );
 
-        const upiUrl = "upi://pay?" + params.toString();
+        const upiUrl =
+            "upi://pay?" + params.toString();
 
-        new QRCode(container, {
-            text: upiUrl,
-            width: 180,
-            height: 180,
-            correctLevel: QRCode.CorrectLevel.M
-        });
+        new QRCode(
+            container,
+            {
+                text: upiUrl,
+                width: 180,
+                height: 180,
+                correctLevel: QRCode.CorrectLevel.M
+            }
+        );
     }
 
     function hideAllPaymentSections() {
-        const sections = [
+        [
             "cardPaymentFields",
             "upiPaymentFields",
             "walletPaymentFields",
             "netbankingPaymentFields",
             "cashPaymentFields"
-        ];
-
-        sections.forEach(function (id) {
-            const element = document.getElementById(id);
+        ].forEach(function (id) {
+            const element =
+                document.getElementById(id);
 
             if (element) {
                 element.classList.add("d-none");
@@ -1205,10 +1573,15 @@
         let selectedMethod = "card";
 
         paymentMethods.forEach(function (id) {
-            const input = document.getElementById(id);
+            const input =
+                document.getElementById(id);
 
-            if (input && input.checked) {
-                selectedMethod = input.value;
+            if (
+                input &&
+                input.checked
+            ) {
+                selectedMethod =
+                    input.value;
             }
         });
 
@@ -1250,16 +1623,21 @@
     }
 
     function syncPaymentId() {
-        const source = document.getElementById("ridePaymentId");
+        const source =
+            document.getElementById("ridePaymentId");
 
         if (!source) {
             return;
         }
 
-        const display = document.getElementById("ridePaymentDisplayId");
+        const display =
+            document.getElementById(
+                "ridePaymentDisplayId"
+            );
 
         if (display) {
-            display.textContent = source.value || "—";
+            display.textContent =
+                source.value || "—";
         }
     }
 
@@ -1272,104 +1650,174 @@
     }
 
     function formatExpiry(value) {
-        const digits = String(value || "")
-            .replace(/\D/g, "")
-            .slice(0, 4);
+        const digits =
+            String(value || "")
+                .replace(/\D/g, "")
+                .slice(0, 4);
 
-        if (digits.length <= 2) {
-            return digits;
-        }
-
-        return digits.slice(0, 2) + "/" + digits.slice(2);
+        return digits.length <= 2
+            ? digits
+            : digits.slice(0, 2) +
+                "/" +
+                digits.slice(2);
     }
 
     paymentMethods.forEach(function (id) {
-        const input = document.getElementById(id);
+        const input =
+            document.getElementById(id);
 
         if (input) {
-            input.addEventListener("change", updatePaymentMethod);
+            input.addEventListener(
+                "change",
+                updatePaymentMethod
+            );
         }
     });
 
-    const upiInput = document.getElementById("paymentUpiId");
+    const upiInput =
+        document.getElementById("paymentUpiId");
 
     if (upiInput) {
-        upiInput.addEventListener("input", function () {
-            generatePaymentQr();
-        });
+        upiInput.addEventListener(
+            "input",
+            generatePaymentQr
+        );
     }
 
-    const cardNumber = document.getElementById("paymentCardNumber");
+    const cardNumber =
+        document.getElementById(
+            "paymentCardNumber"
+        );
 
     if (cardNumber) {
-        cardNumber.addEventListener("input", function () {
-            this.value = formatCardNumber(this.value);
-        });
+        cardNumber.addEventListener(
+            "input",
+            function () {
+                this.value =
+                    formatCardNumber(
+                        this.value
+                    );
+            }
+        );
     }
 
-    const expiry = document.getElementById("paymentCardExpiry");
+    const expiry =
+        document.getElementById(
+            "paymentCardExpiry"
+        );
 
     if (expiry) {
-        expiry.addEventListener("input", function () {
-            this.value = formatExpiry(this.value);
-        });
+        expiry.addEventListener(
+            "input",
+            function () {
+                this.value =
+                    formatExpiry(
+                        this.value
+                    );
+            }
+        );
     }
 
-    const cvv = document.getElementById("paymentCardCvv");
+    const cvv =
+        document.getElementById(
+            "paymentCardCvv"
+        );
 
     if (cvv) {
-        cvv.addEventListener("input", function () {
-            this.value = String(this.value || "")
-                .replace(/\D/g, "")
-                .slice(0, 4);
-        });
+        cvv.addEventListener(
+            "input",
+            function () {
+                this.value =
+                    String(
+                        this.value || ""
+                    )
+                    .replace(/\D/g, "")
+                    .slice(0, 4);
+            }
+        );
     }
 
-    const paymentModal = document.getElementById("paymentModal");
+    const couponInput =
+        document.getElementById(
+            "couponCode"
+        );
+
+    if (couponInput) {
+        couponInput.addEventListener(
+            "keydown",
+            function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    applyCoupon();
+                }
+            }
+        );
+    }
+
+    const paymentModal =
+        document.getElementById(
+            "paymentModal"
+        );
 
     if (paymentModal) {
-        paymentModal.addEventListener("shown.bs.modal", function () {
-            syncPaymentId();
-            updatePaymentAmounts();
-            updatePaymentMethod();
-        });
+        paymentModal.addEventListener(
+            "shown.bs.modal",
+            function () {
+                syncPaymentId();
+                updatePaymentAmounts();
+                updatePaymentMethod();
+            }
+        );
     }
 
-    const paymentAmount = document.getElementById("paymentAmount");
+    const paymentAmount =
+        document.getElementById(
+            "paymentAmount"
+        );
 
     if (paymentAmount) {
-        const observer = new MutationObserver(function () {
-            updatePaymentAmounts();
+        const observer =
+            new MutationObserver(
+                function () {
+                    updatePaymentAmounts();
 
-            const upiMethod = document.getElementById("paymentMethodUpi");
+                    const upiMethod =
+                        document.getElementById(
+                            "paymentMethodUpi"
+                        );
 
-            if (upiMethod && upiMethod.checked) {
-                generatePaymentQr();
+                    if (
+                        upiMethod &&
+                        upiMethod.checked
+                    ) {
+                        generatePaymentQr();
+                    }
+                }
+            );
+
+        observer.observe(
+            paymentAmount,
+            {
+                childList: true,
+                characterData: true,
+                subtree: true
             }
-        });
-
-        observer.observe(paymentAmount, {
-            childList: true,
-            characterData: true,
-            subtree: true
-        });
+        );
     }
 
-    window.generatePaymentQr = generatePaymentQr;
-    window.updatePaymentMethod = updatePaymentMethod;
+    window.applyCoupon =
+        applyCoupon;
+
+    window.generatePaymentQr =
+        generatePaymentQr;
+
+    window.updatePaymentMethod =
+        updatePaymentMethod;
+
+    window.resetCoupon =
+        resetCoupon;
 })();
 </script>
-
-<link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin=""
->
-
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    crossorigin=""
-></script>
 
 <script>
 (function () {
@@ -1379,17 +1827,26 @@
     let pickupMarker = null;
     let dropMarker = null;
     let routeLayer = null;
+
     let routeRequestInProgress = false;
     let pickupGeocodeInProgress = false;
     let dropGeocodeInProgress = false;
+    let fareRequestInProgress = false;
+    let couponRequestInProgress = false;
+    let paymentRequestInProgress = false;
     let formSubmitting = false;
+
     let updatingPickupAddress = false;
     let updatingDropAddress = false;
+
     let pickupCityName = "";
     let dropCityName = "";
-    let fareRequestInProgress = false;
-    let paymentRequestInProgress = false;
+
     let paymentModalInstance = null;
+
+    let couponApplied = false;
+    let appliedCouponCode = "";
+    let payableFareValue = null;
 
     const DEFAULT_CENTER = [20.5937, 78.9629];
     const DEFAULT_ZOOM = 5;
@@ -1399,7 +1856,6 @@
 
     const pickupLatitude = document.getElementById("id_pickup_latitude");
     const pickupLongitude = document.getElementById("id_pickup_longitude");
-
     const dropLatitude = document.getElementById("id_drop_latitude");
     const dropLongitude = document.getElementById("id_drop_longitude");
 
@@ -1429,6 +1885,7 @@
 
     const mapLoading = document.getElementById("mapLoading");
     const mapLoadingText = document.getElementById("mapLoadingText");
+
     const paymentModal = document.getElementById("paymentModal");
     const paymentAlert = document.getElementById("paymentAlert");
     const paymentDistance = document.getElementById("paymentDistance");
@@ -1436,15 +1893,39 @@
     const paymentVehicle = document.getElementById("paymentVehicle");
     const paymentAmount = document.getElementById("paymentAmount");
     const confirmPaymentBtn = document.getElementById("confirmPaymentBtn");
-    const paymentMethodInputs = document.querySelectorAll('input[name="payment_method"]');
+    const ridePaymentId = document.getElementById("ridePaymentId");
+
     const cardPaymentFields = document.getElementById("cardPaymentFields");
     const upiPaymentFields = document.getElementById("upiPaymentFields");
     const netbankingPaymentFields = document.getElementById("netbankingPaymentFields");
     const walletPaymentFields = document.getElementById("walletPaymentFields");
     const cashPaymentNotice = document.getElementById("cashPaymentNotice");
 
+    const couponCodeInput = document.getElementById("couponCode");
+    const couponStatus = document.getElementById("couponStatus");
+    const couponDetails = document.getElementById("couponDetails");
+    const couponOriginalFare = document.getElementById("couponOriginalFare");
+    const couponDiscount = document.getElementById("couponDiscount");
+    const couponFinalFare = document.getElementById("couponFinalFare");
+    const applyCouponBtn = document.getElementById("applyCouponBtn");
+    const couponFare = document.getElementById("couponFare");
+    const finalFareInput = document.getElementById("finalFare");
+
+    const paymentMethodInputs = document.querySelectorAll(
+        'input[name="payment_method"]'
+    );
+
+    function getVehicleTypeField() {
+        return document.getElementById(
+            "{{ form.vehicle_type.id_for_label }}"
+        );
+    }
+
     function hasValue(element) {
-        return element && String(element.value || "").trim() !== "";
+        return !!(
+            element &&
+            String(element.value || "").trim()
+        );
     }
 
     function getNumber(element) {
@@ -1457,16 +1938,393 @@
         return Number.isFinite(value) ? value : null;
     }
 
+    function getEstimatedFareValue() {
+        const value = getNumber(estimatedFare);
+
+        return value !== null && value > 0
+            ? value
+            : null;
+    }
+
+    function getPayableFareValue() {
+        if (
+            payableFareValue !== null &&
+            Number.isFinite(payableFareValue) &&
+            payableFareValue >= 0
+        ) {
+            return payableFareValue;
+        }
+
+        const finalValue = getNumber(finalFareInput);
+
+        if (
+            couponApplied &&
+            finalValue !== null &&
+            finalValue >= 0
+        ) {
+            payableFareValue = finalValue;
+            return finalValue;
+        }
+
+        const estimated = getEstimatedFareValue();
+
+        if (estimated !== null) {
+            payableFareValue = estimated;
+            return estimated;
+        }
+
+        return null;
+    }
+
+    function setPayableFare(value) {
+        const amount = Number(value);
+
+        if (
+            !Number.isFinite(amount) ||
+            amount < 0
+        ) {
+            payableFareValue = null;
+
+            if (finalFareInput) {
+                finalFareInput.value = "";
+            }
+
+            return null;
+        }
+
+        payableFareValue = Number(
+            amount.toFixed(2)
+        );
+
+        if (finalFareInput) {
+            finalFareInput.value =
+                payableFareValue.toFixed(2);
+        }
+
+        return payableFareValue;
+    }
+
+    function updateFareDisplays() {
+        const estimated = getEstimatedFareValue();
+        const payable = getPayableFareValue();
+
+        if (sideFare) {
+            if (payable !== null) {
+                sideFare.textContent =
+                    "₹" + payable.toFixed(2);
+            } else {
+                sideFare.textContent = "Pending";
+            }
+        }
+
+        if (paymentAmount) {
+            paymentAmount.textContent =
+                payable !== null
+                    ? "₹" + payable.toFixed(2)
+                    : "₹0.00";
+        }
+
+        if (couponFare && estimated !== null) {
+            couponFare.value =
+                estimated.toFixed(2);
+        }
+
+        if (
+            finalFareInput &&
+            payable !== null
+        ) {
+            finalFareInput.value =
+                payable.toFixed(2);
+        }
+
+        return payable;
+    }
+
+    function resetCouponState(resetInput = false) {
+        couponApplied = false;
+        appliedCouponCode = "";
+
+        const estimated = getEstimatedFareValue();
+
+        payableFareValue =
+            estimated !== null
+                ? Number(estimated.toFixed(2))
+                : null;
+
+        if (finalFareInput) {
+            finalFareInput.value =
+                payableFareValue !== null
+                    ? payableFareValue.toFixed(2)
+                    : "";
+        }
+
+        if (couponDetails) {
+            couponDetails.classList.add("d-none");
+        }
+
+        if (couponStatus) {
+            couponStatus.textContent = "";
+            couponStatus.className = "small mt-2";
+        }
+
+        if (
+            resetInput &&
+            couponCodeInput
+        ) {
+            couponCodeInput.value = "";
+        }
+
+        updateFareDisplays();
+    }
+
+    async function applyCoupon(silent = false) {
+        if (couponRequestInProgress) {
+            return false;
+        }
+
+        if (
+            !couponCodeInput ||
+            !couponStatus ||
+            !couponDetails ||
+            !applyCouponBtn
+        ) {
+            return false;
+        }
+
+        const couponCode = String(
+            couponCodeInput.value || ""
+        ).trim().toUpperCase();
+
+        const fare = getEstimatedFareValue();
+
+        if (!couponCode) {
+            resetCouponState(false);
+
+            if (!silent) {
+                couponStatus.textContent =
+                    "Please enter a coupon code.";
+                couponStatus.className =
+                    "small mt-2 text-danger";
+            }
+
+            return false;
+        }
+
+        if (
+            fare === null ||
+            fare <= 0
+        ) {
+            if (!silent) {
+                couponStatus.textContent =
+                    "Please calculate the fare first.";
+                couponStatus.className =
+                    "small mt-2 text-danger";
+                couponDetails.classList.add("d-none");
+            }
+
+            return false;
+        }
+
+        couponRequestInProgress = true;
+        applyCouponBtn.disabled = true;
+
+        applyCouponBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-1"></span>Applying...';
+
+        if (!silent) {
+            couponStatus.textContent =
+                "Validating coupon...";
+            couponStatus.className =
+                "small mt-2 text-muted";
+        }
+
+        const formData = new FormData();
+
+        formData.set(
+            "coupon_code",
+            couponCode
+        );
+
+        formData.set(
+            "fare",
+            fare.toFixed(2)
+        );
+
+        const csrfToken =
+            document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+            )?.value || "";
+
+        formData.set(
+            "csrfmiddlewaretoken",
+            csrfToken
+        );
+
+        try {
+            const response = await fetch(
+                "{% url 'apply_coupon' %}",
+                {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    },
+                    body: formData
+                }
+            );
+
+            const data = await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.message ||
+                    "Coupon could not be applied."
+                );
+            }
+
+            const originalAmount = Number(
+                data.original_amount
+            );
+
+            const discount = Number(
+                data.discount
+            );
+
+            const finalAmount = Number(
+                data.final_amount
+            );
+
+            if (
+                !Number.isFinite(finalAmount) ||
+                finalAmount < 0
+            ) {
+                throw new Error(
+                    "Invalid discounted fare was returned."
+                );
+            }
+
+            couponApplied = true;
+
+            appliedCouponCode =
+                String(
+                    data.coupon_code ||
+                    couponCode
+                ).trim().toUpperCase();
+
+            payableFareValue =
+                Number(
+                    finalAmount.toFixed(2)
+                );
+
+            if (couponCodeInput) {
+                couponCodeInput.value =
+                    appliedCouponCode;
+            }
+
+            if (couponFare) {
+                couponFare.value =
+                    (
+                        Number.isFinite(originalAmount)
+                            ? originalAmount
+                            : fare
+                    ).toFixed(2);
+            }
+
+            if (finalFareInput) {
+                finalFareInput.value =
+                    payableFareValue.toFixed(2);
+            }
+
+            if (couponOriginalFare) {
+                couponOriginalFare.textContent =
+                    "₹" +
+                    (
+                        Number.isFinite(originalAmount)
+                            ? originalAmount
+                            : fare
+                    ).toFixed(2);
+            }
+
+            if (couponDiscount) {
+                couponDiscount.textContent =
+                    "-₹" +
+                    (
+                        Number.isFinite(discount)
+                            ? discount
+                            : 0
+                    ).toFixed(2);
+            }
+
+            if (couponFinalFare) {
+                couponFinalFare.textContent =
+                    "₹" +
+                    payableFareValue.toFixed(2);
+            }
+
+            couponDetails.classList.remove(
+                "d-none"
+            );
+
+            couponStatus.textContent =
+                data.message ||
+                "Coupon applied successfully.";
+
+            couponStatus.className =
+                "small mt-2 text-success fw-semibold";
+
+            updateFareDisplays();
+
+            return true;
+        } catch (error) {
+            console.error(
+                "Coupon error:",
+                error
+            );
+
+            resetCouponState(false);
+
+            couponStatus.textContent =
+                error.message ||
+                "Unable to apply coupon.";
+
+            couponStatus.className =
+                "small mt-2 text-danger";
+
+            return false;
+        } finally {
+            couponRequestInProgress = false;
+
+            applyCouponBtn.disabled = false;
+
+            applyCouponBtn.innerHTML =
+                '<i class="bi bi-check2-circle me-1"></i>Apply';
+        }
+    }
+
+    window.applyCoupon = applyCoupon;
+
     function setMapLoading(show, text) {
         if (!mapLoading) {
             return;
         }
 
         if (show) {
-            mapLoadingText.textContent = text || "Loading...";
-            mapLoading.classList.remove("d-none");
+            if (mapLoadingText) {
+                mapLoadingText.textContent =
+                    text || "Loading...";
+            }
+
+            mapLoading.classList.remove(
+                "d-none"
+            );
         } else {
-            mapLoading.classList.add("d-none");
+            mapLoading.classList.add(
+                "d-none"
+            );
         }
     }
 
@@ -1475,112 +2333,159 @@
             return;
         }
 
-        locationStatusBadge.textContent = text;
-        locationStatusBadge.className = "badge rounded-pill border";
+        locationStatusBadge.textContent =
+            text || "";
 
-        if (type === "success") {
-            locationStatusBadge.classList.add(
+        locationStatusBadge.className =
+            "badge rounded-pill border";
+
+        const classes = {
+            success: [
                 "bg-success-subtle",
                 "text-success"
-            );
-        } else if (type === "danger") {
-            locationStatusBadge.classList.add(
+            ],
+            danger: [
                 "bg-danger-subtle",
                 "text-danger"
-            );
-        } else if (type === "warning") {
-            locationStatusBadge.classList.add(
+            ],
+            warning: [
                 "bg-warning-subtle",
                 "text-warning"
-            );
-        } else {
-            locationStatusBadge.classList.add(
+            ]
+        };
+
+        (
+            classes[type] || [
                 "bg-light",
                 "text-secondary"
+            ]
+        ).forEach(function (className) {
+            locationStatusBadge.classList.add(
+                className
             );
-        }
+        });
     }
 
     function setPickupState(selected) {
-        if (!pickupCheck || !pickupIndicatorText) {
+        if (
+            !pickupCheck ||
+            !pickupIndicatorText
+        ) {
             return;
         }
 
-        if (selected) {
-            pickupCheck.textContent = "Ready";
-            pickupCheck.className =
-                "badge bg-success-subtle text-success";
+        pickupCheck.textContent =
+            selected ? "Ready" : "Pending";
 
-            pickupIndicatorText.textContent =
-                pickupAddress.value || "Pickup selected";
-        } else {
-            pickupCheck.textContent = "Pending";
-            pickupCheck.className =
-                "badge bg-light text-secondary";
+        pickupCheck.className =
+            selected
+                ? "badge bg-success-subtle text-success"
+                : "badge bg-light text-secondary";
 
-            pickupIndicatorText.textContent =
-                "Not selected";
-        }
+        pickupIndicatorText.textContent =
+            selected
+                ? (
+                    pickupAddress?.value ||
+                    "Pickup selected"
+                )
+                : "Not selected";
     }
 
     function setDropState(selected) {
-        if (!dropCheck || !dropIndicatorText) {
+        if (
+            !dropCheck ||
+            !dropIndicatorText
+        ) {
             return;
         }
 
-        if (selected) {
-            dropCheck.textContent = "Ready";
-            dropCheck.className =
-                "badge bg-success-subtle text-success";
+        dropCheck.textContent =
+            selected ? "Ready" : "Pending";
 
-            dropIndicatorText.textContent =
-                dropAddress.value || "Destination selected";
-        } else {
-            dropCheck.textContent = "Pending";
-            dropCheck.className =
-                "badge bg-light text-secondary";
+        dropCheck.className =
+            selected
+                ? "badge bg-success-subtle text-success"
+                : "badge bg-light text-secondary";
 
-            dropIndicatorText.textContent =
-                "Not selected";
-        }
+        dropIndicatorText.textContent =
+            selected
+                ? (
+                    dropAddress?.value ||
+                    "Destination selected"
+                )
+                : "Not selected";
     }
 
     function resetRouteData() {
-        if (routeLayer && rideMap) {
+        if (
+            routeLayer &&
+            rideMap
+        ) {
             rideMap.removeLayer(routeLayer);
             routeLayer = null;
         }
 
-        estimatedDistance.value = "";
-        estimatedDuration.value = "";
+        if (estimatedDistance) {
+            estimatedDistance.value = "";
+        }
 
-        sideDistance.textContent = "—";
-        sideDuration.textContent = "—";
+        if (estimatedDuration) {
+            estimatedDuration.value = "";
+        }
 
-        routeSummary.classList.add("d-none");
-        fareStatus.textContent =
-            "Fare will be calculated from the selected vehicle type, city pricing and active surge rules.";
+        if (sideDistance) {
+            sideDistance.textContent = "—";
+        }
+
+        if (sideDuration) {
+            sideDuration.textContent = "—";
+        }
+
+        if (routeSummary) {
+            routeSummary.classList.add("d-none");
+        }
+
+        if (fareStatus) {
+            fareStatus.textContent =
+                "Fare will be calculated from the selected vehicle type, city pricing and active surge rules.";
+        }
+
+        if (estimatedFare) {
+            estimatedFare.value = "";
+        }
+
+        payableFareValue = null;
+
+        resetCouponState(false);
     }
 
     function createMap() {
-        if (!document.getElementById("rideMap")) {
+        if (
+            !document.getElementById(
+                "rideMap"
+            )
+        ) {
             return;
         }
 
-        rideMap = L.map("rideMap", {
-            zoomControl: true,
-            scrollWheelZoom: true, attributionControl: false
-        }).setView(
+        rideMap = L.map(
+            "rideMap",
+            {
+                zoomControl: true,
+                scrollWheelZoom: true,
+                attributionControl: false
+            }
+        ).setView(
             DEFAULT_CENTER,
             DEFAULT_ZOOM
         );
 
         L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3wf8_1_477b9c969e22fe3e205f303d",
-        {
-            subdomains: "abcd",
-            maxZoom: 20
-        }
+            "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3wf8_1_477b9c969e22fe3e205f303d",
+            {
+                subdomains: "abcd",
+                maxZoom: 20
+            }
         ).addTo(rideMap);
 
         rideMap.on(
@@ -1644,10 +2549,21 @@
 
         const points = [];
 
-        const pickupLat = getNumber(pickupLatitude);
-        const pickupLng = getNumber(pickupLongitude);
-        const dropLat = getNumber(dropLatitude);
-        const dropLng = getNumber(dropLongitude);
+        const pickupLat = getNumber(
+            pickupLatitude
+        );
+
+        const pickupLng = getNumber(
+            pickupLongitude
+        );
+
+        const dropLat = getNumber(
+            dropLatitude
+        );
+
+        const dropLng = getNumber(
+            dropLongitude
+        );
 
         if (
             pickupLat !== null &&
@@ -1689,7 +2605,10 @@
         );
     }
 
-    async function reverseGeocode(latitude, longitude) {
+    async function reverseGeocode(
+        latitude,
+        longitude
+    ) {
         const url =
             "https://nominatim.openstreetmap.org/reverse" +
             "?format=jsonv2" +
@@ -1703,9 +2622,8 @@
         const response = await fetch(
             url,
             {
-                method: "GET",
                 headers: {
-                    "Accept": "application/json"
+                    Accept: "application/json"
                 }
             }
         );
@@ -1716,7 +2634,7 @@
             );
         }
 
-        return await response.json();
+        return response.json();
     }
 
     function getReadableAddress(data, fallback) {
@@ -1760,9 +2678,8 @@
         const response = await fetch(
             url,
             {
-                method: "GET",
                 headers: {
-                    "Accept": "application/json"
+                    Accept: "application/json"
                 }
             }
         );
@@ -1775,14 +2692,10 @@
 
         const data = await response.json();
 
-        if (
-            !Array.isArray(data) ||
-            !data.length
-        ) {
-            return null;
-        }
-
-        return data[0];
+        return Array.isArray(data) &&
+            data.length
+            ? data[0]
+            : null;
     }
 
     function getBestCityName(result) {
@@ -1791,6 +2704,7 @@
         }
 
         const address = result.address || {};
+
         const candidates = [
             address.city,
             address.municipality,
@@ -1805,13 +2719,21 @@
         ];
 
         for (const value of candidates) {
-            if (value && String(value).trim()) {
+            if (
+                value &&
+                String(value).trim()
+            ) {
                 return String(value).trim();
             }
         }
 
-        const state = String(address.state || "").trim();
-        const country = String(address.country || "").trim();
+        const state = String(
+            address.state || ""
+        ).trim();
+
+        const country = String(
+            address.country || ""
+        ).trim();
 
         if (
             country.toLowerCase() === "india" &&
@@ -1824,16 +2746,14 @@
     }
 
     async function resolvePickupAddress(showStatus = true) {
-        const query =
-            String(
-                pickupAddress.value || ""
-            ).trim();
+        const query = String(
+            pickupAddress?.value || ""
+        ).trim();
 
-        if (!query) {
-            return false;
-        }
-
-        if (pickupGeocodeInProgress) {
+        if (
+            !query ||
+            pickupGeocodeInProgress
+        ) {
             return false;
         }
 
@@ -1859,11 +2779,8 @@
                 );
             }
 
-            const latitude =
-                Number(result.lat);
-
-            const longitude =
-                Number(result.lon);
+            const latitude = Number(result.lat);
+            const longitude = Number(result.lon);
 
             if (
                 !Number.isFinite(latitude) ||
@@ -1877,16 +2794,16 @@
             pickupLatitude.value =
                 latitude.toFixed(6);
 
-            pickupCityName = getBestCityName(result);
-
             pickupLongitude.value =
                 longitude.toFixed(6);
+
+            pickupCityName =
+                getBestCityName(result);
 
             updatingPickupAddress = true;
 
             pickupAddress.value =
-                result.display_name ||
-                query;
+                result.display_name || query;
 
             updatingPickupAddress = false;
 
@@ -1907,10 +2824,7 @@
 
             if (rideMap) {
                 rideMap.setView(
-                    [
-                        latitude,
-                        longitude
-                    ],
+                    [latitude, longitude],
                     15
                 );
             }
@@ -1919,6 +2833,7 @@
         } catch (error) {
             pickupLatitude.value = "";
             pickupLongitude.value = "";
+            pickupCityName = "";
 
             setPickupState(false);
 
@@ -1938,16 +2853,14 @@
     }
 
     async function resolveDropAddress(showStatus = true) {
-        const query =
-            String(
-                dropAddress.value || ""
-            ).trim();
+        const query = String(
+            dropAddress?.value || ""
+        ).trim();
 
-        if (!query) {
-            return false;
-        }
-
-        if (dropGeocodeInProgress) {
+        if (
+            !query ||
+            dropGeocodeInProgress
+        ) {
             return false;
         }
 
@@ -1973,11 +2886,8 @@
                 );
             }
 
-            const latitude =
-                Number(result.lat);
-
-            const longitude =
-                Number(result.lon);
+            const latitude = Number(result.lat);
+            const longitude = Number(result.lon);
 
             if (
                 !Number.isFinite(latitude) ||
@@ -1991,16 +2901,16 @@
             dropLatitude.value =
                 latitude.toFixed(6);
 
-            dropCityName = getBestCityName(result);
-
             dropLongitude.value =
                 longitude.toFixed(6);
+
+            dropCityName =
+                getBestCityName(result);
 
             updatingDropAddress = true;
 
             dropAddress.value =
-                result.display_name ||
-                query;
+                result.display_name || query;
 
             updatingDropAddress = false;
 
@@ -2021,10 +2931,7 @@
 
             if (rideMap) {
                 rideMap.setView(
-                    [
-                        latitude,
-                        longitude
-                    ],
+                    [latitude, longitude],
                     15
                 );
             }
@@ -2033,6 +2940,7 @@
         } catch (error) {
             dropLatitude.value = "";
             dropLongitude.value = "";
+            dropCityName = "";
 
             setDropState(false);
 
@@ -2131,7 +3039,8 @@
                                 "Current Location"
                             );
 
-                        pickupCityName = getBestCityName(data);
+                        pickupCityName =
+                            getBestCityName(data);
 
                         updatingPickupAddress = false;
 
@@ -2146,16 +3055,14 @@
                         );
                     } catch (error) {
                         updatingPickupAddress = true;
-
                         pickupAddress.value =
                             "Current Location";
-
                         updatingPickupAddress = false;
+
+                        setPickupState(true);
 
                         pickupStatus.textContent =
                             "Coordinates detected, but address lookup failed.";
-
-                        setPickupState(true);
 
                         setLocationBadge(
                             "Pickup ready",
@@ -2231,10 +3138,7 @@
 
         if (rideMap) {
             rideMap.setView(
-                [
-                    latitude,
-                    longitude
-                ],
+                [latitude, longitude],
                 Math.max(
                     rideMap.getZoom(),
                     14
@@ -2263,16 +3167,17 @@
                         "Selected Destination"
                     );
 
+                dropCityName =
+                    getBestCityName(data);
+
                 updatingDropAddress = false;
 
                 dropStatus.textContent =
                     "Destination selected.";
             } catch (error) {
                 updatingDropAddress = true;
-
                 dropAddress.value =
                     "Selected Destination";
-
                 updatingDropAddress = false;
 
                 dropStatus.textContent =
@@ -2280,14 +3185,13 @@
             }
         }
 
-        return await calculateRoute();
+        return calculateRoute();
     }
 
     async function searchDestination() {
-        const query =
-            String(
-                dropAddress.value || ""
-            ).trim();
+        const query = String(
+            dropAddress?.value || ""
+        ).trim();
 
         if (!query) {
             dropStatus.textContent =
@@ -2314,37 +3218,18 @@
                 '<span class="spinner-border spinner-border-sm me-1"></span> Searching';
         }
 
-        dropStatus.textContent =
-            "Searching destination...";
-
-        setLocationBadge(
-            "Searching destination",
-            "warning"
-        );
-
         try {
             const result =
-                await searchGeocoding(
-                    query
-                );
+                await searchGeocoding(query);
 
             if (!result) {
-                dropStatus.textContent =
-                    "No matching destination was found.";
-
-                setLocationBadge(
-                    "Destination not found",
-                    "danger"
+                throw new Error(
+                    "No matching destination was found."
                 );
-
-                return false;
             }
 
-            const latitude =
-                Number(result.lat);
-
-            const longitude =
-                Number(result.lon);
+            const latitude = Number(result.lat);
+            const longitude = Number(result.lon);
 
             if (
                 !Number.isFinite(latitude) ||
@@ -2361,11 +3246,13 @@
             dropLongitude.value =
                 longitude.toFixed(6);
 
+            dropCityName =
+                getBestCityName(result);
+
             updatingDropAddress = true;
 
             dropAddress.value =
-                result.display_name ||
-                query;
+                result.display_name || query;
 
             updatingDropAddress = false;
 
@@ -2374,17 +3261,17 @@
                 longitude
             );
 
+            setDropState(true);
+
             dropStatus.textContent =
                 "Destination selected.";
-
-            setDropState(true);
 
             setLocationBadge(
                 "Destination ready",
                 "success"
             );
 
-            return await calculateRoute();
+            return calculateRoute();
         } catch (error) {
             dropStatus.textContent =
                 error.message ||
@@ -2406,17 +3293,21 @@
     }
 
     async function calculateRoute() {
-        const pickupLat =
-            getNumber(pickupLatitude);
+        const pickupLat = getNumber(
+            pickupLatitude
+        );
 
-        const pickupLng =
-            getNumber(pickupLongitude);
+        const pickupLng = getNumber(
+            pickupLongitude
+        );
 
-        const dropLat =
-            getNumber(dropLatitude);
+        const dropLat = getNumber(
+            dropLatitude
+        );
 
-        const dropLng =
-            getNumber(dropLongitude);
+        const dropLng = getNumber(
+            dropLongitude
+        );
 
         if (
             pickupLat === null ||
@@ -2428,12 +3319,8 @@
         }
 
         if (
-            Math.abs(
-                pickupLat - dropLat
-            ) < 0.000001 &&
-            Math.abs(
-                pickupLng - dropLng
-            ) < 0.000001
+            Math.abs(pickupLat - dropLat) < 0.000001 &&
+            Math.abs(pickupLng - dropLng) < 0.000001
         ) {
             routeSummary.classList.remove(
                 "d-none"
@@ -2484,16 +3371,14 @@
                 coordinates +
                 "?overview=full&geometries=geojson&steps=false";
 
-            const response =
-                await fetch(
-                    url,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Accept": "application/json"
-                        }
+            const response = await fetch(
+                url,
+                {
+                    headers: {
+                        Accept: "application/json"
                     }
-                );
+                }
+            );
 
             if (!response.ok) {
                 throw new Error(
@@ -2514,21 +3399,16 @@
                 );
             }
 
-            const route =
-                data.routes[0];
+            const route = data.routes[0];
 
             const distanceKm =
-                Number(
-                    route.distance
-                ) / 1000;
+                Number(route.distance) / 1000;
 
             const durationMinutes =
                 Math.max(
                     1,
                     Math.round(
-                        Number(
-                            route.duration
-                        ) / 60
+                        Number(route.duration) / 60
                     )
                 );
 
@@ -2550,10 +3430,7 @@
                 routeLayer &&
                 rideMap
             ) {
-                rideMap.removeLayer(
-                    routeLayer
-                );
-
+                rideMap.removeLayer(routeLayer);
                 routeLayer = null;
             }
 
@@ -2579,17 +3456,12 @@
                             weight: 5,
                             opacity: 0.85
                         }
-                    ).addTo(
-                        rideMap
-                    );
+                    ).addTo(rideMap);
 
                 rideMap.fitBounds(
                     routeLayer.getBounds(),
                     {
-                        padding: [
-                            40,
-                            40
-                        ]
+                        padding: [40, 40]
                     }
                 );
             } else {
@@ -2610,14 +3482,14 @@
                 " minutes";
 
             fareStatus.textContent =
-                "Fare will be calculated from the selected vehicle type, city pricing and active surge rules.";
+                "Updating fare...";
 
             setLocationBadge(
                 "Route ready",
                 "success"
             );
 
-            updateFareDisplay();
+            await updateFareDisplay();
 
             return true;
         } catch (error) {
@@ -2630,7 +3502,7 @@
 
             routeSummaryText.textContent =
                 error.message ||
-                "Unable to calculate route. Please try again.";
+                "Unable to calculate route.";
 
             setLocationBadge(
                 "Route failed",
@@ -2641,30 +3513,53 @@
         } finally {
             routeRequestInProgress = false;
 
-            setMapLoading(
-                false
-            );
+            setMapLoading(false);
         }
     }
 
     async function updateFareDisplay() {
-        const vehicleType = document.getElementById("{{ form.vehicle_type.id_for_label }}");
-        const vehicleFareHint = document.getElementById("vehicleFareHint");
-        const distance = getNumber(estimatedDistance);
-        const duration = getNumber(estimatedDuration);
-        const selectedVehicle = vehicleType ? vehicleType.value : "";
-        const cityName = pickupCityName || dropCityName;
+        const vehicleType =
+            getVehicleTypeField();
 
-        if (!selectedVehicle || distance === null || duration === null || !cityName) {
+        const vehicleFareHint =
+            document.getElementById(
+                "vehicleFareHint"
+            );
+
+        const distance =
+            getNumber(estimatedDistance);
+
+        const duration =
+            getNumber(estimatedDuration);
+
+        const selectedVehicle =
+            vehicleType
+                ? vehicleType.value
+                : "";
+
+        const cityName =
+            pickupCityName ||
+            dropCityName;
+
+        if (
+            !selectedVehicle ||
+            distance === null ||
+            duration === null ||
+            !cityName
+        ) {
             if (!selectedVehicle) {
-                fareStatus.textContent = "Select a vehicle type to calculate the fare.";
+                fareStatus.textContent =
+                    "Select a vehicle type to calculate the fare.";
             } else if (!cityName) {
-                fareStatus.textContent = "Location city is still being identified.";
+                fareStatus.textContent =
+                    "Location city is still being identified.";
             } else {
-                fareStatus.textContent = "Calculate the route before selecting the fare.";
+                fareStatus.textContent =
+                    "Calculate the route before selecting the fare.";
             }
-            const existingFare = getNumber(estimatedFare);
-            sideFare.textContent = existingFare !== null ? "₹" + existingFare.toFixed(2) : "Pending";
+
+            updateFareDisplays();
+
             return;
         }
 
@@ -2673,173 +3568,967 @@
         }
 
         fareRequestInProgress = true;
-        fareStatus.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Updating fare...';
+
+        fareStatus.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-1"></span> Updating fare...';
+
         if (vehicleFareHint) {
-            vehicleFareHint.textContent = "Calculating fare for the selected vehicle and route...";
+            vehicleFareHint.textContent =
+                "Calculating fare for the selected vehicle and route...";
         }
 
         try {
-            const url = new URL(window.location.href);
-            url.searchParams.set("fare_preview", "1");
-            url.searchParams.set("vehicle_type", selectedVehicle);
-            url.searchParams.set("city_name", cityName);
+            const url =
+                new URL(
+                    window.location.href
+                );
 
-            if (pickupAddress && pickupAddress.value) {
-                url.searchParams.set("pickup_address", pickupAddress.value);
+            url.searchParams.set(
+                "fare_preview",
+                "1"
+            );
+
+            url.searchParams.set(
+                "vehicle_type",
+                selectedVehicle
+            );
+
+            url.searchParams.set(
+                "city_name",
+                cityName
+            );
+
+            url.searchParams.set(
+                "distance",
+                distance.toFixed(2)
+            );
+
+            url.searchParams.set(
+                "duration",
+                Math.round(duration)
+            );
+
+            if (
+                pickupAddress?.value
+            ) {
+                url.searchParams.set(
+                    "pickup_address",
+                    pickupAddress.value
+                );
             }
 
-            if (pickupLatitude && pickupLatitude.value) {
-                url.searchParams.set("pickup_latitude", pickupLatitude.value);
+            if (
+                pickupLatitude?.value
+            ) {
+                url.searchParams.set(
+                    "pickup_latitude",
+                    pickupLatitude.value
+                );
             }
 
-            if (pickupLongitude && pickupLongitude.value) {
-                url.searchParams.set("pickup_longitude", pickupLongitude.value);
+            if (
+                pickupLongitude?.value
+            ) {
+                url.searchParams.set(
+                    "pickup_longitude",
+                    pickupLongitude.value
+                );
             }
 
-            if (dropLatitude && dropLatitude.value) {
-                url.searchParams.set("drop_latitude", dropLatitude.value);
+            if (
+                dropLatitude?.value
+            ) {
+                url.searchParams.set(
+                    "drop_latitude",
+                    dropLatitude.value
+                );
             }
 
-            if (dropLongitude && dropLongitude.value) {
-                url.searchParams.set("drop_longitude", dropLongitude.value);
+            if (
+                dropLongitude?.value
+            ) {
+                url.searchParams.set(
+                    "drop_longitude",
+                    dropLongitude.value
+                );
             }
 
-            url.searchParams.set("distance", distance.toFixed(2));
-            url.searchParams.set("duration", Math.round(duration));
+            const response = await fetch(
+                url.toString(),
+                {
+                    headers: {
+                        Accept: "application/json",
+                        "X-Requested-With":
+                            "XMLHttpRequest"
+                    }
+                }
+            );
 
-            const response = await fetch(url.toString(), {
-                method: "GET",
-                headers: {"Accept": "application/json", "X-Requested-With": "XMLHttpRequest"}
-            });
-            const data = await response.json();
+            const data =
+                await response.json();
 
-            if (!response.ok || !data.success) {
-                throw new Error(data.message || "Fare could not be calculated.");
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.message ||
+                    "Fare could not be calculated."
+                );
             }
 
-            const fare = Number(data.fare);
-            if (!Number.isFinite(fare)) {
-                throw new Error("Invalid fare was returned.");
+            const fare =
+                Number(data.fare);
+
+            if (
+                !Number.isFinite(fare) ||
+                fare <= 0
+            ) {
+                throw new Error(
+                    "Invalid fare was returned."
+                );
             }
 
-            estimatedFare.value = fare.toFixed(2);
-            sideFare.textContent = "₹" + fare.toFixed(2);
-            fareStatus.textContent = "Fare updated for " + data.vehicle_type + " in " + data.city + ".";
+            estimatedFare.value =
+                fare.toFixed(2);
+
+            if (couponFare) {
+                couponFare.value =
+                    fare.toFixed(2);
+            }
+
+            /*
+             * New fare means previous coupon calculation
+             * is no longer valid.
+             */
+            couponApplied = false;
+            appliedCouponCode = "";
+            payableFareValue =
+                Number(fare.toFixed(2));
+
+            if (finalFareInput) {
+                finalFareInput.value =
+                    payableFareValue.toFixed(2);
+            }
+
+            if (couponDetails) {
+                couponDetails.classList.add(
+                    "d-none"
+                );
+            }
+
+            fareStatus.textContent =
+                "Fare updated for " +
+                data.vehicle_type +
+                " in " +
+                data.city +
+                ".";
+
             if (vehicleFareHint) {
-                vehicleFareHint.textContent = "Fare updates automatically whenever the vehicle is changed.";
+                vehicleFareHint.textContent =
+                    "Fare updates automatically whenever the vehicle is changed.";
+            }
+
+            updateFareDisplays();
+
+            /*
+             * If user had already entered a coupon,
+             * automatically re-validate it against
+             * the newly calculated fare.
+             */
+            if (
+                couponCodeInput &&
+                couponCodeInput.value.trim()
+            ) {
+                await applyCoupon(true);
             }
         } catch (error) {
-            fareStatus.textContent = error.message || "Unable to update fare.";
+            fareStatus.textContent =
+                error.message ||
+                "Unable to update fare.";
+
             if (vehicleFareHint) {
-                vehicleFareHint.textContent = "No fare was returned. Check the active pricing rule for this vehicle and location.";
+                vehicleFareHint.textContent =
+                    "No fare was returned. Check the active pricing rule for this vehicle and location.";
             }
+
+            resetCouponState(false);
         } finally {
             fareRequestInProgress = false;
         }
     }
 
     function setPaymentAlert(message, type) {
-        if (!paymentAlert) return;
-        paymentAlert.textContent = message || "";
-        paymentAlert.className = "alert mb-3";
-        if (!message) { paymentAlert.classList.add("d-none"); return; }
-        paymentAlert.classList.add(type === "success" ? "alert-success" : type === "danger" ? "alert-danger" : "alert-warning");
-        paymentAlert.classList.remove("d-none");
+        if (!paymentAlert) {
+            return;
+        }
+
+        paymentAlert.textContent =
+            message || "";
+
+        paymentAlert.className =
+            "alert mb-3";
+
+        if (!message) {
+            paymentAlert.classList.add(
+                "d-none"
+            );
+            return;
+        }
+
+        paymentAlert.classList.add(
+            type === "success"
+                ? "alert-success"
+                : type === "danger"
+                    ? "alert-danger"
+                    : "alert-warning"
+        );
+
+        paymentAlert.classList.remove(
+            "d-none"
+        );
     }
+
     function updatePaymentMethodFields() {
-        const selected = document.querySelector('input[name="payment_method"]:checked');
-        const method = selected ? selected.value : "";
-        if (cardPaymentFields) cardPaymentFields.classList.toggle("d-none", method !== "card");
-        if (upiPaymentFields) upiPaymentFields.classList.toggle("d-none", method !== "upi");
-        if (netbankingPaymentFields) netbankingPaymentFields.classList.toggle("d-none", method !== "netbanking");
-        if (walletPaymentFields) walletPaymentFields.classList.toggle("d-none", method !== "wallet");
-        if (cashPaymentNotice) cashPaymentNotice.classList.toggle("d-none", method !== "cash");
-        setPaymentAlert("", "warning");
+        const selected =
+            document.querySelector(
+                'input[name="payment_method"]:checked'
+            );
+
+        const method =
+            selected
+                ? selected.value
+                : "";
+
+        if (cardPaymentFields) {
+            cardPaymentFields.classList.toggle(
+                "d-none",
+                method !== "card"
+            );
+        }
+
+        if (upiPaymentFields) {
+            upiPaymentFields.classList.toggle(
+                "d-none",
+                method !== "upi"
+            );
+        }
+
+        if (netbankingPaymentFields) {
+            netbankingPaymentFields.classList.toggle(
+                "d-none",
+                method !== "netbanking"
+            );
+        }
+
+        if (walletPaymentFields) {
+            walletPaymentFields.classList.toggle(
+                "d-none",
+                method !== "wallet"
+            );
+        }
+
+        if (cashPaymentNotice) {
+            cashPaymentNotice.classList.toggle(
+                "d-none",
+                method !== "cash"
+            );
+        }
+
+        updateFareDisplays();
+
+        setPaymentAlert(
+            "",
+            "warning"
+        );
     }
+
     function openPaymentModal() {
-        if (!paymentModal) return false;
-        const fare = getNumber(estimatedFare);
-        const distance = getNumber(estimatedDistance);
-        const duration = getNumber(estimatedDuration);
-        const vehicleType = document.getElementById("{{ form.vehicle_type.id_for_label }}");
-        const vehicleText = vehicleType && vehicleType.selectedIndex >= 0 ? vehicleType.options[vehicleType.selectedIndex].text : "—";
-        if (fare === null || fare <= 0) { setLocationBadge("Fare required", "danger"); fareStatus.textContent = "Please wait for the fare to be calculated before continuing."; return false; }
-        if (paymentDistance) paymentDistance.textContent = distance !== null ? distance.toFixed(2) + " km" : "—";
-        if (paymentDuration) paymentDuration.textContent = duration !== null ? Math.round(duration) + " min" : "—";
-        if (paymentVehicle) paymentVehicle.textContent = vehicleText || "—";
-        if (paymentAmount) paymentAmount.textContent = "₹" + fare.toFixed(2);
-        setPaymentAlert("", "warning");
-        paymentMethodInputs.forEach(function (input) { input.checked = false; });
+        if (!paymentModal) {
+            return false;
+        }
+
+        /*
+         * IMPORTANT:
+         * Payment popup always uses payableFareValue.
+         * This is the discounted fare after coupon.
+         */
+        const fare =
+            getPayableFareValue();
+
+        const distance =
+            getNumber(estimatedDistance);
+
+        const duration =
+            getNumber(estimatedDuration);
+
+        const vehicleType =
+            getVehicleTypeField();
+
+        const vehicleText =
+            vehicleType &&
+            vehicleType.selectedIndex >= 0
+                ? vehicleType.options[
+                    vehicleType.selectedIndex
+                ].text
+                : "—";
+
+        if (
+            fare === null ||
+            fare <= 0
+        ) {
+            setLocationBadge(
+                "Fare required",
+                "danger"
+            );
+
+            fareStatus.textContent =
+                "Please wait for the fare to be calculated before continuing.";
+
+            return false;
+        }
+
+        if (paymentDistance) {
+            paymentDistance.textContent =
+                distance !== null
+                    ? distance.toFixed(2) + " km"
+                    : "—";
+        }
+
+        if (paymentDuration) {
+            paymentDuration.textContent =
+                duration !== null
+                    ? Math.round(duration) + " min"
+                    : "—";
+        }
+
+        if (paymentVehicle) {
+            paymentVehicle.textContent =
+                vehicleText || "—";
+        }
+
+        /*
+         * THIS IS THE MAIN FIX.
+         * Never use estimatedFare here when coupon
+         * is already applied.
+         */
+        if (paymentAmount) {
+            paymentAmount.textContent =
+                "₹" + fare.toFixed(2);
+        }
+
+        setPaymentAlert(
+            couponApplied
+                ? "Coupon applied. Discounted fare is shown below."
+                : "",
+            couponApplied
+                ? "success"
+                : "warning"
+        );
+
+        paymentMethodInputs.forEach(
+            function (input) {
+                input.checked = false;
+            }
+        );
+
         updatePaymentMethodFields();
-        if (typeof bootstrap !== "undefined" && bootstrap.Modal) {
-            if (!paymentModalInstance) paymentModalInstance = new bootstrap.Modal(paymentModal, {backdrop: "static", keyboard: false});
+
+        if (
+            typeof bootstrap !== "undefined" &&
+            bootstrap.Modal
+        ) {
+            if (!paymentModalInstance) {
+                paymentModalInstance =
+                    new bootstrap.Modal(
+                        paymentModal,
+                        {
+                            backdrop: "static",
+                            keyboard: false
+                        }
+                    );
+            }
+
             paymentModalInstance.show();
+
+            /*
+             * Run once again after modal rendering.
+             * This prevents another UI handler from
+             * leaving estimated fare in the popup.
+             */
+            requestAnimationFrame(
+                function () {
+                    const latestPayable =
+                        getPayableFareValue();
+
+                    if (
+                        paymentAmount &&
+                        latestPayable !== null
+                    ) {
+                        paymentAmount.textContent =
+                            "₹" +
+                            latestPayable.toFixed(2);
+                    }
+                }
+            );
+
             return true;
         }
+
         return false;
     }
+
     function serializeRideRequestForm() {
-        const form = document.getElementById("rideRequestForm");
-        const formData = new FormData(form);
-        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-        if (paymentMethod) formData.append("payment_method", paymentMethod.value);
-        const cardFields = ["paymentCardName", "paymentCardNumber", "paymentCardExpiry", "paymentCardCvv", "paymentUpiId", "paymentNetbankingBank", "paymentWalletProvider"];
-        const names = {paymentCardName:"card_name",paymentCardNumber:"card_number",paymentCardExpiry:"card_expiry",paymentCardCvv:"card_cvv",paymentUpiId:"upi_id",paymentNetbankingBank:"netbanking_bank",paymentWalletProvider:"wallet_provider"};
-        cardFields.forEach(function (id) { const element = document.getElementById(id); if (element && element.value) formData.append(names[id], element.value); });
+        const form =
+            document.getElementById(
+                "rideRequestForm"
+            );
+
+        const formData =
+            new FormData(form);
+
+        const paymentMethod =
+            document.querySelector(
+                'input[name="payment_method"]:checked'
+            );
+
+        const payable =
+            getPayableFareValue();
+
+        const estimated =
+            getEstimatedFareValue();
+
+        if (paymentMethod) {
+            formData.set(
+                "payment_method",
+                paymentMethod.value
+            );
+        }
+
+        if (payable !== null) {
+            const amount =
+                payable.toFixed(2);
+
+            formData.set(
+                "final_fare",
+                amount
+            );
+
+            formData.set(
+                "payment_amount",
+                amount
+            );
+
+            formData.set(
+                "amount",
+                amount
+            );
+        }
+
+        if (estimated !== null) {
+            formData.set(
+                "estimated_fare",
+                estimated.toFixed(2)
+            );
+        }
+
+        if (
+            couponApplied &&
+            appliedCouponCode
+        ) {
+            formData.set(
+                "coupon_code",
+                appliedCouponCode
+            );
+
+            formData.set(
+                "coupon_applied",
+                "1"
+            );
+
+            formData.set(
+                "coupon_discount",
+                Math.max(
+                    0,
+                    (
+                        estimated || 0
+                    ) -
+                    (
+                        payable || 0
+                    )
+                ).toFixed(2)
+            );
+        } else {
+            formData.delete(
+                "coupon_code"
+            );
+
+            formData.set(
+                "coupon_applied",
+                "0"
+            );
+
+            formData.delete(
+                "coupon_discount"
+            );
+        }
+
+        const fieldMap = {
+            paymentCardName: "card_name",
+            paymentCardNumber: "card_number",
+            paymentCardExpiry: "card_expiry",
+            paymentCardCvv: "card_cvv",
+            paymentUpiId: "upi_id",
+            paymentNetbankingBank: "netbanking_bank",
+            paymentWalletProvider: "wallet_provider"
+        };
+
+        Object.keys(fieldMap).forEach(
+            function (id) {
+                const element =
+                    document.getElementById(id);
+
+                if (
+                    element &&
+                    element.value
+                ) {
+                    formData.set(
+                        fieldMap[id],
+                        element.value
+                    );
+                }
+            }
+        );
+
         return formData;
     }
+
     async function continuePayment() {
-        if (paymentRequestInProgress) return false;
-        const selected = document.querySelector('input[name="payment_method"]:checked');
-        if (!selected) { setPaymentAlert("Please select a payment method.", "warning"); return false; }
-        const method = selected.value;
-        if (method === "card") {
-            const cardName = document.getElementById("paymentCardName");
-            const cardNumber = document.getElementById("paymentCardNumber");
-            const cardExpiry = document.getElementById("paymentCardExpiry");
-            const cardCvv = document.getElementById("paymentCardCvv");
-            if (!cardName.value.trim() || !cardNumber.value.trim() || !cardExpiry.value.trim() || !cardCvv.value.trim()) { setPaymentAlert("Please complete all card details.", "warning"); return false; }
-            if (cardNumber.value.replace(/\D/g, "").length < 4) { setPaymentAlert("Please enter a valid card number.", "warning"); return false; }
+        if (paymentRequestInProgress) {
+            return false;
         }
-        if (method === "upi" && !document.getElementById("paymentUpiId").value.trim()) { setPaymentAlert("Please enter your UPI ID.", "warning"); return false; }
-        if (method === "netbanking" && !document.getElementById("paymentNetbankingBank").value) { setPaymentAlert("Please select a bank.", "warning"); return false; }
-        if (method === "wallet" && !document.getElementById("paymentWalletProvider").value) { setPaymentAlert("Please select a wallet.", "warning"); return false; }
-        const form = document.getElementById("rideRequestForm");
-        const createPaymentUrl = "{% url 'create_ride_payment' %}";
-        const confirmPaymentUrl = "{% url 'confirm_ride_payment' 0 %}";
+
+        const selected =
+            document.querySelector(
+                'input[name="payment_method"]:checked'
+            );
+
+        if (!selected) {
+            setPaymentAlert(
+                "Please select a payment method.",
+                "warning"
+            );
+
+            return false;
+        }
+
+        const method =
+            selected.value;
+
+        /*
+         * Get discounted fare from the same source
+         * used by payment popup.
+         */
+        const payableFare =
+            getPayableFareValue();
+
+        if (
+            payableFare === null ||
+            payableFare <= 0
+        ) {
+            setPaymentAlert(
+                "Please wait until the final payable fare is calculated.",
+                "danger"
+            );
+
+            return false;
+        }
+
+        if (method === "card") {
+            const cardName =
+                document.getElementById(
+                    "paymentCardName"
+                );
+
+            const cardNumber =
+                document.getElementById(
+                    "paymentCardNumber"
+                );
+
+            const cardExpiry =
+                document.getElementById(
+                    "paymentCardExpiry"
+                );
+
+            const cardCvv =
+                document.getElementById(
+                    "paymentCardCvv"
+                );
+
+            if (
+                !cardName ||
+                !cardNumber ||
+                !cardExpiry ||
+                !cardCvv ||
+                !cardName.value.trim() ||
+                !cardNumber.value.trim() ||
+                !cardExpiry.value.trim() ||
+                !cardCvv.value.trim()
+            ) {
+                setPaymentAlert(
+                    "Please complete all card details.",
+                    "warning"
+                );
+
+                return false;
+            }
+
+            if (
+                cardNumber.value.replace(
+                    /\D/g,
+                    ""
+                ).length < 4
+            ) {
+                setPaymentAlert(
+                    "Please enter a valid card number.",
+                    "warning"
+                );
+
+                return false;
+            }
+        }
+
+        if (method === "upi") {
+            const upiInput =
+                document.getElementById(
+                    "paymentUpiId"
+                );
+
+            if (
+                !upiInput ||
+                !upiInput.value.trim()
+            ) {
+                setPaymentAlert(
+                    "Please enter your UPI ID.",
+                    "warning"
+                );
+
+                return false;
+            }
+        }
+
+        if (method === "netbanking") {
+            const bank =
+                document.getElementById(
+                    "paymentNetbankingBank"
+                );
+
+            if (
+                !bank ||
+                !bank.value
+            ) {
+                setPaymentAlert(
+                    "Please select a bank.",
+                    "warning"
+                );
+
+                return false;
+            }
+        }
+
+        const form =
+            document.getElementById(
+                "rideRequestForm"
+            );
+
+        const createPaymentUrl =
+            "{% url 'create_ride_payment' %}";
+
+        const confirmPaymentUrl =
+            "{% url 'confirm_ride_payment' 0 %}";
+
         paymentRequestInProgress = true;
-        if (confirmPaymentBtn) { confirmPaymentBtn.disabled = true; confirmPaymentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...'; }
-        setPaymentAlert("Creating payment and validating ride request...", "warning");
+
+        if (confirmPaymentBtn) {
+            confirmPaymentBtn.disabled = true;
+
+            confirmPaymentBtn.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+        }
+
+        setPaymentAlert(
+            "Creating payment and validating ride request...",
+            "warning"
+        );
+
         try {
-            const createResponse = await fetch(createPaymentUrl, {method:"POST",body:serializeRideRequestForm(),headers:{"X-Requested-With":"XMLHttpRequest","Accept":"application/json"}});
-            const createData = await createResponse.json();
-            if (!createResponse.ok || !createData.success) {
-                let message = createData.message || "Payment could not be initiated.";
-                if (createData.errors) { Object.keys(createData.errors).forEach(function (field) { createData.errors[field].forEach(function (error) { if (error.message) message += " " + error.message; }); }); }
+            const formData =
+                serializeRideRequestForm();
+
+            const csrfToken =
+                form.querySelector(
+                    'input[name="csrfmiddlewaretoken"]'
+                )?.value || "";
+
+            /*
+             * Final safety:
+             * send EXACTLY the discounted payable amount.
+             */
+            const paymentAmountValue =
+                payableFare.toFixed(2);
+
+            formData.set(
+                "final_fare",
+                paymentAmountValue
+            );
+
+            formData.set(
+                "payment_amount",
+                paymentAmountValue
+            );
+
+            formData.set(
+                "amount",
+                paymentAmountValue
+            );
+
+            const createResponse =
+                await fetch(
+                    createPaymentUrl,
+                    {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "X-Requested-With":
+                                "XMLHttpRequest",
+                            "Accept":
+                                "application/json",
+                            "X-CSRFToken":
+                                csrfToken
+                        }
+                    }
+                );
+
+            let createData = {};
+
+            try {
+                createData =
+                    await createResponse.json();
+            } catch (error) {
+                throw new Error(
+                    "Payment server returned an invalid response."
+                );
+            }
+
+            if (
+                !createResponse.ok ||
+                !createData.success
+            ) {
+                let message =
+                    createData.message ||
+                    "Payment could not be initiated.";
+
+                if (createData.errors) {
+                    Object.keys(
+                        createData.errors
+                    ).forEach(
+                        function (field) {
+                            const errors =
+                                createData.errors[field];
+
+                            if (
+                                Array.isArray(errors)
+                            ) {
+                                errors.forEach(
+                                    function (error) {
+                                        if (
+                                            error &&
+                                            error.message
+                                        ) {
+                                            message +=
+                                                " " +
+                                                error.message;
+                                        } else if (
+                                            typeof error ===
+                                            "string"
+                                        ) {
+                                            message +=
+                                                " " +
+                                                error;
+                                        }
+                                    }
+                                );
+                            }
+                        }
+                    );
+                }
+
                 throw new Error(message);
             }
-            const paymentId = createData.payment_id;
-            document.getElementById("ridePaymentId").value = paymentId;
-            setPaymentAlert("Payment initiated. Confirming payment...", "warning");
-            const confirmUrl = confirmPaymentUrl.replace("/0/", "/" + paymentId + "/");
-            const confirmFormData = new FormData();
-            confirmFormData.append("csrfmiddlewaretoken", form.querySelector('input[name="csrfmiddlewaretoken"]').value);
-            const confirmResponse = await fetch(confirmUrl, {method:"POST",body:confirmFormData,headers:{"X-Requested-With":"XMLHttpRequest","Accept":"application/json"}});
-            const confirmData = await confirmResponse.json();
-            if (!confirmResponse.ok || !confirmData.success) throw new Error(confirmData.message || "Payment confirmation failed.");
-            if (paymentModalInstance) paymentModalInstance.hide();
+
+            const paymentId =
+                createData.payment_id;
+
+            if (!paymentId) {
+                throw new Error(
+                    "Payment ID was not returned by the server."
+                );
+            }
+
+            if (ridePaymentId) {
+                ridePaymentId.value =
+                    paymentId;
+            }
+
+            setPaymentAlert(
+                "Payment initiated. Confirming payment...",
+                "warning"
+            );
+
+            const confirmUrl =
+                confirmPaymentUrl.replace(
+                    "/0/",
+                    "/" + paymentId + "/"
+                );
+
+            const confirmFormData =
+                new FormData();
+
+            confirmFormData.set(
+                "csrfmiddlewaretoken",
+                csrfToken
+            );
+
+            confirmFormData.set(
+                "payment_method",
+                method
+            );
+
+            confirmFormData.set(
+                "payment_amount",
+                paymentAmountValue
+            );
+
+            confirmFormData.set(
+                "final_fare",
+                paymentAmountValue
+            );
+
+            confirmFormData.set(
+                "amount",
+                paymentAmountValue
+            );
+
+            if (
+                couponApplied &&
+                appliedCouponCode
+            ) {
+                confirmFormData.set(
+                    "coupon_code",
+                    appliedCouponCode
+                );
+
+                confirmFormData.set(
+                    "coupon_applied",
+                    "1"
+                );
+            }
+
+            const confirmResponse =
+                await fetch(
+                    confirmUrl,
+                    {
+                        method: "POST",
+                        body: confirmFormData,
+                        headers: {
+                            "X-Requested-With":
+                                "XMLHttpRequest",
+                            "Accept":
+                                "application/json",
+                            "X-CSRFToken":
+                                csrfToken
+                        }
+                    }
+                );
+
+            let confirmData = {};
+
+            try {
+                confirmData =
+                    await confirmResponse.json();
+            } catch (error) {
+                throw new Error(
+                    "Payment confirmation returned an invalid response."
+                );
+            }
+
+            if (
+                !confirmResponse.ok ||
+                !confirmData.success
+            ) {
+                throw new Error(
+                    confirmData.message ||
+                    "Payment confirmation failed."
+                );
+            }
+
+            if (paymentModalInstance) {
+                paymentModalInstance.hide();
+            }
+
             formSubmitting = true;
-            const saveButton = document.getElementById("saveRideRequestBtn");
-            if (saveButton) { saveButton.disabled = true; saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...'; }
-            if (confirmData.redirect_url) window.location.href = confirmData.redirect_url;
-            else if (confirmData.ride_request_id) window.location.href = "{% url 'ride_request_details' 0 %}".replace("/0/", "/" + confirmData.ride_request_id + "/");
+
+            const saveButton =
+                document.getElementById(
+                    "saveRideRequestBtn"
+                );
+
+            if (saveButton) {
+                saveButton.disabled = true;
+
+                saveButton.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
+            }
+
+            if (confirmData.redirect_url) {
+                window.location.href =
+                    confirmData.redirect_url;
+            } else if (
+                confirmData.ride_request_id
+            ) {
+                window.location.href =
+                    "{% url 'ride_request_details' 0 %}"
+                        .replace(
+                            "/0/",
+                            "/" +
+                            confirmData.ride_request_id +
+                            "/"
+                        );
+            }
+
             return true;
         } catch (error) {
-            setPaymentAlert(error.message || "Payment could not be completed.", "danger");
+            console.error(
+                "Payment error:",
+                error
+            );
+
+            setPaymentAlert(
+                error.message ||
+                "Payment could not be completed.",
+                "danger"
+            );
+
             return false;
         } finally {
             paymentRequestInProgress = false;
-            if (confirmPaymentBtn) { confirmPaymentBtn.disabled = false; confirmPaymentBtn.innerHTML = '<i class="bi bi-shield-check me-1"></i>Continue Payment'; }
+
+            if (confirmPaymentBtn) {
+                confirmPaymentBtn.disabled = false;
+
+                confirmPaymentBtn.innerHTML =
+                    '<i class="bi bi-shield-check me-1"></i>Continue Payment';
+            }
         }
     }
 
@@ -2847,6 +4536,8 @@
         dropLatitude.value = "";
         dropLongitude.value = "";
         dropAddress.value = "";
+
+        dropCityName = "";
 
         setDropState(false);
 
@@ -2857,10 +4548,7 @@
             dropMarker &&
             rideMap
         ) {
-            rideMap.removeLayer(
-                dropMarker
-            );
-
+            rideMap.removeLayer(dropMarker);
             dropMarker = null;
         }
 
@@ -2907,7 +4595,7 @@
 
             if (
                 pickupStatus &&
-                pickupAddress.value
+                pickupAddress?.value
             ) {
                 pickupStatus.textContent =
                     "Existing pickup location loaded.";
@@ -2927,7 +4615,7 @@
 
             if (
                 dropStatus &&
-                dropAddress.value
+                dropAddress?.value
             ) {
                 dropStatus.textContent =
                     "Existing destination loaded.";
@@ -2942,17 +4630,14 @@
         }
 
         const existingDistance =
-            getNumber(
-                estimatedDistance
-            );
+            getNumber(estimatedDistance);
 
         const existingDuration =
-            getNumber(
-                estimatedDuration
-            );
+            getNumber(estimatedDuration);
 
         if (
-            existingDistance !== null
+            existingDistance !== null &&
+            sideDistance
         ) {
             sideDistance.textContent =
                 existingDistance.toFixed(2) +
@@ -2960,14 +4645,32 @@
         }
 
         if (
-            existingDuration !== null
+            existingDuration !== null &&
+            sideDuration
         ) {
             sideDuration.textContent =
                 existingDuration +
                 " min";
         }
 
-        updateFareDisplay();
+        const existingFare =
+            getEstimatedFareValue();
+
+        if (
+            existingFare !== null
+        ) {
+            payableFareValue =
+                Number(
+                    existingFare.toFixed(2)
+                );
+
+            if (finalFareInput) {
+                finalFareInput.value =
+                    payableFareValue.toFixed(2);
+            }
+        }
+
+        updateFareDisplays();
 
         if (
             pickupLat !== null &&
@@ -2976,14 +4679,6 @@
             dropLng !== null
         ) {
             calculateRoute();
-        } else if (
-            pickupLat !== null ||
-            dropLat !== null
-        ) {
-            setLocationBadge(
-                "Location loaded",
-                "success"
-            );
         }
     }
 
@@ -3019,9 +4714,7 @@
             pickupLat === null ||
             pickupLng === null
         ) {
-            if (
-                !hasValue(pickupAddress)
-            ) {
+            if (!hasValue(pickupAddress)) {
                 pickupStatus.textContent =
                     "Please enter a pickup address or use Current Location.";
 
@@ -3035,10 +4728,7 @@
                 return false;
             }
 
-            const pickupResolved =
-                await resolvePickupAddress();
-
-            if (!pickupResolved) {
+            if (!await resolvePickupAddress()) {
                 pickupAddress.focus();
                 return false;
             }
@@ -3054,9 +4744,7 @@
             dropLat === null ||
             dropLng === null
         ) {
-            if (
-                !hasValue(dropAddress)
-            ) {
+            if (!hasValue(dropAddress)) {
                 dropStatus.textContent =
                     "Please enter a destination.";
 
@@ -3070,10 +4758,7 @@
                 return false;
             }
 
-            const dropResolved =
-                await resolveDropAddress();
-
-            if (!dropResolved) {
+            if (!await resolveDropAddress()) {
                 dropAddress.focus();
                 return false;
             }
@@ -3100,12 +4785,8 @@
         }
 
         if (
-            Math.abs(
-                pickupLat - dropLat
-            ) < 0.000001 &&
-            Math.abs(
-                pickupLng - dropLng
-            ) < 0.000001
+            Math.abs(pickupLat - dropLat) < 0.000001 &&
+            Math.abs(pickupLng - dropLng) < 0.000001
         ) {
             dropStatus.textContent =
                 "Pickup and destination cannot be the same.";
@@ -3120,15 +4801,11 @@
             return false;
         }
 
-        const distance =
-            getNumber(
-                estimatedDistance
-            );
+        let distance =
+            getNumber(estimatedDistance);
 
-        const duration =
-            getNumber(
-                estimatedDuration
-            );
+        let duration =
+            getNumber(estimatedDuration);
 
         if (
             distance === null ||
@@ -3136,10 +4813,7 @@
             distance <= 0 ||
             duration <= 0
         ) {
-            const routeReady =
-                await calculateRoute();
-
-            if (!routeReady) {
+            if (!await calculateRoute()) {
                 routeSummary.classList.remove(
                     "d-none"
                 );
@@ -3159,21 +4833,17 @@
             }
         }
 
-        const finalDistance =
-            getNumber(
-                estimatedDistance
-            );
+        distance =
+            getNumber(estimatedDistance);
 
-        const finalDuration =
-            getNumber(
-                estimatedDuration
-            );
+        duration =
+            getNumber(estimatedDuration);
 
         if (
-            finalDistance === null ||
-            finalDuration === null ||
-            finalDistance <= 0 ||
-            finalDuration <= 0
+            distance === null ||
+            duration === null ||
+            distance <= 0 ||
+            duration <= 0
         ) {
             setLocationBadge(
                 "Route required",
@@ -3183,13 +4853,54 @@
             return false;
         }
 
-        if ({{ is_edit|yesno:"true,false" }}) {
+        if (
+            getEstimatedFareValue() === null
+        ) {
+            await updateFareDisplay();
+        }
+
+        const finalPayable =
+            getPayableFareValue();
+
+        if (
+            finalPayable === null ||
+            finalPayable <= 0
+        ) {
+            setLocationBadge(
+                "Fare required",
+                "danger"
+            );
+
+            fareStatus.textContent =
+                "Please wait for the fare to be calculated.";
+
+            return false;
+        }
+
+        if (
+            {{ is_edit|yesno:"true,false" }}
+        ) {
             formSubmitting = true;
-            const saveButton = document.getElementById("saveRideRequestBtn");
-            if (saveButton) { saveButton.disabled = true; saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Updating...'; }
-            HTMLFormElement.prototype.submit.call(form);
+
+            const saveButton =
+                document.getElementById(
+                    "saveRideRequestBtn"
+                );
+
+            if (saveButton) {
+                saveButton.disabled = true;
+
+                saveButton.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+            }
+
+            HTMLFormElement.prototype.submit.call(
+                form
+            );
+
             return true;
         }
+
         return openPaymentModal();
     }
 
@@ -3210,6 +4921,9 @@
 
     window.continuePayment =
         continuePayment;
+
+    window.updateFareDisplay =
+        updateFareDisplay;
 
     document.addEventListener(
         "DOMContentLoaded",
@@ -3242,20 +4956,14 @@
                         }
 
                         setPickupState(false);
-
                         resetRouteData();
 
-                        if (
+                        pickupStatus.textContent =
                             String(
                                 pickupAddress.value || ""
                             ).trim()
-                        ) {
-                            pickupStatus.textContent =
-                                "Pickup address changed. Location will be found automatically.";
-                        } else {
-                            pickupStatus.textContent =
-                                "Enter pickup address manually or click Current.";
-                        }
+                                ? "Pickup address changed. Location will be found automatically."
+                                : "Enter pickup address manually or click Current.";
 
                         setLocationBadge(
                             "Pickup pending",
@@ -3275,8 +4983,12 @@
                         }
 
                         if (
-                            getNumber(pickupLatitude) === null ||
-                            getNumber(pickupLongitude) === null
+                            getNumber(
+                                pickupLatitude
+                            ) === null ||
+                            getNumber(
+                                pickupLongitude
+                            ) === null
                         ) {
                             await resolvePickupAddress();
                         }
@@ -3292,7 +5004,9 @@
                             event.preventDefault();
 
                             if (
-                                hasValue(pickupAddress)
+                                hasValue(
+                                    pickupAddress
+                                )
                             ) {
                                 resolvePickupAddress();
                             }
@@ -3325,20 +5039,14 @@
                         }
 
                         setDropState(false);
-
                         resetRouteData();
 
-                        if (
+                        dropStatus.textContent =
                             String(
                                 dropAddress.value || ""
                             ).trim()
-                        ) {
-                            dropStatus.textContent =
-                                "Destination changed. Location will be found automatically.";
-                        } else {
-                            dropStatus.textContent =
-                                "Enter a destination or click the map.";
-                        }
+                                ? "Destination changed. Location will be found automatically."
+                                : "Enter a destination or click the map.";
 
                         setLocationBadge(
                             "Destination pending",
@@ -3391,28 +5099,110 @@
                 );
             }
 
-            const vehicleType = document.getElementById("{{ form.vehicle_type.id_for_label }}");
+            const vehicleType =
+                getVehicleTypeField();
 
             if (vehicleType) {
                 vehicleType.addEventListener(
                     "change",
-                    updateFareDisplay
+                    async function () {
+                        resetCouponState(false);
+                        await updateFareDisplay();
+                    }
                 );
             }
 
             if (estimatedFare) {
                 estimatedFare.addEventListener(
                     "input",
-                    updateFareDisplay
+                    function () {
+                        if (!couponApplied) {
+                            const value =
+                                Number(
+                                    estimatedFare.value
+                                );
+
+                            payableFareValue =
+                                Number.isFinite(value) &&
+                                value >= 0
+                                    ? value
+                                    : null;
+
+                            if (
+                                finalFareInput &&
+                                payableFareValue !== null
+                            ) {
+                                finalFareInput.value =
+                                    payableFareValue.toFixed(2);
+                            }
+                        }
+
+                        updateFareDisplays();
+                    }
                 );
             }
 
-            paymentMethodInputs.forEach(function (input) {
-                input.addEventListener(
-                    "change",
-                    updatePaymentMethodFields
+            if (couponCodeInput) {
+                couponCodeInput.addEventListener(
+                    "input",
+                    function () {
+                        const value =
+                            String(
+                                couponCodeInput.value || ""
+                            )
+                                .trim()
+                                .toUpperCase();
+
+                        if (
+                            couponApplied &&
+                            value !== appliedCouponCode
+                        ) {
+                            resetCouponState(false);
+
+                            couponStatus.textContent =
+                                "Coupon code changed. Apply the new coupon.";
+
+                            couponStatus.className =
+                                "small mt-2 text-warning";
+                        }
+                    }
                 );
-            });
+
+                couponCodeInput.addEventListener(
+                    "keydown",
+                    function (event) {
+                        if (
+                            event.key === "Enter"
+                        ) {
+                            event.preventDefault();
+
+                            applyCoupon(false);
+                        }
+                    }
+                );
+            }
+
+            if (applyCouponBtn) {
+                applyCouponBtn.addEventListener(
+                    "click",
+                    function (event) {
+                        event.preventDefault();
+
+                        applyCoupon(false);
+                    }
+                );
+            }
+
+            paymentMethodInputs.forEach(
+                function (input) {
+                    input.addEventListener(
+                        "change",
+                        updatePaymentMethodFields
+                    );
+                }
+            );
+
+            updateFareDisplays();
 
             setTimeout(
                 function () {

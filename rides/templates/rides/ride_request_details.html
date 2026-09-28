@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %}NandiRide | Ride Request Details{% endblock %}
 {% block content %}
+
 <div class="container-fluid py-3">
-    <!-- Page Header -->
     <div class="row align-items-center mb-4">
         <div class="col-md-8">
             <div class="d-flex align-items-center">
@@ -11,9 +11,7 @@
                 </div>
                 <div>
                     <h3 class="fw-bold mb-1">Ride Request Details</h3>
-                    <p class="text-muted mb-0">
-                        View complete ride request information and lifecycle
-                    </p>
+                    <p class="text-muted mb-0">View complete ride request information and lifecycle</p>
                 </div>
             </div>
         </div>
@@ -31,13 +29,12 @@
             </div>
         </div>
     </div>
-    <!-- Request Overview -->
     <div class="card card-outline card-primary shadow-sm mb-4">
         <div class="card-header">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div>
                     <h5 class="mb-1 fw-semibold">
-                        <i class="fas fa-file-lines me-2"></i>Request {{ ride_request.request_number }}
+                        <i class="fas fa-file-lines me-2"></i>Request ID : <small class="text-muted"> {{ ride_request.request_number }}</small>
                     </h5>
                     <div class="small text-muted">
                         Created {{ ride_request.requested_at|date:"d M Y, h:i A" }}
@@ -45,37 +42,21 @@
                 </div>
                 <div>
                     {% if ride_request.status == "requested" %}
-                        <span class="badge bg-secondary px-3 py-2">
-                            <i class="fas fa-circle me-1"></i>Requested
-                        </span>
+                        <span class="badge bg-secondary px-3 py-2"><i class="fas fa-circle me-1"></i>Requested</span>
                     {% elif ride_request.status == "searching_driver" %}
-                        <span class="badge bg-warning text-dark px-3 py-2">
-                            <i class="fas fa-magnifying-glass me-1"></i>Searching Driver
-                        </span>
+                        <span class="badge bg-warning text-dark px-3 py-2"><i class="fas fa-magnifying-glass me-1"></i>Searching Driver</span>
                     {% elif ride_request.status == "driver_assigned" %}
-                        <span class="badge bg-primary px-3 py-2">
-                            <i class="fas fa-user-check me-1"></i>Driver Assigned
-                        </span>
+                        <span class="badge bg-primary px-3 py-2"><i class="fas fa-user-check me-1"></i>Driver Assigned</span>
                     {% elif ride_request.status == "accepted" %}
-                        <span class="badge bg-success px-3 py-2">
-                            <i class="fas fa-circle-check me-1"></i>Accepted
-                        </span>
+                        <span class="badge bg-success px-3 py-2"><i class="fas fa-circle-check me-1"></i>Accepted</span>
                     {% elif ride_request.status == "cancelled" %}
-                        <span class="badge bg-danger px-3 py-2">
-                            <i class="fas fa-circle-xmark me-1"></i>Cancelled
-                        </span>
+                        <span class="badge bg-danger px-3 py-2"><i class="fas fa-circle-xmark me-1"></i>Cancelled</span>
                     {% elif ride_request.status == "expired" %}
-                        <span class="badge bg-secondary px-3 py-2">
-                            <i class="fas fa-hourglass-end me-1"></i>Expired
-                        </span>
+                        <span class="badge bg-secondary px-3 py-2"><i class="fas fa-hourglass-end me-1"></i>Expired</span>
                     {% elif ride_request.status == "completed" %}
-                        <span class="badge bg-success px-3 py-2">
-                            <i class="fas fa-check-double me-1"></i>Completed
-                        </span>
+                        <span class="badge bg-success px-3 py-2"><i class="fas fa-check-double me-1"></i>Completed</span>
                     {% else %}
-                        <span class="badge bg-secondary px-3 py-2">
-                            {{ ride_request.get_status_display }}
-                        </span>
+                        <span class="badge bg-secondary px-3 py-2">{{ ride_request.get_status_display }}</span>
                     {% endif %}
                 </div>
             </div>
@@ -84,9 +65,7 @@
             <div class="row g-3">
                 <div class="col-lg-4 col-md-6">
                     <div class="info-box shadow-sm h-100 mb-0">
-                        <span class="info-box-icon bg-success">
-                            <i class="fas fa-user text-white"></i>
-                        </span>
+                        <span class="info-box-icon bg-success"><i class="fas fa-user text-white"></i></span>
                         <div class="info-box-content">
                             <span class="info-box-text">Passenger</span>
                             <span class="info-box-number fs-6 text-truncate">{{ ride_request.passenger }}</span>
@@ -95,9 +74,7 @@
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="info-box shadow-sm h-100 mb-0">
-                        <span class="info-box-icon bg-warning">
-                            <i class="fas fa-car text-white"></i>
-                        </span>
+                        <span class="info-box-icon bg-warning"><i class="fas fa-car text-white"></i></span>
                         <div class="info-box-content">
                             <span class="info-box-text">Vehicle Type</span>
                             <span class="info-box-number fs-6 text-truncate">{{ ride_request.vehicle_type }}</span>
@@ -106,9 +83,7 @@
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="info-box shadow-sm h-100 mb-0">
-                        <span class="info-box-icon bg-info">
-                            <i class="fas fa-signal text-white"></i>
-                        </span>
+                        <span class="info-box-icon bg-info"><i class="fas fa-signal text-white"></i></span>
                         <div class="info-box-content">
                             <span class="info-box-text">Current Status</span>
                             <span class="info-box-number text-danger fs-6">{{ ride_request.get_status_display }}</span>
@@ -119,9 +94,7 @@
         </div>
     </div>
     <div class="row">
-        <!-- Main Content -->
         <div class="col-xl-8">
-            <!-- Journey Information -->
             <div class="card card-outline card-primary shadow-sm mb-3">
                 <div class="card-header">
                     <div>
@@ -136,9 +109,7 @@
                         <div class="col-md-6">
                             <div class="bg-body-tertiary bg-primary-subtle rounded-4 p-4 h-100">
                                 <div class="d-flex align-items-start">
-                                    <div class="me-3 text-success">
-                                        <i class="fas fa-location-dot fa-2x"></i>
-                                    </div>
+                                    <div class="me-3 text-success"><i class="fas fa-location-dot fa-2x"></i></div>
                                     <div>
                                         <div class="small text-muted">Pickup Location</div>
                                         <div class="fw-semibold mt-1">{{ ride_request.pickup_location }}</div>
@@ -149,9 +120,7 @@
                         <div class="col-md-6">
                             <div class="bg-body-tertiary bg-danger-subtle rounded-4 p-4 h-100">
                                 <div class="d-flex align-items-start">
-                                    <div class="me-3 text-danger">
-                                        <i class="fas fa-location-dot fa-2x"></i>
-                                    </div>
+                                    <div class="me-3 text-danger"><i class="fas fa-location-dot fa-2x"></i></div>
                                     <div>
                                         <div class="small text-muted">Drop Location</div>
                                         <div class="fw-semibold mt-1">{{ ride_request.drop_location }}</div>
@@ -162,14 +131,21 @@
                     </div>
                 </div>
             </div>
-            <!-- Estimated Trip -->
+            <!-- Updated Fare Section -->
             <div class="card card-outline card-success shadow-sm mb-3">
                 <div class="card-header">
-                    <div>
-                        <h5 class="mb-1 fw-semibold">
-                            <i class="fas fa-calculator me-2 text-primary"></i>Estimated Trip
-                        </h5>
-                        <div class="small text-muted">Values estimated when the request was created</div>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <h5 class="mb-1 fw-semibold">
+                                <i class="fas fa-calculator me-2 text-primary"></i>Fare Details
+                            </h5>
+                            <div class="small text-muted">Fare calculation, coupon discount and final payable amount</div>
+                        </div>
+                        {% if ride_request.payment and ride_request.payment.amount %}
+                            <span class="badge bg-success-subtle text-success px-3 py-2">
+                                <i class="fas fa-indian-rupee-sign me-1"></i>Final Fare ₹{{ ride_request.payment.amount }}
+                            </span>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="card-body">
@@ -203,9 +179,11 @@
                         <div class="col-md-4">
                             <div class="bg-body-tertiary rounded-4 p-4 text-center h-100">
                                 <i class="fas fa-indian-rupee-sign fa-2x text-success mb-2"></i>
-                                <div class="small text-muted">Estimated Fare</div>
-                                <div class="fs-4 fw-bold mt-1">
-                                    {% if ride_request.estimated_fare %}
+                                <div class="small text-muted">Final Fare</div>
+                                <div class="fs-4 fw-bold text-success mt-1">
+                                    {% if ride_request.payment and ride_request.payment.amount %}
+                                        ₹{{ ride_request.payment.amount }}
+                                    {% elif ride_request.estimated_fare %}
                                         ₹{{ ride_request.estimated_fare }}
                                     {% else %}
                                         —
@@ -214,6 +192,56 @@
                             </div>
                         </div>
                     </div>
+                    {% if ride_request.payment %}
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <div class="bg-body-tertiary rounded-4 p-3 h-100">
+                                    <div class="small text-muted">Original Fare</div>
+                                    <div class="fw-bold fs-5 mt-1">
+                                        {% if ride_request.payment.metadata.original_fare %}
+                                            ₹{{ ride_request.payment.metadata.original_fare }}
+                                        {% elif ride_request.estimated_fare %}
+                                            ₹{{ ride_request.estimated_fare }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-success-subtle rounded-4 p-3 h-100">
+                                    <div class="small text-muted">Coupon Discount</div>
+                                    <div class="fw-bold fs-5 text-success mt-1">
+                                        {% if ride_request.payment.metadata.coupon_discount %}
+                                            - ₹{{ ride_request.payment.metadata.coupon_discount }}
+                                        {% else %}
+                                            ₹0
+                                        {% endif %}
+                                    </div>
+                                    {% if ride_request.payment.metadata.coupon_code %}
+                                        <div class="small text-success mt-1">
+                                            <i class="fas fa-ticket-perforated me-1"></i>
+                                            {{ ride_request.payment.metadata.coupon_code }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-primary-subtle rounded-4 p-3 h-100">
+                                    <div class="small text-muted">Final Fare</div>
+                                    <div class="fw-bold fs-5 text-primary mt-1">
+                                        {% if ride_request.payment.amount %}
+                                            ₹{{ ride_request.payment.amount }}
+                                        {% elif ride_request.estimated_fare %}
+                                            ₹{{ ride_request.estimated_fare }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <!-- Payment Details -->
@@ -253,22 +281,17 @@
                 </div>
                 <div class="card-body">
                     {% if ride_request.payment %}
-                        <!-- Payment Summary -->
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                     <div class="small text-muted">Payment Number</div>
-                                    <div class="fw-semibold mt-1 text-break">
-                                        {{ ride_request.payment.payment_number }}
-                                    </div>
+                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.payment_number }}</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                     <div class="small text-muted">Amount</div>
-                                    <div class="fw-bold text-success fs-5 mt-1">
-                                        ₹{{ ride_request.payment.amount }}
-                                    </div>
+                                    <div class="fw-bold text-success fs-5 mt-1">₹{{ ride_request.payment.amount }}</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -295,9 +318,7 @@
                                     <div class="small text-muted">Payment Status</div>
                                     <div class="fw-semibold mt-1">
                                         {% if ride_request.payment.status == "refunded" %}
-                                            <span class="text-success">
-                                                <i class="fas fa-rotate-left me-1"></i>Refunded
-                                            </span>
+                                            <span class="text-success"><i class="fas fa-rotate-left me-1"></i>Refunded</span>
                                         {% else %}
                                             {{ ride_request.payment.get_status_display }}
                                         {% endif %}
@@ -305,7 +326,27 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Payment Transaction Information -->
+                        {% if ride_request.payment.metadata.coupon_code %}
+                            <div class="mt-3">
+                                <div class="bg-success-subtle rounded-4 p-3">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                        <div>
+                                            <div class="small text-muted">Applied Coupon</div>
+                                            <div class="fw-bold text-success mt-1">
+                                                <i class="fas fa-ticket-perforated me-1"></i>
+                                                {{ ride_request.payment.metadata.coupon_code }}
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="small text-muted">Discount Applied</div>
+                                            <div class="fw-bold text-success">
+                                                ₹{{ ride_request.payment.metadata.coupon_discount|default:"0" }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
                         <div class="mt-3">
                             {% if ride_request.payment.payment_method == "upi" %}
                                 {% if ride_request.payment.transaction_id or ride_request.payment.gateway or ride_request.payment.gateway_order_id %}
@@ -314,9 +355,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Transaction ID</div>
-                                                    <div class="fw-semibold mt-1 text-break">
-                                                        {{ ride_request.payment.transaction_id }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.transaction_id }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -324,9 +363,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Gateway</div>
-                                                    <div class="fw-semibold mt-1 text-break">
-                                                        {{ ride_request.payment.gateway }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.gateway }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -334,9 +371,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Order ID</div>
-                                                    <div class="fw-semibold mt-1 text-break">
-                                                        {{ ride_request.payment.gateway_order_id }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.gateway_order_id }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -349,9 +384,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Card Brand</div>
-                                                    <div class="fw-semibold mt-1">
-                                                        {{ ride_request.payment.card_brand }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1">{{ ride_request.payment.card_brand }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -359,9 +392,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Card Number</div>
-                                                    <div class="fw-semibold mt-1">
-                                                        •••• {{ ride_request.payment.card_last4 }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1">•••• {{ ride_request.payment.card_last4 }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -369,9 +400,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Transaction ID</div>
-                                                    <div class="fw-semibold mt-1 text-break">
-                                                        {{ ride_request.payment.transaction_id }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.transaction_id }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -379,9 +408,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Gateway</div>
-                                                    <div class="fw-semibold mt-1 text-break">
-                                                        {{ ride_request.payment.gateway }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.gateway }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -394,9 +421,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Transaction ID</div>
-                                                    <div class="fw-semibold mt-1 text-break">
-                                                        {{ ride_request.payment.transaction_id }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.transaction_id }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -404,9 +429,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Wallet Provider</div>
-                                                    <div class="fw-semibold mt-1 text-break">
-                                                        {{ ride_request.payment.gateway }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.gateway }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -419,9 +442,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Transaction ID</div>
-                                                    <div class="fw-semibold mt-1 text-break">
-                                                        {{ ride_request.payment.transaction_id }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.transaction_id }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -429,9 +450,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Bank / Gateway</div>
-                                                    <div class="fw-semibold mt-1 text-break">
-                                                        {{ ride_request.payment.gateway }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.gateway }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -439,9 +458,7 @@
                                             <div class="col-md-6">
                                                 <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                                     <div class="small text-muted">Order ID</div>
-                                                    <div class="fw-semibold mt-1 text-break">
-                                                        {{ ride_request.payment.gateway_order_id }}
-                                                    </div>
+                                                    <div class="fw-semibold mt-1 text-break">{{ ride_request.payment.gateway_order_id }}</div>
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -453,8 +470,7 @@
                                         <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                             <div class="small text-muted">Payment Mode</div>
                                             <div class="fw-semibold mt-1">
-                                                <i class="fas fa-money-bill-wave me-1 text-primary"></i>
-                                                Cash on Ride
+                                                <i class="fas fa-money-bill-wave me-1 text-primary"></i>Cash on Ride
                                             </div>
                                         </div>
                                     </div>
@@ -466,25 +482,18 @@
                                 <div class="col-md-6">
                                     <div class="bg-body-tertiary rounded-4 p-3 h-100">
                                         <div class="small text-muted">Paid At</div>
-                                        <div class="fw-semibold mt-1">
-                                            {{ ride_request.payment.paid_at|date:"d M Y, h:i A" }}
-                                        </div>
+                                        <div class="fw-semibold mt-1">{{ ride_request.payment.paid_at|date:"d M Y, h:i A" }}</div>
                                     </div>
                                 </div>
                             </div>
                         {% endif %}
-                        <!-- Refund Details -->
                         {% with refunds=ride_request.payment.refunds.all %}
                             {% if refunds %}
                                 <div class="mt-4 pt-3 border-top">
                                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                                         <div>
-                                            <h6 class="fw-bold mb-1">
-                                                <i class="fas fa-rotate-left me-2 text-success"></i>Refund Details
-                                            </h6>
-                                            <div class="small text-muted">
-                                                Refund information for this payment
-                                            </div>
+                                            <h6 class="fw-bold mb-1"><i class="fas fa-rotate-left me-2 text-success"></i>Refund Details</h6>
+                                            <div class="small text-muted">Refund information for this payment</div>
                                         </div>
                                         {% if ride_request.status == "cancelled" %}
                                             <span class="badge bg-danger-subtle text-danger px-3 py-2">
@@ -497,27 +506,17 @@
                                             <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
                                                 <div>
                                                     <div class="small text-muted">Refund Amount</div>
-                                                    <div class="fw-bold text-success fs-4 mt-1">
-                                                        ₹{{ refund.refund_amount }}
-                                                    </div>
+                                                    <div class="fw-bold text-success fs-4 mt-1">₹{{ refund.refund_amount }}</div>
                                                 </div>
                                                 <div>
                                                     {% if refund.status == "processed" %}
-                                                        <span class="badge bg-success px-3 py-2">
-                                                            <i class="fas fa-circle-check me-1"></i>Processed
-                                                        </span>
+                                                        <span class="badge bg-success px-3 py-2"><i class="fas fa-circle-check me-1"></i>Processed</span>
                                                     {% elif refund.status == "pending" %}
-                                                        <span class="badge bg-warning text-dark px-3 py-2">
-                                                            <i class="fas fa-clock me-1"></i>Pending
-                                                        </span>
+                                                        <span class="badge bg-warning text-dark px-3 py-2"><i class="fas fa-clock me-1"></i>Pending</span>
                                                     {% elif refund.status == "failed" %}
-                                                        <span class="badge bg-danger px-3 py-2">
-                                                            <i class="fas fa-circle-xmark me-1"></i>Failed
-                                                        </span>
+                                                        <span class="badge bg-danger px-3 py-2"><i class="fas fa-circle-xmark me-1"></i>Failed</span>
                                                     {% else %}
-                                                        <span class="badge bg-secondary px-3 py-2">
-                                                            {{ refund.status|title }}
-                                                        </span>
+                                                        <span class="badge bg-secondary px-3 py-2">{{ refund.status|title }}</span>
                                                     {% endif %}
                                                 </div>
                                             </div>
@@ -526,9 +525,7 @@
                                                     <div class="col-md-6">
                                                         <div class="bg-white bg-opacity-50 rounded-3 p-3 h-100">
                                                             <div class="small text-muted">Refund Reference</div>
-                                                            <div class="fw-semibold mt-1 text-break">
-                                                                {{ refund.refund_reference }}
-                                                            </div>
+                                                            <div class="fw-semibold mt-1 text-break">{{ refund.refund_reference }}</div>
                                                         </div>
                                                     </div>
                                                 {% endif %}
@@ -536,9 +533,7 @@
                                                     <div class="col-md-6">
                                                         <div class="bg-white bg-opacity-50 rounded-3 p-3 h-100">
                                                             <div class="small text-muted">Refund Requested At</div>
-                                                            <div class="fw-semibold mt-1">
-                                                                {{ refund.requested_at|date:"d M Y, h:i A" }}
-                                                            </div>
+                                                            <div class="fw-semibold mt-1">{{ refund.requested_at|date:"d M Y, h:i A" }}</div>
                                                         </div>
                                                     </div>
                                                 {% endif %}
@@ -546,9 +541,7 @@
                                                     <div class="col-md-6">
                                                         <div class="bg-white bg-opacity-50 rounded-3 p-3 h-100">
                                                             <div class="small text-muted">Refund Processed At</div>
-                                                            <div class="fw-semibold mt-1">
-                                                                {{ refund.processed_at|date:"d M Y, h:i A" }}
-                                                            </div>
+                                                            <div class="fw-semibold mt-1">{{ refund.processed_at|date:"d M Y, h:i A" }}</div>
                                                         </div>
                                                     </div>
                                                 {% endif %}
@@ -556,9 +549,7 @@
                                                     <div class="col-12">
                                                         <div class="bg-white bg-opacity-50 rounded-3 p-3">
                                                             <div class="small text-muted">Refund Reason</div>
-                                                            <div class="fw-semibold mt-1">
-                                                                {{ refund.reason }}
-                                                            </div>
+                                                            <div class="fw-semibold mt-1">{{ refund.reason }}</div>
                                                         </div>
                                                     </div>
                                                 {% endif %}
@@ -574,9 +565,7 @@
                                                 <i class="fas fa-circle-check fs-5 me-3 mt-1"></i>
                                                 <div>
                                                     <div class="fw-bold">Payment Refunded</div>
-                                                    <div class="small mt-1">
-                                                        This ride was cancelled and the payment has been marked as refunded.
-                                                    </div>
+                                                    <div class="small mt-1">This ride was cancelled and the payment has been marked as refunded.</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -588,9 +577,7 @@
                                                 <i class="fas fa-clock fs-5 me-3 mt-1"></i>
                                                 <div>
                                                     <div class="fw-bold">Refund Not Generated</div>
-                                                    <div class="small mt-1">
-                                                        The ride is cancelled, but no refund record has been created yet.
-                                                    </div>
+                                                    <div class="small mt-1">The ride is cancelled, but no refund record has been created yet.</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -602,9 +589,7 @@
                                                 <i class="fas fa-circle-info fs-5 me-3 mt-1"></i>
                                                 <div>
                                                     <div class="fw-bold">Payment Pending</div>
-                                                    <div class="small mt-1">
-                                                        This payment was not completed, so no refund has been generated.
-                                                    </div>
+                                                    <div class="small mt-1">This payment was not completed, so no refund has been generated.</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -616,9 +601,7 @@
                                                 <i class="fas fa-circle-info fs-5 me-3 mt-1"></i>
                                                 <div>
                                                     <div class="fw-bold">No Refund Required</div>
-                                                    <div class="small mt-1">
-                                                        The payment was not successful, so no refund was generated.
-                                                    </div>
+                                                    <div class="small mt-1">The payment was not successful, so no refund was generated.</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -634,17 +617,10 @@
                     {% endif %}
                 </div>
             </div>
-            <!-- Linked Ride -->
             {% if ride_request.ride %}
                 <div class="card card-outline card-success shadow-sm mb-3">
                     <div class="card-header">
-                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                            <div>
-                                <h5 class="mb-1 fw-semibold">
-                                    <i class="fas fa-car-side me-2 text-primary"></i>Linked Ride
-                                </h5>
-                            </div>
-                        </div>
+                        <h5 class="mb-1 fw-semibold"><i class="fas fa-car-side me-2 text-primary"></i>Linked Ride</h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -660,17 +636,11 @@
                                 <div class="small text-muted">Ride Status</div>
                                 <div class="mt-1">
                                     {% if ride_request.ride.status == "completed" %}
-                                        <span class="badge bg-success-subtle text-success">
-                                            {{ ride_request.ride.get_status_display }}
-                                        </span>
+                                        <span class="badge bg-success-subtle text-success">{{ ride_request.ride.get_status_display }}</span>
                                     {% elif ride_request.ride.status == "cancelled" %}
-                                        <span class="badge bg-danger-subtle text-danger">
-                                            {{ ride_request.ride.get_status_display }}
-                                        </span>
+                                        <span class="badge bg-danger-subtle text-danger">{{ ride_request.ride.get_status_display }}</span>
                                     {% else %}
-                                        <span class="badge bg-primary-subtle text-primary">
-                                            {{ ride_request.ride.get_status_display }}
-                                        </span>
+                                        <span class="badge bg-primary-subtle text-primary">{{ ride_request.ride.get_status_display }}</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -684,14 +654,10 @@
                 </div>
             {% endif %}
         </div>
-        <!-- Sidebar -->
         <div class="col-xl-4 mt-3 mt-xl-0">
-            <!-- Actions -->
             <div class="card card-outline card-primary shadow-sm mb-3">
                 <div class="card-header">
-                    <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-bolt me-2 text-primary"></i>Quick Actions
-                    </h5>
+                    <h5 class="mb-0 fw-semibold"><i class="fas fa-bolt me-2 text-primary"></i>Quick Actions</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
@@ -713,122 +679,74 @@
                     </div>
                 </div>
             </div>
-            <!-- Request Lifecycle -->
             <div class="card card-outline card-warning shadow-sm mb-3">
                 <div class="card-header">
-                    <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-diagram-project me-2 text-primary"></i>Request Lifecycle
-                    </h5>
+                    <h5 class="mb-0 fw-semibold"><i class="fas fa-diagram-project me-2 text-primary"></i>Request Lifecycle</h5>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
                         <div class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
-                            <span class="{% if ride_request.status == 'requested' %}fw-bold text-primary{% else %}text-body{% endif %}">
-                                <i class="fas fa-circle me-2"></i>Requested
-                            </span>
-                            {% if ride_request.status == "requested" %}
-                                <i class="fas fa-check text-primary"></i>
-                            {% endif %}
+                            <span class="{% if ride_request.status == 'requested' %}fw-bold text-primary{% else %}text-body{% endif %}"><i class="fas fa-circle me-2"></i>Requested</span>
+                            {% if ride_request.status == "requested" %}<i class="fas fa-check text-primary"></i>{% endif %}
                         </div>
                         <div class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
-                            <span class="{% if ride_request.status == 'searching_driver' %}fw-bold text-warning{% else %}text-body{% endif %}">
-                                <i class="fas fa-magnifying-glass me-2"></i>Searching Driver
-                            </span>
-                            {% if ride_request.status == "searching_driver" %}
-                                <i class="fas fa-check text-warning"></i>
-                            {% endif %}
+                            <span class="{% if ride_request.status == 'searching_driver' %}fw-bold text-warning{% else %}text-body{% endif %}"><i class="fas fa-magnifying-glass me-2"></i>Searching Driver</span>
+                            {% if ride_request.status == "searching_driver" %}<i class="fas fa-check text-warning"></i>{% endif %}
                         </div>
                         <div class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
-                            <span class="{% if ride_request.status == 'driver_assigned' %}fw-bold text-primary{% else %}text-body{% endif %}">
-                                <i class="fas fa-user-check me-2"></i>Driver Assigned
-                            </span>
-                            {% if ride_request.status == "driver_assigned" %}
-                                <i class="fas fa-check text-primary"></i>
-                            {% endif %}
+                            <span class="{% if ride_request.status == 'driver_assigned' %}fw-bold text-primary{% else %}text-body{% endif %}"><i class="fas fa-user-check me-2"></i>Driver Assigned</span>
+                            {% if ride_request.status == "driver_assigned" %}<i class="fas fa-check text-primary"></i>{% endif %}
                         </div>
                         <div class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
-                            <span class="{% if ride_request.status == 'accepted' %}fw-bold text-success{% else %}text-body{% endif %}">
-                                <i class="fas fa-circle-check me-2"></i>Accepted
-                            </span>
-                            {% if ride_request.status == "accepted" %}
-                                <i class="fas fa-check text-success"></i>
-                            {% endif %}
+                            <span class="{% if ride_request.status == 'accepted' %}fw-bold text-success{% else %}text-body{% endif %}"><i class="fas fa-circle-check me-2"></i>Accepted</span>
+                            {% if ride_request.status == "accepted" %}<i class="fas fa-check text-success"></i>{% endif %}
                         </div>
                         <div class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
-                            <span class="{% if ride_request.status == 'cancelled' %}fw-bold text-danger{% else %}text-body{% endif %}">
-                                <i class="fas fa-circle-xmark me-2"></i>Cancelled
-                            </span>
-                            {% if ride_request.status == "cancelled" %}
-                                <i class="fas fa-check text-danger"></i>
-                            {% endif %}
+                            <span class="{% if ride_request.status == 'cancelled' %}fw-bold text-danger{% else %}text-body{% endif %}"><i class="fas fa-circle-xmark me-2"></i>Cancelled</span>
+                            {% if ride_request.status == "cancelled" %}<i class="fas fa-check text-danger"></i>{% endif %}
                         </div>
                         <div class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
-                            <span class="{% if ride_request.status == 'expired' %}fw-bold text-secondary{% else %}text-body{% endif %}">
-                                <i class="fas fa-hourglass-end me-2"></i>Expired
-                            </span>
-                            {% if ride_request.status == "expired" %}
-                                <i class="fas fa-check text-secondary"></i>
-                            {% endif %}
+                            <span class="{% if ride_request.status == 'expired' %}fw-bold text-secondary{% else %}text-body{% endif %}"><i class="fas fa-hourglass-end me-2"></i>Expired</span>
+                            {% if ride_request.status == "expired" %}<i class="fas fa-check text-secondary"></i>{% endif %}
                         </div>
                         <div class="list-group-item bg-transparent px-0 d-flex justify-content-between align-items-center">
-                            <span class="{% if ride_request.status == 'completed' %}fw-bold text-success{% else %}text-body{% endif %}">
-                                <i class="fas fa-check-double me-2"></i>Completed
-                            </span>
-                            {% if ride_request.status == "completed" %}
-                                <i class="fas fa-check text-success"></i>
-                            {% endif %}
+                            <span class="{% if ride_request.status == 'completed' %}fw-bold text-success{% else %}text-body{% endif %}"><i class="fas fa-check-double me-2"></i>Completed</span>
+                            {% if ride_request.status == "completed" %}<i class="fas fa-check text-success"></i>{% endif %}
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Passenger -->
             <div class="card card-outline card-info shadow-sm mb-3">
                 <div class="card-header">
-                    <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-user me-2 text-primary"></i>Passenger
-                    </h5>
+                    <h5 class="mb-0 fw-semibold"><i class="fas fa-user me-2 text-primary"></i>Passenger</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-body-tertiary border p-3 me-3">
-                            <i class="fas fa-user text-info"></i>
-                        </div>
+                        <div class="rounded-circle bg-body-tertiary border p-3 me-3"><i class="fas fa-user text-info"></i></div>
                         <div class="min-w-0">
                             <div class="fw-semibold text-body text-break">{{ ride_request.passenger }}</div>
                             {% if ride_request.passenger.email %}
-                                <div class="small text-muted mt-1 text-break">
-                                    <i class="fas fa-envelope me-1"></i>{{ ride_request.passenger.email }}
-                                </div>
+                                <div class="small text-muted mt-1 text-break"><i class="fas fa-envelope me-1"></i>{{ ride_request.passenger.email }}</div>
                             {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Schedule Information -->
             <div class="card card-outline card-info shadow-sm mb-3">
                 <div class="card-header">
-                    <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-calendar-days me-2 text-primary"></i>Schedule Information
-                    </h5>
+                    <h5 class="mb-0 fw-semibold"><i class="fas fa-calendar-days me-2 text-primary"></i>Schedule Information</h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="bg-body-tertiary bg-primary-subtle rounded-4 p-3">
-                                <div class="small text-muted">
-                                    <i class="fas fa-clock me-1"></i>Requested At
-                                </div>
-                                <div class="fw-semibold mt-1">
-                                    {{ ride_request.requested_at|date:"d M Y, h:i A" }}
-                                </div>
+                                <div class="small text-muted"><i class="fas fa-clock me-1"></i>Requested At</div>
+                                <div class="fw-semibold mt-1">{{ ride_request.requested_at|date:"d M Y, h:i A" }}</div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="bg-body-tertiary bg-danger-subtle rounded-4 p-3">
-                                <div class="small text-muted">
-                                    <i class="fas fa-calendar-check me-1"></i>Scheduled At
-                                </div>
+                                <div class="small text-muted"><i class="fas fa-calendar-check me-1"></i>Scheduled At</div>
                                 <div class="fw-semibold mt-1">
                                     {% if ride_request.scheduled_at %}
                                         {{ ride_request.scheduled_at|date:"d M Y, h:i A" }}
@@ -841,12 +759,9 @@
                     </div>
                 </div>
             </div>
-            <!-- Request Meta -->
             <div class="card card-outline card-secondary shadow-sm">
                 <div class="card-header">
-                    <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-circle-info me-2 text-primary"></i>Request Information
-                    </h5>
+                    <h5 class="mb-0 fw-semibold"><i class="fas fa-circle-info me-2 text-primary"></i>Request Information</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between border-bottom py-2 gap-3">
