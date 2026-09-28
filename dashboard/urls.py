@@ -329,17 +329,22 @@ urlpatterns = [
     "payments/ride/create/",
     payment_views.create_ride_payment,
     name="create_ride_payment",
-),
-path(
-    "payments/ride/<int:pk>/confirm/",
-    payment_views.confirm_ride_payment,
-    name="confirm_ride_payment",
-),
-path(
-    "payments/ride/<int:pk>/fail/",
-    payment_views.fail_ride_payment,
-    name="fail_ride_payment",
-),
+    ),
+    path(
+        "payments/ride/<int:pk>/confirm/",
+        payment_views.confirm_ride_payment,
+        name="confirm_ride_payment",
+    ),
+    path(
+        "payments/ride/<int:pk>/fail/",
+        payment_views.fail_ride_payment,
+        name="fail_ride_payment",
+    ),
+    path(
+        "apply-coupon/",
+        rides_views.apply_coupon,
+        name="apply_coupon",
+    ),
 
     # ============================================================
     # PRICING MANAGEMENT
