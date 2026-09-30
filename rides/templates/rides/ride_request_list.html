@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block title %}NandiRide | Ride Requests{% endblock %}
 {% block content %}
-
 <div class="container-fluid py-3">
     <div class="row align-items-center mb-4">
         <div class="col-md-6">
@@ -95,7 +94,7 @@
         <div class="card-body">
             <form method="get" action="{% url 'ride_request_list' %}" id="requestFilterForm">
                 <div class="row g-3">
-                    <div class="col-lg-6">
+                    <div class="col-lg-9">
                         <label for="requestSearch" class="form-label fw-semibold">Search</label>
                         <div class="input-group">
                             <span class="input-group-text bg-body-tertiary">
@@ -125,15 +124,6 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label for="requestPerPage" class="form-label fw-semibold">Per Page</label>
-                        <select name="per_page" id="requestPerPage" class="form-select" onchange="this.form.submit()">
-                            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-                            <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
-                            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
-                            <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
-                        </select>
-                    </div>
                 </div>
             </form>
         </div>
@@ -154,144 +144,151 @@
             </div>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
+            <table class="table table-hover align-middle mb-0">
+                <colgroup>
+                    <col style="width:6%;">
+                    <col style="width:10%;">
+                    <col style="width:11%;">
+                    <col style="width:16%;">
+                    <col style="width:9%;">
+                    <col style="width:10%;">
+                    <col style="width:7%;">
+                    <col style="width:7%;">
+                    <col style="width:7%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>S.No.</th>
+                        <th>Request</th>
+                        <th>Passenger</th>
+                        <th>Route</th>
+                        <th>Vehicle Type</th>
+                        <th>Requested</th>
+                        <th>Fare</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request_item in page_obj %}
                         <tr>
-                            <th>Request</th>
-                            <th>Passenger</th>
-                            <th>Route</th>
-                            <th>Vehicle Type</th>
-                            <th>Requested</th>
-                            <th>Fare</th>
-                            <th>Status</th>
-                            <th class="text-end">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for request_item in page_obj %}
-                            <tr>
-                                <td>
-                                    <a href="{% url 'ride_request_details' request_item.pk %}" class="fw-semibold text-body text-decoration-none">
-                                        {{ request_item.request_number }}
+                            <td class="px-3 fw-semibold text-body-secondary">
+                                {{ forloop.counter|stringformat:"02d" }}
+                            </td>
+                            <td>
+                                <a href="{% url 'ride_request_details' request_item.pk %}" class="fw-semibold text-body text-decoration-none">
+                                    {{ request_item.request_number }}
+                                </a>
+                                {% if request_item.ride %}
+                                    <div class="small text-muted mt-1">
+                                        <i class="fas fa-car-side me-1"></i>Ride: {{ request_item.ride.ride_number }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        <span class="badge bg-primary rounded-circle p-2">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                    </div>
+                                    <div class="fw-semibold text-body text-break">
+                                        {{ request_item.passenger }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="small text-body text-break">
+                                    <i class="fas fa-location-dot me-1"></i>{{ request_item.pickup_location }}
+                                </div>
+                                <div class="small text-muted mt-1 text-break">
+                                    <i class="fas fa-arrow-down me-1"></i>{{ request_item.drop_location }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-body-tertiary text-body border">
+                                    <i class="fas fa-car me-1"></i>{{ request_item.vehicle_type }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="small text-body">
+                                    {{ request_item.requested_at|date:"d M Y" }}
+                                </div>
+                                <div class="small text-muted">
+                                    {{ request_item.requested_at|date:"h:i A" }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if request_item.estimated_fare %}
+                                    <span class="fw-bold">₹{{ request_item.estimated_fare }}</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if request_item.status == "requested" %}
+                                    <span class="badge bg-secondary">Requested</span>
+                                {% elif request_item.status == "searching_driver" %}
+                                    <span class="badge bg-info">Searching Driver</span>
+                                {% elif request_item.status == "driver_assigned" %}
+                                    <span class="badge bg-primary">Driver Assigned</span>
+                                {% elif request_item.status == "accepted" %}
+                                    <span class="badge bg-success">Accepted</span>
+                                {% elif request_item.status == "cancelled" %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% elif request_item.status == "expired" %}
+                                    <span class="badge bg-warning text-dark">Expired</span>
+                                {% elif request_item.status == "completed" %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ request_item.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group" aria-label="Ride request actions">
+                                    <a href="{% url 'ride_request_details' request_item.pk %}" class="btn btn-sm btn-outline-primary" title="View Request">
+                                        <i class="fas fa-eye"></i>
                                     </a>
-                                    {% if request_item.ride %}
-                                        <div class="small text-muted mt-1">
-                                            <i class="fas fa-car-side me-1"></i>Ride: {{ request_item.ride.ride_number }}
-                                        </div>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-2">
-                                            <span class="badge bg-primary rounded-circle p-2">
-                                                <i class="fas fa-user"></i>
-                                            </span>
-                                        </div>
-                                        <div class="fw-semibold text-body text-break">
-                                            {{ request_item.passenger }}
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="small text-body text-break">
-                                        <i class="fas fa-location-dot me-1"></i>{{ request_item.pickup_location }}
-                                    </div>
-                                    <div class="small text-muted mt-1 text-break">
-                                        <i class="fas fa-arrow-down me-1"></i>{{ request_item.drop_location }}
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-body-tertiary text-body border">
-                                        <i class="fas fa-car me-1"></i>{{ request_item.vehicle_type }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="small text-body">
-                                        {{ request_item.requested_at|date:"d M Y" }}
-                                    </div>
-                                    <div class="small text-muted">
-                                        {{ request_item.requested_at|date:"h:i A" }}
-                                    </div>
-                                </td>
-                                <td>
-                                    {% if request_item.estimated_fare %}
-                                        <span class="fw-bold">₹{{ request_item.estimated_fare }}</span>
-                                    {% else %}
-                                        <span class="text-muted">—</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if request_item.status == "requested" %}
-                                        <span class="badge bg-secondary">Requested</span>
-                                    {% elif request_item.status == "searching_driver" %}
-                                        <span class="badge bg-info">Searching Driver</span>
-                                    {% elif request_item.status == "driver_assigned" %}
-                                        <span class="badge bg-primary">Driver Assigned</span>
-                                    {% elif request_item.status == "accepted" %}
-                                        <span class="badge bg-success">Accepted</span>
-                                    {% elif request_item.status == "cancelled" %}
-                                        <span class="badge bg-danger">Cancelled</span>
-                                    {% elif request_item.status == "expired" %}
-                                        <span class="badge bg-warning text-dark">Expired</span>
-                                    {% elif request_item.status == "completed" %}
-                                        <span class="badge bg-success">Completed</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">{{ request_item.get_status_display }}</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-end">
-                                    <div class="btn-group" role="group" aria-label="Ride request actions">
-                                        <a href="{% url 'ride_request_details' request_item.pk %}" class="btn btn-sm btn-outline-primary" title="View Request">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{% url 'ride_request_edit' request_item.pk %}" class="btn btn-sm btn-outline-primary" title="Edit Request">
-                                            <i class="fas fa-pen"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="8" class="text-center py-5">
-                                    <div class="text-muted">
-                                        <i class="fas fa-inbox fa-3x mb-3"></i>
-                                        <h5 class="fw-semibold">No ride requests found</h5>
-                                        <p class="mb-3">No records match the current search or filter.</p>
-                                        <a href="{% url 'ride_request_add' %}" class="btn btn-primary">
-                                            <i class="fas fa-plus me-1"></i>Create Request
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                                    <a href="{% url 'ride_request_edit' request_item.pk %}" class="btn btn-sm btn-outline-primary" title="Edit Request">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                                    <h5 class="fw-semibold">No ride requests found</h5>
+                                    <p class="mb-3">No records match the current search or filter.</p>
+                                    <a href="{% url 'ride_request_add' %}" class="btn btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Create Request
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         {% if page_obj.has_other_pages %}
             <div class="card-footer bg-body-tertiary">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <div class="small text-muted">
-                        {% if page_obj %}
-                          <i class="fas fa-file-lines text-primary me-1"></i>  Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} requests
-                        {% else %}
-                            Ride request records
-                        {% endif %}
+                        <i class="fas fa-file-lines text-primary me-1"></i>
+                        Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} requests
                     </div>
-                    <!-- <div class="small text-muted">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                    </div> -->
                     <nav aria-label="Ride request pagination">
                         <ul class="pagination pagination-sm mb-0">
                             {% if page_obj.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=1{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}&per_page={{ per_page }}">
+                                    <a class="page-link" href="?page=1{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}">
                                         First
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}&per_page={{ per_page }}">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}">
                                         Previous
                                     </a>
                                 </li>
@@ -301,12 +298,12 @@
                             </li>
                             {% if page_obj.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}&per_page={{ per_page }}">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}">
                                         Next
                                     </a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}&per_page={{ per_page }}">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}">
                                         Last
                                     </a>
                                 </li>

@@ -220,6 +220,11 @@ urlpatterns = [
         rides_views.ride_stop_delete,
         name="ride_stop_delete",
     ),
+    path(
+        "rides/<int:ride_pk>/receive-cash-payment/",
+        rides_views.driver_receive_cash_payment,
+        name="driver_receive_cash_payment",
+    ),
 
     # ============================================================
     # GALLERY MANAGEMENT

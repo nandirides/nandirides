@@ -355,6 +355,28 @@
                                     </div>
                                 </div>
                             {% endif %}
+                                {% if payment.payment_method == "cash" and payment.status == "pending" %}
+                                <div class="border border-warning-subtle rounded-3 p-3 mt-3 bg-warning-subtle bg-opacity-10">
+                                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                                        <div>
+                                            <div class="fw-bold text-warning-emphasis">
+                                                <i class="fas fa-money-bill-wave me-2"></i>
+                                                Cash Payment Pending
+                                            </div>
+                                            <div class="small text-body-secondary mt-1">
+                                                Collect ₹{{ payment.amount }} from the passenger and confirm after receiving the cash.
+                                            </div>
+                                        </div>
+                                        <form method="post" action="{% url 'driver_receive_cash_payment' ride.pk %}" class="m-0">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="fas fa-hand-holding-dollar me-1"></i>
+                                                Cash Received
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                         {% if refund %}
                             <div class="border-top mt-4 pt-4">
