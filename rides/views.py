@@ -3617,11 +3617,17 @@ def driver_receive_cash_payment(request, ride_pk):
         return redirect("ride_details", pk=ride_pk)
 
     ride = get_object_or_404(
-        Ride.objects.select_related("driver", "driver__user"),
+        Ride.objects.select_related(
+            "driver",
+            "driver__user",
+            "ride_request",
+        ),
         pk=ride_pk,
     )
 
-    if not request.user.is_staff:
+    if not request.user.is_staff and (
+        not ride.driver or ride.driver.user_id != request.user.id
+    ):
         messages.error(
             request,
             "You are not authorized to receive cash payment for this ride.",
@@ -3629,7 +3635,7 @@ def driver_receive_cash_payment(request, ride_pk):
         return redirect("ride_details", pk=ride_pk)
 
     payment = Payment.objects.filter(
-        ride=ride,
+        ride_request=ride.ride_request,
         payment_method=Payment.Method.CASH,
         status=Payment.Status.PENDING,
     ).first()
@@ -3641,6 +3647,7 @@ def driver_receive_cash_payment(request, ride_pk):
         )
         return redirect("ride_details", pk=ride_pk)
 
+    payment.ride = ride
     payment.status = Payment.Status.SUCCESS
     payment.paid_at = timezone.now()
     payment.transaction_id = f"CASH-{payment.payment_number}"
@@ -3649,15 +3656,16 @@ def driver_receive_cash_payment(request, ride_pk):
     metadata.update({
         "payment_type": "cash",
         "received_by_driver": True,
-        "received_by_driver_id": ride.driver.user_id,
-        "received_by_admin": True,
-        "received_by_admin_id": request.user.id,
+        "received_by_driver_id": ride.driver.user_id if ride.driver else None,
+        "received_by_admin": request.user.is_staff,
+        "received_by_admin_id": request.user.id if request.user.is_staff else None,
         "received_at": timezone.now().isoformat(),
     })
     payment.metadata = metadata
 
     payment.save(
         update_fields=[
+            "ride",
             "status",
             "paid_at",
             "transaction_id",
