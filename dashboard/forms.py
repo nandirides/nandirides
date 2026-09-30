@@ -1,10 +1,10 @@
 from django import forms
-from .models import Vacancy
+from .models import Vacancy, BlogPost, Feedback
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from dashboard.models import Gallery, UserProfile, UserAddress
 from locations.models import City
-from .models import Feedback
+from django.utils import timezone
 
 class UserCreateForm(UserCreationForm):
     email = forms.EmailField(
@@ -363,3 +363,64 @@ class FeedbackForm(forms.ModelForm):
                 "placeholder": "Write your feedback, question or message...",
             }),
         }
+
+class BlogPostForm(forms.ModelForm):
+    class Meta:
+        model = BlogPost
+        fields = [
+            "title",
+            "category",
+            "excerpt",
+            "content",
+            "cover_image",
+            "author",
+            "published_at",
+            "is_active",
+            "is_featured",
+        ]
+        widgets = {
+            "title": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter blog title"
+            }),
+            "category": forms.Select(attrs={
+                "class": "form-select"
+            }),
+            "excerpt": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Short description of the blog"
+            }),
+            "content": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 8,
+                "placeholder": "Write your complete blog content"
+            }),
+            "cover_image": forms.ClearableFileInput(attrs={
+                "class": "form-control",
+                "accept": "image/jpeg,image/png,image/webp"
+            }),
+            "author": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Author name"
+            }),
+            "published_at": forms.DateTimeInput(attrs={
+                "class": "form-control",
+                "type": "datetime-local"
+            }),
+            "is_active": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+            "is_featured": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            self.initial["published_at"] = timezone.localtime(
+                timezone.now()
+            ).strftime("%Y-%m-%dT%H:%M")
+            self.initial["author"] = "NandiRide Team"
+            self.initial["is_active"] = True

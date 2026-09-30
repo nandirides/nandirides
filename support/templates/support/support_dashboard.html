@@ -4,6 +4,30 @@
 {% block content %}
 <div class="app-content">
     <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                    <div>
+                        <h3 class="mb-1">
+                            <i class="bi bi-headset me-2"></i>{{ page_title }}
+                        </h3>
+                        <p class="text-body-secondary mb-0">
+                            Manage customer support tickets, enquiries and support requests.
+                        </p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if perms.support.add_supportticket %}
+                        <a href="{% url 'ticket_add' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-circle me-1"></i>New Ticket
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'ticket_list' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-ticket-detailed me-1"></i>All Tickets
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row g-3 mb-4">
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card h-100 shadow-sm">
@@ -140,76 +164,78 @@
                             </a>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive"  style="max-height: 300px; overflow-y: auto;">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Ticket</th>
-                                        <th>Customer</th>
-                                        <th>Subject</th>
-                                        <th>Status</th>
-                                        <th>Priority</th>
-                                        <th class="text-end">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for ticket in recent_tickets %}
-                                    <tr>
-                                        <td>
-                                            <a href="{% url 'ticket_detail' ticket.pk %}" class="fw-semibold text-decoration-none">
-                                                {{ ticket.ticket_number }}
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <div class="fw-semibold">{{ ticket.user.get_full_name|default:ticket.user.username }}</div>
-                                            <small class="text-body-secondary">{{ ticket.user.username }}</small>
-                                        </td>
-                                        <td>
-                                            <span class="d-inline-block text-truncate" style="max-width:220px;">
-                                                {{ ticket.subject }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {% if ticket.status == "open" %}
+                    <div class="card-body p-0">
+                        <div style="max-height:330px;overflow-y:auto;">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th class="ps-3">Ticket</th>
+                                            <th>Customer</th>
+                                            <th>Subject</th>
+                                            <th>Status</th>
+                                            <th>Priority</th>
+                                            <th class="text-end pe-3">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ticket in recent_tickets %}
+                                        <tr>
+                                            <td class="ps-3">
+                                                <a href="{% url 'ticket_detail' ticket.pk %}" class="fw-semibold text-decoration-none">
+                                                    {{ ticket.ticket_number }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold">{{ ticket.user.get_full_name|default:ticket.user.username }}</div>
+                                                <small class="text-body-secondary">{{ ticket.user.username }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="d-inline-block text-truncate" style="max-width:220px;" title="{{ ticket.subject }}">
+                                                    {{ ticket.subject }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if ticket.status == "open" %}
                                                 <span class="badge text-bg-warning">Open</span>
-                                            {% elif ticket.status == "in_progress" %}
+                                                {% elif ticket.status == "in_progress" %}
                                                 <span class="badge text-bg-info">In Progress</span>
-                                            {% elif ticket.status == "resolved" %}
+                                                {% elif ticket.status == "resolved" %}
                                                 <span class="badge text-bg-success">Resolved</span>
-                                            {% else %}
+                                                {% else %}
                                                 <span class="badge text-bg-secondary">Closed</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if ticket.priority == "urgent" %}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if ticket.priority == "urgent" %}
                                                 <span class="badge text-bg-danger">Urgent</span>
-                                            {% elif ticket.priority == "high" %}
+                                                {% elif ticket.priority == "high" %}
                                                 <span class="badge text-bg-warning">High</span>
-                                            {% elif ticket.priority == "medium" %}
+                                                {% elif ticket.priority == "medium" %}
                                                 <span class="badge text-bg-primary">Medium</span>
-                                            {% else %}
+                                                {% else %}
                                                 <span class="badge text-bg-secondary">Low</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-end">
-                                            <a href="{% url 'ticket_detail' ticket.pk %}" class="btn btn-sm btn-outline-primary" title="View Ticket">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="6" class="text-center py-5">
-                                            <div class="text-body-secondary">
-                                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-                                                <div class="fw-semibold">No support tickets found</div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end pe-3">
+                                                <a href="{% url 'ticket_detail' ticket.pk %}" class="btn btn-sm btn-outline-primary" title="View Ticket">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="6" class="text-center py-5">
+                                                <div class="text-body-secondary">
+                                                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                                    <div class="fw-semibold">No support tickets found</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -229,27 +255,33 @@
                             </a>
                         </div>
                     </div>
-                    <div class="card-body">
-                        {% for category in categories %}
-                        <div class="d-flex align-items-center justify-content-between py-3 {% if not forloop.last %}border-bottom{% endif %}">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-3 bg-primary-subtle text-primary p-2">
-                                    <i class="bi bi-tag"></i>
+                    <div class="card-body p-0">
+                        <div style="max-height:330px;overflow-y:auto;">
+                            <div class="px-3">
+                                {% for category in categories %}
+                                <div class="d-flex align-items-center justify-content-between py-3 {% if not forloop.last %}border-bottom{% endif %}">
+                                    <div class="d-flex align-items-center gap-3 min-width-0">
+                                        <div class="rounded-3 bg-primary-subtle text-primary p-2 flex-shrink-0">
+                                            <i class="bi bi-tag"></i>
+                                        </div>
+                                        <div class="min-width-0">
+                                            <div class="fw-semibold text-truncate">{{ category.name }}</div>
+                                            <small class="text-body-secondary d-block text-truncate">
+                                                {{ category.description|default:"Support category" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <span class="badge rounded-pill text-bg-primary ms-2 flex-shrink-0">{{ category.ticket_count }}</span>
                                 </div>
-                                <div>
-                                    <div class="fw-semibold">{{ category.name }}</div>
-                                    <small class="text-body-secondary">{{ category.description|default:"Support category" }}</small>
+                                {% empty %}
+                                <div class="text-center py-5 text-body-secondary">
+                                    <i class="bi bi-tags fs-1 d-block mb-3"></i>
+                                    <div class="fw-semibold">No categories found</div>
+                                    <small>Create your first support category.</small>
                                 </div>
+                                {% endfor %}
                             </div>
-                            <span class="badge rounded-pill text-bg-primary">{{ category.ticket_count }}</span>
                         </div>
-                        {% empty %}
-                        <div class="text-center py-5 text-body-secondary">
-                            <i class="bi bi-tags fs-1 d-block mb-3"></i>
-                            <div class="fw-semibold">No categories found</div>
-                            <small>Create your first support category.</small>
-                        </div>
-                        {% endfor %}
                     </div>
                 </div>
             </div>

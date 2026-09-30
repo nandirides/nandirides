@@ -378,6 +378,7 @@ def payment_list(request):
     )
 
     context = {
+        "page_title": "Payments",
         "payments": payments,
         "breadcrumb_items": [
             {

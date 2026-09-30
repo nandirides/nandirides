@@ -24,27 +24,27 @@ urlpatterns = [
     path(
         "about/",
         views.about,
-        name="about1",
+        name="about",
     ),
     path(
         "blog/",
         views.blog,
-        name="blog1",
+        name="blog",
     ),
     path(
         "career/",
         views.career,
-        name="career1",
+        name="career",
     ),
     path(
         "services/",
         views.services,
-        name="services1",
+        name="services",
     ),
     path(
         "contact/",
         views.contact,
-        name="contact1",
+        name="contact",
     ),
     path(
         "groups/",
@@ -61,6 +61,7 @@ urlpatterns = [
         views.user_profile,
         name="user_profile",
     ),
+    path("contact/feedback/", views.feedback_list, name="feedback_list"),
     path("career/vacancies/", views.vacancy_list, name="vacancy_list"),
     path("career/vacancies/add/", views.vacancy_create, name="vacancy_add"),
     path("career/vacancies/<int:pk>/edit/", views.vacancy_edit, name="vacancy_edit"),
@@ -265,6 +266,13 @@ urlpatterns = [
         "gallery/",
         views.ride_gallery,
         name="ride_gallery",
+    ),
+    path("gallery/upload/", views.gallery_upload, name="gallery_upload"),
+    path("blog/create/", views.blog_create, name="blog_create"),
+    path(
+        "blog/<int:pk>/view/",
+        views.blog_view_count,
+        name="blog_view_count",
     ),
     path(
         "gallery/<int:pk>/delete/",

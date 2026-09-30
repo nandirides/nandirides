@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% block title %}{% if blog %}Edit Blog{% else %}Create Blog{% endif %} | NandiRide{% endblock %}
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
+                        <i class="bi bi-pencil-square fs-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-1 fw-bold">{% if blog %}Edit Blog{% else %}Create New Blog{% endif %}</h3>
+                        <p class="text-body-secondary mb-0">Create and publish informative content for NandiRide customers.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'blog_list' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Blogs
+                </a>
+            </div>
+        </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger border-0 shadow-sm">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data" id="blogForm">
+            {% csrf_token %}
+            <div class="row g-4">
+                <div class="col-12 col-xl-8">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-body border-bottom py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-primary-subtle text-primary rounded-2 p-2">
+                                    <i class="bi bi-file-text"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-bold">Blog Information</h5>
+                                    <small class="text-body-secondary">Enter the main content and details of your blog.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <label for="id_title" class="form-label fw-semibold">
+                                    Blog Title <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-body">
+                                        <i class="bi bi-type text-primary"></i>
+                                    </span>
+                                    <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default:'' }}" placeholder="Enter blog title..." maxlength="250" required>
+                                </div>
+                                {% if form.title.errors %}
+                                    <div class="text-danger small mt-1">{{ form.title.errors|striptags }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>Write a clear and attractive title for your blog.
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label for="id_category" class="form-label fw-semibold">
+                                        Category <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="category" id="id_category" class="form-select" required>
+                                        {% for value,label in form.fields.category.choices %}
+                                            <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if form.category.errors %}
+                                        <div class="text-danger small mt-1">{{ form.category.errors|striptags }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_author" class="form-label fw-semibold">Author</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-body">
+                                            <i class="bi bi-person text-primary"></i>
+                                        </span>
+                                        <input type="text" name="author" id="id_author" class="form-control" value="{{ form.author.value|default:'NandiRide Team' }}" maxlength="150" placeholder="Author name">
+                                    </div>
+                                    {% if form.author.errors %}
+                                        <div class="text-danger small mt-1">{{ form.author.errors|striptags }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="id_excerpt" class="form-label fw-semibold">Short Description / Excerpt</label>
+                                <textarea name="excerpt" id="id_excerpt" class="form-control" rows="4" placeholder="Write a short summary of the blog...">{{ form.excerpt.value|default:'' }}</textarea>
+                                {% if form.excerpt.errors %}
+                                    <div class="text-danger small mt-1">{{ form.excerpt.errors|striptags }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-card-text me-1"></i>This short description can be displayed on the blog listing page.
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_content" class="form-label fw-semibold">
+                                    Blog Content <span class="text-danger">*</span>
+                                </label>
+                                <textarea name="content" id="id_content" class="form-control" rows="14" placeholder="Write your complete blog content here..." required>{{ form.content.value|default:'' }}</textarea>
+                                {% if form.content.errors %}
+                                    <div class="text-danger small mt-1">{{ form.content.errors|striptags }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-file-earmark-text me-1"></i>Write the complete article content.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-xl-4">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-body border-bottom py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-success-subtle text-success rounded-2 p-2">
+                                    <i class="bi bi-image"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-bold">Cover Image</h5>
+                                    <small class="text-body-secondary">Upload blog featured image.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="rounded-4 border bg-body-tertiary overflow-hidden mb-3" style="min-height:220px;">
+                                {% if blog and blog.cover_image %}
+                                    <img src="{{ blog.cover_image.url }}" id="imagePreview" class="w-100 h-100 d-block" style="min-height:220px;max-height:280px;object-fit:cover;" alt="Blog Cover">
+                                    <div id="imagePlaceholder" class="d-none flex-column align-items-center justify-content-center text-body-secondary p-4" style="min-height:220px;">
+                                        <i class="bi bi-image fs-1 mb-2"></i>
+                                        <span>Image Preview</span>
+                                    </div>
+                                {% else %}
+                                    <div id="imagePlaceholder" class="d-flex flex-column align-items-center justify-content-center text-body-secondary p-4" style="min-height:220px;">
+                                        <i class="bi bi-cloud-arrow-up fs-1 mb-2"></i>
+                                        <span class="fw-semibold">Image Preview</span>
+                                        <small class="mt-1">Select an image to preview</small>
+                                    </div>
+                                    <img src="" id="imagePreview" class="w-100 d-none" style="min-height:220px;max-height:280px;object-fit:cover;" alt="Blog Cover Preview">
+                                {% endif %}
+                            </div>
+                            <label for="id_cover_image" class="form-label fw-semibold">Select Image</label>
+                            <input type="file" name="cover_image" id="id_cover_image" class="form-control" accept="image/*">
+                            {% if form.cover_image.errors %}
+                                <div class="text-danger small mt-1">{{ form.cover_image.errors|striptags }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>Recommended: JPG, JPEG, PNG or WebP.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-body border-bottom py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-warning-subtle text-warning rounded-2 p-2">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-bold">Publishing</h5>
+                                    <small class="text-body-secondary">Control blog visibility and publishing.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="id_published_at" class="form-label fw-semibold">Published Date & Time</label>
+                                <input type="datetime-local" name="published_at" id="id_published_at" class="form-control" value="{% if form.published_at.value %}{{ form.published_at.value|date:'Y-m-d\\TH:i' }}{% endif %}">
+                                {% if form.published_at.errors %}
+                                    <div class="text-danger small mt-1">{{ form.published_at.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="border rounded-3 p-3 mb-3 bg-body-tertiary">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active" {% if form.is_active.value %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="id_is_active">Active / Published</label>
+                                </div>
+                                <small class="text-body-secondary d-block mt-1">Active blogs can be displayed on the website.</small>
+                            </div>
+                            <div class="border rounded-3 p-3 bg-body-tertiary">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="is_featured" id="id_is_featured" {% if form.is_featured.value %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="id_is_featured">Featured Blog</label>
+                                </div>
+                                <small class="text-body-secondary d-block mt-1">Featured blogs can be highlighted on the website.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:42px;height:42px;">
+                                    <i class="bi bi-lightbulb"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Publishing Tip</h6>
+                                    <p class="small text-body-secondary mb-0">Use a clear title, attractive cover image and useful content to create a better customer experience.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                        <div>
+                            <div class="fw-semibold">
+                                <i class="bi bi-check2-circle text-success me-1"></i>
+                                {% if blog %}Update Blog{% else %}Ready to Publish{% endif %}
+                            </div>
+                            <small class="text-body-secondary">Review all information before saving the blog.</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'blog_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-cloud-arrow-up me-1"></i>
+                                {% if blog %}Update Blog{% else %}Upload Blog{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+<script>
+(function(){
+    const imageInput=document.getElementById("id_cover_image");
+    const preview=document.getElementById("imagePreview");
+    const placeholder=document.getElementById("imagePlaceholder");
+    if(imageInput){
+        imageInput.addEventListener("change",function(){
+            const file=this.files&&this.files[0];
+            if(!file)return;
+            if(!file.type.startsWith("image/")){
+                this.value="";
+                return;
+            }
+            const reader=new FileReader();
+            reader.onload=function(event){
+                preview.src=event.target.result;
+                preview.classList.remove("d-none");
+                if(placeholder){
+                    placeholder.classList.add("d-none");
+                    placeholder.classList.remove("d-flex");
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+})();
+</script>
+{% endblock %}

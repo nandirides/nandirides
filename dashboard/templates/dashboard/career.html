@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Careers at NandiRide{% endblock %}
 {% block content %}
-<div class="container-fluid py-3">
+<div class="container-fluid">
     <div class="card border-0 shadow-sm overflow-hidden mb-4">
         <div class="card-body p-4 p-lg-5">
             <div class="row align-items-center g-4">
@@ -21,7 +21,7 @@
                         <a href="#open-positions" class="btn btn-outline-primary px-4">
                             <i class="bi bi-search me-1"></i>Explore Opportunities
                         </a>
-                        <a href="mailto:nandirides@gmail.com?subject=Career%20Inquiry%20-%20NandiRide" class="btn btn-outline-secondary px-4">
+                        <a href="mailto:nandirides@gmail.com?subject=Career%20Inquiry%20-%20NandiRide" class="btn btn-outline-primary px-4">
                             <i class="bi bi-envelope me-1"></i>Contact Careers
                         </a>
                         <a href="{% url 'vacancy_list' %}" class="btn btn-outline-primary px-4">
@@ -492,10 +492,10 @@
                 solutions, feel free to introduce yourself and share your resume with our team.
             </p>
             <div class="d-flex flex-wrap justify-content-center gap-2">
-                <a href="mailto:nandirides@gmail.com?subject=Career%20Opportunity%20-%20NandiRide" class="btn btn-primary px-4">
+                <a href="mailto:nandirides@gmail.com?subject=Career%20Opportunity%20-%20NandiRide" class="btn btn-outline-primary px-4">
                     <i class="bi bi-envelope me-1"></i>Contact Careers
                 </a>
-                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary px-4">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary px-4">
                     <i class="bi bi-speedometer2 me-1"></i>Dashboard
                 </a>
             </div>

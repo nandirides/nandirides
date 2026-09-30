@@ -41,7 +41,7 @@
         </div>
         <div class="col-12 col-xl-5 mt-3 mt-xl-0">
             <div class="d-flex justify-content-xl-end align-items-center flex-wrap gap-2">
-                <a href="{% url 'ride_dashboard' %}" class="btn btn-outline-primary">
+                <a href="{% url 'ride_list' %}" class="btn btn-outline-primary">
                     <i class="fas fa-arrow-left me-1"></i>Back
                 </a>
                 <a href="{% url 'ride_edit' ride.pk %}" class="btn btn-outline-primary">
@@ -600,38 +600,62 @@
                     <h5 class="card-title mb-1"><i class="fas fa-clipboard-check me-2"></i>Ride Request</h5>
                 </div>
                 <div class="card-body">
-                    {% if ride_request %}
-                        <div class="mb-3">
-                            <small class="text-body-secondary d-block">Request Number</small>
-                            <a href="{% url 'ride_request_details' ride_request.pk %}" class="fw-semibold text-body text-decoration-none">{{ ride_request.request_number }}</a>
-                        </div>
-                        <div class="mb-3">
-                            <small class="text-body-secondary d-block">Passenger</small>
-                            <div class="fw-semibold mt-1">{{ ride.passenger.get_full_name|default:ride.passenger }}</div>
-                        </div>
-                        <div class="mb-3">
-                            <small class="text-body-secondary d-block">Request Status</small>
-                            <div class="mt-1">
-                                {% if ride_request.status == "completed" %}
-                                    <span class="badge bg-success">Completed</span>
-                                {% elif ride_request.status == "cancelled" %}
-                                    <span class="badge bg-danger">Cancelled</span>
-                                {% elif ride_request.status == "accepted" %}
-                                    <span class="badge bg-primary">Accepted</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">{{ ride_request.get_status_display }}</span>
-                                {% endif %}
+                        {% if ride_request %}
+                            <div class="mb-3">
+                                <small class="text-body-secondary d-block">Request Number</small>
+                                <a href="{% url 'ride_request_details' ride_request.pk %}" class="fw-semibold text-body text-decoration-none">
+                                    {{ ride_request.request_number }}
+                                </a>
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <small class="text-body-secondary d-block">Estimated Fare</small>
-                            <div class="fw-bold fs-5 mt-1">{% if ride_request.estimated_fare %}₹{{ ride_request.estimated_fare }}{% else %}—{% endif %}</div>
-                        </div>
-                        <a href="{% url 'ride_request_details' ride_request.pk %}" class="btn btn-outline-primary btn-sm w-100"><i class="fas fa-eye me-1"></i>View Ride Request</a>
-                    {% else %}
-                        <div class="text-center text-body-secondary py-4"><i class="fas fa-clipboard-question fa-2x d-block mb-2"></i>No ride request linked.</div>
-                    {% endif %}
-                </div>
+
+                            <div class="mb-3">
+                                <small class="text-body-secondary d-block">Passenger</small>
+                                <div class="fw-semibold mt-1">
+                                    {{ ride.passenger.get_full_name|default:ride.passenger }}
+                                </div>
+                                    <a href="tel:{{ ride.passenger.phone}}"
+                                    class="btn btn-success btn-sm w-100 mt-2">
+                                        <i class="fas fa-phone me-1"></i>Call Passenger
+                                    </a>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-body-secondary d-block">Request Status</small>
+                                <div class="mt-1">
+                                    {% if ride_request.status == "completed" %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif ride_request.status == "cancelled" %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% elif ride_request.status == "accepted" %}
+                                        <span class="badge bg-primary">Accepted</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ ride_request.get_status_display }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-body-secondary d-block">Estimated Fare</small>
+                                <div class="fw-bold fs-5 mt-1">
+                                    {% if ride_request.estimated_fare %}
+                                        ₹{{ ride_request.estimated_fare }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <a href="{% url 'ride_request_details' ride_request.pk %}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-eye me-1"></i>View Ride Request
+                            </a>
+
+                        {% else %}
+                            <div class="text-center text-body-secondary py-4">
+                                <i class="fas fa-clipboard-question fa-2x d-block mb-2"></i>
+                                No ride request linked.
+                            </div>
+                        {% endif %}
+                    </div>
             </div>
             <div class="card card-outline card-info shadow-sm mt-3">
                 <div class="card-header"><h5 class="card-title mb-0"><i class="fas fa-location-crosshairs me-2"></i>Latest Tracking</h5></div>
