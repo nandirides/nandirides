@@ -76,112 +76,6 @@ GEOCODING_TIMEOUT = 8
 ROUTING_TIMEOUT = 8
 
 
-
-# def _validate_coupon(coupon_code, fare, user):
-#     now = timezone.now()
-
-#     try:
-#         coupon = Coupon.objects.get(
-#             code__iexact=coupon_code,
-#             is_active=True,
-#         )
-#     except Coupon.DoesNotExist:
-#         return (
-#             None,
-#             Decimal("0.00"),
-#             "Invalid or inactive coupon code.",
-#         )
-
-#     if now < coupon.valid_from:
-#         return (
-#             None,
-#             Decimal("0.00"),
-#             "This coupon is not active yet.",
-#         )
-
-#     if now > coupon.valid_to:
-#         return (
-#             None,
-#             Decimal("0.00"),
-#             "This coupon has expired.",
-#         )
-
-#     if fare < coupon.minimum_fare:
-#         return (
-#             None,
-#             Decimal("0.00"),
-#             f"Minimum fare of ₹{coupon.minimum_fare:.2f} is required for this coupon.",
-#         )
-
-#     total_usage = CouponUsage.objects.filter(
-#         coupon=coupon,
-#     ).count()
-
-#     if (
-#         coupon.usage_limit is not None
-#         and total_usage >= coupon.usage_limit
-#     ):
-#         return (
-#             None,
-#             Decimal("0.00"),
-#             "This coupon usage limit has been reached.",
-#         )
-
-#     user_usage = CouponUsage.objects.filter(
-#         coupon=coupon,
-#         user=user,
-#     ).count()
-
-#     if (
-#         coupon.per_user_limit is not None
-#         and user_usage >= coupon.per_user_limit
-#     ):
-#         return (
-#             None,
-#             Decimal("0.00"),
-#             "You have already used this coupon the maximum allowed times.",
-#         )
-
-#     if coupon.discount_type == Coupon.DiscountType.PERCENTAGE:
-#         discount = (
-#             fare
-#             * coupon.discount_value
-#             / Decimal("100")
-#         ).quantize(
-#             Decimal("0.01")
-#         )
-
-#     elif coupon.discount_type == Coupon.DiscountType.FIXED:
-#         discount = coupon.discount_value.quantize(
-#             Decimal("0.01")
-#         )
-
-#     else:
-#         return (
-#             None,
-#             Decimal("0.00"),
-#             "Invalid coupon discount type.",
-#         )
-
-#     if (
-#         coupon.maximum_discount is not None
-#         and discount > coupon.maximum_discount
-#     ):
-#         discount = coupon.maximum_discount
-
-#     if discount > fare:
-#         discount = fare
-
-#     discount = discount.quantize(
-#         Decimal("0.01")
-#     )
-
-#     return (
-#         coupon,
-#         discount,
-#         f"Coupon {coupon.code} applied successfully.",
-#     )
-
 @login_required
 @require_POST
 def apply_coupon(request):
@@ -3715,3 +3609,65 @@ def ride_tracking_live_update(request, ride_pk):
             "recorded_at": tracking.recorded_at.isoformat(),
         },
     })
+
+@login_required
+@transaction.atomic
+def driver_receive_cash_payment(request, ride_pk):
+    if request.method != "POST":
+        return redirect("ride_details", pk=ride_pk)
+
+    ride = get_object_or_404(
+        Ride.objects.select_related("driver", "driver__user"),
+        pk=ride_pk,
+    )
+
+    if not request.user.is_staff:
+        messages.error(
+            request,
+            "You are not authorized to receive cash payment for this ride.",
+        )
+        return redirect("ride_details", pk=ride_pk)
+
+    payment = Payment.objects.filter(
+        ride=ride,
+        payment_method=Payment.Method.CASH,
+        status=Payment.Status.PENDING,
+    ).first()
+
+    if not payment:
+        messages.error(
+            request,
+            "No pending cash payment found for this ride.",
+        )
+        return redirect("ride_details", pk=ride_pk)
+
+    payment.status = Payment.Status.SUCCESS
+    payment.paid_at = timezone.now()
+    payment.transaction_id = f"CASH-{payment.payment_number}"
+
+    metadata = payment.metadata or {}
+    metadata.update({
+        "payment_type": "cash",
+        "received_by_driver": True,
+        "received_by_driver_id": ride.driver.user_id,
+        "received_by_admin": True,
+        "received_by_admin_id": request.user.id,
+        "received_at": timezone.now().isoformat(),
+    })
+    payment.metadata = metadata
+
+    payment.save(
+        update_fields=[
+            "status",
+            "paid_at",
+            "transaction_id",
+            "metadata",
+        ]
+    )
+
+    messages.success(
+        request,
+        f"Cash payment of ₹{payment.amount} received successfully.",
+    )
+
+    return redirect("ride_details", pk=ride_pk)

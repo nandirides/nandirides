@@ -819,7 +819,7 @@ def dashboard(request):
         .order_by("-count")
     )
     context = {
-        #"page_title": "Admin Dashboard",
+        "page_title": "Admin Dashboard",
         "total_users": total_users,
         "active_users": active_users,
         "total_rides": total_rides,

@@ -184,7 +184,7 @@
                             <td>
                                 {% if refund.status|lower == "processed" or refund.status|lower == "completed" or refund.status|lower == "success" %}
                                 <span class="badge rounded-pill bg-success-subtle text-success px-2 py-2 text-wrap">
-                                    <i class="fas fa-check-circle me-1"></i>Completed
+                                    <i class="fas fa-check-circle me-1"></i>Refunded
                                 </span>
                                 {% elif refund.status|lower == "pending" %}
                                 <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis px-2 py-2 text-wrap">
