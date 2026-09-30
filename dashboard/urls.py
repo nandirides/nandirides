@@ -22,6 +22,31 @@ urlpatterns = [
         name="dashboard",
     ),
     path(
+        "about/",
+        views.about,
+        name="about1",
+    ),
+    path(
+        "blog/",
+        views.blog,
+        name="blog1",
+    ),
+    path(
+        "career/",
+        views.career,
+        name="career1",
+    ),
+    path(
+        "services/",
+        views.services,
+        name="services1",
+    ),
+    path(
+        "contact/",
+        views.contact,
+        name="contact1",
+    ),
+    path(
         "groups/",
         views.group_list,
         name="group_list",
@@ -36,6 +61,12 @@ urlpatterns = [
         views.user_profile,
         name="user_profile",
     ),
+    path("career/vacancies/", views.vacancy_list, name="vacancy_list"),
+    path("career/vacancies/add/", views.vacancy_create, name="vacancy_add"),
+    path("career/vacancies/<int:pk>/edit/", views.vacancy_edit, name="vacancy_edit"),
+    path("career/vacancies/<int:pk>/delete/", views.vacancy_delete, name="vacancy_delete"),
+    path("career/vacancies/<int:pk>/toggle/", views.vacancy_toggle, name="vacancy_toggle"),
+    path("career/vacancies/<int:pk>/status/", views.vacancy_status_update, name="vacancy_status_update"),
 
     # ============================================================
     # RIDE DASHBOARD

@@ -1,9 +1,10 @@
 from django import forms
+from .models import Vacancy
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from dashboard.models import Gallery, UserProfile, UserAddress
 from locations.models import City
-
+from .models import Feedback
 
 class UserCreateForm(UserCreationForm):
     email = forms.EmailField(
@@ -288,4 +289,77 @@ class GalleryForm(forms.ModelForm):
         help_texts = {
             "profile_image": "Upload one gallery image",
             "category": "Select image category",
+        }
+
+class VacancyForm(forms.ModelForm):
+    class Meta:
+        model = Vacancy
+        fields = [
+            "title",
+            "department",
+            "job_type",
+            "location",
+            "experience",
+            "salary",
+            "skills",
+            "description",
+            "responsibilities",
+            "requirements",
+            "openings",
+            "application_email",
+            "last_date",
+            "status",
+            "is_active",
+            "is_featured",
+        ]
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Django Backend Developer"}),
+            "department": forms.TextInput(attrs={"class": "form-control", "placeholder": "Technology"}),
+            "job_type": forms.Select(attrs={"class": "form-select"}),
+            "location": forms.TextInput(attrs={"class": "form-control", "placeholder": "Haridwar, Uttarakhand / Remote"}),
+            "experience": forms.TextInput(attrs={"class": "form-control", "placeholder": "1-3 Years"}),
+            "salary": forms.TextInput(attrs={"class": "form-control", "placeholder": "₹4 LPA - ₹7 LPA"}),
+            "skills": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Django, Python, REST API, PostgreSQL"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 5, "placeholder": "Job description"}),
+            "responsibilities": forms.Textarea(attrs={"class": "form-control", "rows": 6, "placeholder": "One responsibility per line"}),
+            "requirements": forms.Textarea(attrs={"class": "form-control", "rows": 6, "placeholder": "One requirement per line"}),
+            "openings": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+            "application_email": forms.EmailInput(attrs={"class": "form-control"}),
+            "last_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "status": forms.Select(attrs={"class": "form-select"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "is_featured": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = [
+            "name",
+            "email",
+            "mobile_number",
+            "subject",
+            "message",
+        ]
+        widgets = {
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter your name",
+            }),
+            "email": forms.EmailInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter your email address",
+            }),
+            "mobile_number": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter mobile number",
+            }),
+            "subject": forms.Select(attrs={
+                "class": "form-select",
+            }),
+            "message": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 6,
+                "placeholder": "Write your feedback, question or message...",
+            }),
         }

@@ -3,6 +3,7 @@ from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 from functools import lru_cache
 import re
+from .models import BlogPost
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
@@ -16,15 +17,18 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from .forms import GalleryForm, UserCreateForm
+from .forms import GalleryForm, UserCreateForm, VacancyForm, FeedbackForm
 from .models import (
     AccountNotificationPreference,
     AccountPaymentDetail,
+    BlogPost,
+    Feedback,
     Gallery,
     GroupStatus,
     UserAddress,
     UserProfile,
     WalletTransaction,
+    Vacancy,
 )
 from drivers.models import Driver
 from locations.models import City, Country, Location, State
@@ -875,6 +879,164 @@ def dashboard(request):
     )
 
 @login_required
+def about(request):
+    context = {
+        "page_title": "About",
+        "breadcrumb_items": [
+            {
+                "title": "About",
+                "url": "about",
+            },
+        ],
+    }
+    return render(
+        request,
+        "dashboard/about.html",
+        context,
+    )
+
+@login_required
+def blog(request):
+    posts = BlogPost.objects.filter(is_active=True).order_by("-is_featured", "-published_at", "-created_at")
+    search = request.GET.get("q", "").strip()
+    category = request.GET.get("category", "").strip()
+    if search:
+        posts = posts.filter(
+            Q(title__icontains=search) |
+            Q(excerpt__icontains=search) |
+            Q(content__icontains=search) |
+            Q(category__icontains=search)
+        )
+    if category:
+        posts = posts.filter(category=category)
+    categories = BlogPost.objects.filter(
+        is_active=True
+    ).values_list(
+        "category",
+        flat=True
+    ).distinct().order_by("category")
+    featured_posts = posts.filter(is_featured=True)
+    recent_posts = posts.order_by("-published_at", "-created_at")
+    context = {
+        "page_title": "Blog",
+        "posts": posts,
+        "featured_posts": featured_posts,
+        "recent_posts": recent_posts,
+        "categories": categories,
+        "search": search,
+        "selected_category": category,
+        "total_posts": BlogPost.objects.count(),
+        "active_posts": BlogPost.objects.filter(is_active=True).count(),
+        "featured_count": BlogPost.objects.filter(
+            is_active=True,
+            is_featured=True
+        ).count(),
+        "total_rides": Ride.objects.count(),
+        "total_users": User.objects.count(),
+        "total_drivers": Driver.objects.count(),
+        "breadcrumb_items": [
+            {
+                "title": "Blog",
+                "url": "blog",
+            },
+        ],
+    }
+    return render(
+        request,
+        "dashboard/blog.html",
+        context,
+    )
+
+@login_required
+def career(request):
+    vacancies = Vacancy.objects.filter(is_active=True).order_by("-is_featured", "-created_at")
+    open_vacancies = vacancies.filter(status="open")
+    context = {
+        "page_title": "Careers",
+        "total_users": User.objects.count(),
+        "total_drivers": Driver.objects.count(),
+        "total_rides": Ride.objects.count(),
+        "total_locations": Location.objects.count(),
+        "vacancies": vacancies,
+        "open_vacancies": open_vacancies.count(),
+        "active_vacancies": vacancies.count(),
+        "featured_vacancies": vacancies.filter(is_featured=True).count(),
+        "departments": vacancies.values_list("department", flat=True).distinct().order_by("department"),
+        "job_types": vacancies.values_list("job_type", flat=True).distinct().order_by("job_type"),
+        "breadcrumb_items": [
+            {
+                "title": "Career",
+                "url": "career",
+            },
+        ],
+    }
+    return render(
+        request,
+        "dashboard/career.html",
+        context,
+    )
+
+@login_required
+def services(request):
+    context = {
+        "page_title": "NandiRide Services",
+        "total_rides": Ride.objects.count(),
+        "total_drivers": Driver.objects.count(),
+        "total_vehicles": Vehicle.objects.count(),
+        "total_vehicle_types": VehicleType.objects.count(),
+        "breadcrumb_items": [
+            {
+                "title": "Services",
+                "url": "services",
+            },
+        ],
+    }
+    return render(
+        request,
+        "dashboard/services.html",
+        context,
+    )
+
+@login_required
+def contact(request):
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save()
+            messages.success(
+                request,
+                f"Thank you, {feedback.name}. Your message has been submitted successfully."
+            )
+            return redirect("contact")
+    else:
+        initial = {}
+        if request.user.is_authenticated:
+            initial["name"] = request.user.get_full_name() or request.user.username
+            initial["email"] = request.user.email
+        form = FeedbackForm(initial=initial)
+    context = {
+        "page_title": "Contact NandiRide",
+        "contact_address": "Haridwar, Uttarakhand, India",
+        "contact_email": "nandirides@gmail.com",
+        "contact_phones": ["9456305604", "8809930846"],
+        "feedback_form": form,
+        "total_feedback": Feedback.objects.count(),
+        "new_feedback": Feedback.objects.filter(status="new").count(),
+        "resolved_feedback": Feedback.objects.filter(status="resolved").count(),
+        "breadcrumb_items": [
+            {
+                "title": "Contact",
+                "url": "contact",
+            },
+        ],
+    }
+    return render(
+        request,
+        "dashboard/contact.html",
+        context,
+    )
+
+@login_required
 @transaction.atomic
 def user_setting(request):
     user = request.user
@@ -1624,3 +1786,123 @@ def group_list(request):
         "dashboard/groups.html",
         context
     )
+
+@login_required
+def vacancy_list(request):
+    vacancies = Vacancy.objects.all()
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    department = request.GET.get("department", "").strip()
+    if search:
+        vacancies = vacancies.filter(
+            Q(title__icontains=search) |
+            Q(department__icontains=search) |
+            Q(location__icontains=search)
+        )
+    if status:
+        vacancies = vacancies.filter(status=status)
+    if department:
+        vacancies = vacancies.filter(department=department)
+    departments = Vacancy.objects.values_list("department", flat=True).distinct().order_by("department")
+    context = {
+        "page_title": "Manage Vacancies",
+        "vacancies": vacancies,
+        "departments": departments,
+        "search": search,
+        "selected_status": status,
+        "selected_department": department,
+        "total_vacancies": Vacancy.objects.count(),
+        "active_vacancies": Vacancy.objects.filter(is_active=True).count(),
+        "open_vacancies": Vacancy.objects.filter(status="open", is_active=True).count(),
+        "featured_vacancies": Vacancy.objects.filter(is_featured=True, is_active=True).count(),
+        "breadcrumb_items": [
+            {"title": "Career", "url": "career"},
+            {"title": "Manage Vacancies", "url": "vacancy_list"},
+        ],
+    }
+    return render(request, "dashboard/vacancy_list.html", context)
+
+@login_required
+def vacancy_create(request):
+    if request.method == "POST":
+        form = VacancyForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Vacancy added successfully.")
+            return redirect("vacancy_list")
+    else:
+        form = VacancyForm()
+    context = {
+        "page_title": "Add Vacancy",
+        "form": form,
+        "is_edit": False,
+        "breadcrumb_items": [
+            {"title": "Career", "url": "career"},
+            {"title": "Manage Vacancies", "url": "vacancy_list"},
+            {"title": "Add Vacancy", "url": "vacancy_add"},
+        ],
+    }
+    return render(request, "dashboard/vacancy_form.html", context)
+
+@login_required
+def vacancy_edit(request, pk):
+    vacancy = get_object_or_404(Vacancy, pk=pk)
+    if request.method == "POST":
+        form = VacancyForm(request.POST, instance=vacancy)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Vacancy updated successfully.")
+            return redirect("vacancy_list")
+    else:
+        form = VacancyForm(instance=vacancy)
+    context = {
+        "page_title": "Edit Vacancy",
+        "form": form,
+        "vacancy": vacancy,
+        "is_edit": True,
+        "breadcrumb_items": [
+            {"title": "Career", "url": "career"},
+            {"title": "Manage Vacancies", "url": "vacancy_list"},
+            {"title": "Edit Vacancy", "url": "vacancy_edit"},
+        ],
+    }
+    return render(request, "dashboard/vacancy_form.html", context)
+
+@login_required
+def vacancy_delete(request, pk):
+    vacancy = get_object_or_404(Vacancy, pk=pk)
+    if request.method == "POST":
+        title = vacancy.title
+        vacancy.delete()
+        messages.success(request, f"{title} deleted successfully.")
+    return redirect("vacancy_list")
+
+@login_required
+def vacancy_toggle(request, pk):
+    vacancy = get_object_or_404(Vacancy, pk=pk)
+    if request.method == "POST":
+        vacancy.is_active = not vacancy.is_active
+        vacancy.save(update_fields=["is_active", "updated_at"])
+        return _json_success(
+            "Vacancy status updated.",
+            is_active=vacancy.is_active,
+            status_text="Active" if vacancy.is_active else "Inactive",
+        )
+    return _json_error("Invalid request method.", 405)
+
+@login_required
+def vacancy_status_update(request, pk):
+    vacancy = get_object_or_404(Vacancy, pk=pk)
+    if request.method == "POST":
+        status = request.POST.get("status", "").strip()
+        valid_statuses = dict(Vacancy.STATUS_CHOICES)
+        if status not in valid_statuses:
+            return _json_error("Invalid vacancy status.")
+        vacancy.status = status
+        vacancy.save(update_fields=["status", "updated_at"])
+        return _json_success(
+            "Vacancy status updated.",
+            status=status,
+            status_text=valid_statuses[status],
+        )
+    return _json_error("Invalid request method.", 405)

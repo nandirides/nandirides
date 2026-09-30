@@ -1,0 +1,545 @@
+{% extends "base.html" %}
+{% block title %}Careers at NandiRide{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="card border-0 shadow-sm overflow-hidden mb-4">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge text-bg-primary rounded-pill px-3 py-2">CAREERS</span>
+                        <span class="badge text-bg-success rounded-pill px-3 py-2">
+                            <i class="bi bi-circle-fill me-1" style="font-size:7px;"></i>JOIN OUR TEAM
+                        </span>
+                    </div>
+                    <h1 class="fw-bold mb-3">Build the Future of Mobility with NandiRide</h1>
+                    <p class="fs-5 text-body-secondary mb-4">
+                        Join us in building technology that makes transportation safer, smarter,
+                        faster and more convenient for riders, drivers and communities.
+                    </p>
+                    <div class="d-flex flex-wrap gap-1">
+                        <a href="#open-positions" class="btn btn-outline-primary px-4">
+                            <i class="bi bi-search me-1"></i>Explore Opportunities
+                        </a>
+                        <a href="mailto:nandirides@gmail.com?subject=Career%20Inquiry%20-%20NandiRide" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-envelope me-1"></i>Contact Careers
+                        </a>
+                        <a href="{% url 'vacancy_list' %}" class="btn btn-outline-primary px-4">
+                            <i class="bi bi-gear me-1"></i>Manage Vacancies
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-4 bg-primary-subtle text-primary shadow-sm" style="width:150px;height:150px;">
+                        <i class="bi bi-briefcase-fill" style="font-size:5rem;"></i>
+                    </div>
+                    <div class="mt-3">
+                        <span class="text-body-secondary small">
+                            <i class="bi bi-geo-alt me-1"></i>Haridwar, Uttarakhand & Remote
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-body-secondary mb-1">Open Positions</div>
+                            <h3 class="fw-bold mb-0">{{ open_vacancies|default:0 }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center" style="width:52px;height:52px;">
+                            <i class="bi bi-person-plus fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-body-secondary mb-1">Active Vacancies</div>
+                            <h3 class="fw-bold mb-0">{{ vacancies|length }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width:52px;height:52px;">
+                            <i class="bi bi-briefcase fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-body-secondary mb-1">Rides Powered</div>
+                            <h3 class="fw-bold mb-0">{{ total_rides|default:0 }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-info-subtle text-info d-flex align-items-center justify-content-center" style="width:52px;height:52px;">
+                            <i class="bi bi-car-front fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-body-secondary mb-1">Drivers</div>
+                            <h3 class="fw-bold mb-0">{{ total_drivers|default:0 }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center" style="width:52px;height:52px;">
+                            <i class="bi bi-person-badge fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-7">
+                    <span class="badge text-bg-primary rounded-pill mb-2">WHY NANDIRIDE?</span>
+                    <h2 class="fw-bold mb-3">Work on something that moves people</h2>
+                    <p class="text-body-secondary mb-0">
+                        At NandiRide, every feature has a real-world purpose. From booking and
+                        payments to driver management, live tracking and customer experience,
+                        your work can directly contribute to a smarter mobility ecosystem.
+                    </p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <i class="bi bi-lightning-charge text-warning fs-3"></i>
+                                <h6 class="fw-bold mt-2 mb-1">Innovation</h6>
+                                <small class="text-body-secondary">Build practical technology.</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <i class="bi bi-people text-primary fs-3"></i>
+                                <h6 class="fw-bold mt-2 mb-1">Teamwork</h6>
+                                <small class="text-body-secondary">Grow through collaboration.</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <i class="bi bi-graph-up-arrow text-success fs-3"></i>
+                                <h6 class="fw-bold mt-2 mb-1">Growth</h6>
+                                <small class="text-body-secondary">Learn and improve continuously.</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <i class="bi bi-bullseye text-danger fs-3"></i>
+                                <h6 class="fw-bold mt-2 mb-1">Impact</h6>
+                                <small class="text-body-secondary">Solve meaningful problems.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="open-positions" class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-body border-bottom p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <span class="badge text-bg-primary rounded-pill mb-2">OPPORTUNITIES</span>
+                    <h2 class="fw-bold mb-1">Current Openings</h2>
+                    <p class="text-body-secondary mb-0">Explore opportunities and find your place at NandiRide.</p>
+                </div>
+                <div class="text-lg-end">
+                    <span class="badge rounded-pill text-bg-success px-3 py-2">
+                        <i class="bi bi-check-circle me-1"></i>{{ open_vacancies|default:0 }} Open Position{% if open_vacancies != 1 %}s{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            {% if vacancies %}
+            <div class="row g-3 mb-4">
+                <div class="col-lg-7">
+                    <div class="input-group">
+                        <span class="input-group-text bg-body">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="search" id="vacancySearch" class="form-control" placeholder="Search by job title, department or location...">
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <select id="departmentFilter" class="form-select">
+                        <option value="">All Departments</option>
+                        {% for vacancy in vacancies %}
+                        <option value="{{ vacancy.department|lower }}">{{ vacancy.department }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row g-4" id="vacancyGrid">
+                {% for vacancy in vacancies %}
+                <div class="col-lg-6 vacancy-item" data-title="{{ vacancy.title|lower }}" data-department="{{ vacancy.department|lower }}" data-location="{{ vacancy.location|lower }}">
+                    <div class="card border h-100 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                <div class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width:58px;height:58px;">
+                                    <i class="bi bi-briefcase-fill fs-4"></i>
+                                </div>
+                                <div class="d-flex flex-wrap justify-content-end gap-1">
+                                    {% if vacancy.status == "open" %}
+                                    <span class="badge text-bg-success">Open</span>
+                                    {% elif vacancy.status == "coming_soon" %}
+                                    <span class="badge text-bg-warning">Coming Soon</span>
+                                    {% else %}
+                                    <span class="badge text-bg-secondary">Closed</span>
+                                    {% endif %}
+                                    {% if vacancy.is_featured %}
+                                    <span class="badge text-bg-warning">
+                                        <i class="bi bi-star-fill me-1"></i>Featured
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <h4 class="fw-bold mb-2">{{ vacancy.title }}</h4>
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge rounded-pill text-bg-light border">
+                                    <i class="bi bi-building me-1"></i>{{ vacancy.department }}
+                                </span>
+                                <span class="badge rounded-pill text-bg-light border">
+                                    <i class="bi bi-clock me-1"></i>{{ vacancy.get_job_type_display }}
+                                </span>
+                            </div>
+                            <p class="text-body-secondary mb-4">{{ vacancy.description|truncatewords:32 }}</p>
+                            <div class="row g-2 mb-4">
+                                <div class="col-sm-6">
+                                    <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                        <div class="small text-body-secondary mb-1">
+                                            <i class="bi bi-geo-alt me-1"></i>Location
+                                        </div>
+                                        <div class="fw-semibold small">{{ vacancy.location }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                        <div class="small text-body-secondary mb-1">
+                                            <i class="bi bi-person-workspace me-1"></i>Experience
+                                        </div>
+                                        <div class="fw-semibold small">{{ vacancy.experience|default:"Flexible" }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                        <div class="small text-body-secondary mb-1">
+                                            <i class="bi bi-people me-1"></i>Openings
+                                        </div>
+                                        <div class="fw-semibold small">{{ vacancy.openings }} Position{% if vacancy.openings != 1 %}s{% endif %}</div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                        <div class="small text-body-secondary mb-1">
+                                            <i class="bi bi-cash-stack me-1"></i>Compensation
+                                        </div>
+                                        <div class="fw-semibold small">{{ vacancy.salary|default:"As per experience" }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if vacancy.skills %}
+                            <div class="mb-4">
+                                <div class="small fw-semibold text-body-secondary mb-2">
+                                    <i class="bi bi-tools me-1"></i>Key Skills
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for skill in vacancy.skills.split|slice:":10" %}
+                                    <span class="badge rounded-pill text-bg-light border">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="d-flex flex-column flex-sm-row gap-2">
+                                <button type="button" class="btn btn-outline-primary flex-fill" data-bs-toggle="modal" data-bs-target="#vacancyModal{{ vacancy.id }}">
+                                    <i class="bi bi-eye me-1"></i>View Details
+                                </button>
+                                {% if vacancy.status == "open" %}
+                                <a href="mailto:{{ vacancy.application_email }}?subject=Application for {{ vacancy.title|urlencode }}" class="btn btn-primary flex-fill">
+                                    <i class="bi bi-send me-1"></i>Apply Now
+                                </a>
+                                {% elif vacancy.status == "coming_soon" %}
+                                <button type="button" class="btn btn-outline-secondary flex-fill" disabled>
+                                    <i class="bi bi-clock me-1"></i>Coming Soon
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn btn-outline-secondary flex-fill" disabled>
+                                    <i class="bi bi-x-circle me-1"></i>Position Closed
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="vacancyModal{{ vacancy.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header">
+                                <div>
+                                    <div class="d-flex flex-wrap gap-2 mb-2">
+                                        {% if vacancy.status == "open" %}
+                                        <span class="badge text-bg-success">Open</span>
+                                        {% elif vacancy.status == "coming_soon" %}
+                                        <span class="badge text-bg-warning">Coming Soon</span>
+                                        {% else %}
+                                        <span class="badge text-bg-secondary">Closed</span>
+                                        {% endif %}
+                                        {% if vacancy.is_featured %}
+                                        <span class="badge text-bg-warning">
+                                            <i class="bi bi-star-fill me-1"></i>Featured
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <h4 class="modal-title fw-bold">{{ vacancy.title }}</h4>
+                                    <div class="small text-body-secondary mt-1">
+                                        {{ vacancy.department }} · {{ vacancy.location }}
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-3">
+                                        <div class="border rounded-3 p-3 h-100">
+                                            <i class="bi bi-briefcase text-primary fs-4"></i>
+                                            <div class="small text-body-secondary mt-2">Job Type</div>
+                                            <div class="fw-semibold">{{ vacancy.get_job_type_display }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border rounded-3 p-3 h-100">
+                                            <i class="bi bi-person-workspace text-success fs-4"></i>
+                                            <div class="small text-body-secondary mt-2">Experience</div>
+                                            <div class="fw-semibold">{{ vacancy.experience|default:"Flexible" }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border rounded-3 p-3 h-100">
+                                            <i class="bi bi-people text-info fs-4"></i>
+                                            <div class="small text-body-secondary mt-2">Openings</div>
+                                            <div class="fw-semibold">{{ vacancy.openings }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border rounded-3 p-3 h-100">
+                                            <i class="bi bi-cash-stack text-warning fs-4"></i>
+                                            <div class="small text-body-secondary mt-2">Salary</div>
+                                            <div class="fw-semibold">{{ vacancy.salary|default:"As per experience" }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h5 class="fw-bold mb-2">About the Role</h5>
+                                <p class="text-body-secondary">{{ vacancy.description }}</p>
+                                {% if vacancy.responsibilities %}
+                                <h5 class="fw-bold mt-4 mb-2">Responsibilities</h5>
+                                <div class="text-body-secondary" style="white-space:pre-line;">{{ vacancy.responsibilities }}</div>
+                                {% endif %}
+                                {% if vacancy.requirements %}
+                                <h5 class="fw-bold mt-4 mb-2">Requirements</h5>
+                                <div class="text-body-secondary" style="white-space:pre-line;">{{ vacancy.requirements }}</div>
+                                {% endif %}
+                                {% if vacancy.skills %}
+                                <h5 class="fw-bold mt-4 mb-2">Skills</h5>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for skill in vacancy.skills.split|slice:":15" %}
+                                    <span class="badge rounded-pill text-bg-light border">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                {% if vacancy.last_date %}
+                                <div class="alert alert-warning mt-4 mb-0">
+                                    <i class="bi bi-calendar-event me-2"></i>
+                                    <strong>Application Deadline:</strong> {{ vacancy.last_date|date:"d M Y" }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                {% if vacancy.status == "open" %}
+                                <a href="mailto:{{ vacancy.application_email }}?subject=Application for {{ vacancy.title|urlencode }}" class="btn btn-primary">
+                                    <i class="bi bi-send me-1"></i>Apply for this Position
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div id="noSearchResult" class="text-center py-5 d-none">
+                <i class="bi bi-search fs-1 text-body-secondary"></i>
+                <h5 class="fw-bold mt-3">No matching vacancies</h5>
+                <p class="text-body-secondary mb-0">Try another job title, department or location.</p>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="rounded-circle bg-body-tertiary d-inline-flex align-items-center justify-content-center mb-3" style="width:90px;height:90px;">
+                    <i class="bi bi-briefcase fs-1 text-body-secondary"></i>
+                </div>
+                <h3 class="fw-bold">No Current Openings</h3>
+                <p class="text-body-secondary mb-4">
+                    There are currently no active vacancies at NandiRide.
+                    Please check again soon.
+                </p>
+                <a href="mailto:nandirides@gmail.com?subject=Career%20Inquiry%20-%20NandiRide" class="btn btn-primary">
+                    <i class="bi bi-envelope me-1"></i>Send Your Resume
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <span class="badge text-bg-primary rounded-pill mb-3">OUR CULTURE</span>
+                    <h3 class="fw-bold mb-3">A place to learn, build and grow</h3>
+                    <p class="text-body-secondary">
+                        We value ownership, curiosity, responsible engineering and a strong
+                        focus on the people who use our platform.
+                    </p>
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="rounded-circle bg-primary-subtle text-primary p-2">
+                            <i class="bi bi-check2"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Ownership</h6>
+                            <p class="small text-body-secondary mb-0">Take responsibility for your work and outcomes.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="rounded-circle bg-success-subtle text-success p-2">
+                            <i class="bi bi-check2"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Continuous Learning</h6>
+                            <p class="small text-body-secondary mb-0">Explore new ideas, technologies and better approaches.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-circle bg-warning-subtle text-warning p-2">
+                            <i class="bi bi-check2"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Customer Focus</h6>
+                            <p class="small text-body-secondary mb-0">Build experiences that solve real customer problems.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <span class="badge text-bg-success rounded-pill mb-3">HIRING PROCESS</span>
+                    <h3 class="fw-bold mb-4">A simple and transparent process</h3>
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:38px;height:38px;">1</div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Application</h6>
+                            <p class="small text-body-secondary mb-0">Send your resume and relevant details.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:38px;height:38px;">2</div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Initial Discussion</h6>
+                            <p class="small text-body-secondary mb-0">Discuss your experience and the opportunity.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:38px;height:38px;">3</div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Technical / Role Round</h6>
+                            <p class="small text-body-secondary mb-0">Demonstrate your skills and problem-solving approach.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3">
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:38px;height:38px;">4</div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Selection</h6>
+                            <p class="small text-body-secondary mb-0">Successful candidates move forward with the team.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-body p-4 p-lg-5 text-center">
+            <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center mb-3" style="width:70px;height:70px;">
+                <i class="bi bi-stars fs-2"></i>
+            </div>
+            <h2 class="fw-bold">Don't see the right position?</h2>
+            <p class="text-body-secondary mx-auto mb-4" style="max-width:700px;">
+                We are continuously growing. If your skills can help us build better mobility
+                solutions, feel free to introduce yourself and share your resume with our team.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a href="mailto:nandirides@gmail.com?subject=Career%20Opportunity%20-%20NandiRide" class="btn btn-primary px-4">
+                    <i class="bi bi-envelope me-1"></i>Contact Careers
+                </a>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function(){
+    const search=document.getElementById("vacancySearch");
+    const filter=document.getElementById("departmentFilter");
+    const items=document.querySelectorAll(".vacancy-item");
+    const empty=document.getElementById("noSearchResult");
+    if(!search||!filter)return;
+    const departments=new Set();
+    Array.from(filter.options).forEach(function(option){
+        if(option.value)departments.add(option.value);
+    });
+    if(departments.size<filter.options.length-1){
+        const values=new Set();
+        Array.from(filter.options).forEach(function(option,index){
+            if(index===0)return;
+            if(values.has(option.value))option.remove();
+            values.add(option.value);
+        });
+    }
+    function applyFilter(){
+        const query=search.value.toLowerCase().trim();
+        const department=filter.value.toLowerCase().trim();
+        let visible=0;
+        items.forEach(function(item){
+            const text=(item.dataset.title+" "+item.dataset.department+" "+item.dataset.location).toLowerCase();
+            const matchSearch=!query||text.includes(query);
+            const matchDepartment=!department||item.dataset.department===department;
+            if(matchSearch&&matchDepartment){
+                item.classList.remove("d-none");
+                visible++;
+            }else{
+                item.classList.add("d-none");
+            }
+        });
+        if(empty)empty.classList.toggle("d-none",visible!==0);
+    }
+    search.addEventListener("input",applyFilter);
+    filter.addEventListener("change",applyFilter);
+})();
+</script>
+{% endblock %}

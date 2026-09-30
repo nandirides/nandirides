@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}NandiRide Blog{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="card border-0 shadow-sm overflow-hidden mb-4">
+        <div class="card-body p-0">
+            <div class="row g-0 align-items-stretch">
+                <div class="col-xl-8 p-4 p-lg-5 d-flex flex-column justify-content-center">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge text-bg-primary rounded-pill px-3 py-2">
+                            <i class="bi bi-journal-text me-1"></i>NANDIRIDE BLOG
+                        </span>
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+                            <i class="bi bi-stars me-1"></i>Latest Updates
+                        </span>
+                    </div>
+                    <h1 class="display-5 fw-bold mb-3">Ideas, Stories & Updates from NandiRide</h1>
+                    <p class="fs-5 text-body-secondary mb-4">
+                        Explore ride guides, safety information, technology updates, travel tips and stories from the NandiRide mobility platform.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="#latest-posts" class="btn btn-primary rounded-pill px-4">
+                            <i class="bi bi-book me-2"></i>Explore Articles
+                        </a>
+                        <a href="#company-gallery" class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="bi bi-images me-2"></i>Company Gallery
+                        </a>
+                    </div>
+                </div>
+                <div class="col-xl-4 bg-body-tertiary d-flex align-items-center justify-content-center p-4 p-lg-5">
+                    <div class="text-center w-100">
+                        <div class="rounded-4 bg-body shadow-sm p-4 mb-3 d-flex align-items-center justify-content-center" style="min-height:210px;">
+                            <img src="{% static 'user/images/logo.png' %}" class="img-fluid" style="max-height:145px;max-width:240px;object-fit:contain;" alt="NandiRide Logo">
+                        </div>
+                        <h4 class="fw-bold mb-1">NandiRide</h4>
+                        <p class="text-body-secondary mb-0">FAST • SAFE • RELIABLE</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3" id="latest-posts">
+        <div>
+            <h3 class="fw-bold mb-1">Latest Articles</h3>
+            <p class="text-body-secondary mb-0">Useful information and updates from the NandiRide team.</p>
+        </div>
+        <div class="input-group" style="max-width:360px;">
+            <span class="input-group-text bg-body border-end-0">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="search" id="blogSearch" class="form-control border-start-0" placeholder="Search articles...">
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mb-4" id="blogFilters">
+        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 blog-filter active" data-filter="all">
+            All
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="Ride Guide">
+            Ride Guide
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="Safety">
+            Safety
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="Technology">
+            Technology
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="Travel Tips">
+            Travel Tips
+        </button>
+    </div>
+    <div class="row g-4" id="blogGrid">
+        <div class="col-md-6 col-xl-4 blog-card-item" data-category="Ride Guide" data-title="How to Book a Ride with NandiRide">
+            <div class="card border-0 shadow-sm overflow-hidden h-100">
+                <div class="position-relative bg-body-tertiary d-flex align-items-center justify-content-center" style="height:210px;">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;">
+                            <i class="bi bi-car-front-fill fs-2"></i>
+                        </div>
+                        <div class="small text-body-secondary">NandiRide Ride Guide</div>
+                    </div>
+                    <span class="position-absolute top-0 end-0 m-3 badge text-bg-primary rounded-pill">Featured</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-primary-subtle text-primary">Ride Guide</span>
+                        <span class="small text-body-secondary">02 Sep 2026</span>
+                    </div>
+                    <h5 class="fw-bold">How to Book a Ride with NandiRide</h5>
+                    <p class="text-body-secondary">A simple guide to booking your next comfortable and reliable ride.</p>
+                    <div class="d-flex align-items-center justify-content-between mt-4">
+                        <span class="small text-body-secondary"><i class="bi bi-clock me-1"></i>5 min read</span>
+                        <a href="{% url 'booking' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4 blog-card-item" data-category="Safety" data-title="5 Simple Tips for a Safer Ride">
+            <div class="card border-0 shadow-sm overflow-hidden h-100">
+                <div class="position-relative bg-body-tertiary d-flex align-items-center justify-content-center" style="height:210px;">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-success-subtle text-success d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;">
+                            <i class="bi bi-shield-check fs-2"></i>
+                        </div>
+                        <div class="small text-body-secondary">Safety & Awareness</div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-success-subtle text-success">Safety</span>
+                        <span class="small text-body-secondary">01 Sep 2026</span>
+                    </div>
+                    <h5 class="fw-bold">5 Simple Tips for a Safer Ride</h5>
+                    <p class="text-body-secondary">Simple practices that can help make every journey more comfortable and secure.</p>
+                    <div class="d-flex align-items-center justify-content-between mt-4">
+                        <span class="small text-body-secondary"><i class="bi bi-clock me-1"></i>4 min read</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3">Read More</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4 blog-card-item" data-category="Travel Tips" data-title="Planning the Perfect Long Distance Journey">
+            <div class="card border-0 shadow-sm overflow-hidden h-100">
+                <div class="position-relative bg-body-tertiary d-flex align-items-center justify-content-center" style="height:210px;">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-warning-subtle text-warning d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;">
+                            <i class="bi bi-signpost-2-fill fs-2"></i>
+                        </div>
+                        <div class="small text-body-secondary">Travel Planning</div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-warning-subtle text-warning">Travel Tips</span>
+                        <span class="small text-body-secondary">30 Aug 2026</span>
+                    </div>
+                    <h5 class="fw-bold">Planning the Perfect Long Distance Journey</h5>
+                    <p class="text-body-secondary">Useful ideas for planning a comfortable and stress-free long-distance journey.</p>
+                    <div class="d-flex align-items-center justify-content-between mt-4">
+                        <span class="small text-body-secondary"><i class="bi bi-clock me-1"></i>6 min read</span>
+                        <a href="{% url 'booking' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4 blog-card-item" data-category="Technology" data-title="Why Real-Time Ride Tracking Matters">
+            <div class="card border-0 shadow-sm overflow-hidden h-100">
+                <div class="position-relative bg-body-tertiary d-flex align-items-center justify-content-center" style="height:210px;">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-info-subtle text-info d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;">
+                            <i class="bi bi-geo-alt-fill fs-2"></i>
+                        </div>
+                        <div class="small text-body-secondary">Smart Mobility Technology</div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-info-subtle text-info">Technology</span>
+                        <span class="small text-body-secondary">28 Aug 2026</span>
+                    </div>
+                    <h5 class="fw-bold">Why Real-Time Ride Tracking Matters</h5>
+                    <p class="text-body-secondary">Understand how ride tracking can provide better journey visibility and information.</p>
+                    <div class="d-flex align-items-center justify-content-between mt-4">
+                        <span class="small text-body-secondary"><i class="bi bi-clock me-1"></i>4 min read</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3">Read More</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4 blog-card-item" data-category="Technology" data-title="Making Your Ride Payments Easy">
+            <div class="card border-0 shadow-sm overflow-hidden h-100">
+                <div class="position-relative bg-body-tertiary d-flex align-items-center justify-content-center" style="height:210px;">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;">
+                            <i class="bi bi-credit-card-2-front-fill fs-2"></i>
+                        </div>
+                        <div class="small text-body-secondary">Digital Payments</div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-primary-subtle text-primary">Technology</span>
+                        <span class="small text-body-secondary">25 Aug 2026</span>
+                    </div>
+                    <h5 class="fw-bold">Making Your Ride Payments Easy</h5>
+                    <p class="text-body-secondary">Learn about convenient payment workflows and managing your ride payment history.</p>
+                    <div class="d-flex align-items-center justify-content-between mt-4">
+                        <span class="small text-body-secondary"><i class="bi bi-clock me-1"></i>3 min read</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3">Read More</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4 blog-card-item" data-category="Travel Tips" data-title="Travel Better with NandiRide">
+            <div class="card border-0 shadow-sm overflow-hidden h-100">
+                <div class="position-relative bg-body-tertiary d-flex align-items-center justify-content-center" style="height:210px;">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-warning-subtle text-warning d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;">
+                            <i class="bi bi-map-fill fs-2"></i>
+                        </div>
+                        <div class="small text-body-secondary">Better Travel Experience</div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-warning-subtle text-warning">Travel Tips</span>
+                        <span class="small text-body-secondary">22 Aug 2026</span>
+                    </div>
+                    <h5 class="fw-bold">Travel Better with NandiRide</h5>
+                    <p class="text-body-secondary">Explore practical travel ideas that can make everyday journeys easier and more convenient.</p>
+                    <div class="d-flex align-items-center justify-content-between mt-4">
+                        <span class="small text-body-secondary"><i class="bi bi-clock me-1"></i>5 min read</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3">Read More</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="noResults" class="alert alert-secondary border-0 shadow-sm mt-4 d-none">
+        <i class="bi bi-search me-2"></i>No articles found for your search.
+    </div>
+    <div class="row g-4 mt-1">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center mb-3" style="width:52px;height:52px;">
+                        <i class="bi bi-shield-check fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Safety First</h5>
+                    <p class="text-body-secondary mb-0">
+                        Discover practical safety information and ride awareness tips for passengers and drivers.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="rounded-3 bg-success-subtle text-success d-flex align-items-center justify-content-center mb-3" style="width:52px;height:52px;">
+                        <i class="bi bi-cpu-fill fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Mobility Technology</h5>
+                    <p class="text-body-secondary mb-0">
+                        Learn how booking, driver assignment, tracking, fare calculation and payment systems work together.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="rounded-3 bg-warning-subtle text-warning d-flex align-items-center justify-content-center mb-3" style="width:52px;height:52px;">
+                        <i class="bi bi-compass-fill fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Travel Tips</h5>
+                    <p class="text-body-secondary mb-0">
+                        Get useful ideas for planning local rides, long journeys and comfortable transportation experiences.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mt-4 overflow-hidden" id="company-gallery">
+        <div class="card-header bg-transparent border-0 p-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <div class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width:44px;height:44px;">
+                            <i class="bi bi-images fs-4"></i>
+                        </div>
+                        <h4 class="fw-bold mb-0">Company Gallery</h4>
+                    </div>
+                    <p class="text-body-secondary mb-0">Upload and preview NandiRide company photos.</p>
+                </div>
+                <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+                    <i class="bi bi-cloud-arrow-up me-1"></i>Media Center
+                </span>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-7">
+                    <div class="border border-2 rounded-4 p-4 text-center bg-body-tertiary" id="uploadBox">
+                        <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;">
+                            <i class="bi bi-cloud-arrow-up fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold">Upload Company Photo</h5>
+                        <p class="text-body-secondary mb-3">
+                            Select a NandiRide office, team, vehicle, event or company activity photo.
+                        </p>
+                        <label for="companyPhoto" class="btn btn-primary rounded-pill px-4">
+                            <i class="bi bi-upload me-2"></i>Select Photo
+                        </label>
+                        <input type="file" id="companyPhoto" class="d-none" accept="image/jpeg,image/png,image/webp">
+                        <div class="small text-body-secondary mt-3">
+                            JPG, PNG or WEBP • Recommended landscape image
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="rounded-4 border overflow-hidden bg-body-tertiary">
+                        <div id="photoPreviewContainer" class="d-flex align-items-center justify-content-center" style="height:260px;">
+                            <div class="text-center text-body-secondary">
+                                <i class="bi bi-image fs-1 d-block mb-2"></i>
+                                <span>Photo preview will appear here</span>
+                            </div>
+                        </div>
+                        <div class="p-3 border-top">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="small text-body-secondary" id="photoName">No photo selected</span>
+                                <span class="badge bg-secondary-subtle text-secondary" id="photoStatus">Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-info border-0 mt-4 mb-0">
+                <i class="bi bi-info-circle me-2"></i>
+                Photo preview is available immediately. Permanent saving requires connecting this upload form to the existing NandiRide gallery upload view.
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mt-4 overflow-hidden">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 mb-3">
+                        <i class="bi bi-lightning-charge-fill me-1"></i>NANDIRIDE UPDATES
+                    </span>
+                    <h3 class="fw-bold">Technology that keeps every journey connected.</h3>
+                    <p class="text-body-secondary mb-0">
+                        NandiRide brings booking, driver management, vehicles, tracking, payments and support operations together to create a connected mobility experience.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="{% url 'services' %}" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-grid me-2"></i>Explore Services
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function(){
+    const searchInput=document.getElementById("blogSearch");
+    const filterButtons=document.querySelectorAll(".blog-filter");
+    const cards=document.querySelectorAll(".blog-card-item");
+    const noResults=document.getElementById("noResults");
+    const photoInput=document.getElementById("companyPhoto");
+    const previewContainer=document.getElementById("photoPreviewContainer");
+    const photoName=document.getElementById("photoName");
+    const photoStatus=document.getElementById("photoStatus");
+    let activeFilter="all";
+    function filterPosts(){
+        const search=(searchInput.value||"").trim().toLowerCase();
+        let visible=0;
+        cards.forEach(card=>{
+            const category=(card.dataset.category||"").toLowerCase();
+            const title=(card.dataset.title||"").toLowerCase();
+            const filterMatch=activeFilter==="all"||category===activeFilter.toLowerCase();
+            const searchMatch=!search||title.includes(search)||category.includes(search);
+            const show=filterMatch&&searchMatch;
+            card.classList.toggle("d-none",!show);
+            if(show)visible++;
+        });
+        noResults.classList.toggle("d-none",visible!==0);
+    }
+    filterButtons.forEach(button=>{
+        button.addEventListener("click",function(){
+            activeFilter=this.dataset.filter||"all";
+            filterButtons.forEach(item=>{
+                item.classList.remove("btn-primary","active");
+                item.classList.add("btn-outline-secondary");
+            });
+            this.classList.remove("btn-outline-secondary");
+            this.classList.add("btn-primary","active");
+            filterPosts();
+        });
+    });
+    if(searchInput)searchInput.addEventListener("input",filterPosts);
+    if(photoInput){
+        photoInput.addEventListener("change",function(){
+            const file=this.files&&this.files[0];
+            if(!file)return;
+            if(!file.type.startsWith("image/")){
+                this.value="";
+                return;
+            }
+            const reader=new FileReader();
+            reader.onload=function(event){
+                previewContainer.innerHTML='<img src="'+event.target.result+'" class="w-100 h-100" style="object-fit:cover;" alt="Company Photo Preview">';
+                photoName.textContent=file.name;
+                photoStatus.textContent="Selected";
+                photoStatus.className="badge bg-success-subtle text-success";
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+})();
+</script>
+{% endblock %}

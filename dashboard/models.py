@@ -1,20 +1,23 @@
 from django.db import models
 from django.conf import settings
-from core.models import TimeStampedModel
 from django.contrib.auth.models import Group
+from django.utils import timezone
+from core.models import TimeStampedModel
+
 
 class GroupStatus(models.Model):
     group = models.OneToOneField(
         Group,
         on_delete=models.CASCADE,
-        related_name="status"
+        related_name="status",
     )
     is_active = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.group.name} - {'Active' if self.is_active else 'Inactive'}"
-    
+
+
 class Gallery(models.Model):
     class Category(models.TextChoices):
         PROFILE = "profile", "Profile"
@@ -39,6 +42,7 @@ class Gallery(models.Model):
     def delete(self, *args, **kwargs):
         if self.profile_image:
             self.profile_image.delete(save=False)
+
         super().delete(*args, **kwargs)
 
     def __str__(self):
@@ -102,6 +106,7 @@ class UserProfile(TimeStampedModel):
 
     def __str__(self):
         return self.user.get_username()
+
 
 class UserAddress(TimeStampedModel):
     class AddressType(models.TextChoices):
@@ -168,7 +173,7 @@ class AccountNotificationPreference(TimeStampedModel):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="notification_preferences"
+        related_name="notification_preferences",
     )
     platform_updates = models.BooleanField(default=True)
     security_alerts = models.BooleanField(default=True)
@@ -210,14 +215,17 @@ class AccountPaymentDetail(TimeStampedModel):
     def __str__(self):
         return f"Payment Details - {self.user.get_username()}"
 
+
 class WalletTransaction(TimeStampedModel):
     class TransactionType(models.TextChoices):
         CREDIT = "credit", "Credit"
         DEBIT = "debit", "Debit"
+
     class Status(models.TextChoices):
         SUCCESS = "success", "Success"
         PENDING = "pending", "Pending"
         FAILED = "failed", "Failed"
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -252,5 +260,153 @@ class WalletTransaction(TimeStampedModel):
         unique=True,
         null=True,
     )
+
     def __str__(self):
         return f"{self.user.get_username()} - {self.transaction_type} - ₹{self.amount}"
+
+
+class Vacancy(models.Model):
+    class Status(models.TextChoices):
+        OPEN = "open", "Open"
+        COMING_SOON = "coming_soon", "Coming Soon"
+        CLOSED = "closed", "Closed"
+
+    class JobType(models.TextChoices):
+        FULL_TIME = "full_time", "Full Time"
+        PART_TIME = "part_time", "Part Time"
+        INTERNSHIP = "internship", "Internship"
+        CONTRACT = "contract", "Contract"
+
+    title = models.CharField(
+        max_length=200,
+    )
+    department = models.CharField(
+        max_length=100,
+    )
+    job_type = models.CharField(
+        max_length=30,
+        choices=JobType.choices,
+        default=JobType.FULL_TIME,
+    )
+    location = models.CharField(
+        max_length=200,
+        default="Haridwar, Uttarakhand",
+    )
+    experience = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+    salary = models.CharField(
+        max_length=150,
+        blank=True,
+    )
+    skills = models.TextField(
+        blank=True,
+    )
+    description = models.TextField()
+    responsibilities = models.TextField(
+        blank=True,
+    )
+    requirements = models.TextField(
+        blank=True,
+    )
+    openings = models.PositiveIntegerField(
+        default=1,
+    )
+    application_email = models.EmailField(
+        default="nandirides@gmail.com",
+    )
+    last_date = models.DateField(
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.OPEN,
+    )
+    is_active = models.BooleanField(
+        default=True,
+    )
+    is_featured = models.BooleanField(
+        default=False,
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = [
+            "-is_featured",
+            "-created_at",
+        ]
+
+    def __str__(self):
+        return self.title
+
+class Feedback(models.Model):
+    SUBJECT_CHOICES = (
+        ("general", "General Enquiry"),
+        ("ride", "Ride Support"),
+        ("booking", "Booking Issue"),
+        ("payment", "Payment Issue"),
+        ("account", "Account Support"),
+        ("driver", "Driver Support"),
+        ("feedback", "Feedback"),
+        ("suggestion", "Suggestion"),
+        ("complaint", "Complaint"),
+        ("other", "Other"),
+    )
+    STATUS_CHOICES = (
+        ("new", "New"),
+        ("in_progress", "In Progress"),
+        ("resolved", "Resolved"),
+        ("closed", "Closed"),
+    )
+    name = models.CharField(max_length=150)
+    email = models.EmailField()
+    mobile_number = models.CharField(max_length=20, blank=True)
+    subject = models.CharField(max_length=30, choices=SUBJECT_CHOICES, default="feedback")
+    message = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="new")
+    admin_note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} - {self.get_subject_display()}"
+
+class BlogPost(models.Model):
+    CATEGORY_CHOICES = (
+        ("company", "Company"),
+        ("mobility", "Mobility"),
+        ("technology", "Technology"),
+        ("safety", "Safety"),
+        ("travel", "Travel"),
+        ("tips", "Tips"),
+        ("updates", "Updates"),
+        ("other", "Other"),
+    )
+    title = models.CharField(max_length=250)
+    slug = models.SlugField(max_length=280, unique=True, blank=True)
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default="company")
+    excerpt = models.TextField(blank=True)
+    content = models.TextField()
+    cover_image = models.ImageField(upload_to="blog/", blank=True, null=True)
+    author = models.CharField(max_length=150, default="NandiRide Team")
+    published_at = models.DateTimeField(default=timezone.now)
+    is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False)
+    views = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        ordering = ["-is_featured", "-published_at", "-created_at"]
+    def __str__(self):
+        return self.title
