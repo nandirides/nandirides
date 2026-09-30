@@ -9,37 +9,37 @@
                 </a>
             </li>
             <li class="nav-item d-none d-md-block">
-                <a href="{% url 'dashboard' %}" class="nav-link fw-medium">
+                <a href="{% url 'dashboard' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                     <i class="bi bi-house-door me-1"></i>
                     Home
                 </a>
             </li>
             <li class="nav-item d-none d-md-block">
-                <a href="{% url 'about1' %}" class="nav-link fw-medium">
+                <a href="{% url 'about' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
                     <i class="bi bi-info-circle me-1"></i>
                     About
                 </a>
             </li>
             <li class="nav-item d-none d-md-block">
-                <a href="{% url 'blog1' %}" class="nav-link fw-medium">
+                <a href="{% url 'blog' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'blog' %}active{% endif %}">
                     <i class="bi bi-journal-text me-1"></i>
                     Blog
                 </a>
             </li>
             <li class="nav-item d-none d-md-block">
-                <a href="{% url 'career1' %}" class="nav-link fw-medium">
+                <a href="{% url 'career' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'career' %}active{% endif %}">
                     <i class="bi bi-briefcase me-1"></i>
                     Career
                 </a>
             </li>
             <li class="nav-item d-none d-md-block">
-                <a href="{% url 'services1' %}" class="nav-link fw-medium">
+                <a href="{% url 'services' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'services' %}active{% endif %}">
                     <i class="bi bi-grid me-1"></i>
                     Services
                 </a>
             </li>
             <li class="nav-item d-none d-md-block">
-                <a href="{% url 'contact1' %}" class="nav-link fw-medium">
+                <a href="{% url 'contact' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
                     <i class="bi bi-envelope me-1"></i>
                     Contact
                 </a>

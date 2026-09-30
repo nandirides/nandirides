@@ -707,7 +707,7 @@ class BlogView(TemplateView):
 
 
 class ContactView(TemplateView):
-    template_name = 'user/contact.html'
+    template_name = 'user/contact1.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -198,6 +198,12 @@ NAVIGATION = [
                 "permission": None,
             },
             {
+                "title": "FeedBack List",
+                "icon": "bi-circle",
+                "url": "feedback_list",
+                "permission": None,
+            },
+            {
                 "title": "Administration",
                 "icon": "bi-circle",
                 "url": "admin:index",

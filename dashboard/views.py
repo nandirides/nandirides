@@ -2,8 +2,9 @@ from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 from functools import lru_cache
+from django.core.paginator import Paginator
 import re
-from .models import BlogPost
+from django.utils.text import slugify
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
@@ -17,7 +18,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from .forms import GalleryForm, UserCreateForm, VacancyForm, FeedbackForm
+from .forms import GalleryForm, UserCreateForm, VacancyForm, FeedbackForm, BlogPostForm
 from .models import (
     AccountNotificationPreference,
     AccountPaymentDetail,
@@ -536,6 +537,20 @@ def user_delete(request, pk):
     return redirect("user_list")
 
 @login_required
+def gallery_upload(request):
+    if request.method == "POST":
+        image = request.FILES.get("profile_image")
+        if image:
+            Gallery.objects.create(
+                profile_image=image,
+                category="other",
+            )
+            messages.success(request, "Company photo uploaded successfully.")
+        else:
+            messages.error(request, "Please select a photo.")
+    return redirect("blog")
+
+@login_required
 def gallery_delete(request, pk):
     if request.method != "POST":
         return redirect("ride_gallery")
@@ -897,7 +912,7 @@ def about(request):
 
 @login_required
 def blog(request):
-    posts = BlogPost.objects.filter(is_active=True).order_by("-is_featured", "-published_at", "-created_at")
+    posts = BlogPost.objects.all().order_by("-is_featured", "-published_at", "-created_at")
     search = request.GET.get("q", "").strip()
     category = request.GET.get("category", "").strip()
     if search:
@@ -909,20 +924,23 @@ def blog(request):
         )
     if category:
         posts = posts.filter(category=category)
-    categories = BlogPost.objects.filter(
-        is_active=True
-    ).values_list(
+    categories = BlogPost.objects.values_list(
         "category",
         flat=True
     ).distinct().order_by("category")
     featured_posts = posts.filter(is_featured=True)
     recent_posts = posts.order_by("-published_at", "-created_at")
+    total_blog_views = BlogPost.objects.aggregate(
+        total=Sum("views")
+    )["total"] or 0
     context = {
         "page_title": "Blog",
         "posts": posts,
+        "blog_posts": posts,
         "featured_posts": featured_posts,
         "recent_posts": recent_posts,
         "categories": categories,
+        "blog_categories": BlogPost.CATEGORY_CHOICES,
         "search": search,
         "selected_category": category,
         "total_posts": BlogPost.objects.count(),
@@ -931,9 +949,11 @@ def blog(request):
             is_active=True,
             is_featured=True
         ).count(),
+        "total_blog_views": total_blog_views,
         "total_rides": Ride.objects.count(),
         "total_users": User.objects.count(),
         "total_drivers": Driver.objects.count(),
+        "gallery_images": Gallery.objects.all().order_by("-date"),
         "breadcrumb_items": [
             {
                 "title": "Blog",
@@ -946,6 +966,43 @@ def blog(request):
         "dashboard/blog.html",
         context,
     )
+
+@login_required
+def blog_view_count(request, pk):
+    if request.method == "POST":
+        blog = get_object_or_404(BlogPost, pk=pk, is_active=True)
+        BlogPost.objects.filter(pk=blog.pk).update(views=F("views") + 1)
+        blog.refresh_from_db()
+        return JsonResponse({
+            "success": True,
+            "views": blog.views,
+        })
+    return JsonResponse({
+        "success": False,
+    }, status=405)
+
+@login_required
+def blog_create(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    if request.method != "POST":
+        return redirect("blog")
+    form = BlogPostForm(request.POST, request.FILES)
+    if form.is_valid():
+        blog = form.save(commit=False)
+        base_slug = slugify(blog.title) or f"blog-{timezone.now().strftime('%Y%m%d%H%M%S')}"
+        slug = base_slug
+        counter = 2
+        while BlogPost.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        blog.slug = slug
+        blog.save()
+        messages.success(request, "Blog published successfully.")
+    else:
+        messages.error(request, "Blog could not be published. Please check the form details.")
+    return redirect("blog")
+
 
 @login_required
 def career(request):
@@ -979,7 +1036,7 @@ def career(request):
 @login_required
 def services(request):
     context = {
-        "page_title": "NandiRide Services",
+        "page_title": "Services",
         "total_rides": Ride.objects.count(),
         "total_drivers": Driver.objects.count(),
         "total_vehicles": Vehicle.objects.count(),
@@ -1009,16 +1066,16 @@ def contact(request):
             )
             return redirect("contact")
     else:
-        initial = {}
-        if request.user.is_authenticated:
-            initial["name"] = request.user.get_full_name() or request.user.username
-            initial["email"] = request.user.email
+        initial = {
+            "name": request.user.get_full_name() or request.user.username,
+            "email": request.user.email,
+        }
         form = FeedbackForm(initial=initial)
     context = {
         "page_title": "Contact NandiRide",
         "contact_address": "Haridwar, Uttarakhand, India",
         "contact_email": "nandirides@gmail.com",
-        "contact_phones": ["9456305604", "8809930846"],
+        "contact_phones": ["9X56305XXX", "9009930XXX"],
         "feedback_form": form,
         "total_feedback": Feedback.objects.count(),
         "new_feedback": Feedback.objects.filter(status="new").count(),
@@ -1030,11 +1087,7 @@ def contact(request):
             },
         ],
     }
-    return render(
-        request,
-        "dashboard/contact.html",
-        context,
-    )
+    return render(request, "dashboard/contact.html", context)
 
 @login_required
 @transaction.atomic
@@ -1906,3 +1959,49 @@ def vacancy_status_update(request, pk):
             status_text=valid_statuses[status],
         )
     return _json_error("Invalid request method.", 405)
+
+@login_required
+def feedback_list(request):
+    feedbacks = Feedback.objects.all()
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    subject = request.GET.get("subject", "").strip()
+    if search:
+        feedbacks = feedbacks.filter(
+            Q(name__icontains=search) |
+            Q(email__icontains=search) |
+            Q(mobile_number__icontains=search) |
+            Q(message__icontains=search)
+        )
+    if status:
+        feedbacks = feedbacks.filter(status=status)
+    if subject:
+        feedbacks = feedbacks.filter(subject=subject)
+    paginator = Paginator(feedbacks, 10)
+    page_number = request.GET.get("page")
+    feedbacks = paginator.get_page(page_number)
+    context = {
+        "page_title": "Feedback Management",
+        "feedbacks": feedbacks,
+        "search": search,
+        "selected_status": status,
+        "selected_subject": subject,
+        "total_feedback": Feedback.objects.count(),
+        "new_feedback": Feedback.objects.filter(status="new").count(),
+        "in_progress_feedback": Feedback.objects.filter(status="in_progress").count(),
+        "resolved_feedback": Feedback.objects.filter(status="resolved").count(),
+        "closed_feedback": Feedback.objects.filter(status="closed").count(),
+        "subject_choices": Feedback.SUBJECT_CHOICES,
+        "status_choices": Feedback.STATUS_CHOICES,
+        "breadcrumb_items": [
+            {
+                "title": "Contact",
+                "url": "contact",
+            },
+            {
+                "title": "Feedback Management",
+                "url": "feedback_list",
+            },
+        ],
+    }
+    return render(request, "dashboard/feedback_list.html", context)

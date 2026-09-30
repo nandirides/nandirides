@@ -27,6 +27,7 @@ def promotions_dashboard(request):
     )
 
     context = {
+        "page_title": "Promotions Dashboard",
         "title": "Promotions Dashboard",
         "breadcrumb_items": [
             {

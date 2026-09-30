@@ -68,6 +68,7 @@ def driver_list(request):
     )
 
     context = {
+        "page_title": "All Driver",
         "breadcrumb_items": [
             {
                 "title": "Drivers",
