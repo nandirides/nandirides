@@ -2,17 +2,18 @@
 {% load static %}
 {% block title %}About NandiRide{% endblock %}
 {% block content %}
+
 <div class="container-fluid">
     <div class="card border-0 shadow-sm overflow-hidden mb-4">
         <div class="card-body p-0">
             <div class="row g-0 align-items-stretch">
-                <div class="col-xl-8 p-lg-5 d-flex flex-column justify-content-center">
-                     <div class="mb-3">
+                <div class="col-xl-7 p-4 p-lg-5 d-flex flex-column justify-content-center">
+                    <div class="mb-3">
                         <span class="badge text-bg-primary rounded-pill px-3 py-2">
                             <i class="bi bi-info-circle me-1"></i> ABOUT NANDIRIDE
                         </span>
                     </div>
-                    <h2 class=" fw-bold mb-3">Safe, Comfortable and Reliable Rides for Every Journey.</h2>
+                    <h2 class="fw-bold mb-3">Safe, Comfortable and Reliable Rides for Every Journey.</h2>
                     <p class="fs-5 text-body-secondary mb-4">
                         NandiRide is a modern mobility platform built to connect passengers with reliable transportation services through simple technology, convenient booking and dependable ride management.
                     </p>
@@ -21,27 +22,75 @@
                     </p>
                     <div class="d-flex flex-wrap gap-2">
                         <span class="badge rounded-pill bg-primary-subtle text-primary border px-3 py-2">
-                            <i class="bi bi-shield-check me-1"></i>Safety First
+                            <i class="bi bi-shield-check me-1"></i> Safety First
                         </span>
                         <span class="badge rounded-pill bg-success-subtle text-success border px-3 py-2">
-                            <i class="bi bi-lightning-charge me-1"></i>Fast Service
+                            <i class="bi bi-lightning-charge me-1"></i> Fast Service
                         </span>
                         <span class="badge rounded-pill bg-warning-subtle text-warning border px-3 py-2">
-                            <i class="bi bi-stars me-1"></i>Better Experience
+                            <i class="bi bi-stars me-1"></i> Better Experience
                         </span>
                         <span class="badge rounded-pill bg-info-subtle text-info border px-3 py-2">
-                            <i class="bi bi-geo-alt me-1"></i>Smart Mobility
+                            <i class="bi bi-geo-alt me-1"></i> Smart Mobility
                         </span>
                     </div>
                 </div>
-                <div class="col-xl-4 bg-body-tertiary d-flex align-items-center justify-content-center p-4 p-lg-5">
-                    <div class="text-center w-100">
-                        <div class="rounded-4 bg-body shadow-sm p-4 d-inline-flex align-items-center justify-content-center mb-3" style="min-width:220px;min-height:180px;">
-                            <img src="{% static 'user/images/logo.png' %}" class="img-fluid" style="max-height:130px;max-width:220px;object-fit:contain;" alt="NandiRide Logo">
+                <div class="col-xl-5 d-flex align-items-center justify-content-center">
+                    <div class="w-100 d-flex align-items-center justify-content-center overflow-hidden" style="min-height:360px;">
+                        <img src="{% static 'adminlte/img/about.png' %}" class="img-fluid w-100 rounded-5" style="max-width:520px;max-height:460px;object-fit:contain;" alt="NandiRide About">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+        <div class="card-header bg-transparent border-0 p-4">
+            <div class="text-center">
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 mb-3">
+                    <i class="bi bi-people-fill me-1"></i> LEADERSHIP
+                </span>
+                <h3 class="fw-bold mb-1">Our Co-Founder & Owners</h3>
+                <p class="text-body-secondary mb-0">The people behind the vision of NandiRide</p>
+            </div>
+        </div>
+        <div class="card-body p-4 p-lg-5 pt-2">
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-6 col-xl-5">
+                    <div class="card border-0 shadow-sm h-100 bg-body-tertiary overflow-hidden">
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-4">
+                                <div class="mx-auto rounded-circle overflow-hidden border border-3 border-primary shadow-sm" style="width:180px;height:180px;">
+                                    <img src="{% static 'adminlte/img/avatar.png' %}" class="w-100 h-100" style="object-fit:cover;" alt="NandiRide Owner 1">
+                                </div>
+                            </div>
+                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 mb-2">
+                                Co-Founder & Owner
+                            </span>
+                            <h4 class="fw-bold mb-1">Mukul Sharma</h4>
+                            <p class="text-primary fw-semibold mb-3">Co-Founder & Owner, NandiRide</p>
+                            <p class="text-body-secondary mb-0">
+                                Leading NandiRide with a vision to build a safe, reliable and technology-driven mobility platform that delivers a better experience for riders and drivers.
+                            </p>
                         </div>
-                        <h4 class="fw-bold mb-2">NandiRide</h4>
-                        <p class="text-body-secondary mb-0">FAST • SAFE • RELIABLE</p>
-                        <small class="text-body-secondary">Technology powered mobility platform</small>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-5">
+                    <div class="card border-0 shadow-sm h-100 bg-body-tertiary overflow-hidden">
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-4">
+                                <div class="mx-auto rounded-circle overflow-hidden border border-3 border-success shadow-sm" style="width:180px;height:180px;">
+                                    <img src="{% static 'adminlte/img/avatar5.png' %}" class="w-100 h-100" style="object-fit:cover;" alt="NandiRide Owner 2">
+                                </div>
+                            </div>
+                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 mb-2">
+                                Co-Founder & Owner
+                            </span>
+                            <h4 class="fw-bold mb-1">Ashish Kushwaha</h4>
+                            <p class="text-success fw-semibold mb-3">Co-Founder & Owner, NandiRide</p>
+                            <p class="text-body-secondary mb-0">
+                                Supporting the growth and development of NandiRide through innovation, operational excellence and a strong focus on customer and driver experience.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

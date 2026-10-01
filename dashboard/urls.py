@@ -268,12 +268,10 @@ urlpatterns = [
         name="ride_gallery",
     ),
     path("gallery/upload/", views.gallery_upload, name="gallery_upload"),
+    path("blog/", views.blog, name="blog"),
     path("blog/create/", views.blog_create, name="blog_create"),
-    path(
-        "blog/<int:pk>/view/",
-        views.blog_view_count,
-        name="blog_view_count",
-    ),
+    path("blog/delete/<int:pk>/", views.blog_delete, name="blog_delete"),
+    path("blog/<int:pk>/view/", views.blog_view_increment, name="blog_view_increment"),
     path(
         "gallery/<int:pk>/delete/",
         views.gallery_delete,
