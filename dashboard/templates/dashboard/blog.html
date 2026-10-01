@@ -1,16 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block title %}NandiRide Blog{% endblock %}
-
 {% block content %}
-
 <div class="container-fluid">
-
     <div class="card border-0 shadow-sm overflow-hidden mb-4">
         <div class="card-body p-0">
             <div class="row g-0 align-items-stretch">
-
                 <div class="col-xl-8 p-4 p-lg-5 d-flex flex-column justify-content-center">
                     <div class="d-flex flex-wrap gap-2 mb-3">
                         <span class="badge text-bg-primary rounded-pill px-3 py-2">
@@ -20,932 +15,569 @@
                             <i class="bi bi-stars me-1"></i>Latest Updates
                         </span>
                     </div>
-
-                    <h1 class="fw-bold mb-3">
-                        Ideas, Stories & Updates from NandiRide
-                    </h1>
-
-                    <p class="fs-5 text-body-secondary mb-4">
-                        Explore ride guides, safety information, technology updates, travel tips and stories from the NandiRide mobility platform.
-                    </p>
-
+                    <h1 class="fw-bold mb-3">Ideas, Stories & Updates from NandiRide</h1>
+                    <p class="fs-5 text-body-secondary mb-4">Explore ride guides, safety information, technology updates, travel tips and stories from the NandiRide mobility platform.</p>
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="#blog-management" class="btn btn-outline-primary rounded-pill px-4">
-                            <i class="bi bi-plus-circle me-2"></i>Create Blog
-                        </a>
+                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="toggleCreateBlog">
+                            <i class="bi bi-plus-circle me-2" id="toggleCreateBlogIcon"></i><span id="toggleCreateBlogText">Create Blog</span>
+                        </button>
                         <a href="#latest-posts" class="btn btn-outline-primary rounded-pill px-4">
                             <i class="bi bi-book me-2"></i>Explore Articles
                         </a>
                     </div>
                 </div>
-
-                <div class="col-xl-4 bg-body-tertiary d-flex align-items-center justify-content-center p-4 p-lg-5">
-                    <div class="text-center w-100">
-                        <div class="rounded-4 bg-body shadow-sm p-4 mb-3 d-flex align-items-center justify-content-center" style="min-height:210px;">
-                            <img
-                                src="{% static 'user/images/logo.png' %}"
-                                class="img-fluid"
-                                style="max-height:145px;max-width:240px;object-fit:contain;"
-                                alt="NandiRide Logo"
-                            >
+                <div class="col-xl-4 d-flex align-items-center justify-content-center">
+                    <div class="text-center">
+                        <div class="rounded-4 bg-body shadow-sm mb-3 align-items-center justify-content-center">
+                            <img src="{% static 'adminlte/img/Blog_Image (2).png' %}" class="img-fluid w-100 rounded-5" style="max-height:250px;max-width:340px;object-fit:contain;" alt="NandiRide Blog">
                         </div>
-                        <h4 class="fw-bold mb-1">NandiRide</h4>
-                        <p class="text-body-secondary mb-0">FAST • SAFE • RELIABLE</p>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
-
     <div class="row g-4 mb-4" id="blog-management">
-
         <div class="col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="small text-body-secondary mb-1">Total Blogs</div>
-                            <h3 class="fw-bold mb-0" id="totalBlogCount">
-                                {{ total_posts|default:"0" }}
-                            </h3>
+                            <h3 class="fw-bold mb-0" id="totalBlogCount">{{ total_posts|default:"0" }}</h3>
                         </div>
                         <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center" style="width:46px;height:46px;">
                             <i class="bi bi-journal-text fs-4"></i>
                         </div>
                     </div>
-                    <div class="small text-body-secondary mt-3">
-                        <i class="bi bi-database me-1"></i>All blog records
-                    </div>
+                    <div class="small text-body-secondary mt-3"><i class="bi bi-database me-1"></i>All blog records</div>
                 </div>
             </div>
         </div>
-
         <div class="col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="small text-body-secondary mb-1">Featured</div>
-                            <h3 class="fw-bold mb-0">
-                                {{ featured_count|default:"0" }}
-                            </h3>
+                            <h3 class="fw-bold mb-0" id="featuredBlogCount">{{ featured_count|default:"0" }}</h3>
                         </div>
                         <div class="bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center" style="width:46px;height:46px;">
                             <i class="bi bi-star-fill fs-4"></i>
                         </div>
                     </div>
-                    <div class="small text-body-secondary mt-3">
-                        <i class="bi bi-stars me-1"></i>Highlighted articles
-                    </div>
+                    <div class="small text-body-secondary mt-3"><i class="bi bi-stars me-1"></i>Highlighted articles</div>
                 </div>
             </div>
         </div>
-
         <div class="col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="small text-body-secondary mb-1">Active Blogs</div>
-                            <h3 class="fw-bold mb-0">
-                                {{ active_posts|default:"0" }}
-                            </h3>
+                            <h3 class="fw-bold mb-0" id="activeBlogCount">{{ active_posts|default:"0" }}</h3>
                         </div>
                         <div class="bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center" style="width:46px;height:46px;">
                             <i class="bi bi-check-circle-fill fs-4"></i>
                         </div>
                     </div>
-                    <div class="small text-body-secondary mt-3">
-                        <i class="bi bi-globe2 me-1"></i>Available for website
-                    </div>
+                    <div class="small text-body-secondary mt-3"><i class="bi bi-globe2 me-1"></i>Available for website</div>
                 </div>
             </div>
         </div>
-
         <div class="col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="small text-body-secondary mb-1">Total Views</div>
-                            <h3 class="fw-bold mb-0" id="totalBlogViews">
-                                {{ total_blog_views|default:"0" }}
-                            </h3>
+                            <h3 class="fw-bold mb-0" id="totalBlogViews">{{ total_blog_views|default:"0" }}</h3>
                         </div>
                         <div class="bg-info-subtle text-info rounded-3 d-flex align-items-center justify-content-center" style="width:46px;height:46px;">
                             <i class="bi bi-eye-fill fs-4"></i>
                         </div>
                     </div>
-                    <div class="small text-body-secondary mt-3">
-                        <i class="bi bi-graph-up me-1"></i>Article engagement
-                    </div>
+                    <div class="small text-body-secondary mt-3"><i class="bi bi-graph-up me-1"></i>Article engagement</div>
                 </div>
             </div>
         </div>
-
     </div>
-
-    <div class="card border-0 shadow-sm overflow-hidden mb-4">
-
+    <div class="card border-0 shadow-sm overflow-hidden mb-4 {% if not request.GET.edit %}d-none{% endif %}" id="createBlogSection">
         <div class="card-header bg-body border-bottom p-4">
             <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <div class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width:44px;height:44px;">
-                            <i class="bi bi-cloud-arrow-up fs-4"></i>
+                            <i class="bi bi-pencil-square fs-4"></i>
                         </div>
                         <div>
-                            <h4 class="fw-bold mb-0">Create Blog</h4>
+                            <h4 class="fw-bold mb-0">
+                                {% if request.GET.edit %}
+                                    Edit Blog
+                                {% else %}
+                                    Create Blog
+                                {% endif %}
+                            </h4>
                             <small class="text-body-secondary">
-                                Upload a new article with cover image.
+                                {% if request.GET.edit %}
+                                    Update your existing article.
+                                {% else %}
+                                    Upload a new article with cover image.
+                                {% endif %}
                             </small>
                         </div>
                     </div>
                 </div>
-
-                <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
-                    <i class="bi bi-pencil-square me-1"></i>Blog Editor
-                </span>
-
+                {% if request.GET.edit %}
+                    <a href="{% url 'blog' %}" class="btn btn-outline-secondary rounded-pill px-3">
+                        <i class="bi bi-x-lg me-1"></i>Cancel Edit
+                    </a>
+                {% else %}
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" id="closeCreateBlog">
+                        <i class="bi bi-x-lg me-1"></i>Close
+                    </button>
+                {% endif %}
             </div>
         </div>
-
         <div class="card-body p-4">
-
-            <form
-                method="post"
-                enctype="multipart/form-data"
-                action="{% url 'blog_create' %}"
-                id="blogUploadForm"
-            >
-
-                {% csrf_token %}
-
-                <div class="row g-4">
-
-                    <div class="col-xl-8">
-
-                        <div class="mb-4">
-                            <label for="blogTitle" class="form-label fw-semibold">
-                                Blog Title <span class="text-danger">*</span>
-                            </label>
-
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text bg-body">
-                                    <i class="bi bi-type text-primary"></i>
-                                </span>
-
-                                <input
-                                    type="text"
-                                    name="title"
-                                    id="blogTitle"
-                                    class="form-control"
-                                    maxlength="250"
-                                    placeholder="Enter blog title..."
-                                    required
-                                >
-                            </div>
-
-                            <div class="form-text">
-                                <i class="bi bi-info-circle me-1"></i>
-                                Write a clear and attractive title.
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-4">
-
-                            <div class="col-md-6">
-                                <label for="blogCategory" class="form-label fw-semibold">
-                                    Category <span class="text-danger">*</span>
-                                </label>
-
-                                <select
-                                    name="category"
-                                    id="blogCategory"
-                                    class="form-select"
-                                    required
-                                >
-                                    <option value="company">Company</option>
-                                    <option value="mobility">Mobility</option>
-                                    <option value="technology">Technology</option>
-                                    <option value="safety">Safety</option>
-                                    <option value="travel">Travel</option>
-                                    <option value="tips">Tips</option>
-                                    <option value="updates">Updates</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="blogAuthor" class="form-label fw-semibold">
-                                    Author
-                                </label>
-
-                                <div class="input-group">
-                                    <span class="input-group-text bg-body">
-                                        <i class="bi bi-person text-primary"></i>
-                                    </span>
-
-                                    <input
-                                        type="text"
-                                        name="author"
-                                        id="blogAuthor"
-                                        class="form-control"
-                                        maxlength="150"
-                                        value="NandiRide Team"
-                                        placeholder="Author name"
-                                    >
+            {% if request.GET.edit %}
+                {% for edit_blog in blog_posts %}
+                    {% if edit_blog.id|stringformat:"s" == request.GET.edit %}
+                        <form method="post" enctype="multipart/form-data" action="{% url 'blog_create' %}" id="blogUploadForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="blog_id" value="{{ edit_blog.id }}">
+                            <div class="row g-4">
+                                <div class="col-xl-8">
+                                    <div class="mb-4">
+                                        <label for="blogTitle" class="form-label fw-semibold">Blog Title <span class="text-danger">*</span></label>
+                                        <div class="input-group input-group-lg">
+                                            <span class="input-group-text bg-body"><i class="bi bi-type text-primary"></i></span>
+                                            <input type="text" name="title" id="blogTitle" class="form-control" maxlength="250" value="{{ edit_blog.title }}" placeholder="Enter blog title..." required>
+                                        </div>
+                                        <div class="form-text"><i class="bi bi-info-circle me-1"></i>Write a clear and attractive title.</div>
+                                    </div>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-md-6">
+                                            <label for="blogCategory" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                                            <select name="category" id="blogCategory" class="form-select" required>
+                                                {% for value,label in blog_categories %}
+                                                    <option value="{{ value }}" {% if edit_blog.category == value %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="blogAuthor" class="form-label fw-semibold">Author</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-body"><i class="bi bi-person text-primary"></i></span>
+                                                <input type="text" name="author" id="blogAuthor" class="form-control" maxlength="150" value="{{ edit_blog.author }}" placeholder="Author name">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="blogExcerpt" class="form-label fw-semibold">Short Description</label>
+                                        <textarea name="excerpt" id="blogExcerpt" class="form-control" rows="4" placeholder="Write a short description of this article...">{{ edit_blog.excerpt }}</textarea>
+                                        <div class="form-text"><i class="bi bi-card-text me-1"></i>This summary will be displayed on the blog listing.</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="blogContent" class="form-label fw-semibold">Blog Content <span class="text-danger">*</span></label>
+                                        <textarea name="content" id="blogContent" class="form-control" rows="13" placeholder="Write your complete blog content here..." required>{{ edit_blog.content }}</textarea>
+                                        <div class="form-text"><i class="bi bi-file-earmark-text me-1"></i>Write the complete article content.</div>
+                                    </div>
                                 </div>
-                            </div>
-
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="blogExcerpt" class="form-label fw-semibold">
-                                Short Description
-                            </label>
-
-                            <textarea
-                                name="excerpt"
-                                id="blogExcerpt"
-                                class="form-control"
-                                rows="4"
-                                placeholder="Write a short description of this article..."
-                            ></textarea>
-
-                            <div class="form-text">
-                                <i class="bi bi-card-text me-1"></i>
-                                This summary will be displayed on the blog listing.
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="blogContent" class="form-label fw-semibold">
-                                Blog Content <span class="text-danger">*</span>
-                            </label>
-
-                            <textarea
-                                name="content"
-                                id="blogContent"
-                                class="form-control"
-                                rows="13"
-                                placeholder="Write your complete blog content here..."
-                                required
-                            ></textarea>
-
-                            <div class="form-text">
-                                <i class="bi bi-file-earmark-text me-1"></i>
-                                Write the complete article content.
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="col-xl-4">
-
-                        <div class="card bg-body-tertiary border-0 h-100">
-                            <div class="card-body p-4">
-
-                                <h5 class="fw-bold mb-3">
-                                    <i class="bi bi-image text-primary me-2"></i>
-                                    Blog Cover Image
-                                </h5>
-
-                                <div class="rounded-4 border overflow-hidden bg-body mb-3">
-                                    <div
-                                        id="blogImagePreview"
-                                        class="d-flex align-items-center justify-content-center"
-                                        style="height:230px;"
-                                    >
-                                        <div class="text-center text-body-secondary">
-                                            <i class="bi bi-image fs-1 d-block mb-2"></i>
-                                            <span>Image preview will appear here</span>
+                                <div class="col-xl-4">
+                                    <div class="card bg-body-tertiary border-0 h-100">
+                                        <div class="card-body p-4">
+                                            <h5 class="fw-bold mb-3"><i class="bi bi-image text-primary me-2"></i>Blog Cover Image</h5>
+                                            <div class="rounded-4 border overflow-hidden bg-body mb-3">
+                                                <div id="blogImagePreview" class="d-flex align-items-center justify-content-center" style="height:230px;">
+                                                    {% if edit_blog.cover_image %}
+                                                        <img src="{{ edit_blog.cover_image.url }}" class="w-100 h-100" style="object-fit:cover;" alt="{{ edit_blog.title }}">
+                                                    {% else %}
+                                                        <div class="text-center text-body-secondary">
+                                                            <i class="bi bi-image fs-1 d-block mb-2"></i>
+                                                            <span>Image preview will appear here</span>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <label for="blogImage" class="form-label fw-semibold">Select New Cover Image</label>
+                                            <input type="file" name="cover_image" id="blogImage" class="form-control" accept="image/jpeg,image/png,image/webp">
+                                            <div class="form-text mb-3">JPG, PNG or WEBP • Maximum 5 MB<br>Leave empty to keep the current image.</div>
+                                            <div class="border rounded-3 p-3 bg-body mb-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" name="is_active" id="blogActive" {% if edit_blog.is_active %}checked{% endif %}>
+                                                    <label class="form-check-label fw-semibold" for="blogActive">Active / Published</label>
+                                                </div>
+                                                <small class="text-body-secondary">Active blogs can appear on the website.</small>
+                                            </div>
+                                            <div class="border rounded-3 p-3 bg-body mb-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" name="is_featured" id="blogFeatured" {% if edit_blog.is_featured %}checked{% endif %}>
+                                                    <label class="form-check-label fw-semibold" for="blogFeatured">Featured Blog</label>
+                                                </div>
+                                                <small class="text-body-secondary">Featured blogs can be highlighted.</small>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="publishedAt" class="form-label fw-semibold">Published Date & Time</label>
+                                                <input type="datetime-local" name="published_at" id="publishedAt" class="form-control" value="{{ edit_blog.published_at|date:'Y-m-d\TH\:i' }}">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <label for="blogImage" class="form-label fw-semibold">
-                                    Select Cover Image <span class="text-danger">*</span>
-                                </label>
-
-                                <input
-                                    type="file"
-                                    name="cover_image"
-                                    id="blogImage"
-                                    class="form-control"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    required
-                                >
-
-                                <div class="form-text mb-3">
-                                    JPG, PNG or WEBP • Maximum 5 MB
-                                </div>
-
-                                <div class="border rounded-3 p-3 bg-body mb-3">
-                                    <div class="form-check form-switch">
-                                        <input
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            name="is_active"
-                                            id="blogActive"
-                                            checked
-                                        >
-                                        <label class="form-check-label fw-semibold" for="blogActive">
-                                            Active / Published
-                                        </label>
+                            </div>
+                            <div class="border-top pt-4 mt-4">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                                    <div>
+                                        <div class="fw-semibold"><i class="bi bi-pencil-square text-primary me-1"></i>Updating Blog</div>
+                                        <small class="text-body-secondary">Update the information and save your changes.</small>
                                     </div>
-                                    <small class="text-body-secondary">
-                                        Active blogs can appear on the website.
-                                    </small>
-                                </div>
-
-                                <div class="border rounded-3 p-3 bg-body mb-3">
-                                    <div class="form-check form-switch">
-                                        <input
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            name="is_featured"
-                                            id="blogFeatured"
-                                        >
-                                        <label class="form-check-label fw-semibold" for="blogFeatured">
-                                            Featured Blog
-                                        </label>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'blog' %}" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-1"></i>Cancel</a>
+                                        <button type="submit" id="blogUploadButton" class="btn btn-primary px-4"><i class="bi bi-check-circle me-1"></i>Update Blog</button>
                                     </div>
-                                    <small class="text-body-secondary">
-                                        Featured blogs can be highlighted.
-                                    </small>
                                 </div>
-
-                                <div class="mb-3">
-                                    <label for="publishedAt" class="form-label fw-semibold">
-                                        Published Date & Time
-                                    </label>
-
-                                    <input
-                                        type="datetime-local"
-                                        name="published_at"
-                                        id="publishedAt"
-                                        class="form-control"
-                                    >
+                            </div>
+                        </form>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <form method="post" enctype="multipart/form-data" action="{% url 'blog_create' %}" id="blogUploadForm">
+                    {% csrf_token %}
+                    <div class="row g-4">
+                        <div class="col-xl-8">
+                            <div class="mb-4">
+                                <label for="blogTitle" class="form-label fw-semibold">Blog Title <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-body"><i class="bi bi-type text-primary"></i></span>
+                                    <input type="text" name="title" id="blogTitle" class="form-control" maxlength="250" placeholder="Enter blog title..." required>
                                 </div>
-
+                                <div class="form-text"><i class="bi bi-info-circle me-1"></i>Write a clear and attractive title.</div>
+                            </div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label for="blogCategory" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                                    <select name="category" id="blogCategory" class="form-select" required>
+                                        {% for value,label in blog_categories %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="blogAuthor" class="form-label fw-semibold">Author</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-body"><i class="bi bi-person text-primary"></i></span>
+                                        <input type="text" name="author" id="blogAuthor" class="form-control" maxlength="150" value="NandiRide Team" placeholder="Author name">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="blogExcerpt" class="form-label fw-semibold">Short Description</label>
+                                <textarea name="excerpt" id="blogExcerpt" class="form-control" rows="4" placeholder="Write a short description of this article..."></textarea>
+                                <div class="form-text"><i class="bi bi-card-text me-1"></i>This summary will be displayed on the blog listing.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="blogContent" class="form-label fw-semibold">Blog Content <span class="text-danger">*</span></label>
+                                <textarea name="content" id="blogContent" class="form-control" rows="13" placeholder="Write your complete blog content here..." required></textarea>
+                                <div class="form-text"><i class="bi bi-file-earmark-text me-1"></i>Write the complete article content.</div>
                             </div>
                         </div>
-
-                    </div>
-
-                </div>
-
-                <div class="border-top pt-4 mt-4">
-
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-
-                        <div>
-                            <div class="fw-semibold">
-                                <i class="bi bi-check2-circle text-success me-1"></i>
-                                Ready to Publish
+                        <div class="col-xl-4">
+                            <div class="card bg-body-tertiary border-0 h-100">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold mb-3"><i class="bi bi-image text-primary me-2"></i>Blog Cover Image</h5>
+                                    <div class="rounded-4 border overflow-hidden bg-body mb-3">
+                                        <div id="blogImagePreview" class="d-flex align-items-center justify-content-center" style="height:230px;">
+                                            <div class="text-center text-body-secondary">
+                                                <i class="bi bi-image fs-1 d-block mb-2"></i>
+                                                <span>Image preview will appear here</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <label for="blogImage" class="form-label fw-semibold">Select Cover Image <span class="text-danger">*</span></label>
+                                    <input type="file" name="cover_image" id="blogImage" class="form-control" accept="image/jpeg,image/png,image/webp" required>
+                                    <div class="form-text mb-3">JPG, PNG or WEBP • Maximum 5 MB</div>
+                                    <div class="border rounded-3 p-3 bg-body mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="is_active" id="blogActive" checked>
+                                            <label class="form-check-label fw-semibold" for="blogActive">Active / Published</label>
+                                        </div>
+                                        <small class="text-body-secondary">Active blogs can appear on the website.</small>
+                                    </div>
+                                    <div class="border rounded-3 p-3 bg-body mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="is_featured" id="blogFeatured">
+                                            <label class="form-check-label fw-semibold" for="blogFeatured">Featured Blog</label>
+                                        </div>
+                                        <small class="text-body-secondary">Featured blogs can be highlighted.</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="publishedAt" class="form-label fw-semibold">Published Date & Time</label>
+                                        <input type="datetime-local" name="published_at" id="publishedAt" class="form-control" value="{% now 'Y-m-d\TH\:i' %}">
+                                    </div>
+                                </div>
                             </div>
-
-                            <small class="text-body-secondary">
-                                Check the title, image and content before uploading.
-                            </small>
                         </div>
-
-                        <div class="d-flex gap-2">
-
-                            <button
-                                type="reset"
-                                class="btn btn-outline-secondary"
-                                id="blogResetButton"
-                            >
-                                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
-                            </button>
-
-                            <button
-                                type="submit"
-                                id="blogUploadButton"
-                                class="btn btn-primary px-4"
-                            >
-                                <i class="bi bi-cloud-arrow-up me-1"></i>Upload Blog
-                            </button>
-
-                        </div>
-
                     </div>
-
-                </div>
-
-            </form>
-
+                    <div class="border-top pt-4 mt-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div>
+                                <div class="fw-semibold"><i class="bi bi-check2-circle text-success me-1"></i>Ready to Publish</div>
+                                <small class="text-body-secondary">Check the title, image and content before uploading.</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="reset" class="btn btn-outline-secondary" id="blogResetButton"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
+                                <button type="submit" id="blogUploadButton" class="btn btn-primary px-4"><i class="bi bi-cloud-arrow-up me-1"></i>Upload Blog</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            {% endif %}
         </div>
     </div>
-
-    <div
-        class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3"
-        id="latest-posts"
-    >
-
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3" id="latest-posts">
         <div>
             <h3 class="fw-bold mb-1">Latest Articles</h3>
-            <p class="text-body-secondary mb-0">
-                Manage and explore published NandiRide articles.
-            </p>
+            <p class="text-body-secondary mb-0">Manage and explore NandiRide articles.</p>
         </div>
-
         <div class="input-group" style="max-width:360px;">
-            <span class="input-group-text bg-body border-end-0">
-                <i class="bi bi-search"></i>
-            </span>
-
-            <input
-                type="search"
-                id="blogSearch"
-                class="form-control border-start-0"
-                placeholder="Search articles..."
-                autocomplete="off"
-            >
+            <span class="input-group-text bg-body border-end-0"><i class="bi bi-search"></i></span>
+            <input type="search" id="blogSearch" class="form-control border-start-0" placeholder="Search articles..." autocomplete="off">
         </div>
-
     </div>
-
     <div class="d-flex flex-wrap gap-2 mb-4" id="blogFilters">
-
-        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 blog-filter active" data-filter="all">
-            All
-        </button>
-
-        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="company">
-            Company
-        </button>
-
-        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="mobility">
-            Mobility
-        </button>
-
-        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="technology">
-            Technology
-        </button>
-
-        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="safety">
-            Safety
-        </button>
-
-        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="travel">
-            Travel
-        </button>
-
-        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="tips">
-            Tips
-        </button>
-
-        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="updates">
-            Updates
-        </button>
-
-        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="other">
-            Other
-        </button>
-
+        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 blog-filter active" data-filter="all">All</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="company">Company</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="mobility">Mobility</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="technology">Technology</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="safety">Safety</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="travel">Travel</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="tips">Tips</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="updates">Updates</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 blog-filter" data-filter="other">Other</button>
     </div>
-
     <div class="row g-4" id="blogGrid">
-
         {% for blog in blog_posts %}
-
-            <div
-                class="col-md-6 col-xl-4 blog-card-item"
-                data-category="{{ blog.category|lower }}"
-                data-title="{{ blog.title|lower }}"
-                data-search="{{ blog.excerpt|default:''|lower }}"
-            >
-
+            <div class="col-md-6 col-xl-4 blog-card-item" data-category="{{ blog.category|lower }}" data-title="{{ blog.title|lower }}" data-search="{{ blog.excerpt|default:''|lower }}">
                 <div class="card border-0 shadow-sm overflow-hidden h-100">
-
                     <div class="position-relative bg-body-tertiary" style="height:220px;">
-
                         {% if blog.cover_image %}
-
-                            <img
-                                src="{{ blog.cover_image.url }}"
-                                class="w-100 h-100"
-                                style="object-fit:cover;"
-                                alt="{{ blog.title }}"
-                            >
-
+                            <img src="{{ blog.cover_image.url }}" class="w-100 h-100" style="object-fit:cover;" alt="{{ blog.title }}">
                         {% else %}
-
                             <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-
                                 <div class="text-center">
-
                                     <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center mb-3" style="width:72px;height:72px;">
                                         <i class="bi bi-journal-text fs-2"></i>
                                     </div>
-
-                                    <div class="small text-body-secondary">
-                                        NandiRide Blog
-                                    </div>
-
+                                    <div class="small text-body-secondary">NandiRide Blog</div>
                                 </div>
-
                             </div>
-
                         {% endif %}
-
                         {% if blog.is_featured %}
-                            <span class="position-absolute top-0 end-0 m-3 badge text-bg-warning rounded-pill">
-                                <i class="bi bi-star-fill me-1"></i>Featured
-                            </span>
+                            <span class="position-absolute top-0 end-0 m-3 badge text-bg-warning rounded-pill"><i class="bi bi-star-fill me-1"></i>Featured</span>
                         {% endif %}
-
                         {% if not blog.is_active %}
-                            <span class="position-absolute top-0 start-0 m-3 badge text-bg-secondary rounded-pill">
-                                Inactive
-                            </span>
+                            <span class="position-absolute top-0 start-0 m-3 badge text-bg-secondary rounded-pill">Inactive</span>
                         {% endif %}
-
                     </div>
-
                     <div class="card-body p-4 d-flex flex-column">
-
                         <div class="d-flex flex-wrap gap-2 mb-3">
-
-                            <span class="badge bg-primary-subtle text-primary">
-                                {{ blog.get_category_display }}
-                            </span>
-
-                            <span class="small text-body-secondary">
-                                {{ blog.published_at|date:"d M Y" }}
-                            </span>
-
+                            <span class="badge bg-primary-subtle text-primary">{{ blog.get_category_display }}</span>
+                            <span class="small text-body-secondary">{{ blog.published_at|date:"d M Y" }}</span>
                         </div>
-
-                        <h5 class="fw-bold">
-                            {{ blog.title }}
-                        </h5>
-
+                        <h5 class="fw-bold">{{ blog.title }}</h5>
                         <p class="text-body-secondary">
-
                             {% if blog.excerpt %}
                                 {{ blog.excerpt|truncatechars:150 }}
                             {% else %}
                                 {{ blog.content|truncatechars:150 }}
                             {% endif %}
-
                         </p>
-
                         <div class="d-flex align-items-center justify-content-between gap-2 mt-auto pt-3">
-
-                            <div class="small text-body-secondary text-truncate">
-                                <i class="bi bi-person me-1"></i>{{ blog.author }}
-                            </div>
-
-                            <div
-                                class="small text-body-secondary flex-shrink-0"
-                                id="blogViews{{ blog.id }}"
-                            >
-                                <i class="bi bi-eye me-1"></i>{{ blog.views|default:"0" }}
-                            </div>
-
+                            <div class="small text-body-secondary text-truncate"><i class="bi bi-person me-1"></i>{{ blog.author }}</div>
+                            <div class="small text-body-secondary flex-shrink-0" id="blogViews{{ blog.id }}"><i class="bi bi-eye me-1"></i>{{ blog.views|default:"0" }}</div>
                         </div>
-
-                        <div class="d-flex gap-2 mt-3">
-
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-grow-1 blog-view-btn"
-                                data-bs-toggle="modal"
-                                data-bs-target="#blogModal{{ blog.id }}"
-                                data-blog-id="{{ blog.id }}"
-                                data-view-url="{% url 'blog_view_count' blog.id %}"
-                            >
-                                <i class="bi bi-eye me-1"></i>View
+                        <div class="d-flex align-items-center justify-content-between gap-2 mt-3">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-4 blog-view-btn" title="View Blog" data-bs-toggle="modal" data-bs-target="#blogModal{{ blog.id }}" data-blog-id="{{ blog.id }}" data-view-url="{% url 'blog_view_increment' blog.id %}">
+                                <i class="bi bi-eye"></i>
                             </button>
-
+                            <a href="{% url 'blog' %}?edit={{ blog.id }}#blog-management" class="btn btn-sm btn-outline-warning rounded-pill px-4" title="Edit Blog">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-4 delete-blog-btn" data-bs-toggle="modal" data-bs-target="#deleteBlogModal" data-blog-id="{{ blog.id }}" data-blog-title="{{ blog.title|escapejs }}" data-delete-url="{% url 'blog_delete' blog.id %}" title="Delete Blog">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
-            <div
-                class="modal fade"
-                id="blogModal{{ blog.id }}"
-                tabindex="-1"
-                aria-labelledby="blogModalLabel{{ blog.id }}"
-                aria-hidden="true"
-            >
-
+            <div class="modal fade" id="blogModal{{ blog.id }}" tabindex="-1" aria-labelledby="blogModalLabel{{ blog.id }}" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-
                     <div class="modal-content border-0 shadow">
-
                         <div class="modal-header">
-
                             <div class="pe-3">
-
                                 <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-
-                                    <span class="badge bg-primary-subtle text-primary">
-                                        {{ blog.get_category_display }}
-                                    </span>
-
+                                    <span class="badge bg-primary-subtle text-primary">{{ blog.get_category_display }}</span>
                                     {% if blog.is_featured %}
-
-                                        <span class="badge bg-warning-subtle text-warning">
-                                            <i class="bi bi-star-fill me-1"></i>Featured
-                                        </span>
-
+                                        <span class="badge bg-warning-subtle text-warning"><i class="bi bi-star-fill me-1"></i>Featured</span>
                                     {% endif %}
-
+                                    {% if blog.is_active %}
+                                        <span class="badge bg-success-subtle text-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
+                                    {% endif %}
                                 </div>
-
-                                <h5
-                                    class="modal-title fw-bold"
-                                    id="blogModalLabel{{ blog.id }}"
-                                >
-                                    {{ blog.title }}
-                                </h5>
-
+                                <h5 class="modal-title fw-bold" id="blogModalLabel{{ blog.id }}">{{ blog.title }}</h5>
                                 <div class="small text-body-secondary mt-1">
-
-                                    <i class="bi bi-calendar3 me-1"></i>
-                                    {{ blog.published_at|date:"d M Y, h:i A" }}
-
+                                    <i class="bi bi-calendar3 me-1"></i>{{ blog.published_at|date:"d M Y, h\:i A" }}
                                     <span class="mx-2">•</span>
-
-                                    <i class="bi bi-person me-1"></i>
-                                    {{ blog.author }}
-
+                                    <i class="bi bi-person me-1"></i>{{ blog.author }}
                                 </div>
-
                             </div>
-
-                            <button
-                                type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"
-                            ></button>
-
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-
                         <div class="modal-body p-4">
-
                             {% if blog.cover_image %}
-
                                 <div class="rounded-4 overflow-hidden mb-4 bg-body-tertiary">
-
-                                    <img
-                                        src="{{ blog.cover_image.url }}"
-                                        class="w-100"
-                                        style="max-height:420px;object-fit:cover;"
-                                        alt="{{ blog.title }}"
-                                    >
-
+                                    <img src="{{ blog.cover_image.url }}" class="w-100" style="max-height:420px;object-fit:cover;" alt="{{ blog.title }}">
                                 </div>
-
                             {% endif %}
-
                             {% if blog.excerpt %}
-
                                 <div class="alert alert-primary border-0 mb-4">
-
-                                    <div class="fw-semibold mb-1">
-                                        <i class="bi bi-info-circle me-1"></i>Summary
-                                    </div>
-
-                                    <div>
-                                        {{ blog.excerpt }}
-                                    </div>
-
+                                    <div class="fw-semibold mb-1"><i class="bi bi-info-circle me-1"></i>Summary</div>
+                                    <div>{{ blog.excerpt }}</div>
                                 </div>
-
                             {% endif %}
-
-                            <div
-                                class="blog-full-content"
-                                style="white-space:pre-wrap;line-height:1.8;"
-                            >
-                                {{ blog.content }}
-                            </div>
-
+                            <div class="blog-full-content" style="white-space:pre-wrap;line-height:1.8;">{{ blog.content }}</div>
                             <div class="border-top mt-4 pt-3">
-
                                 <div class="d-flex flex-wrap gap-3 text-body-secondary small">
-
-                                    <span>
-                                        <i class="bi bi-person me-1"></i>{{ blog.author }}
-                                    </span>
-
-                                    <span>
-                                        <i class="bi bi-eye me-1"></i>
-                                        <span id="modalBlogViews{{ blog.id }}">
-                                            {{ blog.views|default:"0" }}
-                                        </span>
-                                        views
-                                    </span>
-
-                                    <span>
-                                        <i class="bi bi-clock me-1"></i>
-                                        {{ blog.published_at|date:"d M Y, h:i A" }}
-                                    </span>
-
+                                    <span><i class="bi bi-person me-1"></i>{{ blog.author }}</span>
+                                    <span><i class="bi bi-eye me-1"></i><span id="modalBlogViews{{ blog.id }}">{{ blog.views|default:"0" }}</span> views</span>
+                                    <span><i class="bi bi-clock me-1"></i>{{ blog.published_at|date:"d M Y, h\:i A" }}</span>
                                 </div>
-
                             </div>
-
                         </div>
-
                         <div class="modal-footer">
-
-                            <button
-                                type="button"
-                                class="btn btn-outline-danger rounded-pill px-4"
-                                data-bs-dismiss="modal"
-                            >
+                            <a href="{% url 'blog' %}?edit={{ blog.id }}#blog-management" class="btn btn-outline-warning rounded-pill px-4">
+                                <i class="bi bi-pencil-square me-1"></i>Edit
+                            </a>
+                            <button type="button" class="btn btn-outline-danger rounded-pill px-4" data-bs-dismiss="modal">
                                 <i class="bi bi-x-lg me-1"></i>Close
                             </button>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         {% empty %}
-
             <div class="col-12">
-
                 <div class="card border-0 shadow-sm">
-
                     <div class="card-body text-center py-5">
-
-                        <div
-                            class="rounded-circle bg-body-tertiary d-inline-flex align-items-center justify-content-center mb-3"
-                            style="width:80px;height:80px;"
-                        >
+                        <div class="rounded-circle bg-body-tertiary d-inline-flex align-items-center justify-content-center mb-3" style="width:80px;height:80px;">
                             <i class="bi bi-journal-x fs-1 text-body-secondary"></i>
                         </div>
-
-                        <h5 class="fw-bold">
-                            No Blog Articles Found
-                        </h5>
-
-                        <p class="text-body-secondary mb-0">
-                            Create your first NandiRide blog using the form above.
-                        </p>
-
+                        <h5 class="fw-bold">No Blog Articles Found</h5>
+                        <p class="text-body-secondary mb-0">Create your first NandiRide blog using the Create Blog button above.</p>
                     </div>
-
                 </div>
-
             </div>
-
         {% endfor %}
-
     </div>
-
-    <div
-        id="noResults"
-        class="alert alert-secondary border-0 shadow-sm mt-4 d-none"
-    >
-        <i class="bi bi-search me-2"></i>
-        No articles found for your search or selected category.
+    <div id="noResults" class="alert alert-secondary border-0 shadow-sm mt-4 d-none">
+        <i class="bi bi-search me-2"></i>No articles found for your search or selected category.
     </div>
-
     <div class="row g-4 mt-1">
-
         <div class="col-lg-4">
-
             <div class="card border-0 shadow-sm h-100">
-
                 <div class="card-body p-4">
-
-                    <div
-                        class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center mb-3"
-                        style="width:52px;height:52px;"
-                    >
+                    <div class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center mb-3" style="width:52px;height:52px;">
                         <i class="bi bi-shield-check fs-4"></i>
                     </div>
-
-                    <h5 class="fw-bold">
-                        Safety First
-                    </h5>
-
-                    <p class="text-body-secondary mb-0">
-                        Discover practical safety information and ride awareness tips for passengers and drivers.
-                    </p>
-
+                    <h5 class="fw-bold">Safety First</h5>
+                    <p class="text-body-secondary mb-0">Discover practical safety information and ride awareness tips for passengers and drivers.</p>
                 </div>
-
             </div>
-
         </div>
-
         <div class="col-lg-4">
-
             <div class="card border-0 shadow-sm h-100">
-
                 <div class="card-body p-4">
-
-                    <div
-                        class="rounded-3 bg-success-subtle text-success d-flex align-items-center justify-content-center mb-3"
-                        style="width:52px;height:52px;"
-                    >
+                    <div class="rounded-3 bg-success-subtle text-success d-flex align-items-center justify-content-center mb-3" style="width:52px;height:52px;">
                         <i class="bi bi-cpu-fill fs-4"></i>
                     </div>
-
-                    <h5 class="fw-bold">
-                        Mobility Technology
-                    </h5>
-
-                    <p class="text-body-secondary mb-0">
-                        Learn how booking, driver assignment, tracking, fare calculation and payment systems work together.
-                    </p>
-
+                    <h5 class="fw-bold">Mobility Technology</h5>
+                    <p class="text-body-secondary mb-0">Learn how booking, driver assignment, vehicles, tracking, fare calculation and payment systems work together.</p>
                 </div>
-
             </div>
-
         </div>
-
         <div class="col-lg-4">
-
             <div class="card border-0 shadow-sm h-100">
-
                 <div class="card-body p-4">
-
-                    <div
-                        class="rounded-3 bg-warning-subtle text-warning d-flex align-items-center justify-content-center mb-3"
-                        style="width:52px;height:52px;"
-                    >
+                    <div class="rounded-3 bg-warning-subtle text-warning d-flex align-items-center justify-content-center mb-3" style="width:52px;height:52px;">
                         <i class="bi bi-compass-fill fs-4"></i>
                     </div>
-
-                    <h5 class="fw-bold">
-                        Travel Tips
-                    </h5>
-
-                    <p class="text-body-secondary mb-0">
-                        Get useful ideas for planning local rides, long journeys and comfortable transportation experiences.
-                    </p>
-
+                    <h5 class="fw-bold">Travel Tips</h5>
+                    <p class="text-body-secondary mb-0">Get useful ideas for planning local rides, long journeys and comfortable transportation experiences.</p>
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
     <div class="card border-0 shadow-sm mt-4 overflow-hidden">
-
         <div class="card-body p-4 p-lg-5">
-
             <div class="row align-items-center g-4">
-
                 <div class="col-lg-8">
-
-                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 mb-3">
-                        <i class="bi bi-lightning-charge-fill me-1"></i>NANDIRIDE UPDATES
-                    </span>
-
-                    <h3 class="fw-bold">
-                        Technology that keeps every journey connected.
-                    </h3>
-
-                    <p class="text-body-secondary mb-0">
-                        NandiRide brings booking, driver management, vehicles, tracking, payments and support operations together to create a connected mobility experience.
-                    </p>
-
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 mb-3"><i class="bi bi-lightning-charge-fill me-1"></i>NANDIRIDE UPDATES</span>
+                    <h3 class="fw-bold">Technology that keeps every journey connected.</h3>
+                    <p class="text-body-secondary mb-0">NandiRide brings booking, driver management, vehicles, tracking, payments and support operations together to create a connected mobility experience.</p>
                 </div>
-
                 <div class="col-lg-4 text-lg-end">
-
-                    <a
-                        href="{% url 'services' %}"
-                        class="btn btn-primary rounded-pill px-4"
-                    >
-                        <i class="bi bi-grid me-2"></i>Explore Services
-                    </a>
-
+                    <a href="{% url 'services' %}" class="btn btn-primary rounded-pill px-4"><i class="bi bi-grid me-2"></i>Explore Services</a>
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
-
+<div class="modal fade" id="deleteBlogModal" tabindex="-1" aria-labelledby="deleteBlogModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg overflow-hidden">
+            <div class="modal-header border-0 bg-danger-subtle">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                        <i class="bi bi-trash3-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="deleteBlogModalLabel">Delete Blog</h5>
+                        <small class="text-body-secondary">Permanent action</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size:52px;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Are you sure?</h5>
+                    <p class="text-body-secondary mb-2">You are about to permanently delete this blog:</p>
+                    <div class="bg-body-tertiary rounded-3 p-3 mb-3">
+                        <div class="fw-semibold text-danger" id="deleteBlogTitle">Blog Title</div>
+                    </div>
+                    <div class="alert alert-warning border-0 mb-0">
+                        <i class="bi bi-info-circle me-1"></i>This action cannot be undone.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <form method="post" id="confirmDeleteBlogForm" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger rounded-pill px-4" id="confirmDeleteBlogButton">
+                        <i class="bi bi-trash3-fill me-1"></i>Delete Blog
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
 (function(){
     const searchInput=document.getElementById("blogSearch");
@@ -958,93 +590,137 @@
     const blogUploadButton=document.getElementById("blogUploadButton");
     const blogResetButton=document.getElementById("blogResetButton");
     const totalBlogViews=document.getElementById("totalBlogViews");
+    const deleteBlogTitle=document.getElementById("deleteBlogTitle");
+    const confirmDeleteBlogForm=document.getElementById("confirmDeleteBlogForm");
+    const confirmDeleteBlogButton=document.getElementById("confirmDeleteBlogButton");
+    const createBlogSection=document.getElementById("createBlogSection");
+    const toggleCreateBlog=document.getElementById("toggleCreateBlog");
+    const toggleCreateBlogIcon=document.getElementById("toggleCreateBlogIcon");
+    const toggleCreateBlogText=document.getElementById("toggleCreateBlogText");
+    const closeCreateBlog=document.getElementById("closeCreateBlog");
     let activeFilter="all";
-
+    function updateCreateButton(){
+        if(!createBlogSection||!toggleCreateBlog){
+            return;
+        }
+        const isOpen=!createBlogSection.classList.contains("d-none");
+        if(isOpen){
+            toggleCreateBlog.classList.remove("btn-outline-primary");
+            toggleCreateBlog.classList.add("btn-primary");
+            if(toggleCreateBlogIcon){
+                toggleCreateBlogIcon.className="bi bi-x-lg me-2";
+            }
+            if(toggleCreateBlogText){
+                toggleCreateBlogText.textContent="Close Blog Editor";
+            }
+        }else{
+            toggleCreateBlog.classList.remove("btn-primary");
+            toggleCreateBlog.classList.add("btn-outline-primary");
+            if(toggleCreateBlogIcon){
+                toggleCreateBlogIcon.className="bi bi-plus-circle me-2";
+            }
+            if(toggleCreateBlogText){
+                toggleCreateBlogText.textContent="Create Blog";
+            }
+        }
+    }
+    function openCreateBlog(){
+        if(!createBlogSection){
+            return;
+        }
+        createBlogSection.classList.remove("d-none");
+        updateCreateButton();
+        setTimeout(function(){
+            createBlogSection.scrollIntoView({behavior:"smooth",block:"start"});
+        },50);
+    }
+    function closeCreateBlogSection(){
+        if(!createBlogSection){
+            return;
+        }
+        createBlogSection.classList.add("d-none");
+        updateCreateButton();
+    }
+    if(toggleCreateBlog){
+        toggleCreateBlog.addEventListener("click",function(){
+            if(createBlogSection&&createBlogSection.classList.contains("d-none")){
+                openCreateBlog();
+            }else{
+                closeCreateBlogSection();
+            }
+        });
+    }
+    if(closeCreateBlog){
+        closeCreateBlog.addEventListener("click",function(){
+            closeCreateBlogSection();
+        });
+    }
+    updateCreateButton();
     function filterPosts(){
         const search=(searchInput?.value||"").trim().toLowerCase();
         let visible=0;
-
         cards.forEach(card=>{
             const category=(card.dataset.category||"").toLowerCase();
             const title=(card.dataset.title||"").toLowerCase();
             const cardSearch=(card.dataset.search||"").toLowerCase();
-
             const filterMatch=activeFilter==="all"||category===activeFilter;
             const searchMatch=!search||title.includes(search)||category.includes(search)||cardSearch.includes(search);
             const show=filterMatch&&searchMatch;
-
             card.classList.toggle("d-none",!show);
-
             if(show){
                 visible++;
             }
         });
-
         if(noResults){
             noResults.classList.toggle("d-none",visible!==0);
         }
     }
-
     filterButtons.forEach(button=>{
         button.addEventListener("click",function(){
             activeFilter=this.dataset.filter||"all";
-
             filterButtons.forEach(item=>{
                 item.classList.remove("btn-primary","active");
                 item.classList.add("btn-outline-secondary");
             });
-
             this.classList.remove("btn-outline-secondary");
             this.classList.add("btn-primary","active");
-
             filterPosts();
         });
     });
-
     if(searchInput){
         searchInput.addEventListener("input",filterPosts);
     }
-
-    if(blogImage){
+    if(blogImage&&blogImagePreview){
         blogImage.addEventListener("change",function(){
             const file=this.files&&this.files[0];
-
             if(!file){
-                blogImagePreview.innerHTML='<div class="text-center text-body-secondary"><i class="bi bi-image fs-1 d-block mb-2"></i><span>Image preview will appear here</span></div>';
                 return;
             }
-
             const allowedTypes=["image/jpeg","image/png","image/webp"];
-
             if(!allowedTypes.includes(file.type)){
                 this.value="";
                 blogImagePreview.innerHTML='<div class="text-center text-danger"><i class="bi bi-exclamation-triangle fs-1 d-block mb-2"></i><span>Only JPG, PNG or WEBP files are allowed.</span></div>';
                 return;
             }
-
             const maxSize=5*1024*1024;
-
             if(file.size>maxSize){
                 this.value="";
                 blogImagePreview.innerHTML='<div class="text-center text-danger"><i class="bi bi-exclamation-triangle fs-1 d-block mb-2"></i><span>Maximum file size is 5 MB.</span></div>';
                 return;
             }
-
             const reader=new FileReader();
-
             reader.onload=function(event){
                 blogImagePreview.innerHTML='<img src="'+event.target.result+'" class="w-100 h-100" style="object-fit:cover;" alt="Blog Cover Preview">';
             };
-
             reader.readAsDataURL(file);
         });
     }
-
     if(blogResetButton){
         blogResetButton.addEventListener("click",function(){
             setTimeout(function(){
-                blogImagePreview.innerHTML='<div class="text-center text-body-secondary"><i class="bi bi-image fs-1 d-block mb-2"></i><span>Image preview will appear here</span></div>';
-
+                if(blogImagePreview){
+                    blogImagePreview.innerHTML='<div class="text-center text-body-secondary"><i class="bi bi-image fs-1 d-block mb-2"></i><span>Image preview will appear here</span></div>';
+                }
                 if(blogUploadButton){
                     blogUploadButton.disabled=false;
                     blogUploadButton.innerHTML='<i class="bi bi-cloud-arrow-up me-1"></i>Upload Blog';
@@ -1052,16 +728,18 @@
             },50);
         });
     }
-
     if(blogUploadForm){
         blogUploadForm.addEventListener("submit",function(){
             if(blogUploadButton){
                 blogUploadButton.disabled=true;
-                blogUploadButton.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Uploading Blog...';
+                if(window.location.search.includes("edit=")){
+                    blogUploadButton.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Updating Blog...';
+                }else{
+                    blogUploadButton.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Uploading Blog...';
+                }
             }
         });
     }
-
     function getCookie(name){
         const cookies=document.cookie?document.cookie.split(";"):[];
         for(let cookie of cookies){
@@ -1072,22 +750,17 @@
         }
         return "";
     }
-
     document.querySelectorAll(".blog-view-btn").forEach(button=>{
         button.addEventListener("click",function(){
             const viewUrl=this.dataset.viewUrl;
             const blogId=this.dataset.blogId;
-
             if(!viewUrl||!blogId){
                 return;
             }
-
             if(this.dataset.counted==="1"){
                 return;
             }
-
             this.dataset.counted="1";
-
             fetch(viewUrl,{
                 method:"POST",
                 headers:{
@@ -1095,7 +768,8 @@
                     "X-Requested-With":"XMLHttpRequest",
                     "Content-Type":"application/json"
                 },
-                credentials:"same-origin"
+                credentials:"same-origin",
+                body:"{}"
             })
             .then(response=>{
                 if(!response.ok){
@@ -1105,20 +779,17 @@
             })
             .then(data=>{
                 if(!data.success){
+                    this.dataset.counted="0";
                     return;
                 }
-
                 const cardViews=document.getElementById("blogViews"+blogId);
                 const modalViews=document.getElementById("modalBlogViews"+blogId);
-
                 if(cardViews){
                     cardViews.innerHTML='<i class="bi bi-eye me-1"></i>'+data.views;
                 }
-
                 if(modalViews){
                     modalViews.textContent=data.views;
                 }
-
                 if(totalBlogViews&&typeof data.total_views!=="undefined"){
                     totalBlogViews.textContent=data.total_views;
                 }
@@ -1128,9 +799,31 @@
             });
         });
     });
-
+    document.querySelectorAll(".delete-blog-btn").forEach(button=>{
+        button.addEventListener("click",function(){
+            const deleteUrl=this.dataset.deleteUrl||"";
+            const blogTitle=this.dataset.blogTitle||"this blog";
+            if(deleteBlogTitle){
+                deleteBlogTitle.textContent=blogTitle;
+            }
+            if(confirmDeleteBlogForm){
+                confirmDeleteBlogForm.action=deleteUrl;
+            }
+            if(confirmDeleteBlogButton){
+                confirmDeleteBlogButton.disabled=false;
+                confirmDeleteBlogButton.innerHTML='<i class="bi bi-trash3-fill me-1"></i>Delete Blog';
+            }
+        });
+    });
+    if(confirmDeleteBlogForm){
+        confirmDeleteBlogForm.addEventListener("submit",function(){
+            if(confirmDeleteBlogButton){
+                confirmDeleteBlogButton.disabled=true;
+                confirmDeleteBlogButton.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
+            }
+        });
+    }
     filterPosts();
 })();
 </script>
-
 {% endblock %}

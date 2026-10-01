@@ -198,7 +198,7 @@ NAVIGATION = [
                 "permission": None,
             },
             {
-                "title": "FeedBack List",
+                "title": "FeedBack",
                 "icon": "bi-circle",
                 "url": "feedback_list",
                 "permission": None,

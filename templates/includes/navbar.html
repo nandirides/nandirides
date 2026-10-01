@@ -1,4 +1,5 @@
 {% load static %}
+
 <nav class="app-header navbar navbar-expand bg-body border-bottom shadow-sm {% if request.resolver_match.url_name == 'login' %}app-header-login{% else %}app-header-dashboard{% endif %}" style="position:fixed!important;top:0;right:0;z-index:1030!important;">
     <div class="container-fluid position-relative">
         <ul class="navbar-nav align-items-center">
@@ -211,9 +212,67 @@
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    let sessionExpired = false;
     const navbar = document.querySelector(".app-header");
     const sidebarToggle = document.querySelector('[data-lte-toggle="sidebar"]');
     const isLoginPage = document.body.classList.contains("login-page") || (navbar && navbar.classList.contains("app-header-login"));
+    function closeAllBootstrapComponents() {
+        document.querySelectorAll(".notification-dropdown.notification-open").forEach(function (menu) {
+            menu.classList.remove("notification-open");
+        });
+        document.querySelectorAll(".notification-nav-item.notification-parent-open").forEach(function (item) {
+            item.classList.remove("notification-parent-open");
+        });
+        document.querySelectorAll(".modal.show").forEach(function (modalElement) {
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        });
+        document.querySelectorAll(".dropdown-menu.show").forEach(function (menu) {
+            const dropdownInstance = bootstrap.Dropdown.getInstance(menu.previousElementSibling);
+            if (dropdownInstance) {
+                dropdownInstance.hide();
+            } else {
+                menu.classList.remove("show");
+            }
+        });
+        document.querySelectorAll(".navbar-nav .show").forEach(function (element) {
+            element.classList.remove("show");
+        });
+        document.querySelectorAll("[aria-expanded='true']").forEach(function (element) {
+            if (element.closest(".dropdown") || element.closest(".modal")) {
+                element.setAttribute("aria-expanded", "false");
+            }
+        });
+        document.querySelectorAll(".modal-backdrop").forEach(function (backdrop) {
+            backdrop.remove();
+        });
+        document.body.classList.remove("modal-open");
+        document.body.style.removeProperty("overflow");
+        document.body.style.removeProperty("padding-right");
+    }
+    function prepareSessionLogout() {
+        if (sessionExpired) {
+            return;
+        }
+        sessionExpired = true;
+        closeAllBootstrapComponents();
+        if (window.notificationRefreshTimer) {
+            clearInterval(window.notificationRefreshTimer);
+            window.notificationRefreshTimer = null;
+        }
+        if (window.notificationAbortController) {
+            try {
+                window.notificationAbortController.abort();
+            } catch (error) {}
+            window.notificationAbortController = null;
+        }
+    }
+    window.addEventListener("session-timeout", function () {
+        prepareSessionLogout();
+    });
+    window.prepareSessionLogout = prepareSessionLogout;
     function updateNavbar() {
         if (!navbar || isLoginPage) {
             if (navbar && isLoginPage) {
@@ -275,6 +334,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const notificationNav = document.querySelector(".notification-nav-item");
     if (notificationBell && notificationMenu) {
         notificationBell.addEventListener("click", function (event) {
+            if (sessionExpired) {
+                event.preventDefault();
+                return;
+            }
             event.preventDefault();
             event.stopPropagation();
             const isOpen = notificationMenu.classList.contains("notification-open");
@@ -295,6 +358,9 @@ document.addEventListener("DOMContentLoaded", function () {
             event.stopPropagation();
         });
         document.addEventListener("click", function () {
+            if (sessionExpired) {
+                return;
+            }
             notificationMenu.classList.remove("notification-open");
             if (notificationNav) {
                 notificationNav.classList.remove("notification-parent-open");
@@ -324,10 +390,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const notificationStatusUrl = "{% url 'notification_status' %}";
     const notificationBadge = document.getElementById("notification-badge");
     const notificationList = document.getElementById("notification-list");
-
+    window.notificationAbortController = null;
     function updateNotificationBadge(count) {
+        if (sessionExpired) {
+            return;
+        }
         let badge = document.getElementById("notification-badge");
-
         if (count > 0) {
             if (!badge) {
                 badge = document.createElement("span");
@@ -338,22 +406,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     bellWrapper.appendChild(badge);
                 }
             }
-
-            badge.innerHTML =
-                count +
-                '<span class="visually-hidden">unread notifications</span>';
+            badge.innerHTML = count + '<span class="visually-hidden">unread notifications</span>';
         } else if (badge) {
             badge.remove();
         }
     }
-
     function renderNotifications(data) {
-        if (!notificationList) {
+        if (sessionExpired || !notificationList) {
             return;
         }
-
         notificationList.innerHTML = "";
-
         if (!data || data.length === 0) {
             notificationList.innerHTML = `
                 <div class="text-center py-4 text-body-secondary">
@@ -363,18 +425,11 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
             return;
         }
-
         data.forEach(function (notification) {
             const item = document.createElement("a");
-
             item.href = notification.url;
-            item.className =
-                "dropdown-item notification-item py-3 border-bottom";
-
-            const unreadDot = notification.is_read
-                ? ""
-                : '<span class="notification-unread-dot"></span>';
-
+            item.className = "dropdown-item notification-item py-3 border-bottom";
+            const unreadDot = notification.is_read ? "" : '<span class="notification-unread-dot"></span>';
             item.innerHTML = `
                 <div class="d-flex align-items-start">
                     <div class="notification-item-icon me-3">
@@ -394,18 +449,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     ${unreadDot}
                 </div>
             `;
-
             notificationList.appendChild(item);
         });
     }
-
     function escapeNotificationHtml(value) {
         const div = document.createElement("div");
         div.textContent = value || "";
         return div.innerHTML;
     }
-
     function refreshNotifications() {
+        if (sessionExpired || document.hidden) {
+            return;
+        }
+        if (window.notificationAbortController) {
+            try {
+                window.notificationAbortController.abort();
+            } catch (error) {}
+        }
+        window.notificationAbortController = new AbortController();
         fetch(notificationStatusUrl, {
             method: "GET",
             headers: {
@@ -413,40 +474,41 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Accept": "application/json"
             },
             credentials: "same-origin",
-            cache: "no-store"
+            cache: "no-store",
+            signal: window.notificationAbortController.signal
         })
         .then(function (response) {
-            if (!response.ok) {
-                throw new Error(
-                    "Notification request failed: " +
-                    response.status
-                );
+            if (sessionExpired) {
+                return null;
             }
-
+            if (response.status === 401 || response.status === 403 || response.redirected) {
+                prepareSessionLogout();
+                return null;
+            }
+            if (!response.ok) {
+                throw new Error("Notification request failed: " + response.status);
+            }
             return response.json();
         })
         .then(function (data) {
-            updateNotificationBadge(
-                Number(data.unread_count || 0)
-            );
-
-            renderNotifications(
-                data.notifications || []
-            );
+            if (!data || sessionExpired) {
+                return;
+            }
+            updateNotificationBadge(Number(data.unread_count || 0));
+            renderNotifications(data.notifications || []);
         })
         .catch(function (error) {
-            console.error(
-                "Notification refresh error:",
-                error
-            );
+            if (error.name !== "AbortError" && !sessionExpired) {
+                console.error("Notification refresh error:", error);
+            }
         });
     }
-
     refreshNotifications();
-
-    setInterval(
-        refreshNotifications,
-        10000
-    );
+    window.notificationRefreshTimer = setInterval(refreshNotifications, 10000);
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden && !sessionExpired) {
+            refreshNotifications();
+        }
+    });
 });
 </script>

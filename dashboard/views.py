@@ -912,6 +912,8 @@ def about(request):
 
 @login_required
 def blog(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
     posts = BlogPost.objects.all().order_by("-is_featured", "-published_at", "-created_at")
     search = request.GET.get("q", "").strip()
     category = request.GET.get("category", "").strip()
@@ -920,7 +922,7 @@ def blog(request):
             Q(title__icontains=search) |
             Q(excerpt__icontains=search) |
             Q(content__icontains=search) |
-            Q(category__icontains=search)
+            Q(author__icontains=search)
         )
     if category:
         posts = posts.filter(category=category)
@@ -930,9 +932,6 @@ def blog(request):
     ).distinct().order_by("category")
     featured_posts = posts.filter(is_featured=True)
     recent_posts = posts.order_by("-published_at", "-created_at")
-    total_blog_views = BlogPost.objects.aggregate(
-        total=Sum("views")
-    )["total"] or 0
     context = {
         "page_title": "Blog",
         "posts": posts,
@@ -945,63 +944,81 @@ def blog(request):
         "selected_category": category,
         "total_posts": BlogPost.objects.count(),
         "active_posts": BlogPost.objects.filter(is_active=True).count(),
-        "featured_count": BlogPost.objects.filter(
-            is_active=True,
-            is_featured=True
-        ).count(),
-        "total_blog_views": total_blog_views,
-        "total_rides": Ride.objects.count(),
-        "total_users": User.objects.count(),
-        "total_drivers": Driver.objects.count(),
-        "gallery_images": Gallery.objects.all().order_by("-date"),
-        "breadcrumb_items": [
-            {
-                "title": "Blog",
-                "url": "blog",
-            },
-        ],
+        "featured_count": BlogPost.objects.filter(is_featured=True).count(),
+        "total_blog_views": BlogPost.objects.aggregate(
+            total=Sum("views")
+        )["total"] or 0,
     }
-    return render(
-        request,
-        "dashboard/blog.html",
-        context,
-    )
+    return render(request, "dashboard/blog.html", context)
 
-@login_required
-def blog_view_count(request, pk):
-    if request.method == "POST":
-        blog = get_object_or_404(BlogPost, pk=pk, is_active=True)
-        BlogPost.objects.filter(pk=blog.pk).update(views=F("views") + 1)
-        blog.refresh_from_db()
-        return JsonResponse({
-            "success": True,
-            "views": blog.views,
-        })
-    return JsonResponse({
-        "success": False,
-    }, status=405)
 
 @login_required
 def blog_create(request):
     if not request.user.is_staff:
         raise PermissionDenied
-    if request.method != "POST":
-        return redirect("blog")
-    form = BlogPostForm(request.POST, request.FILES)
-    if form.is_valid():
-        blog = form.save(commit=False)
-        base_slug = slugify(blog.title) or f"blog-{timezone.now().strftime('%Y%m%d%H%M%S')}"
-        slug = base_slug
-        counter = 2
-        while BlogPost.objects.filter(slug=slug).exists():
-            slug = f"{base_slug}-{counter}"
-            counter += 1
-        blog.slug = slug
-        blog.save()
-        messages.success(request, "Blog published successfully.")
-    else:
-        messages.error(request, "Blog could not be published. Please check the form details.")
+    blog_id = request.POST.get("blog_id") or request.GET.get("edit")
+    blog = None
+    if blog_id:
+        blog = get_object_or_404(BlogPost, pk=blog_id)
+    if request.method == "POST":
+        form = BlogPostForm(request.POST, request.FILES, instance=blog)
+        if form.is_valid():
+            blog = form.save(commit=False)
+            base_slug = slugify(blog.title) or f"blog-{timezone.now().strftime('%Y%m%d%H%M%S')}"
+            slug = base_slug
+            counter = 2
+            while BlogPost.objects.filter(slug=slug).exclude(pk=blog.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            blog.slug = slug
+            blog.save()
+            if blog_id:
+                messages.success(request, "Blog updated successfully.")
+            else:
+                messages.success(request, "Blog published successfully.")
+        else:
+            messages.error(request, "Blog could not be saved. Please check the form details.")
     return redirect("blog")
+
+
+@login_required
+def blog_delete(request, pk):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    if request.method == "POST":
+        blog = get_object_or_404(BlogPost, pk=pk)
+        blog.delete()
+        messages.success(request, "Blog deleted successfully.")
+    return redirect("blog")
+
+
+@login_required
+def blog_view_increment(request, pk):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    if request.method != "POST":
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Invalid request method."
+            },
+            status=405
+        )
+    blog = get_object_or_404(BlogPost, pk=pk)
+    BlogPost.objects.filter(pk=blog.pk).update(
+        views=F("views") + 1
+    )
+    blog.refresh_from_db()
+    total_views = BlogPost.objects.aggregate(
+        total=Sum("views")
+    )["total"] or 0
+    return JsonResponse(
+        {
+            "success": True,
+            "views": blog.views,
+            "total_views": total_views,
+        }
+    )
 
 
 @login_required
@@ -1072,7 +1089,7 @@ def contact(request):
         }
         form = FeedbackForm(initial=initial)
     context = {
-        "page_title": "Contact NandiRide",
+        "page_title": "Contact",
         "contact_address": "Haridwar, Uttarakhand, India",
         "contact_email": "nandirides@gmail.com",
         "contact_phones": ["9X56305XXX", "9009930XXX"],
