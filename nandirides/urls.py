@@ -26,4 +26,14 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path('superuser', include('superuser.urls')),
     path('', include('user.urls')),
+    
+    # REST API
+    path(
+        "api/v1/",
+        include("api.urls"),
+    ),
+     path(
+        "api-auth/",
+        include("rest_framework.urls"),
+    ),
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
