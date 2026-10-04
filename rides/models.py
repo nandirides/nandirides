@@ -72,6 +72,24 @@ class RideRequest(TimeStampedModel):
         null=True,
         blank=True,
     )
+    coupon = models.ForeignKey(
+        "promotions.Coupon",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="ride_requests",
+    )
+    discount_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+    final_fare = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
 
     status = models.CharField(
         max_length=30,
