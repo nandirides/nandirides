@@ -1,1 +1,1 @@
-first
+pip install django-cors-headers
