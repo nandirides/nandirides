@@ -104,7 +104,7 @@ class AppState {
   static String driverPayout = 'demo.driver@upi';
   static bool driverOnline = false;
   static bool isDriver = false;
-
+}
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
