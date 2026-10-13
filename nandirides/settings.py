@@ -25,13 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-*)5oiu0(h6=!y^*5t(yhw1&g%$nrmn0%+uc2(v0ewhnddbpa^0'
-
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = False
-
-DEBUG = os.getenv("DEBUG")==True
+DEBUG = os.getenv("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
@@ -244,14 +241,20 @@ SECURE_BROWSER_XSS_FILTER =True
 X_FRAME_OPTIONS= 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFT = True
 
-#for Https Productions
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+# Development and production security settings
 
-if not DEBUG:
+if DEBUG:
+    # Local development: HTTP is allowed
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+
+else:
+    # Production: HTTPS
     SECURE_SSL_REDIRECT = True
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD  = True
-    SESSION_COOKIE_SECURE  = True
-    CSRF_COOKIE_SECURE  = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
