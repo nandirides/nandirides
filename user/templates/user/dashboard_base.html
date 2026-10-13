@@ -6,13 +6,13 @@
         <aside class="col-md-3 col-lg-2 bg-white border-end min-vh-100 d-none d-md-block">
             <div class="position-sticky top-0 p-3">
                 <div class="text-center mb-4">
-                    <img src="{% static 'user/images/user_image.jpg' %}" alt="Nandi Ride" class="img-fluid rounded-circle shadow-sm" style="width:90px;height:90px;object-fit:cover;">
+                    <img src="{% static 'user/images/user_image.jpg' %}" alt="NandiRide" class="img-fluid rounded-circle shadow-sm" style="width:90px;height:90px;object-fit:cover;">
                     <h6 class="fw-bold mt-3 mb-1">NandiRide</h6>
                     <small class="text-secondary">Ride Booking</small>
                 </div>
                 <div class="nav flex-column nav-pills gap-2">
                     {% for item in sidebar_menu %}
-                    <a href="{% url item.url %}" class="nav-link slide d-flex align-items-center px-3 py-2 {% if request.resolver_match.url_name == item.url %}active{% endif %}">
+                    <a href="{% url item.url %}" class="nav-link slide d-flex align-items-center px-3 py-2 {% if request.resolver_match.url_name == item.url %}active bg-danger text-white{% endif %}">
                         <span class="me-3"><i class="{{ item.icon }}"></i></span>
                         <span>{{ item.name }}</span>
                     </a>
@@ -29,45 +29,51 @@
                 </div>
             </div>
         </aside>
-        <div class="d-md-none bg-white border-bottom shadow-sm p-3">
+        <div class="col-12 d-md-none bg-white border-bottom shadow-sm p-3">
             <div class="d-flex align-items-center justify-content-between">
-                <button class="btn btn-danger rounded-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+                <button class="btn btn-danger rounded-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="Open navigation">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div class="fw-bold fs-5">Nandi<span class="text-danger">Ride</span></div>
                 <div class="dropdown">
-                    <button class="btn btn-light border rounded-circle" type="button" data-bs-toggle="dropdown">
+                    <button class="btn btn-light border rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
                         <i class="fa-solid fa-user text-danger"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                         <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fa-solid fa-user me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'editprofile' %}"><i class="fa-solid fa-pen me-2"></i>Edit Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'resetpassword' %}"><i class="fa-solid fa-key me-2"></i>Change Password</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="{% url 'login' %}"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+                        <li>
+                            <form method="post" action="{% url 'logout' %}" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar">
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
             <div class="offcanvas-header border-bottom">
                 <div class="d-flex align-items-center">
-                    <img src="{% static 'user/images/user_image.jpg' %}" alt="Nandi Ride" class="rounded-circle me-2" style="width:45px;height:45px;object-fit:cover;">
+                    <img src="{% static 'user/images/user_image.jpg' %}" alt="NandiRide" class="rounded-circle me-2" style="width:45px;height:45px;object-fit:cover;">
                     <div>
-                        <h6 class="fw-bold mb-0">NandiRide</h6>
+                        <h6 class="fw-bold mb-0" id="mobileSidebarLabel">NandiRide</h6>
                         <small class="text-secondary">Ride Booking</small>
                     </div>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
                 <div class="nav flex-column gap-2">
                     {% for item in sidebar_menu %}
-                        <div class="nav-item">
-                            <a href="{% url item.url %}"
-                            class="nav-link slide d-flex px-3 py-2 fw-bold rounded-pill {% if request.resolver_match.url_name == item.url %}active{% endif %}">
-                                <i class="{{ item.icon }} me-2"></i>
-                                <span>{{ item.name }}</span>
-                            </a>
-                        </div>
+                    <div class="nav-item">
+                        <a href="{% url item.url %}" class="nav-link slide d-flex align-items-center px-3 py-2 fw-bold rounded-pill {% if request.resolver_match.url_name == item.url %}active bg-danger text-white{% endif %}">
+                            <i class="{{ item.icon }} me-2"></i>
+                            <span>{{ item.name }}</span>
+                        </a>
+                    </div>
                     {% endfor %}
                 </div>
                 <div class="bg-danger-subtle rounded-3 p-3 mt-4">
@@ -83,55 +89,11 @@
         </div>
         <main class="col-12 col-md-9 col-lg-10 bg-light min-vh-100">
             <header class="bg-white border-bottom shadow-sm px-3 px-md-4 py-3">
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center gap-2">
                     <div>
-                        <h4 class="fw-bold mb-1">
-                            {% block page_heading %}Dashboard{% endblock %}
-                        </h4>
+                        <h4 class="fw-bold mb-1">{% block page_heading %}Dashboard{% endblock %}</h4>
                         <small class="text-secondary d-none d-sm-block">Welcome to your NandiRide dashboard</small>
                     </div>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-danger border-0 dropdown-toggle d-flex align-items-center gap-2 p-1 pe-2 rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {% if user.profile_image %}
-                                    <img src="{{ user.profile_image.url }}" alt="Profile" class="rounded-circle object-fit-cover" width="42" height="42">
-                                {% else %}
-                                    <span class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width:42px;height:42px;">
-                                        <i class="fa-solid fa-user"></i>
-                                    </span>
-                                {% endif %}
-                                <span class="d-none d-sm-block text-start">
-                                    <small class=" d-block">Welcome</small>
-                                    <strong class="small">{{ user.first_name|default:user.username }}</strong>
-                                </span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                                <li>
-                                    <a class="dropdown-item text-danger py-2" href="{% url 'profile' %}">
-                                        <i class="fa-solid fa-user me-2 text-danger"></i>
-                                        Profile
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item text-danger py-2" href="{% url 'editprofile' %}">
-                                        <i class="fa-solid fa-pen me-2 text-danger"></i>
-                                        Edit Profile
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item text-danger py-2" href="{% url 'resetpassword' %}">
-                                        <i class="fa-solid fa-key me-2 text-danger"></i>
-                                        Change Password
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item py-2 text-danger" href="{% url 'login' %}">
-                                        <i class="fa-solid fa-right-from-bracket me-2"></i>
-                                        Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
                 </div>
             </header>
             <div class="p-2 p-md-2 mb-lg-0">
@@ -143,9 +105,9 @@
 {% if messages %}
 <div class="position-fixed top-0 end-0 p-3" style="z-index:1100;max-width:400px;width:100%;">
     {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+    <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show shadow-sm" role="alert">
         {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endfor %}
 </div>

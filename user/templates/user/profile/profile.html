@@ -1,17 +1,14 @@
 {% extends 'user/dashboard_base.html' %}
 {% load static %}
 {% block page_heading %}Profile{% endblock %}
-{% block title %}{{site_name}} | Profile{% endblock %}
+{% block title %}{{ site_name }} | Profile{% endblock %}
 {% block dashboard_content %}
-
 <div class="container-fluid px-0">
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="bg-danger profile-header">
             <div class="p-4">
                 <div class="d-flex align-items-center">
-                    <div class="profile-top-icon">
-                        <i class="fa-solid fa-user text-white"></i>
-                    </div>
+                    <div class="profile-top-icon"><i class="fa-solid fa-user text-white"></i></div>
                     <div class="ms-3 text-white">
                         <h4 class="fw-bold mb-1">My Profile</h4>
                         <p class="mb-0 opacity-75">Manage your NandiRide account information</p>
@@ -22,34 +19,34 @@
         <div class="card-body p-4">
             <div class="row align-items-center">
                 <div class="col-md-auto text-center text-md-start">
-                    {% if form.instance.profileimage %}
-                        <img src="{{ form.instance.profileimage.url }}" alt="Profile" class="rounded-circle border border-4 border-white shadow profile-avatar">
+                    {% if form.profileimage.value %}
+                        <img src="{{ form.profileimage.value.url }}" alt="Profile" class="rounded-circle border border-4 border-white shadow profile-avatar" onerror="this.style.display='none';document.getElementById('profileAvatarFallback').classList.remove('d-none');">
+                        <div id="profileAvatarFallback" class="profile-avatar-placeholder d-none"><i class="fa-solid fa-user"></i></div>
                     {% else %}
-                        <div class="profile-avatar-placeholder">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
+                        <div class="profile-avatar-placeholder"><i class="fa-solid fa-user"></i></div>
                     {% endif %}
                 </div>
                 <div class="col-md mt-3 mt-md-0">
-                    <h4 class="fw-bold mb-1">{{ form.instance.user_name|default:"NandiRide User" }}</h4>
+                    <h4 class="fw-bold mb-1">
+                        {% if form.user_name.value %}{{ form.user_name.value }}{% elif CustomerForm.firstname.value %}{{ CustomerForm.firstname.value }}{% elif user.get_full_name %}{{ user.get_full_name }}{% else %}NandiRide User{% endif %}
+                    </h4>
                     <p class="text-secondary mb-2">
-                        {% if form.instance.email %}
-                            <i class="fa-solid fa-envelope me-2 text-danger"></i>
-                            {{ form.instance.email }}
+                        {% if form.email.value %}
+                            <i class="fa-solid fa-envelope me-2 text-danger"></i>{{ form.email.value }}
+                        {% elif user.email %}
+                            <i class="fa-solid fa-envelope me-2 text-danger"></i>{{ user.email }}
+                        {% else %}
+                            <i class="fa-solid fa-envelope me-2 text-danger"></i>Not provided
                         {% endif %}
                     </p>
-                    {% if form.instance.user_type %}
-                        <span class="badge rounded-pill bg-danger-subtle text-danger px-3 py-2">
-                            <i class="fa-solid fa-user-tag me-1"></i>
-                            {{ form.instance.user_type }}
-                        </span>
+                    {% if form.user_type.value %}
+                        <span class="badge rounded-pill bg-danger-subtle text-danger px-3 py-2"><i class="fa-solid fa-user-tag me-1"></i>{{ form.user_type.value }}</span>
+                    {% elif user.is_authenticated %}
+                        <span class="badge rounded-pill bg-danger-subtle text-danger px-3 py-2"><i class="fa-solid fa-user-tag me-1"></i>{% if user.is_staff %}Administrator{% else %}Customer{% endif %}</span>
                     {% endif %}
                 </div>
                 <div class="col-md-auto mt-3 mt-md-0">
-                    <a href="{% url 'editprofile' %}" class="btn btn-outline-danger rounded-pill px-4">
-                        <i class="fa-solid fa-pen-to-square me-2"></i>
-                        Edit Profile
-                    </a>
+                    <a href="{% url 'editprofile' %}" class="btn btn-outline-danger rounded-pill px-4"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Profile</a>
                 </div>
             </div>
         </div>
@@ -57,250 +54,222 @@
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4">
             <div class="section-heading mb-4">
-                <div class="section-icon bg-danger-subtle text-danger">
-                    <i class="fa-solid fa-user"></i>
-                </div>
+                <div class="section-icon bg-danger-subtle text-danger"><i class="fa-solid fa-user"></i></div>
                 <div>
                     <h5 class="fw-bold mb-0">Personal Information</h5>
                     <small class="text-secondary">Your basic account information</small>
                 </div>
             </div>
-             <div class="row g-3">
-                {{CustomerForm.as_p}}
-                 {{UserProfile.as_p}}
+            <div class="row g-3">
                 {% for field in form %}
-                    {% if field.name == 'user_name' %}
+                    {% if field.name == 'user_name' or field.name == 'first_name' or field.name == 'last_name' or field.name == 'user_type' or field.name == 'Registration_date' or field.name == 'email' or field.name == 'mobile_number' %}
                         <div class="col-md-6 col-xl-4">
                             <div class="profile-field">
-                                <label>{{ field.label }}</label>
+                                <label class="form-label">{{ field.label }}</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'first_name' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'last_name' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'user_type' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-user-tag"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'Registration_date' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-calendar-days"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'email' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                                    <input type="email" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'mobile_number' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                                    <span class="input-group-text">
+                                        {% if field.name == 'email' %}<i class="fa-solid fa-envelope"></i>
+                                        {% elif field.name == 'mobile_number' %}<i class="fa-solid fa-phone"></i>
+                                        {% elif field.name == 'user_type' %}<i class="fa-solid fa-user-tag"></i>
+                                        {% elif field.name == 'Registration_date' %}<i class="fa-solid fa-calendar-days"></i>
+                                        {% else %}<i class="fa-solid fa-user"></i>{% endif %}
+                                    </span>
                                     <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
                                 </div>
                             </div>
                         </div>
                     {% endif %}
                 {% endfor %}
+                {% if CustomerForm %}
+                    {% for field in CustomerForm %}
+                        {% if field.name == 'firstname' or field.name == 'lastname' or field.name == 'email' or field.name == 'mobilenumber' or field.name == 'gender' %}
+                            <div class="col-md-6 col-xl-4">
+                                <div class="profile-field">
+                                    <label class="form-label">{{ field.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            {% if field.name == 'email' %}<i class="fa-solid fa-envelope"></i>
+                                            {% elif field.name == 'mobilenumber' %}<i class="fa-solid fa-phone"></i>
+                                            {% elif field.name == 'gender' %}<i class="fa-solid fa-venus-mars"></i>
+                                            {% else %}<i class="fa-solid fa-user"></i>{% endif %}
+                                        </span>
+                                        <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if UserProfile %}
+                    {% for field in UserProfile %}
+                        {% if field.name == 'phone' or field.name == 'date_of_birth' or field.name == 'gender' or field.name == 'emergency_contact_name' or field.name == 'emergency_contact_phone' %}
+                            <div class="col-md-6 col-xl-4">
+                                <div class="profile-field">
+                                    <label class="form-label">{{ field.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            {% if field.name == 'phone' or field.name == 'emergency_contact_phone' %}<i class="fa-solid fa-phone"></i>
+                                            {% elif field.name == 'date_of_birth' %}<i class="fa-solid fa-calendar"></i>
+                                            {% elif field.name == 'gender' %}<i class="fa-solid fa-venus-mars"></i>
+                                            {% else %}<i class="fa-solid fa-user"></i>{% endif %}
+                                        </span>
+                                        <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4">
             <div class="section-heading mb-4">
-                <div class="section-icon bg-danger-subtle text-danger">
-                    <i class="fa-solid fa-car"></i>
-                </div>
+                <div class="section-icon bg-danger-subtle text-danger"><i class="fa-solid fa-car"></i></div>
                 <div>
                     <h5 class="fw-bold mb-0">Vehicle Information</h5>
-                    <small class="text-secondary">Your registered vehicle details</small>
+                    <small class="text-secondary">Your registered vehicle and driver details</small>
                 </div>
             </div>
             <div class="row g-3">
-                {{Driver.as_p}}
-                {{DriverDocument.as_p}}
-                {{DriverBankAccount.as_p}}
                 {% for field in form %}
-                    {% if field.name == 'Driver_Licence_Number' %}
+                    {% if field.name == 'Driver_Licence_Number' or field.name == 'vehicle_type' or field.name == 'vehicle_number' or field.name == 'vehicle_insurance' or field.name == 'vehicle_pollution' or field.name == 'documnet_upload' %}
                         <div class="col-md-6 col-xl-4">
                             <div class="profile-field">
-                                <label>{{ field.label }}</label>
+                                <label class="form-label">{{ field.label }}</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'vehicle_type' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-motorcycle"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'vehicle_number' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'vehicle_insurance' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-shield-halved"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'vehicle_pollution' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-leaf"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'documnet_upload' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-file"></i></span>
+                                    <span class="input-group-text">
+                                        {% if field.name == 'Driver_Licence_Number' %}<i class="fa-solid fa-id-card"></i>
+                                        {% elif field.name == 'vehicle_type' %}<i class="fa-solid fa-motorcycle"></i>
+                                        {% elif field.name == 'vehicle_number' %}<i class="fa-solid fa-hashtag"></i>
+                                        {% elif field.name == 'vehicle_insurance' %}<i class="fa-solid fa-shield-halved"></i>
+                                        {% elif field.name == 'vehicle_pollution' %}<i class="fa-solid fa-leaf"></i>
+                                        {% else %}<i class="fa-solid fa-file"></i>{% endif %}
+                                    </span>
                                     <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
                                 </div>
                             </div>
                         </div>
                     {% endif %}
                 {% endfor %}
+                {% if Driver %}
+                    {% for field in Driver %}
+                        {% if field.name == 'license_number' or field.name == 'driving_license_number' or field.name == 'vehicle_number' or field.name == 'vehicle_type' or field.name == 'verification_status' or field.name == 'status' %}
+                            <div class="col-md-6 col-xl-4">
+                                <div class="profile-field">
+                                    <label class="form-label">{{ field.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+                                        <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if DriverDocument %}
+                    {% for field in DriverDocument %}
+                        {% if field.name != 'id' and field.name != 'driver' and field.name != 'created_at' and field.name != 'updated_at' %}
+                            <div class="col-md-6 col-xl-4">
+                                <div class="profile-field">
+                                    <label class="form-label">{{ field.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-solid fa-file-lines"></i></span>
+                                        <input type="text" class="form-control" value="{% if field.value %}{{ field.value }}{% else %}Not Provided{% endif %}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if DriverBankAccount %}
+                    {% for field in DriverBankAccount %}
+                        {% if field.name != 'id' and field.name != 'driver' and field.name != 'created_at' and field.name != 'updated_at' and field.name != 'account_number' and field.name != 'bank_account_number' %}
+                            <div class="col-md-6 col-xl-4">
+                                <div class="profile-field">
+                                    <label class="form-label">{{ field.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-solid fa-building-columns"></i></span>
+                                        <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if not Driver and not DriverDocument and not DriverBankAccount and not form.Driver_Licence_Number and not form.vehicle_type and not form.vehicle_number %}
+                    <div class="col-12">
+                        <div class="alert alert-light border rounded-3 mb-0"><i class="fa-solid fa-circle-info text-danger me-2"></i>No driver or vehicle information is available for this account.</div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4">
             <div class="section-heading mb-4">
-                <div class="section-icon bg-danger-subtle text-danger">
-                    <i class="fa-solid fa-location-dot"></i>
-                </div>
+                <div class="section-icon bg-danger-subtle text-danger"><i class="fa-solid fa-location-dot"></i></div>
                 <div>
                     <h5 class="fw-bold mb-0">Address Information</h5>
                     <small class="text-secondary">Your registered address</small>
                 </div>
             </div>
             <div class="row g-3">
-                {{UserAddress.as_p}}
                 {% for field in form %}
-                    {% if field.name == 'street' %}
+                    {% if field.name == 'street' or field.name == 'village_colony' or field.name == 'country' or field.name == 'state' or field.name == 'district' or field.name == 'pin_code' %}
                         <div class="col-md-6 col-xl-4">
                             <div class="profile-field">
-                                <label>{{ field.label }}</label>
+                                <label class="form-label">{{ field.label }}</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-road"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'village_colony' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-house"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'country' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-globe"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'state' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-map"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'district' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-                                    <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif field.name == 'pin_code' %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="profile-field">
-                                <label>{{ field.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-map-pin"></i></span>
+                                    <span class="input-group-text">
+                                        {% if field.name == 'street' %}<i class="fa-solid fa-road"></i>
+                                        {% elif field.name == 'village_colony' %}<i class="fa-solid fa-house"></i>
+                                        {% elif field.name == 'country' %}<i class="fa-solid fa-globe"></i>
+                                        {% elif field.name == 'state' %}<i class="fa-solid fa-map"></i>
+                                        {% elif field.name == 'district' %}<i class="fa-solid fa-location-dot"></i>
+                                        {% else %}<i class="fa-solid fa-map-pin"></i>{% endif %}
+                                    </span>
                                     <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
                                 </div>
                             </div>
                         </div>
                     {% endif %}
                 {% endfor %}
+                {% if UserAddress %}
+                    {% for field in UserAddress %}
+                        {% if field.name == 'address_type' or field.name == 'label' or field.name == 'address_line1' or field.name == 'address_line2' or field.name == 'landmark' or field.name == 'city' or field.name == 'postal_code' or field.name == 'is_default' %}
+                            <div class="col-md-6 col-xl-4">
+                                <div class="profile-field">
+                                    <label class="form-label">{{ field.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            {% if field.name == 'city' or field.name == 'postal_code' %}<i class="fa-solid fa-map-pin"></i>
+                                            {% elif field.name == 'is_default' %}<i class="fa-solid fa-star"></i>
+                                            {% else %}<i class="fa-solid fa-location-dot"></i>{% endif %}
+                                        </span>
+                                        <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if UserProfile %}
+                    {% for field in UserProfile %}
+                        {% if field.name == 'address' or field.name == 'city' %}
+                            <div class="col-md-6 col-xl-4">
+                                <div class="profile-field">
+                                    <label class="form-label">{{ field.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+                                        <input type="text" class="form-control" value="{{ field.value|default:'Not Provided' }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>
@@ -311,9 +280,7 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <a href="{% url 'booking' %}" class="quick-action text-decoration-none">
-                        <div class="quick-icon bg-danger-subtle text-danger">
-                            <i class="fa-solid fa-plus"></i>
-                        </div>
+                        <div class="quick-icon bg-danger-subtle text-danger"><i class="fa-solid fa-plus"></i></div>
                         <div class="ms-3">
                             <h6 class="fw-bold mb-1">Book a Ride</h6>
                             <small class="text-secondary">Create a new ride booking</small>
@@ -323,9 +290,7 @@
                 </div>
                 <div class="col-md-4">
                     <a href="{% url 'myride' %}" class="quick-action text-decoration-none">
-                        <div class="quick-icon bg-danger-subtle text-danger">
-                            <i class="fa-solid fa-route"></i>
-                        </div>
+                        <div class="quick-icon bg-danger-subtle text-danger"><i class="fa-solid fa-route"></i></div>
                         <div class="ms-3">
                             <h6 class="fw-bold mb-1">My Rides</h6>
                             <small class="text-secondary">View your ride history</small>
@@ -334,13 +299,11 @@
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="{% url 'payment' %}" class="quick-action text-decoration-none">
-                        <div class="quick-icon bg-danger-subtle text-danger">
-                            <i class="fa-solid fa-credit-card"></i>
-                        </div>
+                    <a href="{% url 'paymentdetails' %}" class="quick-action text-decoration-none">
+                        <div class="quick-icon bg-danger-subtle text-danger"><i class="fa-solid fa-credit-card"></i></div>
                         <div class="ms-3">
                             <h6 class="fw-bold mb-1">Payments</h6>
-                            <small class="text-secondary">View payment information</small>
+                            <small class="text-secondary">View payment history</small>
                         </div>
                         <i class="fa-solid fa-chevron-right ms-auto text-secondary"></i>
                     </a>
@@ -350,9 +313,9 @@
     </div>
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3">
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3" role="alert">
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
     {% endif %}
