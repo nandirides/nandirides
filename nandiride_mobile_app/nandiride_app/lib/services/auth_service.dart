@@ -1,7 +1,6 @@
 import 'api_service.dart';
 
 class AuthService {
-  /// Register a new customer.
   static Future<Map<String, dynamic>> register({
     required String firstName,
     required String lastName,
@@ -22,7 +21,6 @@ class AuthService {
     });
   }
 
-  /// Login using username and password.
   static Future<Map<String, dynamic>> login({
     required String username,
     required String password,
@@ -30,6 +28,26 @@ class AuthService {
     return ApiService.post('/auth/login/', {
       'username': username,
       'password': password,
+    });
+  }
+
+  // Current logged-in user ka profile load karein.
+  static Future<Map<String, dynamic>> getCurrentUser() async {
+    return ApiService.get('/users/');
+  }
+
+  // Name, email aur phone Django mein save karein.
+  static Future<Map<String, dynamic>> updateCurrentUser({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String phone,
+  }) async {
+    return ApiService.patch('/users/', {
+      'first_name': firstName,
+      'last_name': lastName,
+      'email': email,
+      'phone': phone,
     });
   }
 }
