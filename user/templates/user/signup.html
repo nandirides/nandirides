@@ -35,7 +35,7 @@
                                     </div>
                                 </div>
                                 <p class="mt-4 mb-2">Already have an account?</p>
-                                <a href="{% url 'login' %}" class="btn btn-outline-light rounded-pill px-5 fw-semibold">
+                                <a href="{% url 'user-login' %}" class="btn btn-outline-light rounded-pill px-5 fw-semibold">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>Login
                                 </a>
                             </div>
@@ -81,9 +81,9 @@
                                                 {{ field.label }}{% if field.field.required %}<span class="text-danger ms-1">*</span>{% endif %}
                                             </label>
                                             {% if field.name == 'password' or field.name == 'confirmpassword' %}
-                                            <div class="input-group">
+                                            <div class="position-relative">
                                                 {{ field }}
-                                                <button type="button" class="btn btn-outline-secondary password-toggle" data-target="{{ field.id_for_label }}" aria-label="Show password">
+                                                <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent text-secondary px-3" data-target="{{ field.id_for_label }}" aria-label="Show password" aria-controls="{{ field.id_for_label }}" style="z-index:5;" >
                                                     <i class="fa-solid fa-eye"></i>
                                                 </button>
                                             </div>
@@ -129,14 +129,6 @@
         </div>
     </div>
 </div>
-<style>
-#signupForm input:not([type="checkbox"]){width:100%;min-height:46px;border:1px solid #dee2e6;border-radius:10px;padding:10px 12px;background-color:#f8f9fa}
-#signupForm .input-group input{border-top-right-radius:0;border-bottom-right-radius:0}
-#signupForm .input-group .btn{border-top-right-radius:10px;border-bottom-right-radius:10px}
-#signupForm input:focus{border-color:#dc3545;box-shadow:0 0 0 .2rem rgba(220,53,69,.12);outline:0}
-#signupForm input[type="checkbox"]{width:1rem;min-height:1rem;padding:0}
-#signupForm .form-check-input:checked{background-color:#dc3545;border-color:#dc3545}
-</style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('signupForm');
@@ -159,15 +151,15 @@ document.addEventListener('DOMContentLoaded', function () {
         mobile.setAttribute('inputmode', 'numeric');
         mobile.setAttribute('maxlength', '10');
     }
-    if (password) {
-        password.setAttribute('autocomplete', 'new-password');
-        password.setAttribute('type', 'password');
-    }
-    if (confirmPassword) {
-        confirmPassword.setAttribute('autocomplete', 'new-password');
-        confirmPassword.setAttribute('type', 'password');
-    }
-    document.querySelectorAll('.password-toggle').forEach(function (button) {
+    [password, confirmPassword].forEach(function (input) {
+        if (!input) return;
+        input.setAttribute('autocomplete', 'new-password');
+        input.setAttribute('type', 'password');
+        input.classList.add('form-control', 'rounded-3', 'pe-5');
+        input.style.minHeight = '46px';
+        input.style.backgroundColor = '#f8f9fa';
+    });
+    document.querySelectorAll('[data-target]').forEach(function (button) {
         button.addEventListener('click', function () {
             const input = document.getElementById(button.dataset.target);
             if (!input) return;
@@ -193,6 +185,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (mobile && mobile.value.trim() && !/^[6-9]\d{9}$/.test(mobile.value.trim())) {
             mobile.classList.add('is-invalid');
             valid = false;
+        } else if (mobile) {
+            mobile.classList.remove('is-invalid');
         }
         if (password && confirmPassword && password.value !== confirmPassword.value) {
             confirmPassword.setCustomValidity('Passwords do not match.');
