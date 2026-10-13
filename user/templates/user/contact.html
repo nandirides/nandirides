@@ -1,5 +1,6 @@
+
 {% extends 'user/base.html' %}
-{% block title %}{{ site_name }} | Contact Us{% endblock %}
+{% block title %}{{ site_name|default:"NandiRide" }} | Contact Us{% endblock %}
 {% block content %}
 <div class="container-fluid px-0">
     <section class="bg text-white py-5">
@@ -7,7 +8,7 @@
             <div class="row align-items-center g-4 g-lg-5">
                 <div class="col-lg-7">
                     <span class="badge bg-white text-danger rounded-pill px-3 py-2 mb-3">
-                        <i class="fa-solid fa-headset me-2"></i>Contact {{ site_name }}
+                        <i class="fa-solid fa-headset me-2"></i>Contact {{ site_name|default:"NandiRide" }}
                     </span>
                     <h1 class="display-4 fw-bold mb-3">We're Here to Help.</h1>
                     <p class="lead text-white-50 mb-4">Have a question about your ride, booking, payment or account? Our team is ready to help you.</p>
@@ -15,7 +16,7 @@
                         <a href="#contact-form" class="btn btn-light btn-lg rounded-pill px-4 fw-semibold">
                             <i class="fa-solid fa-paper-plane me-2 text-danger"></i>Send Message
                         </a>
-                        <a href="tel:{{ contact_phone }}" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-semibold">
+                        <a href="tel:{{ contact_phone|default:'' }}" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-semibold">
                             <i class="fa-solid fa-phone me-2"></i>Call Support
                         </a>
                     </div>
@@ -53,22 +54,22 @@
                             </div>
                             <h3 class="fw-bold mb-3">Need Assistance?</h3>
                             <p class="text-secondary mb-4">Choose the easiest way to reach our team and we'll help you with your NandiRide experience.</p>
-                            <a href="tel:{{ contact_phone }}" class="d-flex align-items-center text-decoration-none border-top pt-3 mb-3">
+                            <a href="tel:{{ contact_phone|default:'' }}" class="d-flex align-items-center text-decoration-none border-top pt-3 mb-3">
                                 <div class="bg-danger-subtle text-danger rounded-3 p-2 me-3">
                                     <i class="fa-solid fa-phone"></i>
                                 </div>
                                 <div>
                                     <small class="text-secondary d-block">Call Us</small>
-                                    <span class="fw-bold text-dark">{{ contact_phone }}</span>
+                                    <span class="fw-bold text-dark">{{ contact_phone|default:"Contact support" }}</span>
                                 </div>
                             </a>
-                            <a href="mailto:{{ contact_email }}" class="d-flex align-items-center text-decoration-none border-top pt-3 mb-3">
+                            <a href="mailto:{{ contact_email|default:'' }}" class="d-flex align-items-center text-decoration-none border-top pt-3 mb-3">
                                 <div class="bg-danger-subtle text-danger rounded-3 p-2 me-3">
                                     <i class="fa-solid fa-envelope"></i>
                                 </div>
                                 <div>
                                     <small class="text-secondary d-block">Email Us</small>
-                                    <span class="fw-bold text-dark">{{ contact_email }}</span>
+                                    <span class="fw-bold text-dark">{{ contact_email|default:"Email support" }}</span>
                                 </div>
                             </a>
                             <div class="d-flex align-items-center border-top pt-3">
@@ -77,7 +78,7 @@
                                 </div>
                                 <div>
                                     <small class="text-secondary d-block">Working Hours</small>
-                                    <span class="fw-bold text-dark">{{ contact_hours }}</span>
+                                    <span class="fw-bold text-dark">{{ contact_hours|default:"Please contact support" }}</span>
                                 </div>
                             </div>
                         </div>
@@ -133,7 +134,7 @@
                                 </div>
                                 <div class="ms-3">
                                     <small class="text-secondary d-block">Phone Support</small>
-                                    <a href="tel:{{ contact_phone }}" class="text-dark text-decoration-none fw-bold">{{ contact_phone }}</a>
+                                    <a href="tel:{{ contact_phone|default:'' }}" class="text-dark text-decoration-none fw-bold">{{ contact_phone|default:"Contact support" }}</a>
                                 </div>
                             </div>
                         </div>
@@ -146,7 +147,7 @@
                                 </div>
                                 <div class="ms-3">
                                     <small class="text-secondary d-block">Email Support</small>
-                                    <a href="mailto:{{ contact_email }}" class="text-dark text-decoration-none fw-bold">{{ contact_email }}</a>
+                                    <a href="mailto:{{ contact_email|default:'' }}" class="text-dark text-decoration-none fw-bold">{{ contact_email|default:"Email support" }}</a>
                                 </div>
                             </div>
                         </div>
@@ -159,7 +160,7 @@
                                 </div>
                                 <div class="ms-3">
                                     <small class="text-secondary d-block">Our Location</small>
-                                    <span class="fw-bold">{{ contact_address }}</span>
+                                    <span class="fw-bold">{{ contact_address|default:"Contact us for location details" }}</span>
                                 </div>
                             </div>
                         </div>
@@ -179,59 +180,67 @@
                             </div>
                             {% if messages %}
                             {% for message in messages %}
-                            <div class="alert alert-{{ message.tags|default:'success' }} alert-dismissible fade show rounded-3" role="alert">
-                                <i class="fa-solid fa-circle-check me-2"></i>{{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %} alert-dismissible fade show rounded-3" role="alert">
+                                <i class="fa-solid fa-circle-info me-2"></i>{{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                             {% endfor %}
                             {% endif %}
-                            <form method="post" validate>
+                            <form method="post" id="feedbackForm">
                                 {% csrf_token %}
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Full Name</label>
+                                        <label for="feedbackName" class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0">
                                                 <i class="fa-solid fa-user text-danger"></i>
                                             </span>
-                                            <input type="text" name="name" class="form-control bg-light border-start-0" placeholder="Enter your name" required>
+                                            <input type="text" id="feedbackName" name="name" class="form-control bg-light border-start-0" placeholder="Enter your name" value="{{ form_data.name|default:'' }}" minlength="2" maxlength="150" autocomplete="name" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Email Address</label>
+                                        <label for="feedbackEmail" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0">
                                                 <i class="fa-solid fa-envelope text-danger"></i>
                                             </span>
-                                            <input type="email" name="email" class="form-control bg-light border-start-0" placeholder="Enter your email" required>
+                                            <input type="email" id="feedbackEmail" name="email" class="form-control bg-light border-start-0" placeholder="Enter your email" value="{{ form_data.email|default:'' }}" maxlength="254" autocomplete="email" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Phone Number</label>
+                                        <label for="feedbackPhone" class="form-label fw-semibold">Phone Number</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0">
                                                 <i class="fa-solid fa-phone text-danger"></i>
                                             </span>
-                                            <input type="tel" name="phone" class="form-control bg-light border-start-0" placeholder="Enter your phone number">
+                                            <input type="tel" id="feedbackPhone" name="phone" class="form-control bg-light border-start-0" placeholder="Enter your phone number" value="{{ form_data.phone|default:'' }}" maxlength="20" autocomplete="tel">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Subject</label>
-                                        <select name="subject" class="form-select bg-light" required>
-                                            <option value="" selected disabled>Select a subject</option>
+                                        <label for="feedbackSubject" class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
+                                        <select id="feedbackSubject" name="subject" class="form-select bg-light" required>
+                                            <option value="" disabled {% if not form_data.subject %}selected{% endif %}>Select a subject</option>
                                             {% for subject in contact_subjects %}
-                                            <option value="{{ subject }}">{{ subject }}</option>
+                                            <option value="{{ subject }}" {% if form_data.subject == subject %}selected{% endif %}>{{ subject }}</option>
+                                            {% empty %}
+                                            <option value="General Enquiry" {% if form_data.subject == "General Enquiry" %}selected{% endif %}>General Enquiry</option>
+                                            <option value="Ride Support" {% if form_data.subject == "Ride Support" %}selected{% endif %}>Ride Support</option>
+                                            <option value="Booking Help" {% if form_data.subject == "Booking Help" %}selected{% endif %}>Booking Help</option>
+                                            <option value="Payment Help" {% if form_data.subject == "Payment Help" %}selected{% endif %}>Payment Help</option>
+                                            <option value="Account Help" {% if form_data.subject == "Account Help" %}selected{% endif %}>Account Help</option>
+                                            <option value="Other" {% if form_data.subject == "Other" %}selected{% endif %}>Other</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                     <div class="col-12">
-                                        <label class="form-label fw-semibold">Message</label>
-                                        <textarea name="message" rows="6" class="form-control bg-light" placeholder="Tell us how we can help you..." required></textarea>
+                                        <label for="feedbackMessage" class="form-label fw-semibold">Message <span class="text-danger">*</span></label>
+                                        <textarea id="feedbackMessage" name="message" rows="6" class="form-control bg-light" placeholder="Tell us how we can help you..." minlength="10" maxlength="5000" required>{{ form_data.message|default:'' }}</textarea>
+                                        <div class="form-text">Please provide at least 10 characters.</div>
                                     </div>
                                     <div class="col-12">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="privacyCheck" required>
-                                            <label class="form-check-label text-secondary small" for="privacyCheck">I agree to be contacted by {{ site_name }} regarding my enquiry.</label>
+                                            <input class="form-check-input" type="checkbox" id="privacyCheck" name="privacy_consent" value="yes" required {% if form_data.privacy_consent %}checked{% endif %}>
+                                            <label class="form-check-label text-secondary small" for="privacyCheck">I agree to be contacted by {{ site_name|default:"NandiRide" }} regarding my enquiry.</label>
                                         </div>
                                     </div>
                                     <div class="col-12">
@@ -315,11 +324,11 @@
                         {% for faq in faqs %}
                         <div class="accordion-item border-0 border-bottom">
                             <h2 class="accordion-header" id="heading{{ forloop.counter }}">
-                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %} fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}">
+                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %} fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ forloop.counter }}">
                                     <i class="fa-solid fa-circle-question text-danger me-3"></i>{{ faq.question }}
                                 </button>
                             </h2>
-                            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#contactFaq">
+                            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#contactFaq">
                                 <div class="accordion-body text-secondary">{{ faq.answer }}</div>
                             </div>
                         </div>
@@ -347,10 +356,10 @@
                     <h2 class="display-6 fw-bold mb-3">Still Need Help?</h2>
                     <p class="text-white-50 mb-4">Our support team is always ready to help you with your NandiRide experience.</p>
                     <div class="d-flex flex-wrap justify-content-center gap-2">
-                        <a href="tel:{{ contact_phone }}" class="btn btn-light btn-lg rounded-pill px-4 fw-semibold text-danger">
+                        <a href="tel:{{ contact_phone|default:'' }}" class="btn btn-light btn-lg rounded-pill px-4 fw-semibold text-danger">
                             <i class="fa-solid fa-phone me-2"></i>Call Us
                         </a>
-                        <a href="mailto:{{ contact_email }}" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-semibold">
+                        <a href="mailto:{{ contact_email|default:'' }}" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-semibold">
                             <i class="fa-solid fa-envelope me-2"></i>Email Us
                         </a>
                     </div>

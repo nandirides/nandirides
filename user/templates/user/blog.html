@@ -1,5 +1,6 @@
+
 {% extends 'user/base.html' %}
-{% block title %}{{ site_name }} | Blog{% endblock %}
+{% block title %}{{ site_name|default:"NandiRide" }} | Blog{% endblock %}
 {% block content %}
 <div class="container-fluid px-0">
     <section class="bg text-white py-5">
@@ -7,10 +8,10 @@
             <div class="row align-items-center g-4 g-lg-5">
                 <div class="col-lg-7">
                     <span class="badge bg-white text-danger rounded-pill px-3 py-2 mb-3">
-                        <i class="fa-solid fa-newspaper me-2"></i>{{ site_name }} Blog
+                        <i class="fa-solid fa-newspaper me-2"></i>{{ site_name|default:"NandiRide" }} Blog
                     </span>
                     <h1 class="display-4 fw-bold mb-3">Ride Smarter.<br>Travel Better.</h1>
-                    <p class="lead text-white-50 mb-4">Discover travel tips, ride guides, safety advice and the latest updates from {{ site_name }}.</p>
+                    <p class="lead text-white-50 mb-4">Discover travel tips, ride guides, safety advice and the latest updates from {{ site_name|default:"NandiRide" }}.</p>
                     <div class="d-flex flex-wrap gap-2">
                         <a href="{% url 'booking' %}" class="btn btn-light btn-lg rounded-pill px-4 fw-semibold">
                             <i class="fa-solid fa-car me-2 text-danger"></i>Book a Ride
@@ -94,23 +95,28 @@
                         <span class="input-group-text bg-white border-end-0">
                             <i class="fa-solid fa-magnifying-glass text-danger"></i>
                         </span>
-                        <input type="search" class="form-control border-start-0 border-end-0" placeholder="Search articles, travel tips, safety...">
-                        <button class="btn btn-danger px-4 fw-semibold" type="button">Search</button>
+                        <input type="search" id="blogSearch" class="form-control border-start-0" placeholder="Search articles, travel tips, safety..." aria-label="Search blog articles" oninput="filterBlogPosts()">
                     </div>
                 </div>
                 <div class="col-lg-5">
-                    <div class="d-flex flex-wrap justify-content-lg-end gap-2">
-                        <button type="button" class="btn btn-danger rounded-pill px-3">All</button>
+                    <div id="blogCategories" class="d-flex flex-wrap justify-content-lg-end gap-2">
+                        <button type="button" class="btn btn-danger rounded-pill px-3 blog-category active" data-category="all" onclick="selectBlogCategory(this)">All</button>
                         {% for category in categories %}
-                        <button type="button" class="btn btn-outline-danger rounded-pill px-3">{{ category }}</button>
+                        <button type="button" class="btn btn-outline-danger rounded-pill px-3 blog-category" data-category="{{ category|lower }}" onclick="selectBlogCategory(this)">{{ category }}</button>
                         {% endfor %}
                     </div>
                 </div>
             </div>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
+                <small class="text-secondary" id="blogFilterSummary" aria-live="polite">Showing all articles</small>
+                <button type="button" id="clearBlogFilters" class="btn btn-sm btn-outline-secondary rounded-pill d-none" onclick="clearBlogFilters()">
+                    <i class="fa-solid fa-rotate-left me-1"></i>Clear filters
+                </button>
+            </div>
         </div>
     </section>
     {% if featured_post %}
-    <section class="py-5">
+    <section class="py-5" id="featured-section">
         <div class="container">
             <div class="d-flex align-items-end justify-content-between mb-4">
                 <div>
@@ -121,13 +127,13 @@
                     <i class="fa-solid fa-star me-1"></i>Featured
                 </span>
             </div>
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <article class="card border-0 shadow-lg rounded-4 overflow-hidden blog-post-card" data-title="{{ featured_post.title|default:''|lower }}" data-category="{{ featured_post.category|default:''|lower }}" data-description="{{ featured_post.description|default:''|lower }}" data-author="{{ featured_post.author|default:'NandiRide Team'|lower }}">
                 <div class="row g-0">
                     <div class="col-lg-5">
                         {% if featured_post.image %}
-                        <img src="{{ featured_post.image }}" class="w-100 h-100 object-fit-cover" alt="{{ featured_post.title }}">
+                        <img src="{{ featured_post.image }}" class="w-100 h-100 object-fit-cover" style="min-height:300px;" alt="{{ featured_post.title }}" loading="lazy">
                         {% else %}
-                        <div class="bg-danger text-white h-100 d-flex align-items-center justify-content-center p-5">
+                        <div class="bg-danger text-white h-100 d-flex align-items-center justify-content-center p-5" style="min-height:300px;">
                             <div class="text-center">
                                 <i class="{{ featured_post.icon|default:'fa-solid fa-newspaper' }} display-1 mb-3"></i>
                                 <h4 class="fw-bold mb-0">{{ featured_post.category }}</h4>
@@ -163,7 +169,7 @@
                                     Read Article <i class="fa-solid fa-arrow-right ms-2"></i>
                                 </a>
                                 {% else %}
-                                <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold">
+                                <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold" disabled>
                                     Read Article <i class="fa-solid fa-arrow-right ms-2"></i>
                                 </button>
                                 {% endif %}
@@ -171,7 +177,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </article>
         </div>
     </section>
     {% endif %}
@@ -185,17 +191,17 @@
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                     <span class="badge bg-white text-dark border rounded-pill px-3 py-2">
-                        <i class="fa-solid fa-layer-group text-danger me-2"></i>{{ posts|length }} Articles
+                        <i class="fa-solid fa-layer-group text-danger me-2"></i><span id="blogArticleCount">{{ posts|length }}</span> Articles
                     </span>
                 </div>
             </div>
-            <div class="row g-4">
+            <div class="row g-4" id="blogPostsGrid">
                 {% for post in posts %}
-                <div class="col-12 col-md-6 col-lg-4">
-                    <article class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="col-12 col-md-6 col-lg-4 blog-post-item">
+                    <article class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden blog-post-card" data-title="{{ post.title|default:''|lower }}" data-category="{{ post.category|default:''|lower }}" data-description="{{ post.description|default:''|lower }}" data-author="{{ post.author|default:'NandiRide Team'|lower }}">
                         {% if post.image %}
                         <div class="position-relative">
-                            <img src="{{ post.image }}" class="card-img-top object-fit-cover" style="height:220px;" alt="{{ post.title }}">
+                            <img src="{{ post.image }}" class="card-img-top object-fit-cover" style="height:220px;" alt="{{ post.title }}" loading="lazy">
                             {% if post.featured %}
                             <span class="position-absolute top-0 start-0 badge bg-danger m-3 rounded-pill px-3 py-2">
                                 <i class="fa-solid fa-star me-1"></i>Featured
@@ -213,7 +219,7 @@
                         </div>
                         {% endif %}
                         <div class="card-body p-4 d-flex flex-column">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                                 <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2">{{ post.category }}</span>
                                 <small class="text-secondary">
                                     <i class="fa-regular fa-calendar me-1"></i>{{ post.date }}
@@ -222,7 +228,7 @@
                             <h4 class="fw-bold mb-3">{{ post.title }}</h4>
                             <p class="text-secondary mb-4">{{ post.description }}</p>
                             <div class="mt-auto">
-                                <div class="d-flex align-items-center justify-content-between border-top pt-3">
+                                <div class="d-flex align-items-center justify-content-between border-top pt-3 gap-2">
                                     <small class="text-secondary">
                                         <i class="fa-regular fa-clock text-danger me-1"></i>{{ post.read_time|default:'5 min read' }}
                                     </small>
@@ -241,7 +247,7 @@
                     </article>
                 </div>
                 {% empty %}
-                <div class="col-12">
+                <div class="col-12" id="blogEmptyState">
                     <div class="card border-0 shadow-sm rounded-4 text-center p-5">
                         <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex p-4 mx-auto mb-3">
                             <i class="fa-solid fa-newspaper display-6"></i>
@@ -251,6 +257,16 @@
                     </div>
                 </div>
                 {% endfor %}
+                <div class="col-12 d-none" id="blogNoResults">
+                    <div class="card border-0 shadow-sm rounded-4 text-center p-5">
+                        <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex p-4 mx-auto mb-3">
+                            <i class="fa-solid fa-magnifying-glass display-6"></i>
+                        </div>
+                        <h4 class="fw-bold">No Matching Articles</h4>
+                        <p class="text-secondary mb-3">Try another search phrase or choose a different category.</p>
+                        <button type="button" class="btn btn-danger rounded-pill px-4 mx-auto" onclick="clearBlogFilters()">Show All Articles</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -265,9 +281,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm rounded-4">
                         <div class="card-body p-4 p-lg-5">
-                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4">
-                                <i class="fa-solid fa-lightbulb fs-3"></i>
-                            </div>
+                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4"><i class="fa-solid fa-lightbulb fs-3"></i></div>
                             <h3 class="fw-bold">Travel Smarter</h3>
                             <p class="text-secondary mb-0">Get practical tips and useful ideas to make every NandiRide journey simple and comfortable.</p>
                         </div>
@@ -276,9 +290,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm rounded-4">
                         <div class="card-body p-4 p-lg-5">
-                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4">
-                                <i class="fa-solid fa-shield-heart fs-3"></i>
-                            </div>
+                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4"><i class="fa-solid fa-shield-heart fs-3"></i></div>
                             <h3 class="fw-bold">Stay Safe</h3>
                             <p class="text-secondary mb-0">Learn simple ride and travel safety practices for a better experience on every trip.</p>
                         </div>
@@ -287,9 +299,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm rounded-4">
                         <div class="card-body p-4 p-lg-5">
-                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4">
-                                <i class="fa-solid fa-map-location-dot fs-3"></i>
-                            </div>
+                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4"><i class="fa-solid fa-map-location-dot fs-3"></i></div>
                             <h3 class="fw-bold">Explore More</h3>
                             <p class="text-secondary mb-0">Discover destinations, useful guides and new ways to enjoy your everyday travel.</p>
                         </div>
@@ -298,9 +308,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm rounded-4">
                         <div class="card-body p-4 p-lg-5">
-                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4">
-                                <i class="fa-solid fa-car-side fs-3"></i>
-                            </div>
+                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4"><i class="fa-solid fa-car-side fs-3"></i></div>
                             <h3 class="fw-bold">Ride Guides</h3>
                             <p class="text-secondary mb-0">Understand how to book, manage and enjoy your NandiRide trips with ease.</p>
                         </div>
@@ -309,9 +317,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm rounded-4">
                         <div class="card-body p-4 p-lg-5">
-                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4">
-                                <i class="fa-solid fa-credit-card fs-3"></i>
-                            </div>
+                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4"><i class="fa-solid fa-credit-card fs-3"></i></div>
                             <h3 class="fw-bold">Payment Tips</h3>
                             <p class="text-secondary mb-0">Learn more about convenient payments and managing your ride payment history.</p>
                         </div>
@@ -320,9 +326,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm rounded-4">
                         <div class="card-body p-4 p-lg-5">
-                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4">
-                                <i class="fa-solid fa-headset fs-3"></i>
-                            </div>
+                            <div class="bg-danger-subtle text-danger rounded-4 d-inline-flex p-3 mb-4"><i class="fa-solid fa-headset fs-3"></i></div>
                             <h3 class="fw-bold">NandiRide Support</h3>
                             <p class="text-secondary mb-0">Find useful information and helpful guidance whenever you need assistance.</p>
                         </div>
@@ -338,12 +342,13 @@
                     <div class="bg-white text-danger rounded-circle d-inline-flex p-3 mb-3">
                         <i class="fa-solid fa-envelope-open-text fs-3"></i>
                     </div>
-                    <h2 class="display-6 fw-bold">Stay Updated With {{ site_name }}</h2>
+                    <h2 class="display-6 fw-bold">Stay Updated With {{ site_name|default:"NandiRide" }}</h2>
                     <p class="text-white-50 mb-4">Get the latest travel tips, ride updates and useful guides directly in your inbox.</p>
-                    <form method="post" class="row g-2 justify-content-center">
+                    <form method="post" action="" class="row g-2 justify-content-center">
                         {% csrf_token %}
+                        <input type="hidden" name="form_type" value="newsletter">
                         <div class="col-12 col-md-8">
-                            <input type="email" name="email" class="form-control form-control-lg rounded-pill px-4" placeholder="Enter your email address" required>
+                            <input type="email" name="email" class="form-control form-control-lg rounded-pill px-4" placeholder="Enter your email address" aria-label="Email address for newsletter" autocomplete="email" required>
                         </div>
                         <div class="col-12 col-md-auto">
                             <button type="submit" class="btn btn-light btn-lg rounded-pill px-4 fw-semibold text-danger w-100">
@@ -351,9 +356,101 @@
                             </button>
                         </div>
                     </form>
+                    <small class="d-block text-white-50 mt-3">Subscribe to receive NandiRide blog updates.</small>
                 </div>
             </div>
         </div>
     </section>
 </div>
+<script>
+(function () {
+    let activeCategory = "all";
+    function normalize(value) {
+        return (value || "").toString().toLowerCase().trim();
+    }
+    window.filterBlogPosts = function () {
+        const searchInput = document.getElementById("blogSearch");
+        const query = normalize(searchInput ? searchInput.value : "");
+        const cards = Array.from(document.querySelectorAll("#blogPostsGrid .blog-post-item"));
+        const featuredSection = document.getElementById("featured-section");
+        const featuredCard = featuredSection ? featuredSection.querySelector(".blog-post-card") : null;
+        let visibleCount = 0;
+        cards.forEach(function (item) {
+            const card = item.querySelector(".blog-post-card");
+            if (!card) return;
+            const searchableText = normalize([
+                card.dataset.title,
+                card.dataset.category,
+                card.dataset.description,
+                card.dataset.author,
+                card.textContent
+            ].join(" "));
+            const category = normalize(card.dataset.category);
+            const categoryMatch = activeCategory === "all" || category === activeCategory;
+            const searchMatch = !query || searchableText.includes(query);
+            const show = categoryMatch && searchMatch;
+            item.classList.toggle("d-none", !show);
+            if (show) visibleCount++;
+        });
+        if (featuredSection && featuredCard) {
+            const searchableText = normalize([
+                featuredCard.dataset.title,
+                featuredCard.dataset.category,
+                featuredCard.dataset.description,
+                featuredCard.dataset.author,
+                featuredCard.textContent
+            ].join(" "));
+            const category = normalize(featuredCard.dataset.category);
+            const categoryMatch = activeCategory === "all" || category === activeCategory;
+            const searchMatch = !query || searchableText.includes(query);
+            featuredSection.classList.toggle("d-none", !(categoryMatch && searchMatch));
+        }
+        const countElement = document.getElementById("blogArticleCount");
+        if (countElement) countElement.textContent = visibleCount;
+        const noResults = document.getElementById("blogNoResults");
+        if (noResults) noResults.classList.toggle("d-none", visibleCount !== 0);
+        const summary = document.getElementById("blogFilterSummary");
+        if (summary) {
+            if (query && activeCategory !== "all") {
+                summary.textContent = visibleCount + " article(s) matching “" + query + "” in " + activeCategory;
+            } else if (query) {
+                summary.textContent = visibleCount + " article(s) matching “" + query + "”";
+            } else if (activeCategory !== "all") {
+                summary.textContent = visibleCount + " article(s) in " + activeCategory;
+            } else {
+                summary.textContent = "Showing " + visibleCount + " article(s)";
+            }
+        }
+        const clearButton = document.getElementById("clearBlogFilters");
+        if (clearButton) clearButton.classList.toggle("d-none", !query && activeCategory === "all");
+    };
+    window.selectBlogCategory = function (button) {
+        activeCategory = normalize(button.dataset.category) || "all";
+        document.querySelectorAll(".blog-category").forEach(function (item) {
+            const selected = normalize(item.dataset.category) === activeCategory;
+            item.classList.toggle("btn-danger", selected);
+            item.classList.toggle("btn-outline-danger", !selected);
+            item.classList.toggle("active", selected);
+            item.setAttribute("aria-pressed", selected ? "true" : "false");
+        });
+        window.filterBlogPosts();
+    };
+    window.clearBlogFilters = function () {
+        const searchInput = document.getElementById("blogSearch");
+        if (searchInput) searchInput.value = "";
+        const allButton = document.querySelector('.blog-category[data-category="all"]');
+        if (allButton) window.selectBlogCategory(allButton);
+        else {
+            activeCategory = "all";
+            window.filterBlogPosts();
+        }
+    };
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".blog-category").forEach(function (button) {
+            button.setAttribute("aria-pressed", normalize(button.dataset.category) === "all" ? "true" : "false");
+        });
+        window.filterBlogPosts();
+    });
+})();
+</script>
 {% endblock %}
