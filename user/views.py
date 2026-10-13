@@ -273,7 +273,7 @@ class About(TemplateView):
             'button_url': reverse('booking'),
             'secondary_button': 'Contact Us',
             'secondary_button_icon': 'fa-solid fa-headset',
-            'secondary_button_url': reverse('contact'),
+            'secondary_button_url': reverse('user-contact'),
         }
         context['about_intro'] = {
             'small': 'WHO WE ARE',
@@ -489,7 +489,7 @@ class ServicesView(TemplateView):
                 'features': ['Quick assistance', 'Ride support', 'Customer care'],
                 'button': 'Contact Us',
                 'button_icon': 'fa-solid fa-headset',
-                'url': 'contact',
+                'url': 'user-contact',
                 'popular': False,
                 'popular_text': 'Popular',
             },
@@ -566,7 +566,7 @@ class CareerView(TemplateView):
                 'salary': 'Competitive',
                 'description': 'Build scalable backend services and APIs for the NandiRide ride booking platform.',
                 'skills': ['Python', 'Django', 'DRF', 'PostgreSQL'],
-                'url': 'contact',
+                'url': 'user-contact',
                 'featured': True,
             },
             {
@@ -579,7 +579,7 @@ class CareerView(TemplateView):
                 'salary': 'Competitive',
                 'description': 'Create smooth and reliable mobile experiences for NandiRide customers and drivers.',
                 'skills': ['React Native', 'JavaScript', 'API', 'Git'],
-                'url': 'contact',
+                'url': 'user-contact',
                 'featured': False,
             },
             {
@@ -592,7 +592,7 @@ class CareerView(TemplateView):
                 'salary': 'Competitive',
                 'description': 'Help customers with bookings, rides, payments and general NandiRide support.',
                 'skills': ['Communication', 'Customer Service', 'Problem Solving'],
-                'url': 'contact',
+                'url': 'user-contact',
                 'featured': False,
             },
             {
@@ -605,7 +605,7 @@ class CareerView(TemplateView):
                 'salary': 'Competitive',
                 'description': 'Support daily ride operations and help maintain a reliable experience for customers and drivers.',
                 'skills': ['Operations', 'Management', 'Communication'],
-                'url': 'contact',
+                'url': 'user-contact',
                 'featured': False,
             },
         ]
@@ -707,7 +707,7 @@ class BlogView(TemplateView):
 
 
 class ContactView(TemplateView):
-    template_name = 'user/contact1.html'
+    template_name = 'user/contact.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
