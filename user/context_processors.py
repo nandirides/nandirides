@@ -23,42 +23,42 @@ def site_data(request):
             },
             {
                 'name': 'About',
-                'url': reverse('about'),
+                'url': reverse('user-about'),
                 'icon': 'fa fa-info-circle',
             },
             {
                 'name': 'Services',
-                'url': reverse('services'),
+                'url': reverse('user-services'),
                 'icon': 'fa fa-cogs',
             },
             {
                 'name': 'Blog',
-                'url': reverse('blog'),
+                'url': reverse('user-blog'),
                 'icon': 'fa fa-cogs',
             },
             {
                 'name': 'Career',
-                'url': reverse('career'),
+                'url': reverse('user-career'),
                 'icon': 'fa fa-briefcase',
             },
             {
                 'name': 'Contact',
-                'url': reverse('contact'),
+                'url': reverse('user-contact'),
                 'icon': 'fa fa-phone',
             },
         ],
 
         # LOGIN
         'button_login': 'Login',
-        'url_login': reverse('login'),
+        'url_login': reverse('user-login'),
         'button_reg': 'Register',
-        'url_signup': reverse('signup'),
+        'url_signup': reverse('user-signup'),
 
         # SUPPORT
         'support_links': [
             {
                 'name': 'Help Center',
-                'url': reverse('contact'),
+                'url': reverse('user-contact'),
             },
             {
                 'name': 'Safety',
