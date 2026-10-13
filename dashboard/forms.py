@@ -1,35 +1,180 @@
 from django import forms
+from .models import Vacancy, BlogPost, Feedback
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from dashboard.models import Gallery
-
+from dashboard.models import Gallery, UserProfile, UserAddress
+from locations.models import City
+from django.utils import timezone
 
 class UserCreateForm(UserCreationForm):
-
     email = forms.EmailField(
         required=True,
-        widget=forms.EmailInput(attrs={
-            "class": "form-control",
-            "placeholder": "Email address",
-        })
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Email address",
+            }
+        ),
     )
-
     first_name = forms.CharField(
         required=False,
-        widget=forms.TextInput(attrs={
-            "class": "form-control",
-            "placeholder": "First name",
-        })
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "First name",
+            }
+        ),
     )
-
     last_name = forms.CharField(
         required=False,
-        widget=forms.TextInput(attrs={
-            "class": "form-control",
-            "placeholder": "Last name",
-        })
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Last name",
+            }
+        ),
     )
-
+    phone = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Mobile number",
+                "maxlength": "20",
+            }
+        ),
+    )
+    date_of_birth = forms.DateField(
+        required=False,
+        widget=forms.DateInput(
+            attrs={
+                "class": "form-control",
+                "type": "date",
+            }
+        ),
+    )
+    gender = forms.ChoiceField(
+        required=False,
+        choices=UserProfile.Gender.choices,
+        widget=forms.Select(
+            attrs={
+                "class": "form-select",
+            }
+        ),
+    )
+    city = forms.ModelChoiceField(
+        required=False,
+        queryset=City.objects.none(),
+        empty_label="Select city",
+        widget=forms.Select(
+            attrs={
+                "class": "form-select",
+            }
+        ),
+    )
+    profile_image = forms.ImageField(
+        required=False,
+        widget=forms.ClearableFileInput(
+            attrs={
+                "class": "form-control",
+                "accept": "image/*",
+            }
+        ),
+    )
+    address = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Enter profile address",
+                "rows": 3,
+            }
+        ),
+    )
+    emergency_contact_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Emergency contact name",
+            }
+        ),
+    )
+    emergency_contact_phone = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Emergency contact phone",
+                "maxlength": "20",
+            }
+        ),
+    )
+    address_type = forms.ChoiceField(
+        required=False,
+        choices=UserAddress.AddressType.choices,
+        widget=forms.Select(
+            attrs={
+                "class": "form-select",
+            }
+        ),
+    )
+    label = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Example: Home, Office",
+            }
+        ),
+    )
+    address_line1 = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Address line 1",
+            }
+        ),
+    )
+    address_line2 = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Address line 2",
+            }
+        ),
+    )
+    landmark = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Landmark",
+            }
+        ),
+    )
+    postal_code = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Postal code",
+                "maxlength": "20",
+            }
+        ),
+    )
+    address_city = forms.ModelChoiceField(
+        required=False,
+        queryset=City.objects.none(),
+        empty_label="Select address city",
+        widget=forms.Select(
+            attrs={
+                "class": "form-select",
+            }
+        ),
+    )
     class Meta:
         model = User
         fields = [
@@ -40,69 +185,242 @@ class UserCreateForm(UserCreationForm):
             "password1",
             "password2",
         ]
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.fields["username"].widget.attrs.update({
-            "class": "form-control",
-            "placeholder": "Username",
-        })
-
-        self.fields["password1"].widget.attrs.update({
-            "class": "form-control",
-            "placeholder": "Password",
-        })
-
-        self.fields["password2"].widget.attrs.update({
-            "class": "form-control",
-            "placeholder": "Confirm password",
-        })
-
-         # UPDATE MODE
+        cities = City.objects.all().order_by("name")
+        self.fields["city"].queryset = cities
+        self.fields["address_city"].queryset = cities
+        self.fields["username"].widget.attrs.update(
+            {
+                "class": "form-control",
+                "placeholder": "Username",
+            }
+        )
+        self.fields["password1"].widget.attrs.update(
+            {
+                "class": "form-control",
+                "placeholder": "Password",
+            }
+        )
+        self.fields["password2"].widget.attrs.update(
+            {
+                "class": "form-control",
+                "placeholder": "Confirm password",
+            }
+        )
         if self.instance and self.instance.pk:
             self.fields["username"].disabled = True
-            self.fields["password1"].required = True
-            self.fields["password2"].required = True
-            # self.fields.pop("password1")
-            # self.fields.pop("password2")
-
+            self.fields["password1"].required = False
+            self.fields["password2"].required = False
             self.fields["password1"].help_text = (
                 "Leave blank to keep the current password."
             )
-
+            try:
+                profile = self.instance.profile
+            except UserProfile.DoesNotExist:
+                profile = None
+            address = (
+                UserAddress.objects.filter(
+                    user=self.instance,
+                    is_default=True,
+                ).first()
+                or UserAddress.objects.filter(
+                    user=self.instance,
+                ).first()
+            )
+            if profile:
+                self.fields["phone"].initial = profile.phone
+                self.fields["date_of_birth"].initial = profile.date_of_birth
+                self.fields["gender"].initial = profile.gender
+                self.fields["city"].initial = profile.city
+                self.fields["address"].initial = profile.address
+                self.fields["emergency_contact_name"].initial = (
+                    profile.emergency_contact_name
+                )
+                self.fields["emergency_contact_phone"].initial = (
+                    profile.emergency_contact_phone
+                )
+                self.fields["profile_image"].initial = profile.profile_image
+            if address:
+                self.fields["address_type"].initial = address.address_type
+                self.fields["label"].initial = address.label
+                self.fields["address_line1"].initial = address.address_line1
+                self.fields["address_line2"].initial = address.address_line2
+                self.fields["landmark"].initial = address.landmark
+                self.fields["postal_code"].initial = address.postal_code
+                self.fields["address_city"].initial = address.city
     def clean_username(self):
         username = self.cleaned_data.get("username")
-
         qs = User.objects.filter(username=username)
-
-        # UPDATE:
-        # Don't consider the current user as a duplicate.
         if self.instance and self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
-
         if qs.exists():
             raise forms.ValidationError(
                 "A user with that username already exists."
             )
-
         return username
 
 
 class GalleryForm(forms.ModelForm):
-    
     def __init__(self, *args, **kwargs):
-          super().__init__(*args, **kwargs)
-          self.fields["profile_image"].required = True
-    
+        super().__init__(*args, **kwargs)
+        self.fields["profile_image"].required = True
+        self.fields["category"].required = True
+
     class Meta:
         model = Gallery
-        fields =[
-            'profile_image'
+        fields = [
+            "profile_image",
+            "category",
         ]
-        
-        help_texts = {
-            'profile_image' : 'Optional: Upload a profile image',
-            'my_file' : 'Optional: Attach any addational document (PDF, DOCX,etc.)'
+        widgets = {
+            "profile_image": forms.ClearableFileInput(
+                attrs={
+                    "class": "form-control",
+                    "accept": "image/*",
+                }
+            ),
+            "category": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
         }
-        
+        help_texts = {
+            "profile_image": "Upload one gallery image",
+            "category": "Select image category",
+        }
+
+class VacancyForm(forms.ModelForm):
+    class Meta:
+        model = Vacancy
+        fields = [
+            "title",
+            "department",
+            "job_type",
+            "location",
+            "experience",
+            "salary",
+            "skills",
+            "description",
+            "responsibilities",
+            "requirements",
+            "openings",
+            "application_email",
+            "last_date",
+            "status",
+            "is_active",
+            "is_featured",
+        ]
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Django Backend Developer"}),
+            "department": forms.TextInput(attrs={"class": "form-control", "placeholder": "Technology"}),
+            "job_type": forms.Select(attrs={"class": "form-select"}),
+            "location": forms.TextInput(attrs={"class": "form-control", "placeholder": "Haridwar, Uttarakhand / Remote"}),
+            "experience": forms.TextInput(attrs={"class": "form-control", "placeholder": "1-3 Years"}),
+            "salary": forms.TextInput(attrs={"class": "form-control", "placeholder": "₹4 LPA - ₹7 LPA"}),
+            "skills": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Django, Python, REST API, PostgreSQL"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 5, "placeholder": "Job description"}),
+            "responsibilities": forms.Textarea(attrs={"class": "form-control", "rows": 6, "placeholder": "One responsibility per line"}),
+            "requirements": forms.Textarea(attrs={"class": "form-control", "rows": 6, "placeholder": "One requirement per line"}),
+            "openings": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+            "application_email": forms.EmailInput(attrs={"class": "form-control"}),
+            "last_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "status": forms.Select(attrs={"class": "form-select"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "is_featured": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = [
+            "name",
+            "email",
+            "mobile_number",
+            "subject",
+            "message",
+        ]
+        widgets = {
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter your name",
+            }),
+            "email": forms.EmailInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter your email address",
+            }),
+            "mobile_number": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter mobile number",
+            }),
+            "subject": forms.Select(attrs={
+                "class": "form-select",
+            }),
+            "message": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 6,
+                "placeholder": "Write your feedback, question or message...",
+            }),
+        }
+
+class BlogPostForm(forms.ModelForm):
+    class Meta:
+        model = BlogPost
+        fields = [
+            "title",
+            "category",
+            "excerpt",
+            "content",
+            "cover_image",
+            "author",
+            "published_at",
+            "is_active",
+            "is_featured",
+        ]
+        widgets = {
+            "title": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter blog title"
+            }),
+            "category": forms.Select(attrs={
+                "class": "form-select"
+            }),
+            "excerpt": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Short description of the blog"
+            }),
+            "content": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 8,
+                "placeholder": "Write your complete blog content"
+            }),
+            "cover_image": forms.ClearableFileInput(attrs={
+                "class": "form-control",
+                "accept": "image/jpeg,image/png,image/webp"
+            }),
+            "author": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Author name"
+            }),
+            "published_at": forms.DateTimeInput(attrs={
+                "class": "form-control",
+                "type": "datetime-local"
+            }),
+            "is_active": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+            "is_featured": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            self.initial["published_at"] = timezone.localtime(
+                timezone.now()
+            ).strftime("%Y-%m-%dT%H:%M")
+            self.initial["author"] = "NandiRide Team"
+            self.initial["is_active"] = True

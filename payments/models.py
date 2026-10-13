@@ -28,6 +28,16 @@ class Payment(TimeStampedModel):
         "rides.Ride",
         on_delete=models.PROTECT,
         related_name="payment",
+        null=True,
+        blank=True,
+    )
+
+    ride_request = models.OneToOneField(
+        "rides.RideRequest",
+        on_delete=models.PROTECT,
+        related_name="payment",
+        null=True,
+        blank=True,
     )
 
     user = models.ForeignKey(
@@ -57,6 +67,27 @@ class Payment(TimeStampedModel):
         blank=True,
     )
 
+    gateway_order_id = models.CharField(
+        max_length=255,
+        blank=True,
+        db_index=True,
+    )
+
+    card_brand = models.CharField(
+        max_length=30,
+        blank=True,
+    )
+
+    card_last4 = models.CharField(
+        max_length=4,
+        blank=True,
+    )
+
+    metadata = models.JSONField(
+        default=dict,
+        blank=True,
+    )
+
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -67,6 +98,7 @@ class Payment(TimeStampedModel):
         null=True,
         blank=True,
     )
+
 
 class Refund(TimeStampedModel):
 
@@ -103,5 +135,3 @@ class Refund(TimeStampedModel):
         null=True,
         blank=True,
     )
-
-

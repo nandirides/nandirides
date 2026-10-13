@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+{% block title %}NandiRide | {{ page_title|default:"Ride" }}{% endblock %}
+{% block content %}
+
+<div class="container-fluid py-2">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h3 class="mb-0">{{ page_title|default:"Create Ride" }}</h3>
+            </div>
+            <div class="text-muted small">
+                {% if object %}
+                    Update ride details.
+                {% else %}
+                    Create a new ride.
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <a href="{% url 'ride_list' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-1"></i>
+                Back
+            </a>
+        </div>
+    </div>
+    <form method="post" id="rideForm">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div class="d-flex">
+                            <i class="bi bi-receipt text-primary me-2"></i>
+                            <h5 class="mb-0">Ride Request</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ride Number</label>
+                                <div class="form-control bg-primary-subtle text-primary fw-bold border-0" id="rideNumberDisplay">
+                                    {% if form.ride_number.value %}
+                                        {{ form.ride_number.value }}
+                                    {% elif object and object.ride_number %}
+                                        {{ object.ride_number }}
+                                    {% endif %}
+                                </div>
+                                {% if form.ride_number %}
+                                    <div class="d-none">
+                                        {{ form.ride_number }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ride Request</label>
+                                {% if object %}
+                                    <div class="form-control bg-light text-body fw-semibold">
+                                        {% if object.ride_request %}
+                                            {{ object.ride_request }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-none">
+                                        {{ form.ride_request }}
+                                    </div>
+                                {% else %}
+                                    {{ form.ride_request }}
+                                {% endif %}
+                                {% if form.ride_request.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.ride_request.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div class="d-flex">
+                            <i class="bi bi-person-badge text-primary me-2"></i>
+                            <h5 class="mb-0">Customer & Vehicle Type</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Customer</label>
+                                <div class="form-control bg-primary-subtle text-muted" id="passengerDisplay">—</div>
+                                {% if form.passenger %}
+                                    <div class="d-none">
+                                        {{ form.passenger }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Vehicle Type</label>
+                                <div class="form-control bg-primary-subtle text-muted" id="vehicleTypeDisplay">—</div>
+                                {% if form.vehicle_type %}
+                                    <div class="d-none">
+                                        {{ form.vehicle_type }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div class="d-flex">
+                            <i class="bi bi-car-front text-primary me-2"></i>
+                            <h5 class="mb-0">Driver & Vehicle Number</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.driver.id_for_label }}" class="form-label fw-semibold">Driver</label>
+                                {{ form.driver }}
+                                {% if form.driver.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.driver.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.vehicle.id_for_label }}" class="form-label fw-semibold">Vehicle</label>
+                                {{ form.vehicle }}
+                                {% if form.vehicle.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.vehicle.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div class="d-flex">
+                            <i class="bi bi-geo-alt text-primary me-2"></i>
+                            <h5 class="mb-0">Journey</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <div class="rounded-3 bg-primary-subtle p-3 h-100">
+                                    <div class="d-flex align-items-center gap-2 mb-2 text-primary">
+                                        <i class="fas fa-location-dot"></i>
+                                        <span class="small fw-semibold">Pickup Location</span>
+                                    </div>
+                                    <div class="fw-semibold text-body-secondary text-break" id="pickupLocationDisplay">—</div>
+                                </div>
+                                <div class="d-none">
+                                    {{ form.pickup_location }}
+                                </div>
+                                {% if form.pickup_location.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.pickup_location.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="rounded-3 bg-danger-subtle p-3 h-100">
+                                    <div class="d-flex align-items-center gap-2 mb-2 text-danger">
+                                        <i class="fas fa-location-dot"></i>
+                                        <span class="small fw-semibold">Drop Location</span>
+                                    </div>
+                                    <div class="fw-semibold text-body-secondary text-break" id="dropLocationDisplay">—</div>
+                                </div>
+                                <div class="d-none">
+                                    {{ form.drop_location }}
+                                </div>
+                                {% if form.drop_location.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.drop_location.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.scheduled_at.id_for_label }}" class="form-label fw-semibold">
+                                    Scheduled At
+                                </label>
+                                {{ form.scheduled_at }}
+                                {% if form.scheduled_at.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.scheduled_at.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
+                                    Ride Status
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.status.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                        <div class="d-flex">
+                            <i class="bi bi-speedometer2 text-primary me-2"></i>
+                            <h5 class="mb-0">Trip Details</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold">Distance</label>
+                                <div class="form-control bg-primary-subtle text-muted fw-semibold" id="distanceDisplay">—</div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold">Duration</label>
+                                <div class="form-control bg-primary-subtle text-muted fw-semibold" id="durationDisplay">—</div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold">Fare</label>
+                                <div class="form-control bg-success-subtle text-muted fw-semibold" id="fareDisplay">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-0">
+                    <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
+                        <a href="{% url 'ride_list' %}" class="btn btn-outline-danger">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2-circle me-1"></i>
+                            {% if object %}
+                                Update Ride
+                            {% else %}
+                                {{ submit_text|default:"Save Ride" }}
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                {% if object %}
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header bg-body">
+                            <h5 class="mb-0">Edit Timeline</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="small">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Created</span>
+                                    <span class="fw-semibold">{{ object.created_at|date:"d M Y, h:i A" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Updated</span>
+                                    <span class="fw-semibold">{{ object.updated_at|date:"d M Y, h:i A" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-body">
+                        <h5 class="mb-0">Ride Status Flow</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="small">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-primary">1</span>
+                                <span>Driver Assigned</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-primary">2</span>
+                                <span>Driver Arriving</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-primary">3</span>
+                                <span>Driver Arrived</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-primary">4</span>
+                                <span>Started</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-success">5</span>
+                                <span>Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if object and object.ride_request %}
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-header bg-body">
+                            <h5 class="mb-0">Source Request</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="small">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Request</span>
+                                    <span class="fw-semibold">{{ object.ride_request.pk }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Vehicle Type</span>
+                                    <span class="fw-semibold">{{ object.ride_request.vehicle_type }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-body">
+                        <h5 class="mb-0">Form Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="small text-muted">
+                            {% if object %}
+                                Ride Request is fixed for this ride. You can update the driver, vehicle, schedule and ride status.
+                            {% else %}
+                                Select a ride request first. Related passenger, vehicle, journey and fare details will then be loaded automatically.
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const isEditMode = {% if object %}true{% else %}false{% endif %};
+    const requestField = document.getElementById("id_ride_request");
+    const vehicleField = document.getElementById("id_vehicle");
+    const driverField = document.getElementById("id_driver");
+    const pickupField = document.getElementById("id_pickup_location");
+    const dropField = document.getElementById("id_drop_location");
+    const scheduledField = document.getElementById("id_scheduled_at");
+    const passengerField = document.getElementById("id_passenger");
+    const vehicleTypeField = document.getElementById("id_vehicle_type");
+    const statusField = document.getElementById("id_status");
+    const rideNumberField = document.getElementById("id_ride_number");
+    const rideNumberDisplay = document.getElementById("rideNumberDisplay");
+    const pickupDisplay = document.getElementById("pickupLocationDisplay");
+    const dropDisplay = document.getElementById("dropLocationDisplay");
+    const rideForm = document.getElementById("rideForm");
+    if (!rideForm) {
+        return;
+    }
+    const setDisplay = function (id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            const cleanValue = value !== null && value !== undefined
+                ? String(value).trim()
+                : "";
+            element.textContent = cleanValue || "—";
+        }
+    };
+    const setFieldValue = function (field, value) {
+        if (field && value !== null && value !== undefined) {
+            field.value = value;
+        }
+    };
+    const requestData = {
+        {% for request in form.ride_request.field.queryset %}
+        "{{ request.pk }}": {
+            passenger: "{% if request.passenger %}{{ request.passenger.get_full_name|default:request.passenger.username|escapejs }}{% endif %}",
+            passengerId: "{% if request.passenger %}{{ request.passenger.pk }}{% endif %}",
+            vehicleTypeId: "{% if request.vehicle_type %}{{ request.vehicle_type.pk }}{% endif %}",
+            vehicleTypeName: "{% if request.vehicle_type %}{{ request.vehicle_type|escapejs }}{% endif %}",
+            pickupId: "{% if request.pickup_location %}{{ request.pickup_location.pk }}{% endif %}",
+            pickupName: "{% if request.pickup_location %}{{ request.pickup_location|escapejs }}{% endif %}",
+            dropId: "{% if request.drop_location %}{{ request.drop_location.pk }}{% endif %}",
+            dropName: "{% if request.drop_location %}{{ request.drop_location|escapejs }}{% endif %}",
+            scheduled: "{% if request.scheduled_at %}{{ request.scheduled_at|date:'Y-m-d\\TH:i' }}{% endif %}",
+            distance: "{% if request.estimated_distance != None %}{{ request.estimated_distance|floatformat:2 }} km{% endif %}",
+            duration: "{% if request.estimated_duration != None %}{{ request.estimated_duration }} min{% endif %}",
+            fare: "{% if request.estimated_fare != None %}₹{{ request.estimated_fare|floatformat:2 }}{% endif %}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+    const applyRequestData = function (requestId) {
+        const data = requestData[String(requestId)];
+        if (!data) {
+            return;
+        }
+        setDisplay("passengerDisplay", data.passenger);
+        setDisplay("vehicleTypeDisplay", data.vehicleTypeName);
+        setDisplay("distanceDisplay", data.distance);
+        setDisplay("durationDisplay", data.duration);
+        setDisplay("fareDisplay", data.fare);
+        if (pickupDisplay) {
+            pickupDisplay.textContent = data.pickupName || "—";
+        }
+        if (dropDisplay) {
+            dropDisplay.textContent = data.dropName || "—";
+        }
+        setFieldValue(passengerField, data.passengerId);
+        setFieldValue(vehicleTypeField, data.vehicleTypeId);
+        setFieldValue(pickupField, data.pickupId);
+        setFieldValue(dropField, data.dropId);
+        if (scheduledField && data.scheduled) {
+            scheduledField.value = data.scheduled;
+        }
+    };
+    if (isEditMode) {
+        if (requestField) {
+            requestField.disabled = true;
+        }
+        if (rideNumberField && rideNumberDisplay) {
+            const rideNumber = String(
+                rideNumberField.value ||
+                rideNumberDisplay.textContent ||
+                ""
+            ).trim();
+            if (rideNumber) {
+                rideNumberField.value = rideNumber;
+                rideNumberDisplay.textContent = rideNumber;
+            }
+        }
+        const existingRequestId = requestField
+            ? String(requestField.value || "")
+            : "";
+        if (existingRequestId) {
+            applyRequestData(existingRequestId);
+        }
+        rideForm.addEventListener("submit", function () {
+            if (requestField) {
+                requestField.disabled = false;
+            }
+        });
+        return;
+    }
+    if (!requestField) {
+        return;
+    }
+    requestField.addEventListener("change", function () {
+        const requestId = String(this.value || "");
+        if (!requestId) {
+            return;
+        }
+        applyRequestData(requestId);
+    });
+});
+</script>
+{% endblock %}

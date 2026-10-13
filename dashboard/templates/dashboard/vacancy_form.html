@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if is_edit %}Edit Vacancy{% else %}Add Vacancy{% endif %} | NandiRide
+{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid py-3">
+
+        <!-- Page Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h3 class="mb-1 fw-bold">
+                    <i class="bi bi-briefcase me-2"></i>
+                    {% if is_edit %}Edit Vacancy{% else %}Add New Vacancy{% endif %}
+                </h3>
+
+                <p class="text-body-secondary mb-0">
+                    Manage career opportunities displayed on the NandiRide Careers page.
+                </p>
+            </div>
+
+            <a href="{% url 'vacancy_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Vacancies
+            </a>
+        </div>
+
+        <!-- Vacancy Form -->
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row g-4">
+
+                <!-- Position Information -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+
+                        <div class="card-header bg-body border-bottom">
+                            <h5 class="mb-0 fw-bold">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Position Information
+                            </h5>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row g-3">
+
+                                <!-- Job Title -->
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">
+                                        Job Title
+                                    </label>
+
+                                    {{ form.title }}
+
+                                    {% if form.title.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.title.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Department -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Department
+                                    </label>
+
+                                    {{ form.department }}
+                                </div>
+
+                                <!-- Job Type -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Job Type
+                                    </label>
+
+                                    {{ form.job_type }}
+                                </div>
+
+                                <!-- Experience -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Experience
+                                    </label>
+
+                                    {{ form.experience }}
+                                </div>
+
+                                <!-- Openings -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Openings
+                                    </label>
+
+                                    {{ form.openings }}
+                                </div>
+
+                                <!-- Location -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Location
+                                    </label>
+
+                                    {{ form.location }}
+                                </div>
+
+                                <!-- Salary -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Salary / CTC
+                                    </label>
+
+                                    {{ form.salary }}
+                                </div>
+
+                                <!-- Required Skills -->
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        Required Skills
+                                    </label>
+
+                                    {{ form.skills }}
+
+                                    <div class="form-text">
+                                        Example: Python, Django, REST API, PostgreSQL, Git
+                                    </div>
+                                </div>
+
+                                <!-- Job Description -->
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        Job Description
+                                    </label>
+
+                                    {{ form.description }}
+                                </div>
+
+                                <!-- Responsibilities -->
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        Responsibilities
+                                    </label>
+
+                                    {{ form.responsibilities }}
+
+                                    <div class="form-text">
+                                        Write each responsibility on a new line.
+                                    </div>
+                                </div>
+
+                                <!-- Requirements -->
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        Requirements
+                                    </label>
+
+                                    {{ form.requirements }}
+
+                                    <div class="form-text">
+                                        Write each requirement on a new line.
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Publishing Settings -->
+                <div class="col-lg-4">
+
+                    <div class="card border-0 shadow-sm mb-4">
+
+                        <div class="card-header bg-body border-bottom">
+                            <h5 class="mb-0 fw-bold">
+                                <i class="bi bi-sliders me-2"></i>
+                                Publishing
+                            </h5>
+                        </div>
+
+                        <div class="card-body">
+
+                            <!-- Vacancy Status -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Vacancy Status
+                                </label>
+
+                                {{ form.status }}
+                            </div>
+
+                            <!-- Application Email -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Application Email
+                                </label>
+
+                                {{ form.application_email }}
+                            </div>
+
+                            <!-- Last Date -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Last Date
+                                </label>
+
+                                {{ form.last_date }}
+                            </div>
+
+                            <!-- Active Vacancy -->
+                            <div class="form-check form-switch mb-3">
+                                {{ form.is_active }}
+
+                                <label
+                                    class="form-check-label fw-semibold"
+                                    for="{{ form.is_active.id_for_label }}"
+                                >
+                                    Active Vacancy
+                                </label>
+                            </div>
+
+                            <!-- Featured Position -->
+                            <div class="form-check form-switch">
+                                {{ form.is_featured }}
+
+                                <label
+                                    class="form-check-label fw-semibold"
+                                    for="{{ form.is_featured.id_for_label }}"
+                                >
+                                    Featured Position
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Publishing Tip -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+
+                            <div class="d-flex align-items-start gap-3">
+
+                                <div class="rounded-circle bg-primary-subtle text-primary p-3">
+                                    <i class="bi bi-lightbulb fs-5"></i>
+                                </div>
+
+                                <div>
+                                    <h6 class="fw-bold">
+                                        Publishing Tip
+                                    </h6>
+
+                                    <p class="small text-body-secondary mb-0">
+                                        Keep the vacancy active when you want candidates to see it on the public Careers page. Use Coming Soon when the position is planned but applications are not open yet.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Form Footer / Submit Actions -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+
+                    <div>
+                        <h6 class="fw-bold mb-1">
+                            {% if is_edit %}
+                                Update this vacancy
+                            {% else %}
+                                Publish this vacancy
+                            {% endif %}
+                        </h6>
+
+                        <p class="text-body-secondary small mb-0">
+                            All vacancy information can be changed later from Manage Vacancies.
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+
+                        <a
+                            href="{% url 'vacancy_list' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-circle me-1"></i>
+
+                            {% if is_edit %}
+                                Update Vacancy
+                            {% else %}
+                                Add Vacancy
+                            {% endif %}
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+</section>
+{% endblock %}

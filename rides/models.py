@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-
 from core.models import TimeStampedModel
 from drivers.models import Driver
 from locations.models import Location
@@ -73,6 +72,24 @@ class RideRequest(TimeStampedModel):
         null=True,
         blank=True,
     )
+    coupon = models.ForeignKey(
+        "promotions.Coupon",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="ride_requests",
+    )
+    discount_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+    final_fare = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
 
     status = models.CharField(
         max_length=30,
@@ -80,6 +97,9 @@ class RideRequest(TimeStampedModel):
         default=Status.REQUESTED,
         db_index=True,
     )
+
+    def __str__(self):
+            return f"{self.request_number} - {self.passenger}"
 
 class Ride(TimeStampedModel):
 
@@ -348,6 +368,9 @@ class CancellationReason(TimeStampedModel):
     is_active = models.BooleanField(
         default=True,
     )
+
+    def __str__(self):
+            return f"{self.reason}"
 
 
 class RideCancellation(TimeStampedModel):

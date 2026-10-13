@@ -1,237 +1,514 @@
 {% load static %}
 
-<nav class="app-header navbar navbar-expand bg-body">
-
-    <div class="container-fluid">
-
-
-        <!-- Left Navbar -->
-        <ul class="navbar-nav">
-            <button
-                type="button"
-                class="nav-link border-0 bg-transparent"
-                id="theme-toggle"
-            >
-                <i
-                    class="bi bi-moon-fill"
-                    id="theme-icon"
-                ></i>
-            </button>
-            <!-- Sidebar Toggle -->
+<nav class="app-header navbar navbar-expand bg-body border-bottom shadow-sm {% if request.resolver_match.url_name == 'login' %}app-header-login{% else %}app-header-dashboard{% endif %}" style="position:fixed!important;top:0;right:0;z-index:1030!important;">
+    <div class="container-fluid position-relative">
+        <ul class="navbar-nav align-items-center">
+            {% if request.resolver_match.url_name != 'login' %}
             <li class="nav-item">
-
-                <a
-                    class="nav-link"
-                    data-lte-toggle="sidebar"
-                    href="#"
-                    role="button"
-                    aria-label="Toggle sidebar"
-                >
-
-                    <i class="bi bi-list"></i>
-
+                <a class="nav-link rounded" data-lte-toggle="sidebar" href="#" role="button" aria-label="Toggle sidebar" title="Toggle sidebar">
+                    <i class="bi bi-list fs-5"></i>
                 </a>
-
             </li>
-
-
-            <!-- Home -->
             <li class="nav-item d-none d-md-block">
-
-                <a
-                    href="{% url 'dashboard' %}"
-                    class="nav-link"
-                >
+                <a href="{% url 'dashboard' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="bi bi-house-door me-1"></i>
                     Home
                 </a>
-
             </li>
+            <li class="nav-item d-none d-md-block">
+                <a href="{% url 'about' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                    <i class="bi bi-info-circle me-1"></i>
+                    About
+                </a>
             </li>
-      <li class="nav-item d-none d-md-block">
-        <a href="#" class="nav-link">Contact</a>
-      </li>
-
-        </ul>
-   <!-- End navbar links -->
-
-        <!-- Right Navbar -->
-        <!-- Navbar search: a quiet pill, the icon is the submit button (md and up) -->
-    <form class="navbar-search d-none d-md-block ms-3" role="search" action="search-results.html">
-      <label for="navbar-search-input" class="visually-hidden">Search</label>
-      <div class="navbar-search-field">
-        <input type="search" id="navbar-search-input" name="q" class="form-control" placeholder="Search…" autocomplete="off" />
-        <button class="navbar-search-submit" type="submit" aria-label="Submit search">
-          <i class="bi bi-search" aria-hidden="true"></i>
-        </button>
-      </div>
-    </form>
-
-    <ul class="navbar-nav ms-auto">
-      <!-- Search on small screens: link to the search page -->
-      <li class="nav-item d-md-none">
-        <a class="nav-link" href="search-results.html" aria-label="Search">
-          <i class="bi bi-search" aria-hidden="true"></i>
-        </a>
-      </li>           
-
-
-            {% if user.is_authenticated %}
-
-
-                <!-- User Menu -->
-                <li class="nav-item dropdown">
-
-                    <a
-                        class="nav-link dropdown-toggle d-flex align-items-center"
-                        href="#"
-                        role="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                    >
-
-                        <img
-                            src="{% static 'adminlte/img/user1-128x128.jpg' %}"
-                            class="user-image rounded-circle shadow me-2"
-                            width="32"
-                            height="32"
-                            alt="User profile"
-                        >
-
-                        <span class="d-none d-md-inline">
-                            {{ user.get_username }}
-                        </span>
-
-                    </a>
-
-
-                    <ul class="dropdown-menu dropdown-menu-end">
-
-
-                        <!-- User Header -->
-                        <li class="user-header text-bg-primary p-3">
-
-                            <div class="text-center">
-
-                                <img
-                                    src="{% static 'adminlte/img/user1-128x128.jpg' %}"
-                                    class="rounded-circle shadow"
-                                    width="64"
-                                    height="64"
-                                    alt="User profile"
-                                >
-
-                                <p class="mb-0 mt-2">
-
-                                    {{ user.get_username }}
-
-                                    {% if user.is_staff %}
-                                        <small>
-                                            Administrator
-                                        </small>
-                                    {% endif %}
-
-                                </p>
-
-                            </div>
-
-                        </li>
-
-
-                        <!-- Profile -->
-                        <li>
-
-                            <a
-                               href="{% url 'user_profile' %}"
-                                class="dropdown-item"
-                            >
-
-                                <i class="bi bi-person me-2"></i>
-
-                                Profile
-
-                            </a>
-
-                        </li>
-
-
-                        <!-- Settings -->
-                        <li>
-
-                            <a
-                                href="{% url 'user_setting' %}"
-                                class="dropdown-item"
-                            >
-
-                                <i class="bi bi-gear me-2"></i>
-
-                                Settings
-
-                            </a>
-
-                        </li>
-
-
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-
-                        <!-- Logout -->
-                        <li>
-
-                            <form
-                                method="post"
-                                action="{% url 'logout' %}"
-                            >
-
-                                {% csrf_token %}
-
-                                <button
-                                    type="submit"
-                                    class="dropdown-item text-danger"
-                                >
-
-                                    <i class="bi bi-box-arrow-right me-2"></i>
-
-                                    Logout
-
-                                </button>
-
-                            </form>
-
-                        </li>
-
-
-                    </ul>
-
-                </li>
-
-
-            {% else %}
-
-
-                <!-- Login -->
-                <li class="nav-item">
-
-                    <a
-                        href="{% url 'login' %}"
-                        class="nav-link"
-                    >
-
-                        <i class="bi bi-box-arrow-in-right me-1"></i>
-
-                        Login
-
-                    </a>
-
-                </li>
-
-
+            <li class="nav-item d-none d-md-block">
+                <a href="{% url 'blog' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'blog' %}active{% endif %}">
+                    <i class="bi bi-journal-text me-1"></i>
+                    Blog
+                </a>
+            </li>
+            <li class="nav-item d-none d-md-block">
+                <a href="{% url 'career' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'career' %}active{% endif %}">
+                    <i class="bi bi-briefcase me-1"></i>
+                    Career
+                </a>
+            </li>
+            <li class="nav-item d-none d-md-block">
+                <a href="{% url 'services' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'services' %}active{% endif %}">
+                    <i class="bi bi-grid me-1"></i>
+                    Services
+                </a>
+            </li>
+            <li class="nav-item d-none d-md-block">
+                <a href="{% url 'contact' %}" class="nav-link fw-medium nav-tab-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+                    <i class="bi bi-envelope me-1"></i>
+                    Contact
+                </a>
+            </li>
             {% endif %}
-
-
         </ul>
-
+        {% if request.resolver_match.url_name == 'login' %}
+        <div class="position-absolute top-50 start-50 translate-middle d-flex align-items-center gap-3 text-nowrap">
+            <img src="{% static 'user/images/logo.png' %}" alt="NandiRide Logo" width="42" height="42" class="rounded-3 shadow-sm">
+            <div class="lh-sm">
+                <div class="fw-bold fs-5 text-body">
+                    Welcome to the Nandi<small class="text-warning">Ride</small>
+                    <span class="fs-5 text-body fw-semibold">Administration Portal</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <ul class="navbar-nav ms-auto align-items-center">
+            {% if request.resolver_match.url_name != 'login' %}
+            <li class="nav-item d-md-none">
+                <a class="nav-link rounded-circle" href="#" aria-label="Search" title="Search">
+                    <i class="bi bi-search"></i>
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <button type="button" class="nav-link border-0 bg-transparent rounded-circle" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+                    <i class="bi bi-moon-fill" id="theme-icon"></i>
+                </button>
+            </li>
+            {% if user.is_authenticated %}
+            <li class="nav-item dropdown notification-nav-item">
+                <a class="nav-link notification-bell-wrapper rounded-circle"
+                   href="#"
+                   role="button"
+                   aria-expanded="false"
+                   aria-label="Notifications"
+                   title="Notifications">
+                    <i class="bi bi-bell fs-5"></i>
+                    {% if unread_notifications_count > 0 %}
+                    <span id="notification-badge" class="notification-badge">
+                        {{ unread_notifications_count }}
+                        <span class="visually-hidden">unread notifications</span>
+                    </span>
+                    {% endif %}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end notification-dropdown shadow border-0 rounded-3 overflow-hidden">
+                    <li class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold">Notifications</span>
+                        <a href="{% url 'notification_list' %}" class="small text-decoration-none text-primary">View All</a>
+                    </li>
+                    <li id="notification-list" class="notification-list-scroll">
+                        {% if notifications %}
+                        {% for notification in notifications %}
+                        <a href="{% url 'notification_read' notification.pk %}" class="dropdown-item notification-item py-3 border-bottom">
+                            <div class="d-flex align-items-start">
+                                <div class="notification-item-icon me-3">
+                                    <i class="bi bi-bell-fill"></i>
+                                </div>
+                                <div class="flex-grow-1 notification-content">
+                                    <div class="fw-semibold text-body notification-title">
+                                        {{ notification.title }}
+                                    </div>
+                                    <small class="text-body-secondary notification-message">
+                                        {{ notification.message }}
+                                    </small>
+                                    {% if notification.created_at %}
+                                    <small class="d-block text-body-secondary mt-1 notification-time">
+                                        {{ notification.created_at|timesince }} ago
+                                    </small>
+                                    {% endif %}
+                                </div>
+                                {% if not notification.is_read %}
+                                <span class="notification-unread-dot"></span>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center py-4 text-body-secondary">
+                            <i class="bi bi-bell-slash fs-3 d-block mb-2"></i>
+                            No new notifications
+                        </div>
+                        {% endif %}
+                    </li>
+                    <li class="text-center border-top">
+                        <a href="{% url 'notification_list' %}" class="dropdown-item py-2 text-primary fw-medium">
+                            View all notifications
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown ms-1">
+                <a class="nav-link dropdown-toggle d-flex align-items-center px-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if user.profile.profile_image %}
+                    <img src="{{ user.profile.profile_image.url }}" class="rounded-circle shadow-sm border me-2 object-fit-cover" width="34" height="34" alt="User profile">
+                    {% else %}
+                    <span class="rounded-circle shadow-sm border me-2 bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width:34px;height:34px;">
+                        <i class="bi bi-person-fill"></i>
+                    </span>
+                    {% endif %}
+                    <span class="d-none d-md-inline fw-medium">{{ user.get_full_name|default:user.get_username }}</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0 rounded-3 overflow-hidden" style="width:320px;">
+                    <div class="bg-primary text-white text-center p-3">
+                        {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image.url }}" class="rounded-circle border border-3 border-white shadow-sm bg-white object-fit-cover" width="90" height="90" alt="User profile">
+                        {% else %}
+                        <div class="rounded-circle border border-3 border-white shadow-sm bg-white text-primary d-inline-flex align-items-center justify-content-center" style="width:90px;height:90px;">
+                            <i class="bi bi-person-fill fs-1"></i>
+                        </div>
+                        {% endif %}
+                        <h6 class="mb-1 mt-2 fw-semibold">{{ user.get_full_name|default:user.get_username }}</h6>
+                        <p class="mb-1 small fw-medium badge text-white border">
+                            {% if user.is_superuser %}
+                            Super Administrator
+                            {% elif user.is_staff %}
+                            Administrator
+                            {% else %}
+                            Web User
+                            {% endif %}
+                        </p><br>
+                        <small class="opacity-100">Last Login {{ user.last_login|date:"d M Y, h:i A" }}</small>
+                    </div>
+                    <div class="p-3 bg-body">
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'user_setting' %}" class="btn btn-outline-primary btn-sm flex-fill">
+                                <i class="bi bi-gear me-1"></i>
+                                Admin Setting
+                            </a>
+                            <button type="button" class="btn btn-outline-danger btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#signOutModal">
+                                <i class="bi bi-box-arrow-right me-1"></i>
+                                Sign out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            {% else %}
+            <li class="nav-item">
+                <a href="{% url 'login' %}" class="nav-link d-flex align-items-center">
+                    <i class="bi bi-box-arrow-in-right text-primary me-1"></i>
+                    <span class="d-none d-sm-inline">Public Login</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
     </div>
-
 </nav>
+<div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <i class="bi bi-box-arrow-right text-danger fs-1"></i>
+                </div>
+                <h5 class="fw-semibold mb-2" id="signOutModalLabel">Sign out?</h5>
+                <p class="text-body-secondary mb-4">Are you sure you want to sign out?</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" action="{% url 'logout' %}" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger px-4">Sign out</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let sessionExpired = false;
+    const navbar = document.querySelector(".app-header");
+    const sidebarToggle = document.querySelector('[data-lte-toggle="sidebar"]');
+    const isLoginPage = document.body.classList.contains("login-page") || (navbar && navbar.classList.contains("app-header-login"));
+    function closeAllBootstrapComponents() {
+        document.querySelectorAll(".notification-dropdown.notification-open").forEach(function (menu) {
+            menu.classList.remove("notification-open");
+        });
+        document.querySelectorAll(".notification-nav-item.notification-parent-open").forEach(function (item) {
+            item.classList.remove("notification-parent-open");
+        });
+        document.querySelectorAll(".modal.show").forEach(function (modalElement) {
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        });
+        document.querySelectorAll(".dropdown-menu.show").forEach(function (menu) {
+            const dropdownInstance = bootstrap.Dropdown.getInstance(menu.previousElementSibling);
+            if (dropdownInstance) {
+                dropdownInstance.hide();
+            } else {
+                menu.classList.remove("show");
+            }
+        });
+        document.querySelectorAll(".navbar-nav .show").forEach(function (element) {
+            element.classList.remove("show");
+        });
+        document.querySelectorAll("[aria-expanded='true']").forEach(function (element) {
+            if (element.closest(".dropdown") || element.closest(".modal")) {
+                element.setAttribute("aria-expanded", "false");
+            }
+        });
+        document.querySelectorAll(".modal-backdrop").forEach(function (backdrop) {
+            backdrop.remove();
+        });
+        document.body.classList.remove("modal-open");
+        document.body.style.removeProperty("overflow");
+        document.body.style.removeProperty("padding-right");
+    }
+    function prepareSessionLogout() {
+        if (sessionExpired) {
+            return;
+        }
+        sessionExpired = true;
+        closeAllBootstrapComponents();
+        if (window.notificationRefreshTimer) {
+            clearInterval(window.notificationRefreshTimer);
+            window.notificationRefreshTimer = null;
+        }
+        if (window.notificationAbortController) {
+            try {
+                window.notificationAbortController.abort();
+            } catch (error) {}
+            window.notificationAbortController = null;
+        }
+    }
+    window.addEventListener("session-timeout", function () {
+        prepareSessionLogout();
+    });
+    window.prepareSessionLogout = prepareSessionLogout;
+    function updateNavbar() {
+        if (!navbar || isLoginPage) {
+            if (navbar && isLoginPage) {
+                navbar.style.left = "0px";
+                navbar.style.width = "100%";
+            }
+            return;
+        }
+        if (window.innerWidth <= 991.98) {
+            navbar.style.left = "0px";
+            navbar.style.width = "100%";
+            return;
+        }
+        const sidebar = document.querySelector(".app-sidebar");
+        const body = document.body;
+        const sidebarCollapsed = body.classList.contains("sidebar-collapse");
+        if (sidebarCollapsed) {
+            navbar.style.left = "0px";
+            navbar.style.width = "100%";
+            return;
+        }
+        if (sidebar) {
+            const width = sidebar.getBoundingClientRect().width;
+            if (width > 0) {
+                navbar.style.left = width + "px";
+                navbar.style.width = "calc(100% - " + width + "px)";
+                return;
+            }
+        }
+        navbar.style.left = "0px";
+        navbar.style.width = "100%";
+    }
+    updateNavbar();
+    window.addEventListener("resize", updateNavbar);
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener("click", function () {
+            setTimeout(updateNavbar, 50);
+            setTimeout(updateNavbar, 150);
+            setTimeout(updateNavbar, 300);
+            setTimeout(updateNavbar, 500);
+        });
+    }
+    const sidebar = document.querySelector(".app-sidebar");
+    if (sidebar) {
+        const observer = new MutationObserver(function () {
+            updateNavbar();
+        });
+        observer.observe(document.body, {
+            attributes: true,
+            attributeFilter: ["class"]
+        });
+        observer.observe(sidebar, {
+            attributes: true,
+            attributeFilter: ["class", "style"]
+        });
+    }
+    const notificationBell = document.querySelector(".notification-bell-wrapper");
+    const notificationMenu = document.querySelector(".notification-dropdown");
+    const notificationNav = document.querySelector(".notification-nav-item");
+    if (notificationBell && notificationMenu) {
+        notificationBell.addEventListener("click", function (event) {
+            if (sessionExpired) {
+                event.preventDefault();
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            const isOpen = notificationMenu.classList.contains("notification-open");
+            document.querySelectorAll(".notification-dropdown.notification-open").forEach(function (menu) {
+                menu.classList.remove("notification-open");
+            });
+            document.querySelectorAll(".notification-nav-item.notification-parent-open").forEach(function (item) {
+                item.classList.remove("notification-parent-open");
+            });
+            if (!isOpen) {
+                notificationMenu.classList.add("notification-open");
+                if (notificationNav) {
+                    notificationNav.classList.add("notification-parent-open");
+                }
+            }
+        });
+        notificationMenu.addEventListener("click", function (event) {
+            event.stopPropagation();
+        });
+        document.addEventListener("click", function () {
+            if (sessionExpired) {
+                return;
+            }
+            notificationMenu.classList.remove("notification-open");
+            if (notificationNav) {
+                notificationNav.classList.remove("notification-parent-open");
+            }
+        });
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                notificationMenu.classList.remove("notification-open");
+                if (notificationNav) {
+                    notificationNav.classList.remove("notification-parent-open");
+                }
+            }
+        });
+    }
+    const searchInput = document.getElementById("navbar-search-input");
+    if (searchInput) {
+        searchInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                const form = searchInput.closest("form");
+                if (searchInput.value.trim() && form) {
+                    form.submit();
+                }
+            }
+        });
+    }
+    const notificationStatusUrl = "{% url 'notification_status' %}";
+    const notificationBadge = document.getElementById("notification-badge");
+    const notificationList = document.getElementById("notification-list");
+    window.notificationAbortController = null;
+    function updateNotificationBadge(count) {
+        if (sessionExpired) {
+            return;
+        }
+        let badge = document.getElementById("notification-badge");
+        if (count > 0) {
+            if (!badge) {
+                badge = document.createElement("span");
+                badge.id = "notification-badge";
+                badge.className = "notification-badge";
+                const bellWrapper = document.querySelector(".notification-bell-wrapper");
+                if (bellWrapper) {
+                    bellWrapper.appendChild(badge);
+                }
+            }
+            badge.innerHTML = count + '<span class="visually-hidden">unread notifications</span>';
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+    function renderNotifications(data) {
+        if (sessionExpired || !notificationList) {
+            return;
+        }
+        notificationList.innerHTML = "";
+        if (!data || data.length === 0) {
+            notificationList.innerHTML = `
+                <div class="text-center py-4 text-body-secondary">
+                    <i class="bi bi-bell-slash fs-3 d-block mb-2"></i>
+                    No new notifications
+                </div>
+            `;
+            return;
+        }
+        data.forEach(function (notification) {
+            const item = document.createElement("a");
+            item.href = notification.url;
+            item.className = "dropdown-item notification-item py-3 border-bottom";
+            const unreadDot = notification.is_read ? "" : '<span class="notification-unread-dot"></span>';
+            item.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <div class="notification-item-icon me-3">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <div class="flex-grow-1 notification-content">
+                        <div class="fw-semibold text-body notification-title">
+                            ${escapeNotificationHtml(notification.title)}
+                        </div>
+                        <small class="text-body-secondary notification-message">
+                            ${escapeNotificationHtml(notification.message)}
+                        </small>
+                        <small class="d-block text-body-secondary mt-1 notification-time">
+                            ${escapeNotificationHtml(notification.created_at)}
+                        </small>
+                    </div>
+                    ${unreadDot}
+                </div>
+            `;
+            notificationList.appendChild(item);
+        });
+    }
+    function escapeNotificationHtml(value) {
+        const div = document.createElement("div");
+        div.textContent = value || "";
+        return div.innerHTML;
+    }
+    function refreshNotifications() {
+        if (sessionExpired || document.hidden) {
+            return;
+        }
+        if (window.notificationAbortController) {
+            try {
+                window.notificationAbortController.abort();
+            } catch (error) {}
+        }
+        window.notificationAbortController = new AbortController();
+        fetch(notificationStatusUrl, {
+            method: "GET",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json"
+            },
+            credentials: "same-origin",
+            cache: "no-store",
+            signal: window.notificationAbortController.signal
+        })
+        .then(function (response) {
+            if (sessionExpired) {
+                return null;
+            }
+            if (response.status === 401 || response.status === 403 || response.redirected) {
+                prepareSessionLogout();
+                return null;
+            }
+            if (!response.ok) {
+                throw new Error("Notification request failed: " + response.status);
+            }
+            return response.json();
+        })
+        .then(function (data) {
+            if (!data || sessionExpired) {
+                return;
+            }
+            updateNotificationBadge(Number(data.unread_count || 0));
+            renderNotifications(data.notifications || []);
+        })
+        .catch(function (error) {
+            if (error.name !== "AbortError" && !sessionExpired) {
+                console.error("Notification refresh error:", error);
+            }
+        });
+    }
+    refreshNotifications();
+    window.notificationRefreshTimer = setInterval(refreshNotifications, 10000);
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden && !sessionExpired) {
+            refreshNotifications();
+        }
+    });
+});
+</script>

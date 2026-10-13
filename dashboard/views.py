@@ -1,150 +1,2024 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User
+from datetime import datetime
+from decimal import Decimal, InvalidOperation
+from urllib.parse import urlencode
+from functools import lru_cache
+from django.core.paginator import Paginator
+import re
+from django.utils.text import slugify
+from django.conf import settings
 from django.contrib import messages
-from .forms import UserCreateForm, GalleryForm
-from dashboard.models import Gallery
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User, Group, Permission
+from django.core.mail import send_mail
+from django.core.signing import BadSignature, SignatureExpired, dumps, loads
+from django.db import transaction
+from django.db.models import Count, F, Q, Sum
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
+from .forms import GalleryForm, UserCreateForm, VacancyForm, FeedbackForm, BlogPostForm
+from .models import (
+    AccountNotificationPreference,
+    AccountPaymentDetail,
+    BlogPost,
+    Feedback,
+    Gallery,
+    GroupStatus,
+    UserAddress,
+    UserProfile,
+    WalletTransaction,
+    Vacancy,
+)
+from drivers.models import Driver
+from locations.models import City, Country, Location, State
+from payments.models import Payment, Refund
+from pricing.models import FareBreakdown, FareRule, SurgePricing
+from promotions.models import Coupon, CouponUsage
+from rides.models import Ride, RideRequest
+from support.models import SupportTicket
+from vehicles.models import Vehicle, VehicleType
+from django.core.exceptions import PermissionDenied
 
-def ride_gallery(request):
-    gallery = Gallery.objects.all()
-    if request.method == 'POST':
-        form = GalleryForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('ride_gallery')
-    else:
-        form = GalleryForm()
-    return render(request,'includes/gallery.html',{'form':form, 'gallery': gallery})
+EMAIL_VERIFICATION_SALT = "nandiride-email-verification"
+EMAIL_VERIFICATION_MAX_AGE = 86400
 
+def _is_ajax(request):
+    return request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
+def _json_error(message, status=400):
+    return JsonResponse(
+        {
+            "success": False,
+            "message": message,
+        },
+        status=status,
+    )
 
+def _json_success(message="", **kwargs):
+    data = {
+        "success": True,
+        "message": message,
+    }
+    data.update(kwargs)
+    return JsonResponse(data)
+
+@lru_cache(maxsize=None)
+def _field_names(model):
+    return frozenset(field.name for field in model._meta.get_fields())
+
+def _safe_count(model, filters=None):
+    filters = filters or {}
+    fields = _field_names(model)
+    if not all(key.split("__", 1)[0] in fields for key in filters):
+        return model.objects.count()
+    return model.objects.filter(**filters).count()
+
+def _safe_sum(model, field_names):
+    fields = _field_names(model)
+    for field_name in field_names:
+        if field_name in fields:
+            result = model.objects.aggregate(
+                total=Sum(field_name)
+            )
+            return result["total"] or Decimal("0")
+    return Decimal("0")
+
+def _safe_active_count(model):
+    fields = _field_names(model)
+    if "is_active" in fields:
+        return model.objects.filter(
+            is_active=True
+        ).count()
+    if "status" in fields:
+        active_values = [
+            "active",
+            "Active",
+            "ACTIVE",
+        ]
+        return model.objects.filter(
+            status__in=active_values
+        ).count()
+    return model.objects.count()
+
+def _safe_status_count(model, values):
+    if "status" not in _field_names(model):
+        return 0
+    return model.objects.filter(status__in=values).count()
+
+def _safe_status_counts(model, groups):
+    if "status" not in _field_names(model):
+        return {name: 0 for name in groups}
+    result = model.objects.aggregate(
+        **{
+            name: Count("id", filter=Q(status__in=values))
+            for name, values in groups.items()
+        }
+    )
+    return {name: result[name] or 0 for name in groups}
+
+def _safe_verified_count(model):
+    fields = _field_names(model)
+    if "is_verified" in fields:
+        return model.objects.filter(
+            is_verified=True
+        ).count()
+    if "verified" in fields:
+        return model.objects.filter(
+            verified=True
+        ).count()
+    if "verification_status" in fields:
+        return model.objects.filter(
+            verification_status__in=[
+                "verified",
+                "approved",
+                "active",
+                "Verified",
+                "Approved",
+                "Active",
+            ]
+        ).count()
+    return 0
+
+def _safe_pending_verification_count(model):
+    fields = _field_names(model)
+    if "is_verified" in fields:
+        return model.objects.filter(
+            is_verified=False
+        ).count()
+    if "verified" in fields:
+        return model.objects.filter(
+            verified=False
+        ).count()
+    if "verification_status" in fields:
+        return model.objects.filter(
+            verification_status__in=[
+                "pending",
+                "submitted",
+                "under_review",
+                "Pending",
+                "Submitted",
+                "Under Review",
+            ]
+        ).count()
+    return 0
 
 @login_required
-def user_create(request, pk=None):
-     # ADD USER
-    if pk is None:
-        user_obj = None
-        page_title = "Add User"
-
-    # UPDATE USER
-    else:
-        user_obj = get_object_or_404(
-            User,
-            pk=pk
-        )
-        page_title = "Edit User"
-
+def ride_gallery(request):
+    gallery = Gallery.objects.all().order_by("-date")
     if request.method == "POST":
-        form = UserCreateForm(request.POST, instance = user_obj)
-
-        if form.is_valid():
-            user = form.save()
-            if user_obj:
-                messages.success(
-                    request,
-                    f"{user.username} updated successfully."
-                )
-            else:
-                messages.success(
-                    request,
-                    f"{user.username} created successfully."
-                )
-
-            return redirect("user_list")
-    else:
-        
-        form = UserCreateForm(
-            instance = user_obj
+        form = GalleryForm(
+            request.POST,
+            request.FILES,
         )
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request,
+                "Gallery image added successfully.",
+            )
+            return redirect("ride_gallery")
+    else:
+        form = GalleryForm()
 
+        context = {
+            "page_title": "Gallery",
+            "gallery": gallery,
+            "galleries": gallery,
+            "form": form,
+            "breadcrumb_items": [
+                {
+                    "title": "Gallery",
+                    "url": "/ride_gallery"
+                },
+            ]
+        }
+    return render(
+        request,
+        "includes/gallery.html",context
+    )
+
+@login_required
+@transaction.atomic
+def user_create(request, pk=None):
+    user_obj = (
+        get_object_or_404(User, pk=pk)
+        if pk is not None
+        else None
+    )
+    if request.method == "POST":
+        action = request.POST.get(
+            "action",
+            "",
+        ).strip()
+        if action == "toggle_status":
+            if user_obj is None:
+                messages.error(
+                    request,
+                    "Invalid user.",
+                )
+                return redirect("user_list")
+            if user_obj.pk == request.user.pk:
+                messages.error(
+                    request,
+                    "You cannot change your own account status.",
+                )
+                return redirect("user_list")
+            user_obj.is_active = not user_obj.is_active
+            user_obj.save(
+                update_fields=[
+                    "is_active",
+                ]
+            )
+            messages.success(
+                request,
+                (
+                    "User account activated successfully."
+                    if user_obj.is_active
+                    else "User account deactivated successfully."
+                ),
+            )
+            return_to = request.POST.get(
+                "return_to",
+                "list",
+            ).strip().lower()
+            if return_to == "edit":
+                return redirect(
+                    "user_update",
+                    pk=user_obj.pk,
+                )
+            return redirect("user_list")
+        form = UserCreateForm(
+            request.POST,
+            request.FILES,
+            instance=user_obj,
+        )
+        old_password = (
+            user_obj.password
+            if user_obj is not None
+            else None
+        )
+        password_values = [
+            request.POST.get(name, "").strip()
+            for name in (
+                "password",
+                "new_password",
+                "password1",
+            )
+        ]
+        password_changed = any(password_values)
+        if form.is_valid():
+            saved_user = form.save()
+            if (
+                user_obj is not None
+                and old_password
+                and not password_changed
+                and saved_user.password != old_password
+            ):
+                saved_user.password = old_password
+                saved_user.save(
+                    update_fields=[
+                        "password",
+                    ]
+                )
+            profile, _ = UserProfile.objects.get_or_create(
+                user=saved_user
+            )
+            profile.phone = request.POST.get(
+                "phone",
+                profile.phone,
+            ).strip()
+            profile.gender = request.POST.get(
+                "gender",
+                profile.gender,
+            ).strip()
+            profile.address = request.POST.get(
+                "address",
+                profile.address,
+            ).strip()
+            profile.emergency_contact_name = request.POST.get(
+                "emergency_contact_name",
+                profile.emergency_contact_name,
+            ).strip()
+            profile.emergency_contact_phone = request.POST.get(
+                "emergency_contact_phone",
+                profile.emergency_contact_phone,
+            ).strip()
+            date_of_birth = request.POST.get(
+                "date_of_birth",
+                "",
+            ).strip()
+            if date_of_birth:
+                try:
+                    profile.date_of_birth = datetime.strptime(
+                        date_of_birth,
+                        "%Y-%m-%d",
+                    ).date()
+                except ValueError:
+                    pass
+            city_id = request.POST.get(
+                "city",
+                "",
+            ).strip()
+            profile.city = (
+                City.objects.filter(
+                    pk=city_id
+                ).first()
+                if city_id
+                else None
+            )
+            profile_image = request.FILES.get(
+                "profile_image"
+            )
+            remove_profile_image = (
+                request.POST.get(
+                    "remove_profile_image",
+                    "",
+                ).strip()
+                in {
+                    "1",
+                    "on",
+                    "true",
+                }
+            )
+            if remove_profile_image:
+                if profile.profile_image:
+                    profile.profile_image.delete(
+                        save=False
+                    )
+                profile.profile_image = None
+            elif profile_image:
+                if profile.profile_image:
+                    profile.profile_image.delete(
+                        save=False
+                    )
+                profile.profile_image = profile_image
+            profile.save()
+            address_line1 = request.POST.get(
+                "address_line1",
+                "",
+            ).strip()
+            address_line2 = request.POST.get(
+                "address_line2",
+                "",
+            ).strip()
+            landmark = request.POST.get(
+                "landmark",
+                "",
+            ).strip()
+            postal_code = request.POST.get(
+                "postal_code",
+                "",
+            ).strip()
+            label = request.POST.get(
+                "address_label",
+                "",
+            ).strip()
+            if not label:
+                label = request.POST.get(
+                    "label",
+                    "",
+                ).strip()
+            address_type = request.POST.get(
+                "address_type",
+                UserAddress.AddressType.OTHER,
+            ).strip()
+            address_city_id = (
+                request.POST.get(
+                    "address_city",
+                    "",
+                ).strip()
+                or city_id
+            )
+            remove_address = (
+                request.POST.get(
+                    "remove_address",
+                    "",
+                ).strip()
+                in {
+                    "1",
+                    "on",
+                    "true",
+                }
+            )
+            if address_line1:
+                address = (
+                    UserAddress.objects.filter(
+                        user=saved_user,
+                        is_default=True,
+                    ).first()
+                    or UserAddress.objects.filter(
+                        user=saved_user
+                    ).first()
+                )
+                if address is None:
+                    address = UserAddress(
+                        user=saved_user
+                    )
+                address.address_line1 = address_line1
+                address.address_line2 = address_line2
+                address.landmark = landmark
+                address.postal_code = postal_code
+                address.label = label
+                address.address_type = address_type
+                address.city = (
+                    City.objects.filter(
+                        pk=address_city_id
+                    ).first()
+                    if address_city_id
+                    else None
+                )
+                address.is_default = True
+                address.save()
+                UserAddress.objects.filter(
+                    user=saved_user
+                ).exclude(
+                    pk=address.pk
+                ).update(
+                    is_default=False
+                )
+            elif remove_address:
+                UserAddress.objects.filter(
+                    user=saved_user
+                ).delete()
+            messages.success(
+                request,
+                (
+                    "User created successfully."
+                    if pk is None
+                    else "User updated successfully."
+                ),
+            )
+            return redirect(
+                "user_profile",
+                user_id=saved_user.pk,
+            )
+    else:
+        form = UserCreateForm(
+            instance=user_obj
+        )
+    cities = City.objects.all().order_by(
+        "name"
+    )
+    profile = None
+    address = None
+    if user_obj is not None:
+        profile, _ = UserProfile.objects.get_or_create(
+            user=user_obj
+        )
+        address = (
+            UserAddress.objects.filter(
+                user=user_obj,
+                is_default=True,
+            ).first()
+            or UserAddress.objects.filter(
+                user=user_obj
+            ).first()
+        )
     return render(
         request,
         "dashboard/users/user_create.html",
         {
             "form": form,
             "user_obj": user_obj,
-            "page_title": page_title,
-        }
+            "selected_user": user_obj,
+            "profile": profile,
+            "address": address,
+            "page_title": (
+                ""
+                if user_obj
+                else ""
+            ),
+            "is_edit": user_obj is not None,
+            "cities": cities,
+            "breadcrumb_items": [
+                {
+                    "title": (
+                        ""
+                        if user_obj
+                        else ""
+                    ),
+                    "url": (
+                        reverse(
+                            "user_update",
+                            args=[user_obj.id],
+                        )
+                        if user_obj
+                        else reverse(
+                            "user_create"
+                        )
+                    ),
+                },
+            ],
+        },
     )
 
 
 @login_required
 def user_delete(request, pk):
-    user = get_object_or_404(User, pk=pk)
-
-    if user == request.user:
+    if request.method != "POST":
+        return redirect("user_list")
+    user_obj = get_object_or_404(
+        User,
+        pk=pk,
+    )
+    if user_obj.pk == request.user.pk:
         messages.error(
             request,
-            "You cannot delete your own account."
+            "You cannot delete your own account.",
         )
         return redirect("user_list")
-
-    else:
-        request.method == "POST"
-        username = user.username
-        user.delete()
-
-        messages.success(
-            request,
-            f"User '{username}' deleted successfully."
-        )
-
-        return redirect("user_list")
-
-def gallery_delete(request, pk):
-    data = get_object_or_404(Gallery, pk=pk)
-    request.method == "POST"
-    image = data.profile_image
-    data.delete()
-
+    user_obj.delete()
     messages.success(
         request,
-        f"User '{image}' Image deleted successfully."
+        "User deleted successfully.",
     )
+    return redirect("user_list")
 
+@login_required
+def gallery_upload(request):
+    if request.method == "POST":
+        image = request.FILES.get("profile_image")
+        if image:
+            Gallery.objects.create(
+                profile_image=image,
+                category="other",
+            )
+            messages.success(request, "Company photo uploaded successfully.")
+        else:
+            messages.error(request, "Please select a photo.")
+    return redirect("blog")
+
+@login_required
+def gallery_delete(request, pk):
+    if request.method != "POST":
+        return redirect("ride_gallery")
+    gallery = get_object_or_404(
+        Gallery,
+        pk=pk,
+    )
+    gallery.delete()
+    messages.success(
+        request,
+        "Gallery image deleted successfully.",
+    )
     return redirect("ride_gallery")
-    
-
-
-@login_required
-def dashboard(request):
-    return render(
-        request,
-        "dashboard/dashboard.html",
-    )
-
-@login_required
-def user_profile(request):
-    return render(
-        request,
-        "account/profile.html",
-    )
-
-@login_required
-def user_setting(request):
-    return render(
-        request,
-        "account/setting.html",
-    )
-
-@login_required
-def user_ridestatus(request):
-    return render(
-        request,
-        "dashboard/users/ridestatus.html",
-    )
-
-# @login_required
-# def ride_gallery(request):
-#     return render(
-#         request,
-#         "includes/gallery.html",
-#     )
 
 @login_required
 def user_list(request):
-    users = User.objects.all()
+    users = User.objects.all().order_by(
+        "-date_joined"
+    )
     return render(
         request,
-        "dashboard/users/list.html", {'users': users}
+        "dashboard/users/list.html",
+        {
+            "users": users,
+            #"page_title": "User List",
+            "breadcrumb_items": [
+                {
+                    "title": "User List",
+                    "url": "user_list"
+                },
+            ],
+        },
     )
+
+@login_required
+def user_profile(request, user_id):
+    profile_user = get_object_or_404(
+        User,
+        pk=user_id,
+    )
+    profile, _ = UserProfile.objects.get_or_create(
+        user=profile_user
+    )
+    address = (
+        UserAddress.objects.filter(
+            user=profile_user,
+            is_default=True,
+        ).first()
+        or UserAddress.objects.filter(
+            user=profile_user
+        ).first()
+    )
+    return render(
+        request,
+        "account/user_profile.html",
+        {
+            "profile_user": profile_user,
+            "selected_user": profile_user,
+            "user_obj": profile_user,
+            "profile": profile,
+            "address": address,
+            "profile_display_user": profile_user,
+            "is_profile_owner": profile_user.pk == request.user.pk,
+        },
+    )
+
+@login_required
+def dashboard(request):
+    user_counts = User.objects.aggregate(
+        total=Count("id"),
+        active=Count("id", filter=Q(is_active=True)),
+    )
+    ride_counts = Ride.objects.aggregate(
+        total=Count("id"),
+        completed=Count("id", filter=Q(status=Ride.Status.COMPLETED)),
+        cancelled=Count("id", filter=Q(status=Ride.Status.CANCELLED)),
+        ongoing=Count(
+            "id",
+            filter=Q(
+                status__in=[
+                    Ride.Status.DRIVER_ASSIGNED,
+                    Ride.Status.DRIVER_ARRIVING,
+                    Ride.Status.DRIVER_ARRIVED,
+                    Ride.Status.STARTED,
+                ]
+            ),
+        ),
+    )
+    ride_request_counts = RideRequest.objects.aggregate(
+        total=Count("id"),
+        pending=Count(
+            "id",
+            filter=Q(
+                status__in=[
+                    RideRequest.Status.REQUESTED,
+                    RideRequest.Status.SEARCHING,
+                ]
+            ),
+        ),
+    )
+    total_users = user_counts["total"]
+    active_users = user_counts["active"]
+    total_rides = ride_counts["total"]
+    total_ride_requests = ride_request_counts["total"]
+    completed_rides = ride_counts["completed"]
+    cancelled_rides = ride_counts["cancelled"]
+    ongoing_rides = ride_counts["ongoing"]
+    pending_rides = ride_request_counts["pending"]
+    total_drivers = Driver.objects.count()
+    active_drivers = _safe_active_count(
+        Driver
+    )
+    verified_drivers = _safe_verified_count(
+        Driver
+    )
+    pending_driver_verification = (
+        _safe_pending_verification_count(
+            Driver
+        )
+    )
+    total_vehicles = Vehicle.objects.count()
+    active_vehicles = _safe_active_count(
+        Vehicle
+    )
+    total_vehicle_types = VehicleType.objects.count()
+    total_payments = Payment.objects.count()
+    payment_status_counts = _safe_status_counts(
+        Payment,
+        {
+            "successful": [
+                "success", "successful", "completed", "paid",
+                "SUCCESS", "SUCCESSFUL", "COMPLETED", "PAID",
+            ],
+            "pending": ["pending", "processing", "PENDING", "PROCESSING"],
+            "failed": ["failed", "failure", "FAILED", "FAILURE"],
+        },
+    )
+    successful_payments = payment_status_counts["successful"]
+    pending_payments = payment_status_counts["pending"]
+    failed_payments = payment_status_counts["failed"]
+    total_revenue = _safe_sum(
+        Payment,
+        [
+            "amount",
+            "total_amount",
+            "paid_amount",
+            "fare_amount",
+            "price",
+        ],
+    )
+    if total_revenue == Decimal("0"):
+        completed_fare = RideRequest.objects.filter(
+            status=RideRequest.Status.COMPLETED
+        ).aggregate(
+            total=Sum("estimated_fare")
+        )
+        completed_fare_value = (
+            completed_fare["total"]
+            or Decimal("0")
+        )
+        if completed_fare_value > 0:
+            total_revenue = completed_fare_value
+    total_refunds = _safe_sum(
+        Refund,
+        [
+            "amount",
+            "refund_amount",
+            "total_amount",
+        ],
+    )
+    refunded_payments = Refund.objects.count()
+    total_fare_rules = FareRule.objects.count()
+    active_fare_rules = _safe_active_count(
+        FareRule
+    )
+    total_surge_pricing = SurgePricing.objects.count()
+    active_surge_pricing = _safe_active_count(
+        SurgePricing
+    )
+    total_fare_breakdowns = (
+        FareBreakdown.objects.count()
+    )
+    total_coupons = Coupon.objects.count()
+    active_coupons = _safe_active_count(
+        Coupon
+    )
+    total_coupon_usage = (
+        CouponUsage.objects.count()
+    )
+    total_support_tickets = (
+        SupportTicket.objects.count()
+    )
+    open_tickets = _safe_status_count(
+        SupportTicket,
+        [
+            "open",
+            "pending",
+            "OPEN",
+            "PENDING",
+        ],
+    )
+    in_progress_tickets = _safe_status_count(
+        SupportTicket,
+        [
+            "in_progress",
+            "processing",
+            "assigned",
+            "IN_PROGRESS",
+            "PROCESSING",
+            "ASSIGNED",
+        ],
+    )
+    urgent_tickets = 0
+    support_ticket_fields = _field_names(
+        SupportTicket
+    )
+    if "priority" in support_ticket_fields:
+        urgent_tickets = SupportTicket.objects.filter(
+            priority__in=[
+                "urgent",
+                "high",
+                "Urgent",
+                "High",
+                "URGENT",
+                "HIGH",
+            ]
+        ).count()
+    maintenance_vehicles = 0
+    blocked_vehicles = 0
+    vehicle_fields = _field_names(
+        Vehicle
+    )
+    if "status" in vehicle_fields:
+        maintenance_vehicles = Vehicle.objects.filter(
+            status__in=[
+                "maintenance",
+                "under_maintenance",
+                "Maintenance",
+                "Under Maintenance",
+            ]
+        ).count()
+        blocked_vehicles = Vehicle.objects.filter(
+            status__in=[
+                "blocked",
+                "inactive",
+                "Blocked",
+                "Inactive",
+            ]
+        ).count()
+    elif "is_maintenance" in vehicle_fields:
+        maintenance_vehicles = Vehicle.objects.filter(
+            is_maintenance=True
+        ).count()
+    elif "is_blocked" in vehicle_fields:
+        blocked_vehicles = Vehicle.objects.filter(
+            is_blocked=True
+        ).count()
+    total_locations = Location.objects.count()
+    total_countries = Country.objects.count()
+    total_states = State.objects.count()
+    total_cities = City.objects.count()
+    recent_rides = (
+        Ride.objects
+        .select_related(
+            "passenger",
+            "driver",
+            "vehicle",
+            "ride_request",
+        )
+        .order_by("-id")[:10]
+    )
+    ride_distribution = list(
+        Ride.objects
+        .filter(
+            ride_request__vehicle_type__isnull=False
+        )
+        .values(
+            name=F(
+                "ride_request__vehicle_type__name"
+            )
+        )
+        .annotate(
+            count=Count("id")
+        )
+        .order_by("-count")
+    )
+    context = {
+        "page_title": "Admin Dashboard",
+        "total_users": total_users,
+        "active_users": active_users,
+        "total_rides": total_rides,
+        "total_ride_requests": total_ride_requests,
+        "completed_rides": completed_rides,
+        "cancelled_rides": cancelled_rides,
+        "ongoing_rides": ongoing_rides,
+        "pending_rides": pending_rides,
+        "total_drivers": total_drivers,
+        "active_drivers": active_drivers,
+        "verified_drivers": verified_drivers,
+        "pending_driver_verification": pending_driver_verification,
+        "total_vehicles": total_vehicles,
+        "active_vehicles": active_vehicles,
+        "maintenance_vehicles": maintenance_vehicles,
+        "blocked_vehicles": blocked_vehicles,
+        "total_vehicle_types": total_vehicle_types,
+        "total_payments": total_payments,
+        "successful_payments": successful_payments,
+        "pending_payments": pending_payments,
+        "failed_payments": failed_payments,
+        "refunded_payments": refunded_payments,
+        "total_revenue": total_revenue,
+        "total_refunds": total_refunds,
+        "total_fare_rules": total_fare_rules,
+        "active_fare_rules": active_fare_rules,
+        "total_surge_pricing": total_surge_pricing,
+        "active_surge_pricing": active_surge_pricing,
+        "total_fare_breakdowns": total_fare_breakdowns,
+        "total_coupons": total_coupons,
+        "active_coupons": active_coupons,
+        "total_coupon_usage": total_coupon_usage,
+        "total_support_tickets": total_support_tickets,
+        "open_tickets": open_tickets,
+        "in_progress_tickets": in_progress_tickets,
+        "urgent_tickets": urgent_tickets,
+        "total_locations": total_locations,
+        "total_countries": total_countries,
+        "total_states": total_states,
+        "total_cities": total_cities,
+        "recent_rides": recent_rides,
+        "ride_distribution": ride_distribution,
+        "users_count": total_users,
+        "rides_count": total_rides,
+        "drivers_count": total_drivers,
+        "vehicles_count": total_vehicles,
+        "revenue": total_revenue,
+    }
+    return render(
+        request,
+        "dashboard/dashboard.html",
+        context,
+    )
+
+@login_required
+def about(request):
+    context = {
+        "page_title": "About",
+        "breadcrumb_items": [
+            {
+                "title": "About",
+                "url": "about",
+            },
+        ],
+    }
+    return render(
+        request,
+        "dashboard/about.html",
+        context,
+    )
+
+@login_required
+def blog(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    posts = BlogPost.objects.all().order_by("-is_featured", "-published_at", "-created_at")
+    search = request.GET.get("q", "").strip()
+    category = request.GET.get("category", "").strip()
+    if search:
+        posts = posts.filter(
+            Q(title__icontains=search) |
+            Q(excerpt__icontains=search) |
+            Q(content__icontains=search) |
+            Q(author__icontains=search)
+        )
+    if category:
+        posts = posts.filter(category=category)
+    categories = BlogPost.objects.values_list(
+        "category",
+        flat=True
+    ).distinct().order_by("category")
+    featured_posts = posts.filter(is_featured=True)
+    recent_posts = posts.order_by("-published_at", "-created_at")
+    context = {
+        "page_title": "Blog",
+        "posts": posts,
+        "blog_posts": posts,
+        "featured_posts": featured_posts,
+        "recent_posts": recent_posts,
+        "categories": categories,
+        "blog_categories": BlogPost.CATEGORY_CHOICES,
+        "search": search,
+        "selected_category": category,
+        "total_posts": BlogPost.objects.count(),
+        "active_posts": BlogPost.objects.filter(is_active=True).count(),
+        "featured_count": BlogPost.objects.filter(is_featured=True).count(),
+        "total_blog_views": BlogPost.objects.aggregate(
+            total=Sum("views")
+        )["total"] or 0,
+    }
+    return render(request, "dashboard/blog.html", context)
+
+
+@login_required
+def blog_create(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    blog_id = request.POST.get("blog_id") or request.GET.get("edit")
+    blog = None
+    if blog_id:
+        blog = get_object_or_404(BlogPost, pk=blog_id)
+    if request.method == "POST":
+        form = BlogPostForm(request.POST, request.FILES, instance=blog)
+        if form.is_valid():
+            blog = form.save(commit=False)
+            base_slug = slugify(blog.title) or f"blog-{timezone.now().strftime('%Y%m%d%H%M%S')}"
+            slug = base_slug
+            counter = 2
+            while BlogPost.objects.filter(slug=slug).exclude(pk=blog.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            blog.slug = slug
+            blog.save()
+            if blog_id:
+                messages.success(request, "Blog updated successfully.")
+            else:
+                messages.success(request, "Blog published successfully.")
+        else:
+            messages.error(request, "Blog could not be saved. Please check the form details.")
+    return redirect("blog")
+
+
+@login_required
+def blog_delete(request, pk):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    if request.method == "POST":
+        blog = get_object_or_404(BlogPost, pk=pk)
+        blog.delete()
+        messages.success(request, "Blog deleted successfully.")
+    return redirect("blog")
+
+
+@login_required
+def blog_view_increment(request, pk):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    if request.method != "POST":
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Invalid request method."
+            },
+            status=405
+        )
+    blog = get_object_or_404(BlogPost, pk=pk)
+    BlogPost.objects.filter(pk=blog.pk).update(
+        views=F("views") + 1
+    )
+    blog.refresh_from_db()
+    total_views = BlogPost.objects.aggregate(
+        total=Sum("views")
+    )["total"] or 0
+    return JsonResponse(
+        {
+            "success": True,
+            "views": blog.views,
+            "total_views": total_views,
+        }
+    )
+
+
+@login_required
+def career(request):
+    vacancies = Vacancy.objects.filter(is_active=True).order_by("-is_featured", "-created_at")
+    open_vacancies = vacancies.filter(status="open")
+    context = {
+        "page_title": "Careers",
+        "total_users": User.objects.count(),
+        "total_drivers": Driver.objects.count(),
+        "total_rides": Ride.objects.count(),
+        "total_locations": Location.objects.count(),
+        "vacancies": vacancies,
+        "open_vacancies": open_vacancies.count(),
+        "active_vacancies": vacancies.count(),
+        "featured_vacancies": vacancies.filter(is_featured=True).count(),
+        "departments": vacancies.values_list("department", flat=True).distinct().order_by("department"),
+        "job_types": vacancies.values_list("job_type", flat=True).distinct().order_by("job_type"),
+        "breadcrumb_items": [
+            {
+                "title": "Career",
+                "url": "career",
+            },
+        ],
+    }
+    return render(
+        request,
+        "dashboard/career.html",
+        context,
+    )
+
+@login_required
+def services(request):
+    context = {
+        "page_title": "Services",
+        "total_rides": Ride.objects.count(),
+        "total_drivers": Driver.objects.count(),
+        "total_vehicles": Vehicle.objects.count(),
+        "total_vehicle_types": VehicleType.objects.count(),
+        "breadcrumb_items": [
+            {
+                "title": "Services",
+                "url": "services",
+            },
+        ],
+    }
+    return render(
+        request,
+        "dashboard/services.html",
+        context,
+    )
+
+@login_required
+def contact(request):
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save()
+            messages.success(
+                request,
+                f"Thank you, {feedback.name}. Your message has been submitted successfully."
+            )
+            return redirect("contact")
+    else:
+        initial = {
+            "name": request.user.get_full_name() or request.user.username,
+            "email": request.user.email,
+        }
+        form = FeedbackForm(initial=initial)
+    context = {
+        "page_title": "Contact",
+        "contact_address": "Haridwar, Uttarakhand, India",
+        "contact_email": "nandirides@gmail.com",
+        "contact_phones": ["9X56305XXX", "9009930XXX"],
+        "feedback_form": form,
+        "total_feedback": Feedback.objects.count(),
+        "new_feedback": Feedback.objects.filter(status="new").count(),
+        "resolved_feedback": Feedback.objects.filter(status="resolved").count(),
+        "breadcrumb_items": [
+            {
+                "title": "Contact",
+                "url": "contact",
+            },
+        ],
+    }
+    return render(request, "dashboard/contact.html", context)
+
+@login_required
+@transaction.atomic
+def user_setting(request):
+    user = request.user
+    profile, _ = UserProfile.objects.get_or_create(
+        user=user
+    )
+    notification_preferences, _ = (
+        AccountNotificationPreference.objects.get_or_create(
+            user=user
+        )
+    )
+    payment_detail, _ = (
+        AccountPaymentDetail.objects.get_or_create(
+            user=user
+        )
+    )
+    address = (
+        UserAddress.objects.filter(
+            user=user,
+            is_default=True,
+        ).first()
+        or UserAddress.objects.filter(
+            user=user
+        ).first()
+    )
+    verify_token = request.GET.get(
+        "verify",
+        "",
+    ).strip()
+    if verify_token:
+        try:
+            payload = loads(
+                verify_token,
+                salt=EMAIL_VERIFICATION_SALT,
+                max_age=EMAIL_VERIFICATION_MAX_AGE,
+            )
+            if (
+                int(payload.get("user_id")) == user.pk
+                and payload.get("email") == user.email
+            ):
+                profile.email_verified = True
+                profile.email_verified_at = timezone.now()
+                profile.save(
+                    update_fields=[
+                        "email_verified",
+                        "email_verified_at",
+                        "updated_at",
+                    ]
+                )
+                messages.success(
+                    request,
+                    "Email address verified successfully.",
+                )
+            else:
+                messages.error(
+                    request,
+                    "This email verification link is invalid.",
+                )
+        except (
+            SignatureExpired,
+            BadSignature,
+            TypeError,
+            ValueError,
+        ):
+            messages.error(
+                request,
+                "This email verification link is invalid or expired.",
+            )
+        return redirect("user_setting")
+    if request.method == "POST":
+        action = request.POST.get(
+            "action",
+            "update_profile",
+        ).strip()
+        if action == "update_notification":
+            field = request.POST.get(
+                "field",
+                "",
+            ).strip()
+            value = (
+                request.POST.get(
+                    "value",
+                    "",
+                ).lower()
+                == "true"
+            )
+            allowed_fields = {
+                "platform_updates",
+                "security_alerts",
+                "ride_activity",
+                "email_notifications",
+            }
+            if field not in allowed_fields:
+                return _json_error(
+                    "Invalid notification field."
+                )
+            setattr(
+                notification_preferences,
+                field,
+                value,
+            )
+            notification_preferences.save(
+                update_fields=[
+                    field,
+                ]
+            )
+            return _json_success(
+                "Notification preference updated.",
+                field=field,
+                value=value,
+            )
+        if action == "update_notifications":
+            allowed_fields = {
+                "platform_updates",
+                "security_alerts",
+                "ride_activity",
+                "email_notifications",
+            }
+            for field in allowed_fields:
+                if field in request.POST:
+                    setattr(
+                        notification_preferences,
+                        field,
+                        request.POST.get(
+                            field
+                        ).lower()
+                        == "true",
+                    )
+            notification_preferences.save()
+            messages.success(
+                request,
+                "Notification preferences updated.",
+            )
+            return redirect("user_setting")
+        if action == "send_email_verification":
+            if not user.email:
+                return _json_error(
+                    "Please add an email address first."
+                )
+            if profile.email_verified:
+                return _json_success(
+                    "Your email address is already verified.",
+                    email_verified=True,
+                )
+            token = dumps(
+                {
+                    "user_id": user.pk,
+                    "email": user.email,
+                },
+                salt=EMAIL_VERIFICATION_SALT,
+            )
+            query_string = urlencode(
+                {
+                    "verify": token,
+                }
+            )
+            verification_url = request.build_absolute_uri(
+                f"{reverse('user_setting')}?{query_string}"
+            )
+            subject = (
+                "Verify your NandiRide email address"
+            )
+            message = (
+                f"Hello {user.get_full_name() or user.get_username()},\n\n"
+                "Please verify your NandiRide email address by opening the link below:\n\n"
+                f"{verification_url}\n\n"
+                "This verification link is valid for 24 hours.\n\n"
+                "Regards,\n"
+                "NandiRide"
+            )
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    getattr(
+                        settings,
+                        "DEFAULT_FROM_EMAIL",
+                        "webmaster@localhost",
+                    ),
+                    [user.email],
+                    fail_silently=False,
+                )
+            except Exception:
+                return _json_error(
+                    "Verification email could not be sent. Please check your email settings."
+                )
+            return _json_success(
+                "Verification email sent successfully. Please check your inbox.",
+                email_verified=False,
+            )
+        if action == "save_account_details":
+            upi_id = request.POST.get(
+                "upi_id",
+                "",
+            ).strip()
+            if upi_id:
+                if len(upi_id) > 100:
+                    return _json_error(
+                        "UPI ID is too long."
+                    )
+                if not re.match(
+                    r"^[A-Za-z0-9][A-Za-z0-9._-]{1,}@[A-Za-z0-9.-]{2,}$",
+                    upi_id,
+                ):
+                    return _json_error(
+                        "Please enter a valid UPI ID."
+                    )
+            payment_detail.upi_id = upi_id
+            payment_detail.save(
+                update_fields=[
+                    "upi_id",
+                    "updated_at",
+                ]
+            )
+            return _json_success(
+                (
+                    "UPI ID linked successfully."
+                    if upi_id
+                    else "UPI ID removed successfully."
+                ),
+                upi_id=payment_detail.upi_id,
+                has_upi=bool(payment_detail.upi_id),
+                upi_status=(
+                    "Linked"
+                    if payment_detail.upi_id
+                    else "Not Linked"
+                ),
+            )
+        if action == "get_account_details":
+            return _json_success(
+                "Account details loaded.",
+                upi_id=payment_detail.upi_id,
+                upi_status=(
+                    "Linked"
+                    if payment_detail.upi_id
+                    else "Not Linked"
+                ),
+                wallet_balance=f"{payment_detail.wallet_balance:.2f}",
+                card_last_four=payment_detail.card_last_four,
+                card_brand=payment_detail.card_brand,
+                card_expiry=payment_detail.card_expiry,
+                has_upi=bool(payment_detail.upi_id),
+                has_card=bool(
+                    payment_detail.card_last_four
+                ),
+            )
+        if action == "add_wallet_money":
+            amount_raw = request.POST.get(
+                "amount",
+                "",
+            ).strip()
+            try:
+                amount = Decimal(amount_raw)
+            except (
+                InvalidOperation,
+                TypeError,
+            ):
+                return _json_error(
+                    "Please enter a valid amount."
+                )
+            if amount <= 0:
+                return _json_error(
+                    "Wallet amount must be greater than zero."
+                )
+            if amount.as_tuple().exponent < -2:
+                return _json_error(
+                    "Wallet amount can have maximum 2 decimal places."
+                )
+            with transaction.atomic():
+                locked_payment_detail = (
+                    AccountPaymentDetail.objects.select_for_update().get(
+                        pk=payment_detail.pk
+                    )
+                )
+                locked_payment_detail.wallet_balance += amount
+                locked_payment_detail.save(
+                    update_fields=[
+                        "wallet_balance",
+                        "updated_at",
+                    ]
+                )
+                wallet_transaction = WalletTransaction.objects.create(
+                    user=user,
+                    transaction_type=WalletTransaction.TransactionType.CREDIT,
+                    amount=amount,
+                    balance_after=locked_payment_detail.wallet_balance,
+                    status=WalletTransaction.Status.SUCCESS,
+                    description="Wallet balance added from Account Settings.",
+                )
+                wallet_balance = (
+                    locked_payment_detail.wallet_balance
+                )
+            transaction_date = getattr(
+                wallet_transaction,
+                "created_at",
+                None,
+            )
+            if transaction_date is None:
+                transaction_date = getattr(
+                    wallet_transaction,
+                    "created",
+                    None,
+                )
+            if transaction_date is None:
+                transaction_date = timezone.now()
+            transaction_type = getattr(
+                wallet_transaction.transaction_type,
+                "label",
+                None,
+            ) or "Credit"
+            transaction_status = getattr(
+                wallet_transaction.status,
+                "label",
+                None,
+            ) or "Success"
+            return _json_success(
+                "Money added to wallet successfully.",
+                wallet_balance=f"{wallet_balance:.2f}",
+                amount_added=f"{amount:.2f}",
+                transaction={
+                    "id": wallet_transaction.pk,
+                    "date": transaction_date.strftime(
+                        "%d %b %Y, %I:%M %p"
+                    ),
+                    "type": str(transaction_type),
+                    "amount": f"{amount:.2f}",
+                    "balance": f"{wallet_balance:.2f}",
+                    "status": str(transaction_status),
+                    "description": wallet_transaction.description,
+                },
+            )
+        if action == "save_card":
+            card_last_four = request.POST.get(
+                "card_last_four",
+                "",
+            ).strip()
+            card_brand = request.POST.get(
+                "card_brand",
+                "",
+            ).strip()
+            card_expiry = request.POST.get(
+                "card_expiry",
+                "",
+            ).strip()
+            if (
+                not card_last_four.isdigit()
+                or len(card_last_four) != 4
+            ):
+                return _json_error(
+                    "Please enter the last 4 digits of your card."
+                )
+            if not card_brand:
+                return _json_error(
+                    "Please select or enter the card brand."
+                )
+            if len(card_brand) > 30:
+                return _json_error(
+                    "Card brand is too long."
+                )
+            if not re.match(
+                r"^(0[1-9]|1[0-2])/(?:[0-9]{2}|[0-9]{4})$",
+                card_expiry,
+            ):
+                return _json_error(
+                    "Card expiry must be in MM/YY or MM/YYYY format."
+                )
+            payment_detail.card_last_four = card_last_four
+            payment_detail.card_brand = card_brand
+            payment_detail.card_expiry = card_expiry
+            payment_detail.save(
+                update_fields=[
+                    "card_last_four",
+                    "card_brand",
+                    "card_expiry",
+                    "updated_at",
+                ]
+            )
+            return _json_success(
+                "Card details saved successfully.",
+                card_last_four=payment_detail.card_last_four,
+                card_brand=payment_detail.card_brand,
+                card_expiry=payment_detail.card_expiry,
+                has_card=True,
+            )
+        if action == "remove_card":
+            payment_detail.card_last_four = ""
+            payment_detail.card_brand = ""
+            payment_detail.card_expiry = ""
+            payment_detail.save(
+                update_fields=[
+                    "card_last_four",
+                    "card_brand",
+                    "card_expiry",
+                    "updated_at",
+                ]
+            )
+            return _json_success(
+                "Card removed successfully.",
+                has_card=False,
+                card_last_four="",
+                card_brand="",
+                card_expiry="",
+            )
+        if action == "change_password":
+            current_password = request.POST.get(
+                "current_password",
+                "",
+            )
+            new_password = request.POST.get(
+                "new_password",
+                "",
+            )
+            confirm_password = request.POST.get(
+                "confirm_password",
+                "",
+            )
+            if not user.check_password(
+                current_password
+            ):
+                messages.error(
+                    request,
+                    "Current password is incorrect.",
+                )
+                return redirect("user_setting")
+            if len(new_password) < 8:
+                messages.error(
+                    request,
+                    "New password must contain at least 8 characters.",
+                )
+                return redirect("user_setting")
+            if new_password != confirm_password:
+                messages.error(
+                    request,
+                    "New password and confirmation password do not match.",
+                )
+                return redirect("user_setting")
+            user.set_password(new_password)
+            user.save(
+                update_fields=[
+                    "password",
+                ]
+            )
+            update_session_auth_hash(
+                request,
+                user,
+            )
+            messages.success(
+                request,
+                "Password changed successfully.",
+            )
+            return redirect("user_setting")
+        old_email = user.email.strip()
+        new_email = request.POST.get(
+            "email",
+            user.email,
+        ).strip()
+        user.first_name = request.POST.get(
+            "first_name",
+            user.first_name,
+        ).strip()
+        user.last_name = request.POST.get(
+            "last_name",
+            user.last_name,
+        ).strip()
+        user.email = new_email
+        user.save(
+            update_fields=[
+                "first_name",
+                "last_name",
+                "email",
+            ]
+        )
+        if new_email != old_email:
+            profile.email_verified = False
+            profile.email_verified_at = None
+        profile.phone = request.POST.get(
+            "phone",
+            profile.phone,
+        ).strip()
+        profile.gender = request.POST.get(
+            "gender",
+            profile.gender,
+        ).strip()
+        profile.address = request.POST.get(
+            "address",
+            profile.address,
+        ).strip()
+        profile.emergency_contact_name = request.POST.get(
+            "emergency_contact_name",
+            profile.emergency_contact_name,
+        ).strip()
+        profile.emergency_contact_phone = request.POST.get(
+            "emergency_contact_phone",
+            profile.emergency_contact_phone,
+        ).strip()
+        date_of_birth = request.POST.get(
+            "date_of_birth",
+            "",
+        ).strip()
+        if date_of_birth:
+            try:
+                profile.date_of_birth = datetime.strptime(
+                    date_of_birth,
+                    "%Y-%m-%d",
+                ).date()
+            except ValueError:
+                pass
+        city_id = request.POST.get(
+            "city",
+            "",
+        ).strip()
+        profile.city = (
+            City.objects.filter(
+                pk=city_id
+            ).first()
+            if city_id
+            else None
+        )
+        remove_profile_image = (
+            request.POST.get(
+                "remove_profile_image"
+            )
+            == "1"
+        )
+        profile_image = request.FILES.get(
+            "profile_image"
+        )
+        if remove_profile_image:
+            if profile.profile_image:
+                profile.profile_image.delete(
+                    save=False
+                )
+            profile.profile_image = None
+        elif profile_image:
+            if profile.profile_image:
+                profile.profile_image.delete(
+                    save=False
+                )
+            profile.profile_image = profile_image
+        profile.save()
+        address_line1 = request.POST.get(
+            "address_line1",
+            "",
+        ).strip()
+        address_line2 = request.POST.get(
+            "address_line2",
+            "",
+        ).strip()
+        landmark = request.POST.get(
+            "landmark",
+            "",
+        ).strip()
+        postal_code = request.POST.get(
+            "postal_code",
+            "",
+        ).strip()
+        label = request.POST.get(
+            "address_label",
+            "",
+        ).strip()
+        address_type = request.POST.get(
+            "address_type",
+            UserAddress.AddressType.OTHER,
+        ).strip()
+        address_city_id = (
+            request.POST.get(
+                "address_city",
+                "",
+            ).strip()
+            or city_id
+        )
+        remove_address = (
+            request.POST.get(
+                "remove_address"
+            )
+            == "1"
+        )
+        if address_line1:
+            if address is None:
+                address = UserAddress(
+                    user=user
+                )
+            address.address_line1 = address_line1
+            address.address_line2 = address_line2
+            address.landmark = landmark
+            address.postal_code = postal_code
+            address.label = label
+            address.address_type = address_type
+            address.city = (
+                City.objects.filter(
+                    pk=address_city_id
+                ).first()
+                if address_city_id
+                else None
+            )
+            address.is_default = True
+            address.save()
+            UserAddress.objects.filter(
+                user=user
+            ).exclude(
+                pk=address.pk
+            ).update(
+                is_default=False
+            )
+        elif remove_address and address:
+            address.delete()
+            address = None
+        messages.success(
+            request,
+            "Account settings updated successfully.",
+        )
+        return redirect("user_setting")
+    cities = City.objects.all().order_by(
+        "name"
+    )
+    context = {
+            "page_title": 'Admin Setting',
+            "breadcrumb_items": [
+                {
+                    "title": "Admin Setting",
+                    "url": "user_setting"
+                },
+            ],
+            "user": user,
+            "profile": profile,
+            "address": address,
+            "cities": cities,
+            "notification_preferences": notification_preferences,
+            "payment_detail": payment_detail,
+            "payment_details": payment_detail,
+            "email_verified": bool(
+                profile.email_verified
+                and user.email
+            ),
+            }
+    return render(
+        request,
+        "account/setting.html",context 
+        )
+
+@login_required
+def group_list(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        group_id = request.POST.get("group_id")
+
+        if not group_id:
+            return JsonResponse({
+                "success": False,
+                "message": "Group ID is required."
+            }, status=400)
+
+        try:
+            group = Group.objects.get(id=group_id)
+        except Group.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Group not found."
+            }, status=404)
+
+        group_status, created = GroupStatus.objects.get_or_create(
+            group=group,
+            defaults={"is_active": True}
+        )
+
+        group_status.is_active = not group_status.is_active
+        group_status.save(update_fields=["is_active", "updated_at"])
+
+        return JsonResponse({
+            "success": True,
+            "group_id": group.id,
+            "is_active": group_status.is_active,
+            "status": "Active" if group_status.is_active else "Inactive"
+        })
+
+    query = request.GET.get("q", "").strip()
+
+    groups_queryset = Group.objects.all().order_by("name")
+
+    if query:
+        groups_queryset = groups_queryset.filter(
+            name__icontains=query
+        )
+
+    total_groups = groups_queryset.count()
+
+    groups = list(groups_queryset)
+
+    group_ids = [group.pk for group in groups]
+
+    statuses = {
+        status.group_id: status
+        for status in GroupStatus.objects.filter(
+            group_id__in=group_ids
+        )
+    }
+
+    missing_groups = [
+        group
+        for group in groups
+        if group.pk not in statuses
+    ]
+
+    if missing_groups:
+        GroupStatus.objects.bulk_create(
+            [
+                GroupStatus(
+                    group=group,
+                    is_active=True
+                )
+                for group in missing_groups
+            ],
+            ignore_conflicts=True,
+        )
+
+        statuses.update({
+            status.group_id: status
+            for status in GroupStatus.objects.filter(
+                group_id__in=group_ids
+            )
+        })
+
+    for group in groups:
+        group.group_status = statuses.get(group.pk)
+
+    context = {
+        "groups": groups,
+        "total_groups": Group.objects.count(),
+        "page_title": "Groups Management",
+        "breadcrumb_items": [
+            {
+                "title": "Groups",
+                "url": "group_list"
+            },
+        ],
+        "total_users": User.objects.count(),
+        "assigned_users": User.objects.filter(
+            groups__isnull=False
+        ).distinct().count(),
+        "total_permissions": Permission.objects.count(),
+    }
+
+    return render(
+        request,
+        "dashboard/groups.html",
+        context
+    )
+
+@login_required
+def vacancy_list(request):
+    vacancies = Vacancy.objects.all()
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    department = request.GET.get("department", "").strip()
+    if search:
+        vacancies = vacancies.filter(
+            Q(title__icontains=search) |
+            Q(department__icontains=search) |
+            Q(location__icontains=search)
+        )
+    if status:
+        vacancies = vacancies.filter(status=status)
+    if department:
+        vacancies = vacancies.filter(department=department)
+    departments = Vacancy.objects.values_list("department", flat=True).distinct().order_by("department")
+    context = {
+        "page_title": "Manage Vacancies",
+        "vacancies": vacancies,
+        "departments": departments,
+        "search": search,
+        "selected_status": status,
+        "selected_department": department,
+        "total_vacancies": Vacancy.objects.count(),
+        "active_vacancies": Vacancy.objects.filter(is_active=True).count(),
+        "open_vacancies": Vacancy.objects.filter(status="open", is_active=True).count(),
+        "featured_vacancies": Vacancy.objects.filter(is_featured=True, is_active=True).count(),
+        "breadcrumb_items": [
+            {"title": "Career", "url": "career"},
+            {"title": "Manage Vacancies", "url": "vacancy_list"},
+        ],
+    }
+    return render(request, "dashboard/vacancy_list.html", context)
+
+@login_required
+def vacancy_create(request):
+    if request.method == "POST":
+        form = VacancyForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Vacancy added successfully.")
+            return redirect("vacancy_list")
+    else:
+        form = VacancyForm()
+    context = {
+        "page_title": "Add Vacancy",
+        "form": form,
+        "is_edit": False,
+        "breadcrumb_items": [
+            {"title": "Career", "url": "career"},
+            {"title": "Manage Vacancies", "url": "vacancy_list"},
+            {"title": "Add Vacancy", "url": "vacancy_add"},
+        ],
+    }
+    return render(request, "dashboard/vacancy_form.html", context)
+
+@login_required
+def vacancy_edit(request, pk):
+    vacancy = get_object_or_404(Vacancy, pk=pk)
+    if request.method == "POST":
+        form = VacancyForm(request.POST, instance=vacancy)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Vacancy updated successfully.")
+            return redirect("vacancy_list")
+    else:
+        form = VacancyForm(instance=vacancy)
+    context = {
+        "page_title": "Edit Vacancy",
+        "form": form,
+        "vacancy": vacancy,
+        "is_edit": True,
+        "breadcrumb_items": [
+            {"title": "Career", "url": "career"},
+            {"title": "Manage Vacancies", "url": "vacancy_list"},
+            {"title": "Edit Vacancy", "url": "vacancy_edit"},
+        ],
+    }
+    return render(request, "dashboard/vacancy_form.html", context)
+
+@login_required
+def vacancy_delete(request, pk):
+    vacancy = get_object_or_404(Vacancy, pk=pk)
+    if request.method == "POST":
+        title = vacancy.title
+        vacancy.delete()
+        messages.success(request, f"{title} deleted successfully.")
+    return redirect("vacancy_list")
+
+@login_required
+def vacancy_toggle(request, pk):
+    vacancy = get_object_or_404(Vacancy, pk=pk)
+    if request.method == "POST":
+        vacancy.is_active = not vacancy.is_active
+        vacancy.save(update_fields=["is_active", "updated_at"])
+        return _json_success(
+            "Vacancy status updated.",
+            is_active=vacancy.is_active,
+            status_text="Active" if vacancy.is_active else "Inactive",
+        )
+    return _json_error("Invalid request method.", 405)
+
+@login_required
+def vacancy_status_update(request, pk):
+    vacancy = get_object_or_404(Vacancy, pk=pk)
+    if request.method == "POST":
+        status = request.POST.get("status", "").strip()
+        valid_statuses = dict(Vacancy.STATUS_CHOICES)
+        if status not in valid_statuses:
+            return _json_error("Invalid vacancy status.")
+        vacancy.status = status
+        vacancy.save(update_fields=["status", "updated_at"])
+        return _json_success(
+            "Vacancy status updated.",
+            status=status,
+            status_text=valid_statuses[status],
+        )
+    return _json_error("Invalid request method.", 405)
+
+@login_required
+def feedback_list(request):
+    feedbacks = Feedback.objects.all()
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    subject = request.GET.get("subject", "").strip()
+    if search:
+        feedbacks = feedbacks.filter(
+            Q(name__icontains=search) |
+            Q(email__icontains=search) |
+            Q(mobile_number__icontains=search) |
+            Q(message__icontains=search)
+        )
+    if status:
+        feedbacks = feedbacks.filter(status=status)
+    if subject:
+        feedbacks = feedbacks.filter(subject=subject)
+    paginator = Paginator(feedbacks, 10)
+    page_number = request.GET.get("page")
+    feedbacks = paginator.get_page(page_number)
+    context = {
+        "page_title": "Feedback Management",
+        "feedbacks": feedbacks,
+        "search": search,
+        "selected_status": status,
+        "selected_subject": subject,
+        "total_feedback": Feedback.objects.count(),
+        "new_feedback": Feedback.objects.filter(status="new").count(),
+        "in_progress_feedback": Feedback.objects.filter(status="in_progress").count(),
+        "resolved_feedback": Feedback.objects.filter(status="resolved").count(),
+        "closed_feedback": Feedback.objects.filter(status="closed").count(),
+        "subject_choices": Feedback.SUBJECT_CHOICES,
+        "status_choices": Feedback.STATUS_CHOICES,
+        "breadcrumb_items": [
+            {
+                "title": "Contact",
+                "url": "contact",
+            },
+            {
+                "title": "Feedback Management",
+                "url": "feedback_list",
+            },
+        ],
+    }
+    return render(request, "dashboard/feedback_list.html", context)

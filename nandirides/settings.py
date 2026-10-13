@@ -11,7 +11,11 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+import dj_database_url
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,18 +24,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*)5oiu0(h6=!y^*5t(yhw1&g%$nrmn0%+uc2(v0ewhnddbpa^0'
+# SECRET_KEY = 'django-insecure-*)5oiu0(h6=!y^*5t(yhw1&g%$nrmn0%+uc2(v0ewhnddbpa^0'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 ROOT_URLCONF = "nandirides.urls"
-LOGOUT_REDIRECT_URL = "/"
-LOGIN_URL = "/accounts/login/"
-LOGOUT_REDIRECT_URL = "/accounts/login/"
 
+LOGOUT_REDIRECT_URL = "/accounts/login/"
+LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/admindashboard/"
 
 
@@ -43,6 +47,12 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    
+    # Third-party
+    "rest_framework",
+    "rest_framework.authtoken",
+    "corsheaders",
+
     'django.contrib.staticfiles',
     'user',
     'customer',
@@ -59,17 +69,54 @@ INSTALLED_APPS = [
     'support',
 ]
 
+REST_FRAMEWORK = {
+
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+
+    "DEFAULT_PAGINATION_CLASS": (
+        "rest_framework.pagination.PageNumberPagination"
+    ),
+
+    "PAGE_SIZE": 20,
+}
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'dashboard.middleware.AdminInactivityTimeoutMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:59245",
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost:\d+$",
+    r"^http://127\.0\.0\.1:\d+$",
 ]
 
 ROOT_URLCONF = 'nandirides.urls'
+
 
 TEMPLATES = [
     {
@@ -82,10 +129,12 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'user.context_processors.site_data',
+                "support.context_processors.notifications",
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'nandirides.wsgi.application'
 
@@ -94,10 +143,23 @@ WSGI_APPLICATION = 'nandirides.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    # "default": {
+    #     "ENGINE": "django.db.backends.postgresql",
+    #     "NAME": "nandirides",
+    #     "USER": "postgres",
+    #     "PASSWORD": "root",
+    #     "HOST": "127.0.0.1",
+    #     "PORT": "5432",
+    # }
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
+
+    'default': dj_database_url.config(
+        default=os.getenv("DATABASE_URL") )
+
 }
 
 
@@ -125,7 +187,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -141,16 +203,58 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.ComprassedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# Email Configuration
+# Gmail SMTP
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+EMAIL_HOST_USER = 'nandiride@gmail.com'
+
+# IMPORTANT:
+# Use Gmail App Password here, NOT your normal Gmail password.
+EMAIL_HOST_PASSWORD = 'ilwhvtbwdliptxdn'
+
+DEFAULT_FROM_EMAIL = 'NandiRide <nandiride@gmail.com>'
+SERVER_EMAIL = 'nandiride@gmail.com'
+
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/6.1/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#SECURITY  SETTING
+SECURE_BROWSER_XSS_FILTER =True
+X_FRAME_OPTIONS= 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFT = True
+
+# Development and production security settings
+
+if DEBUG:
+    # Local development: HTTP is allowed
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+
+else:
+    # Production: HTTPS
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

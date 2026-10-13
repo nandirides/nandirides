@@ -48,14 +48,6 @@ class MyRide(models.Model):
     ride_type = models.CharField(max_length=200)
     ride_track = models.CharField(max_length=200)
 
-class Payment(models.Model):
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='payments')
-    payment_id = models.CharField(max_length=200)
-    payment_date = models.CharField(max_length=200)
-    payment_time = models.CharField(max_length=200)
-    payment_type = models.CharField(max_length=200)
-    payment_status = models.CharField(max_length=200)
-    payment_receipt = models.CharField(max_length=200)
 
 class User(models.Model):
     GENDER_CHOICES = [

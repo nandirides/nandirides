@@ -1,20 +1,43 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import Group
+from django.utils import timezone
 from core.models import TimeStampedModel
 
-# class User(models.Model):
-#     usernamename = models.CharField(max_length=100)
-#     email = models.EmailField()
-#     # roll = models.IntegerField()
 
-    # def __str__(self):
-    #     return self.name
-        
+class GroupStatus(models.Model):
+    group = models.OneToOneField(
+        Group,
+        on_delete=models.CASCADE,
+        related_name="status",
+    )
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.group.name} - {'Active' if self.is_active else 'Inactive'}"
+
+
 class Gallery(models.Model):
-    profile_image = models.ImageField(upload_to='profileimg', blank=True,
-                                      help_text='Optional: Upload a profile image')
-    my_file = models.FileField(upload_to = 'doc', blank=True)
-    date = models.DateTimeField(auto_now_add = True)
+    class Category(models.TextChoices):
+        PROFILE = "profile", "Profile"
+        VEHICLE = "vehicle", "Vehicle"
+        RIDE = "ride", "Ride"
+        DRIVER = "driver", "Driver"
+        OTHER = "other", "Other"
+
+    profile_image = models.ImageField(
+        upload_to="profileimg/",
+        blank=False,
+        null=False,
+        help_text="Required: Upload a gallery image",
+    )
+    category = models.CharField(
+        max_length=20,
+        choices=Category.choices,
+        default=Category.OTHER,
+    )
+    date = models.DateTimeField(auto_now_add=True)
 
     def delete(self, *args, **kwargs):
         if self.profile_image:
@@ -22,9 +45,11 @@ class Gallery(models.Model):
 
         super().delete(*args, **kwargs)
 
+    def __str__(self):
+        return f"{self.get_category_display()} - {self.profile_image.name}"
+
 
 class UserProfile(TimeStampedModel):
-
     class Gender(models.TextChoices):
         MALE = "male", "Male"
         FEMALE = "female", "Female"
@@ -35,33 +60,27 @@ class UserProfile(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="profile",
     )
-
     profile_image = models.ImageField(
         upload_to="profiles/",
         blank=True,
         null=True,
     )
-
     phone = models.CharField(
         max_length=20,
         blank=True,
     )
-
     date_of_birth = models.DateField(
         null=True,
         blank=True,
     )
-
     gender = models.CharField(
         max_length=10,
         choices=Gender.choices,
         blank=True,
     )
-
     address = models.TextField(
         blank=True,
     )
-
     city = models.ForeignKey(
         "locations.City",
         on_delete=models.SET_NULL,
@@ -69,22 +88,27 @@ class UserProfile(TimeStampedModel):
         blank=True,
         related_name="user_profiles",
     )
-
     emergency_contact_name = models.CharField(
         max_length=150,
         blank=True,
     )
-
     emergency_contact_phone = models.CharField(
         max_length=20,
+        blank=True,
+    )
+    email_verified = models.BooleanField(
+        default=False,
+    )
+    email_verified_at = models.DateTimeField(
+        null=True,
         blank=True,
     )
 
     def __str__(self):
         return self.user.get_username()
 
-class UserAddress(TimeStampedModel):
 
+class UserAddress(TimeStampedModel):
     class AddressType(models.TextChoices):
         HOME = "home", "Home"
         OFFICE = "office", "Office"
@@ -95,61 +119,294 @@ class UserAddress(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="addresses",
     )
-
     address_type = models.CharField(
         max_length=20,
         choices=AddressType.choices,
         default=AddressType.OTHER,
     )
-
     label = models.CharField(
         max_length=100,
         blank=True,
     )
-
     address_line1 = models.CharField(
         max_length=255,
     )
-
     address_line2 = models.CharField(
         max_length=255,
         blank=True,
     )
-
     landmark = models.CharField(
         max_length=255,
         blank=True,
     )
-
     city = models.ForeignKey(
         "locations.City",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
-
     postal_code = models.CharField(
         max_length=20,
         blank=True,
     )
-
     latitude = models.DecimalField(
         max_digits=9,
         decimal_places=6,
         null=True,
         blank=True,
     )
-
     longitude = models.DecimalField(
         max_digits=9,
         decimal_places=6,
         null=True,
         blank=True,
     )
-
     is_default = models.BooleanField(
         default=False,
     )
 
     def __str__(self):
         return self.label or self.address_line1
+
+
+class AccountNotificationPreference(TimeStampedModel):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notification_preferences",
+    )
+    platform_updates = models.BooleanField(default=True)
+    security_alerts = models.BooleanField(default=True)
+    ride_activity = models.BooleanField(default=True)
+    email_notifications = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Notification Preferences - {self.user.get_username()}"
+
+
+class AccountPaymentDetail(TimeStampedModel):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="payment_details",
+    )
+    upi_id = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+    wallet_balance = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
+    card_last_four = models.CharField(
+        max_length=4,
+        blank=True,
+    )
+    card_brand = models.CharField(
+        max_length=30,
+        blank=True,
+    )
+    card_expiry = models.CharField(
+        max_length=7,
+        blank=True,
+    )
+
+    def __str__(self):
+        return f"Payment Details - {self.user.get_username()}"
+
+
+class WalletTransaction(TimeStampedModel):
+    class TransactionType(models.TextChoices):
+        CREDIT = "credit", "Credit"
+        DEBIT = "debit", "Debit"
+
+    class Status(models.TextChoices):
+        SUCCESS = "success", "Success"
+        PENDING = "pending", "Pending"
+        FAILED = "failed", "Failed"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="wallet_transactions",
+    )
+    transaction_type = models.CharField(
+        max_length=10,
+        choices=TransactionType.choices,
+        default=TransactionType.CREDIT,
+    )
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+    balance_after = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.SUCCESS,
+    )
+    description = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+    reference = models.CharField(
+        max_length=100,
+        blank=True,
+        unique=True,
+        null=True,
+    )
+
+    def __str__(self):
+        return f"{self.user.get_username()} - {self.transaction_type} - ₹{self.amount}"
+
+
+class Vacancy(models.Model):
+    class Status(models.TextChoices):
+        OPEN = "open", "Open"
+        COMING_SOON = "coming_soon", "Coming Soon"
+        CLOSED = "closed", "Closed"
+
+    class JobType(models.TextChoices):
+        FULL_TIME = "full_time", "Full Time"
+        PART_TIME = "part_time", "Part Time"
+        INTERNSHIP = "internship", "Internship"
+        CONTRACT = "contract", "Contract"
+
+    title = models.CharField(
+        max_length=200,
+    )
+    department = models.CharField(
+        max_length=100,
+    )
+    job_type = models.CharField(
+        max_length=30,
+        choices=JobType.choices,
+        default=JobType.FULL_TIME,
+    )
+    location = models.CharField(
+        max_length=200,
+        default="Haridwar, Uttarakhand",
+    )
+    experience = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+    salary = models.CharField(
+        max_length=150,
+        blank=True,
+    )
+    skills = models.TextField(
+        blank=True,
+    )
+    description = models.TextField()
+    responsibilities = models.TextField(
+        blank=True,
+    )
+    requirements = models.TextField(
+        blank=True,
+    )
+    openings = models.PositiveIntegerField(
+        default=1,
+    )
+    application_email = models.EmailField(
+        default="nandirides@gmail.com",
+    )
+    last_date = models.DateField(
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.OPEN,
+    )
+    is_active = models.BooleanField(
+        default=True,
+    )
+    is_featured = models.BooleanField(
+        default=False,
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = [
+            "-is_featured",
+            "-created_at",
+        ]
+
+    def __str__(self):
+        return self.title
+
+class Feedback(models.Model):
+    SUBJECT_CHOICES = (
+        ("general", "General Enquiry"),
+        ("ride", "Ride Support"),
+        ("booking", "Booking Issue"),
+        ("payment", "Payment Issue"),
+        ("account", "Account Support"),
+        ("driver", "Driver Support"),
+        ("feedback", "Feedback"),
+        ("suggestion", "Suggestion"),
+        ("complaint", "Complaint"),
+        ("other", "Other"),
+    )
+    STATUS_CHOICES = (
+        ("new", "New"),
+        ("in_progress", "In Progress"),
+        ("resolved", "Resolved"),
+        ("closed", "Closed"),
+    )
+    name = models.CharField(max_length=150)
+    email = models.EmailField()
+    mobile_number = models.CharField(max_length=20, blank=True)
+    subject = models.CharField(max_length=30, choices=SUBJECT_CHOICES, default="feedback")
+    message = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="new")
+    admin_note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} - {self.get_subject_display()}"
+
+class BlogPost(models.Model):
+    CATEGORY_CHOICES = (
+        ("company", "Company"),
+        ("mobility", "Mobility"),
+        ("technology", "Technology"),
+        ("safety", "Safety"),
+        ("travel", "Travel"),
+        ("tips", "Tips"),
+        ("updates", "Updates"),
+        ("other", "Other"),
+    )
+    title = models.CharField(max_length=250)
+    slug = models.SlugField(max_length=280, unique=True, blank=True)
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default="company")
+    excerpt = models.TextField(blank=True)
+    content = models.TextField()
+    cover_image = models.ImageField(upload_to="blog/", blank=True, null=True)
+    author = models.CharField(max_length=150, default="NandiRide Team")
+    published_at = models.DateTimeField(default=timezone.now)
+    is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False)
+    views = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        ordering = ["-is_featured", "-published_at", "-created_at"]
+    def __str__(self):
+        return self.title

@@ -1,0 +1,5219 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title|default:"Ride Request" }} | NandiRide{% endblock %}
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                    <i class="bi bi-car-front-fill me-1"></i>
+                    Ride Request
+                </span>
+                {% if is_edit %}
+                <span class="badge bg-warning-subtle text-warning rounded-pill px-3 py-2">
+                    <i class="bi bi-pencil-square me-1"></i>
+                    Edit Mode
+                </span>
+                {% else %}
+                <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    New Request
+                </span>
+                {% endif %}
+            </div>
+            <h3 class="mb-1 fw-semibold">
+                {{ page_title|default:"Ride Request" }}
+            </h3>
+            <p class="text-muted mb-0">
+                Enter pickup and destination to calculate the trip automatically.
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'ride_request_list' %}" class="btn btn-outline-primary border">
+                <i class="bi bi-arrow-left me-1"></i>
+                Back
+            </a>
+        </div>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger border-0 shadow-sm">
+        <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+            <div>
+                {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="post" id="rideRequestForm" novalidate>
+        {% csrf_token %}
+
+        {{ form.pickup_location }}
+        {{ form.drop_location }}
+        {{ form.pickup_latitude }}
+        {{ form.pickup_longitude }}
+        {{ form.drop_latitude }}
+        {{ form.drop_longitude }}
+        {{ form.pickup_city }}
+        {{ form.drop_city }}
+
+        <div class="row g-4">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <div class="d-flex align-items-center justify-content-between gap-2">
+                            <div>
+                                <h5 class="mb-1 fw-semibold">
+                                    <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                                    Trip Locations
+                                </h5>
+                                <small class="text-muted">
+                                    Enter an address manually, use your current location, or select a destination from the map.
+                                </small>
+                            </div>
+                            <span id="locationStatusBadge" class="badge bg-light text-secondary border">
+                                Waiting
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_pickup_address" class="form-label fw-semibold">
+                                    <i class="bi bi-geo-alt-fill text-primary me-1"></i>
+                                    Pickup Location
+                                </label>
+
+                                <div class="input-group">
+                                    {{ form.pickup_address }}
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        id="useCurrentLocationBtn"
+                                        onclick="useCurrentLocation()"
+                                        title="Use current location"
+                                    >
+                                        <i class="bi bi-crosshair me-1"></i>
+                                        Current
+                                    </button>
+                                </div>
+
+                                <div id="pickupStatus" class="small text-muted mt-2">
+                                    Enter pickup address manually or click Current to detect your location.
+                                </div>
+
+                                {% for error in form.pickup_address.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_drop_address" class="form-label fw-semibold">
+                                    <i class="bi bi-geo-alt text-primary me-1"></i>
+                                    Destination
+                                </label>
+
+                                <div class="input-group">
+                                    {{ form.drop_address }}
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        id="searchDestinationBtn"
+                                        onclick="searchDestination()"
+                                        title="Search destination"
+                                    >
+                                        <i class="bi bi-search me-1"></i>
+                                        Search
+                                    </button>
+                                </div>
+
+                                <div id="dropStatus" class="small text-muted mt-2">
+                                    Enter a destination, press Enter, or click the map.
+                                </div>
+
+                                {% for error in form.drop_address.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12">
+                                <div class="position-relative">
+                                    <div class="ratio ratio-16x9">
+                                        <div
+                                            id="rideMap"
+                                            class="h-100 w-100 rounded-3 border overflow-hidden bg-light"
+                                        ></div>
+                                    </div>
+
+                                    <div
+                                        id="mapLoading"
+                                        class="position-absolute top-50 start-50 translate-middle d-none"
+                                        style="z-index: 1000;"
+                                    >
+                                        <div class="bg-white rounded-3 shadow px-3 py-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                                <span class="small fw-semibold" id="mapLoadingText">
+                                                    Loading...
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
+                                    <div class="small text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Click anywhere on the map to set the destination.
+                                    </div>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-primary"
+                                        onclick="clearDestination()"
+                                    >
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        Clear Destination
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="bi bi-car-front-fill text-primary me-2"></i>
+                            Vehicle Choice
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="{{ form.vehicle_type.id_for_label }}" class="form-label fw-semibold">
+                                    Vehicle Type
+                                </label>
+                                {{ form.vehicle_type }}
+                                <div id="vehicleFareHint" class="small text-muted mt-2">
+                                    Select a vehicle after choosing pickup and destination to calculate the fare.
+                                </div>
+                                {% for error in form.vehicle_type.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="bi bi-signpost-split-fill text-primary me-2"></i>
+                            Estimated Trip Details
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="{{ form.estimated_distance.id_for_label }}" class="form-label fw-semibold">
+                                    Distance
+                                </label>
+                                <div class="input-group">
+                                    {{ form.estimated_distance }}
+                                    <span class="input-group-text">km</span>
+                                </div>
+                                {% for error in form.estimated_distance.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="{{ form.estimated_duration.id_for_label }}" class="form-label fw-semibold">
+                                    Duration
+                                </label>
+                                <div class="input-group">
+                                    {{ form.estimated_duration }}
+                                    <span class="input-group-text">min</span>
+                                </div>
+                                {% for error in form.estimated_duration.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.estimated_fare.id_for_label }}" class="form-label fw-semibold">
+                                    Estimated Fare
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    {{ form.estimated_fare }}
+                                </div>
+                                <div id="fareStatus" class="small text-muted mt-1">
+                                    Fare will be calculated from active pricing rules.
+                                </div>
+                                {% for error in form.estimated_fare.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" id="couponFare" value="0">
+                            <div class="mt-3">
+                                <label for="couponCode" class="form-label fw-semibold">
+                                    <i class="bi bi-ticket-perforated-fill text-primary me-1"></i>
+                                    Apply Coupon
+                                </label>
+
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        id="couponCode"
+                                        name="coupon_code"
+                                        class="form-control"
+                                        placeholder="Enter coupon code"
+                                        autocomplete="off"
+                                    >
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-primary"
+                                        id="applyCouponBtn"
+                                        onclick="applyCoupon()"
+                                    >
+                                        <i class="bi bi-check2-circle me-1"></i>
+                                        Apply
+                                    </button>
+                                </div>
+
+                                <div id="couponStatus" class="small mt-2 text-muted">
+                                    Have a coupon? Enter the code to get a discount.
+                                </div>
+
+                                <div
+                                    id="couponDetails"
+                                    class="border rounded-3 p-3 mt-2 d-none bg-light"
+                                >
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Original Fare</span>
+                                        <strong id="couponOriginalFare">₹0.00</strong>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Coupon Discount</span>
+                                        <strong class="text-success" id="couponDiscount">
+                                            -₹0.00
+                                        </strong>
+                                    </div>
+
+                                    <div class="border-top pt-2 d-flex justify-content-between">
+                                        <span class="fw-semibold">Final Fare</span>
+                                        <strong class="text-primary" id="couponFinalFare">
+                                            ₹0.00
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="routeSummary" class="alert alert-light border mt-4 mb-0 d-none">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0 p-3">
+                                    <i class="bi bi-signpost-2-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold" id="routeSummaryTitle">
+                                        Route calculated
+                                    </div>
+                                    <div class="small text-muted" id="routeSummaryText"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="bi bi-person-vcard-fill text-primary me-2"></i>
+                            Request Information
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.request_number.id_for_label }}" class="form-label fw-semibold">
+                                    Request Number
+                                </label>
+                                {{ form.request_number }}
+                                {% for error in form.request_number.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.passenger.id_for_label }}" class="form-label fw-semibold">
+                                    Customer
+                                </label>
+                                {{ form.passenger }}
+                                {% for error in form.passenger.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.scheduled_at.id_for_label }}" class="form-label fw-semibold">
+                                    Scheduled At
+                                </label>
+                                {{ form.scheduled_at }}
+                                {% for error in form.scheduled_at.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
+                                    Status
+                                </label>
+                                {{ form.status }}
+                                {% for error in form.status.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap justify-content-end borde gap-2 mb-4">
+                    <a href="{% url 'ride_request_list' %}" class="btn btn-outline-danger px-4">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancel
+                    </a>
+                    <button
+                        type="submit"
+                        class="btn btn-primary px-4"
+                        id="saveRideRequestBtn"
+                    >
+                        <i class="bi bi-check2-circle me-1"></i>
+                        {% if is_edit %}
+                            Update Request
+                        {% else %}
+                            Create Request
+                        {% endif %}
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="bi bi-lightning-charge-fill text-primary me-2"></i>
+                            Request Actions
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary"
+                                onclick="useCurrentLocation()"
+                            >
+                                <i class="bi bi-crosshair me-2"></i>
+                                Detect Current Location
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary"
+                                onclick="focusDestination()"
+                            >
+                                <i class="bi bi-search me-2"></i>
+                                Set Destination
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary"
+                                onclick="calculateRoute()"
+                            >
+                                <i class="bi bi-arrow-repeat me-2"></i>
+                                Recalculate Route
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="bi bi-activity text-primary me-2"></i>
+                            Trip Status
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div
+                                id="pickupIndicator"
+                                class="rounded-circle bg-light text-secondary d-flex align-items-center justify-content-center flex-shrink-0 p-3"
+                            >
+                                <i class="bi bi-geo-alt-fill"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold">Pickup</div>
+                                <div id="pickupIndicatorText" class="small text-muted">
+                                    Not selected
+                                </div>
+                            </div>
+                            <span id="pickupCheck" class="badge bg-light text-secondary">
+                                Pending
+                            </span>
+                        </div>
+
+                        <div class="border-start ms-3 ps-4 mb-3" style="height:22px;"></div>
+
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div
+                                id="dropIndicator"
+                                class="rounded-circle bg-light text-secondary d-flex align-items-center justify-content-center flex-shrink-0 p-3"
+                            >
+                                <i class="bi bi-geo-alt"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold">Destination</div>
+                                <div id="dropIndicatorText" class="small text-muted">
+                                    Not selected
+                                </div>
+                            </div>
+                            <span id="dropCheck" class="badge bg-light text-secondary">
+                                Pending
+                            </span>
+                        </div>
+
+                        <div class="border-top pt-3 mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small">Distance</span>
+                                <strong id="sideDistance">—</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small">Duration</span>
+                                <strong id="sideDuration">—</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small">Estimated Fare</span>
+                                <strong id="sideFare">—</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="bi bi-list-check text-primary me-2"></i>
+                            Request Lifecycle
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0 p-2">
+                                <i class="bi bi-1-circle"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Set Pickup</div>
+                                <div class="small text-muted">
+                                    Enter an address, use GPS, or select an existing location.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0 p-2">
+                                <i class="bi bi-2-circle"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Set Destination</div>
+                                <div class="small text-muted">
+                                    Search, enter an address, or click on the map.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0 p-2">
+                                <i class="bi bi-3-circle"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Calculate Route</div>
+                                <div class="small text-muted">
+                                    Distance and duration are calculated automatically.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0 p-2">
+                                <i class="bi bi-4-circle"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Apply Fare</div>
+                                <div class="small text-muted">
+                                    Active fare and surge rules are applied on submission.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-light border shadow-sm">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-shield-check text-primary fs-5"></i>
+                        <div>
+                            <div class="fw-semibold mb-1">
+                                Location Privacy
+                            </div>
+                            <div class="small text-muted">
+                                Your browser asks for location permission only when you click the Current Location button.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-body text-body">
+            <div class="modal-header border-bottom border-secondary-subtle px-4 py-3 bg-body">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger flex-shrink-0" style="width:46px;height:46px;">
+                        <i class="bi bi-credit-card-2-front fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-1 text-body" id="paymentModalLabel">
+                            Payment Details
+                        </h5>
+                        <div class="small text-body-secondary">
+                            Complete your payment securely to create this ride request.
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-0 bg-body">
+
+                <div id="paymentAlert" class="alert d-none rounded-0 border-0 mb-0" role="alert"></div>
+
+                <div class="px-4 pt-3">
+                    <div class="card border border-secondary-subtle shadow-sm rounded-4 mb-3 bg-body">
+                        <div class="card-body py-2 px-3">
+                            <div class="row g-0 align-items-center">
+
+                                <div class="col-6 col-md-3 border-end border-secondary-subtle">
+                                    <div class="d-flex align-items-center gap-2 px-2 py-1">
+                                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-danger-subtle text-danger flex-shrink-0" style="width:38px;height:38px;">
+                                            <i class="bi bi-signpost-2-fill"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="small text-body-secondary">Distance</div>
+                                            <div class="fw-semibold text-body text-truncate" id="paymentDistance">—</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-3 border-end border-secondary-subtle">
+                                    <div class="d-flex align-items-center gap-2 px-2 py-1">
+                                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary flex-shrink-0" style="width:38px;height:38px;">
+                                            <i class="bi bi-clock-fill"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="small text-body-secondary">Duration</div>
+                                            <div class="fw-semibold text-body text-truncate" id="paymentDuration">—</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-3 border-end border-secondary-subtle">
+                                    <div class="d-flex align-items-center gap-2 px-2 py-1">
+                                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-info-subtle text-info flex-shrink-0" style="width:38px;height:38px;">
+                                            <i class="bi bi-car-front-fill"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="small text-body-secondary">Vehicle</div>
+                                            <div class="fw-semibold text-body text-truncate" id="paymentVehicle">—</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-3">
+                                    <div class="d-flex align-items-center gap-2 px-2 py-1">
+                                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-success-subtle text-success flex-shrink-0" style="width:38px;height:38px;">
+                                            <i class="bi bi-currency-rupee"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="small text-body-secondary">Total Fare</div>
+                                            <div class="fw-bold fs-5 text-danger text-truncate" id="paymentAmount">₹0.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-4 pb-3">
+                    <div class="row g-3 align-items-stretch">
+
+                        <div class="col-lg-3">
+                            <div class="card border border-secondary-subtle shadow-sm rounded-4 h-100 mb-0 bg-body">
+                                <div class="card-header border-0 bg-transparent px-3 pt-3 pb-2">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <div class="fw-bold text-body">
+                                                Payment Method
+                                            </div>
+                                            <div class="small text-body-secondary">
+                                                Choose payment option
+                                            </div>
+                                        </div>
+                                        <i class="bi bi-wallet2 text-danger fs-5"></i>
+                                    </div>
+                                </div>
+
+                                <div class="card-body p-2">
+
+                                    <input type="radio" class="btn-check" name="payment_method" id="paymentMethodCard" value="card" autocomplete="off" checked>
+
+                                    <label for="paymentMethodCard" class="payment-method-option d-flex align-items-center gap-3 rounded-3 p-3 mb-1 w-100 text-start border border-transparent bg-body text-body">
+                                        <span class="d-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger flex-shrink-0" style="width:40px;height:40px;">
+                                            <i class="bi bi-credit-card"></i>
+                                        </span>
+                                        <span class="flex-grow-1 min-w-0">
+                                            <span class="d-block fw-semibold text-body">Card</span>
+                                            <span class="d-block small text-body-secondary text-truncate">Debit / Credit Card</span>
+                                        </span>
+                                        <i class="bi bi-chevron-right small text-body-secondary"></i>
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="payment_method" id="paymentMethodUpi" value="upi" autocomplete="off">
+
+                                    <label for="paymentMethodUpi" class="payment-method-option d-flex align-items-center gap-3 rounded-3 p-3 mb-1 w-100 text-start border border-transparent bg-body text-body">
+                                        <span class="d-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary flex-shrink-0" style="width:40px;height:40px;">
+                                            <i class="bi bi-phone"></i>
+                                        </span>
+                                        <span class="flex-grow-1 min-w-0">
+                                            <span class="d-block fw-semibold text-body">UPI</span>
+                                            <span class="d-block small text-body-secondary text-truncate">QR Code / UPI ID</span>
+                                        </span>
+                                        <i class="bi bi-chevron-right small text-body-secondary"></i>
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="payment_method" id="paymentMethodWallet" value="wallet" autocomplete="off">
+
+                                    <label for="paymentMethodWallet" class="payment-method-option d-flex align-items-center gap-3 rounded-3 p-3 mb-1 w-100 text-start border border-transparent bg-body text-body">
+                                        <span class="d-flex align-items-center justify-content-center rounded-3 bg-success-subtle text-success flex-shrink-0" style="width:40px;height:40px;">
+                                            <i class="bi bi-wallet2"></i>
+                                        </span>
+                                        <span class="flex-grow-1 min-w-0">
+                                            <span class="d-block fw-semibold text-body">Wallet</span>
+                                            <span class="d-block small text-body-secondary text-truncate">NandiRide Wallet</span>
+                                        </span>
+                                        <i class="bi bi-chevron-right small text-body-secondary"></i>
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="payment_method" id="paymentMethodNetbanking" value="netbanking" autocomplete="off">
+
+                                    <label for="paymentMethodNetbanking" class="payment-method-option d-flex align-items-center gap-3 rounded-3 p-3 mb-1 w-100 text-start border border-transparent bg-body text-body">
+                                        <span class="d-flex align-items-center justify-content-center rounded-3 bg-info-subtle text-info flex-shrink-0" style="width:40px;height:40px;">
+                                            <i class="bi bi-bank"></i>
+                                        </span>
+                                        <span class="flex-grow-1 min-w-0">
+                                            <span class="d-block fw-semibold text-body">Net Banking</span>
+                                            <span class="d-block small text-body-secondary text-truncate">Select your bank</span>
+                                        </span>
+                                        <i class="bi bi-chevron-right small text-body-secondary"></i>
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="payment_method" id="paymentMethodCash" value="cash" autocomplete="off">
+
+                                    <label for="paymentMethodCash" class="payment-method-option d-flex align-items-center gap-3 rounded-3 p-3 w-100 text-start border border-transparent bg-body text-body">
+                                        <span class="d-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning flex-shrink-0" style="width:40px;height:40px;">
+                                            <i class="bi bi-cash-coin"></i>
+                                        </span>
+                                        <span class="flex-grow-1 min-w-0">
+                                            <span class="d-block fw-semibold text-body">Cash</span>
+                                            <span class="d-block small text-body-secondary text-truncate">Pay to driver</span>
+                                        </span>
+                                        <i class="bi bi-chevron-right small text-body-secondary"></i>
+                                    </label>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-9">
+
+                            <div class="card border border-secondary-subtle shadow-sm rounded-4 h-100 mb-0 bg-body">
+                                <div class="card-body p-4">
+
+                                    <div id="cardPaymentFields">
+
+                                        <div class="d-flex align-items-center justify-content-between mb-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="d-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger" style="width:44px;height:44px;">
+                                                    <i class="bi bi-credit-card-2-front fs-5"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold fs-6 text-body">Card Payment</div>
+                                                    <div class="small text-body-secondary">
+                                                        Enter your card details securely.
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <span class="badge rounded-pill text-bg-success px-3 py-2">
+                                                <i class="bi bi-shield-check me-1"></i>
+                                                Secure
+                                            </span>
+                                        </div>
+
+                                        <div class="row g-3">
+
+                                            <div class="col-12">
+                                                <label for="paymentCardName" class="form-label small fw-semibold text-body">
+                                                    Card Holder Name
+                                                </label>
+
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle text-body-secondary">
+                                                        <i class="bi bi-person"></i>
+                                                    </span>
+
+                                                    <input type="text" id="paymentCardName" name="card_name" class="form-control bg-body text-body border-secondary-subtle" autocomplete="cc-name" placeholder="Enter card holder name">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <label for="paymentCardNumber" class="form-label small fw-semibold text-body">
+                                                    Card Number
+                                                </label>
+
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle text-body-secondary">
+                                                        <i class="bi bi-credit-card"></i>
+                                                    </span>
+
+                                                    <input type="text" id="paymentCardNumber" name="card_number" class="form-control bg-body text-body border-secondary-subtle" inputmode="numeric" maxlength="23" autocomplete="cc-number" placeholder="1234 5678 9012 3456">
+                                                </div>
+
+                                                <div class="small text-body-secondary mt-1">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    Only the last 4 digits are retained by NandiRide.
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label for="paymentCardExpiry" class="form-label small fw-semibold text-body">
+                                                    Expiry
+                                                </label>
+
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle text-body-secondary">
+                                                        <i class="bi bi-calendar3"></i>
+                                                    </span>
+
+                                                    <input type="text" id="paymentCardExpiry" name="card_expiry" class="form-control bg-body text-body border-secondary-subtle" maxlength="5" autocomplete="cc-exp" placeholder="MM/YY">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label for="paymentCardCvv" class="form-label small fw-semibold text-body">
+                                                    CVV
+                                                </label>
+
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle text-body-secondary">
+                                                        <i class="bi bi-lock"></i>
+                                                    </span>
+
+                                                    <input type="password" id="paymentCardCvv" name="card_cvv" class="form-control bg-body text-body border-secondary-subtle" inputmode="numeric" maxlength="4" autocomplete="cc-csc" placeholder="CVV">
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div id="upiPaymentFields" class="d-none">
+
+                                        <div class="d-flex align-items-center justify-content-between mb-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary" style="width:44px;height:44px;">
+                                                    <i class="bi bi-qr-code fs-5"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold fs-6 text-body">UPI Payment</div>
+                                                    <div class="small text-body-secondary">
+                                                        Scan the QR code or enter your UPI ID.
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <span class="badge rounded-pill text-bg-success px-3 py-2">
+                                                <i class="bi bi-shield-check me-1"></i>
+                                                Secure
+                                            </span>
+                                        </div>
+
+                                        <div class="row g-4 align-items-center">
+
+                                            <div class="col-md-5">
+                                                <div class="text-center">
+
+                                                    <div class="small fw-semibold text-body-secondary mb-2">
+                                                        Scan to Pay
+                                                    </div>
+
+                                                    <div class="d-inline-flex align-items-center justify-content-center bg-white border border-secondary-subtle rounded-4 p-2 shadow-sm">
+                                                        <div id="paymentQrCode" class="d-flex align-items-center justify-content-center" style="width:190px;height:190px;">
+                                                            <div class="text-center text-secondary">
+                                                                <i class="bi bi-qr-code fs-1 d-block mb-2"></i>
+                                                                <small>Enter UPI ID</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mt-3">
+                                                        <span class="badge rounded-pill text-bg-light border px-3 py-2">
+                                                            <i class="bi bi-currency-rupee me-1"></i>
+                                                            <span id="paymentQrAmount">₹0.00</span>
+                                                        </span>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-7">
+
+                                                <div class="border border-primary-subtle rounded-4 p-4 bg-primary-subtle bg-opacity-10">
+
+                                                    <label for="paymentUpiId" class="form-label fw-semibold text-body">
+                                                        UPI ID
+                                                    </label>
+
+                                                    <div class="input-group mb-3">
+                                                        <span class="input-group-text bg-body border-secondary-subtle text-body-secondary">
+                                                            <i class="bi bi-at"></i>
+                                                        </span>
+
+                                                        <input type="text" id="paymentUpiId" name="upi_id" class="form-control bg-body text-body border-secondary-subtle" placeholder="example@upi" autocomplete="off">
+                                                    </div>
+
+                                                    <div class="alert alert-primary mb-0 py-2 px-3">
+                                                        <div class="d-flex align-items-start gap-2">
+                                                            <i class="bi bi-info-circle-fill mt-1"></i>
+                                                            <div class="small">
+                                                                Enter your UPI ID. A payment QR code will be generated automatically.
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div id="walletPaymentFields" class="d-none">
+
+                                        <div class="d-flex align-items-center gap-3 mb-4">
+                                            <div class="d-flex align-items-center justify-content-center rounded-3 bg-success-subtle text-success" style="width:44px;height:44px;">
+                                                <i class="bi bi-wallet2 fs-5"></i>
+                                            </div>
+
+                                            <div>
+                                                <div class="fw-bold fs-6 text-body">NandiRide Wallet</div>
+                                                <div class="small text-body-secondary">
+                                                    Pay using your available wallet balance.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="border border-success-subtle rounded-4 p-4 bg-success-subtle bg-opacity-10">
+                                            <div class="row align-items-center">
+
+                                                <div class="col-md-7">
+                                                    <div class="small text-body-secondary mb-1">
+                                                        Payment Amount
+                                                    </div>
+
+                                                    <div class="fs-3 fw-bold text-success" id="walletPaymentAmount">
+                                                        ₹0.00
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                                                    <span class="badge rounded-pill text-bg-success px-3 py-2">
+                                                        <i class="bi bi-wallet-fill me-1"></i>
+                                                        Wallet Payment
+                                                    </span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div id="netbankingPaymentFields" class="d-none">
+
+                                        <div class="d-flex align-items-center gap-3 mb-4">
+                                            <div class="d-flex align-items-center justify-content-center rounded-3 bg-info-subtle text-info" style="width:44px;height:44px;">
+                                                <i class="bi bi-bank fs-5"></i>
+                                            </div>
+
+                                            <div>
+                                                <div class="fw-bold fs-6 text-body">Net Banking</div>
+                                                <div class="small text-body-secondary">
+                                                    Select your bank to continue.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3">
+
+                                            <div class="col-md-8">
+                                                <label for="paymentNetbankingBank" class="form-label fw-semibold text-body">
+                                                    Select Bank
+                                                </label>
+
+                                                <select id="paymentNetbankingBank" name="netbanking_bank" class="form-select form-select-lg bg-body text-body border-secondary-subtle">
+                                                    <option value="">Select your bank</option>
+                                                    <option value="sbi">State Bank of India</option>
+                                                    <option value="hdfc">HDFC Bank</option>
+                                                    <option value="icici">ICICI Bank</option>
+                                                    <option value="axis">Axis Bank</option>
+                                                    <option value="kotak">Kotak Mahindra Bank</option>
+                                                    <option value="pnb">Punjab National Bank</option>
+                                                    <option value="bob">Bank of Baroda</option>
+                                                    <option value="canara">Canara Bank</option>
+                                                    <option value="union">Union Bank of India</option>
+                                                    <option value="idbi">IDBI Bank</option>
+                                                    <option value="indusind">IndusInd Bank</option>
+                                                    <option value="yes">YES BANK</option>
+                                                    <option value="other">Other Bank</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="h-100 border border-info-subtle rounded-4 p-3 bg-info-subtle bg-opacity-10">
+                                                    <div class="fw-semibold small text-body mb-2">
+                                                        <i class="bi bi-shield-check me-1"></i>
+                                                        Secure Banking
+                                                    </div>
+
+                                                    <div class="small text-body-secondary">
+                                                        You will continue securely through your selected bank.
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div id="cashPaymentFields" class="d-none">
+
+                                        <div class="d-flex align-items-center gap-3 mb-4">
+                                            <div class="d-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning" style="width:44px;height:44px;">
+                                                <i class="bi bi-cash-coin fs-5"></i>
+                                            </div>
+
+                                            <div>
+                                                <div class="fw-bold fs-6 text-body">Cash Payment</div>
+                                                <div class="small text-body-secondary">
+                                                    Pay the driver directly in cash.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="cashPaymentNotice" class="alert alert-warning mb-0 rounded-4">
+                                            <div class="d-flex align-items-start gap-3">
+                                                <i class="bi bi-info-circle-fill fs-5"></i>
+
+                                                <div>
+                                                    <div class="fw-semibold">
+                                                        Cash payment will remain Pending.
+                                                    </div>
+
+                                                    <div class="small mt-1">
+                                                        The payment status will be updated after the cash is manually collected and confirmed.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <input type="hidden" id="ridePaymentId" value="">
+
+            </div>
+
+            <div class="modal-footer border-top border-secondary-subtle px-4 py-3 bg-body-tertiary">
+
+                <div class="me-auto d-none d-md-flex align-items-center gap-2 small text-body-secondary">
+                    <i class="bi bi-shield-lock-fill text-success"></i>
+                    Secure payment powered by NandiRide
+                </div>
+
+                <button type="button" class="btn btn-light border border-secondary-subtle text-body px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>
+                    Cancel
+                </button>
+
+                <button type="button" class="btn btn-primary px-4 shadow-sm" id="confirmPaymentBtn" onclick="continuePayment()">
+                    <i class="bi bi-shield-check me-1"></i>
+                    Continue Payment
+                    <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<script>
+(function () {
+    const paymentMethods = [
+        "paymentMethodCard",
+        "paymentMethodUpi",
+        "paymentMethodWallet",
+        "paymentMethodNetbanking",
+        "paymentMethodCash"
+    ];
+
+    function getAmount() {
+        const element = document.getElementById("paymentAmount");
+
+        if (!element) {
+            return 0;
+        }
+
+        const value = String(element.textContent || "")
+            .replace(/[₹,\s]/g, "")
+            .trim();
+
+        const amount = parseFloat(value);
+
+        return Number.isFinite(amount) ? amount : 0;
+    }
+
+    function getBaseFare() {
+        const couponFare = document.getElementById("couponFare");
+
+        if (couponFare) {
+            const value = parseFloat(couponFare.value || "0");
+
+            if (Number.isFinite(value) && value > 0) {
+                return value;
+            }
+        }
+
+        const estimatedFare = document.getElementById("id_estimated_fare");
+
+        if (estimatedFare) {
+            const value = parseFloat(estimatedFare.value || "0");
+
+            if (Number.isFinite(value) && value > 0) {
+                return value;
+            }
+        }
+
+        return getAmount();
+    }
+
+    function getCouponCode() {
+        const input = document.getElementById("couponCode");
+
+        return input
+            ? String(input.value || "").trim().toUpperCase()
+            : "";
+    }
+
+    function setCouponStatus(message, type) {
+        const status = document.getElementById("couponStatus");
+
+        if (!status) {
+            return;
+        }
+
+        status.textContent = message || "";
+
+        status.className =
+            "small mt-2 " +
+            (
+                type === "success"
+                    ? "text-success fw-semibold"
+                    : type === "danger"
+                        ? "text-danger"
+                        : "text-muted"
+            );
+    }
+
+    function updateCouponFare(fare) {
+        const couponFare = document.getElementById("couponFare");
+
+        if (couponFare) {
+            couponFare.value = Number(fare || 0).toFixed(2);
+        }
+    }
+
+    function resetCoupon() {
+        const details = document.getElementById("couponDetails");
+        const finalFare = document.getElementById("finalFare");
+        const baseFare = getBaseFare();
+
+        updateCouponFare(baseFare);
+
+        if (finalFare) {
+            finalFare.value = baseFare.toFixed(2);
+        }
+
+        if (details) {
+            details.classList.add("d-none");
+        }
+
+        setCouponStatus(
+            "Have a coupon? Enter the code to get a discount.",
+            "muted"
+        );
+    }
+
+    async function applyCoupon() {
+        const input = document.getElementById("couponCode");
+        const status = document.getElementById("couponStatus");
+        const details = document.getElementById("couponDetails");
+        const original = document.getElementById("couponOriginalFare");
+        const discount = document.getElementById("couponDiscount");
+        const final = document.getElementById("couponFinalFare");
+        const button = document.getElementById("applyCouponBtn");
+
+        const code = input
+            ? String(input.value || "").trim().toUpperCase()
+            : "";
+
+        const fare = getBaseFare();
+
+        if (!code) {
+            setCouponStatus(
+                "Please enter a coupon code.",
+                "danger"
+            );
+
+            if (details) {
+                details.classList.add("d-none");
+            }
+
+            return false;
+        }
+
+        if (!fare || fare <= 0) {
+            setCouponStatus(
+                "Please calculate the fare first.",
+                "danger"
+            );
+
+            if (details) {
+                details.classList.add("d-none");
+            }
+
+            return false;
+        }
+
+        if (button) {
+            button.disabled = true;
+
+            button.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-1"></span>Applying...';
+        }
+
+        setCouponStatus(
+            "Validating coupon...",
+            "muted"
+        );
+
+        const formData = new FormData();
+
+        formData.append(
+            "coupon_code",
+            code
+        );
+
+        formData.append(
+            "fare",
+            fare.toFixed(2)
+        );
+
+        const csrfToken =
+            document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+            )?.value || "";
+
+        if (csrfToken) {
+            formData.append(
+                "csrfmiddlewaretoken",
+                csrfToken
+            );
+        }
+
+        try {
+            const response = await fetch(
+                "{% url 'apply_coupon' %}",
+                {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    },
+                    body: formData
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message ||
+                    "Coupon could not be applied."
+                );
+            }
+
+            const originalAmount = Number(
+                data.original_amount || fare
+            );
+
+            const couponDiscountAmount = Number(
+                data.discount || 0
+            );
+
+            const finalAmount = Number(
+                data.final_amount || fare
+            );
+
+            if (original) {
+                original.textContent =
+                    "₹" + originalAmount.toFixed(2);
+            }
+
+            if (discount) {
+                discount.textContent =
+                    "-₹" + couponDiscountAmount.toFixed(2);
+            }
+
+            if (final) {
+                final.textContent =
+                    "₹" + finalAmount.toFixed(2);
+            }
+
+            if (details) {
+                details.classList.remove("d-none");
+            }
+
+            if (input) {
+                input.value =
+                    data.coupon_code || code;
+            }
+
+            updateCouponFare(finalAmount);
+
+            const finalFareInput =
+                document.getElementById("finalFare");
+
+            if (finalFareInput) {
+                finalFareInput.value =
+                    finalAmount.toFixed(2);
+            }
+
+            const paymentAmount =
+                document.getElementById("paymentAmount");
+
+            if (paymentAmount) {
+                paymentAmount.textContent =
+                    "₹" + finalAmount.toFixed(2);
+            }
+
+            updatePaymentAmounts();
+
+            const upiMethod =
+                document.getElementById("paymentMethodUpi");
+
+            if (
+                upiMethod &&
+                upiMethod.checked
+            ) {
+                generatePaymentQr();
+            }
+
+            setCouponStatus(
+                data.message ||
+                "Coupon applied successfully.",
+                "success"
+            );
+
+            return true;
+
+        } catch (error) {
+            console.error(
+                "Coupon error:",
+                error
+            );
+
+            if (details) {
+                details.classList.add("d-none");
+            }
+
+            setCouponStatus(
+                error.message ||
+                "Unable to apply coupon. Please try again.",
+                "danger"
+            );
+
+            return false;
+
+        } finally {
+            if (button) {
+                button.disabled = false;
+
+                button.innerHTML =
+                    '<i class="bi bi-check2-circle me-1"></i>Apply';
+            }
+        }
+    }
+
+    function getUpiId() {
+        const input =
+            document.getElementById("paymentUpiId");
+
+        return input
+            ? String(input.value || "").trim()
+            : "";
+    }
+
+    function updatePaymentAmounts() {
+        const amount = getAmount();
+        const amountText = "₹" + amount.toFixed(2);
+
+        const qrAmount =
+            document.getElementById("paymentQrAmount");
+
+        const walletAmount =
+            document.getElementById("walletPaymentAmount");
+
+        if (qrAmount) {
+            qrAmount.textContent = amountText;
+        }
+
+        if (walletAmount) {
+            walletAmount.textContent = amountText;
+        }
+    }
+
+    function generatePaymentQr() {
+        const container =
+            document.getElementById("paymentQrCode");
+
+        if (!container) {
+            return;
+        }
+
+        const upiId = getUpiId();
+        const amount = getAmount();
+
+        updatePaymentAmounts();
+
+        container.innerHTML = "";
+
+        if (!upiId) {
+            container.innerHTML =
+                '<div class="text-center text-secondary">' +
+                    '<i class="bi bi-qr-code fs-1 d-block mb-2"></i>' +
+                    '<small>Enter UPI ID</small>' +
+                '</div>';
+
+            return;
+        }
+
+        if (typeof QRCode === "undefined") {
+            container.innerHTML =
+                '<div class="text-center text-danger">' +
+                    '<i class="bi bi-exclamation-triangle fs-3 d-block mb-2"></i>' +
+                    '<small>QR generator unavailable</small>' +
+                '</div>';
+
+            return;
+        }
+
+        const paymentIdElement =
+            document.getElementById("ridePaymentId");
+
+        const paymentId = paymentIdElement
+            ? String(
+                paymentIdElement.value || ""
+            ).trim()
+            : "";
+
+        const params =
+            new URLSearchParams();
+
+        params.set(
+            "pa",
+            upiId
+        );
+
+        params.set(
+            "pn",
+            "NandiRide"
+        );
+
+        params.set(
+            "am",
+            amount.toFixed(2)
+        );
+
+        params.set(
+            "cu",
+            "INR"
+        );
+
+        params.set(
+            "tn",
+            paymentId
+                ? "NandiRide " + paymentId
+                : "NandiRide Ride Payment"
+        );
+
+        const upiUrl =
+            "upi://pay?" + params.toString();
+
+        new QRCode(
+            container,
+            {
+                text: upiUrl,
+                width: 180,
+                height: 180,
+                correctLevel: QRCode.CorrectLevel.M
+            }
+        );
+    }
+
+    function hideAllPaymentSections() {
+        [
+            "cardPaymentFields",
+            "upiPaymentFields",
+            "walletPaymentFields",
+            "netbankingPaymentFields",
+            "cashPaymentFields"
+        ].forEach(function (id) {
+            const element =
+                document.getElementById(id);
+
+            if (element) {
+                element.classList.add("d-none");
+            }
+        });
+    }
+
+    function updatePaymentMethod() {
+        let selectedMethod = "card";
+
+        paymentMethods.forEach(function (id) {
+            const input =
+                document.getElementById(id);
+
+            if (
+                input &&
+                input.checked
+            ) {
+                selectedMethod =
+                    input.value;
+            }
+        });
+
+        hideAllPaymentSections();
+
+        if (selectedMethod === "card") {
+            document
+                .getElementById("cardPaymentFields")
+                ?.classList.remove("d-none");
+        }
+
+        if (selectedMethod === "upi") {
+            document
+                .getElementById("upiPaymentFields")
+                ?.classList.remove("d-none");
+
+            generatePaymentQr();
+        }
+
+        if (selectedMethod === "wallet") {
+            document
+                .getElementById("walletPaymentFields")
+                ?.classList.remove("d-none");
+
+            updatePaymentAmounts();
+        }
+
+        if (selectedMethod === "netbanking") {
+            document
+                .getElementById("netbankingPaymentFields")
+                ?.classList.remove("d-none");
+        }
+
+        if (selectedMethod === "cash") {
+            document
+                .getElementById("cashPaymentFields")
+                ?.classList.remove("d-none");
+        }
+    }
+
+    function syncPaymentId() {
+        const source =
+            document.getElementById("ridePaymentId");
+
+        if (!source) {
+            return;
+        }
+
+        const display =
+            document.getElementById(
+                "ridePaymentDisplayId"
+            );
+
+        if (display) {
+            display.textContent =
+                source.value || "—";
+        }
+    }
+
+    function formatCardNumber(value) {
+        return String(value || "")
+            .replace(/\D/g, "")
+            .slice(0, 16)
+            .replace(/(.{4})/g, "$1 ")
+            .trim();
+    }
+
+    function formatExpiry(value) {
+        const digits =
+            String(value || "")
+                .replace(/\D/g, "")
+                .slice(0, 4);
+
+        return digits.length <= 2
+            ? digits
+            : digits.slice(0, 2) +
+                "/" +
+                digits.slice(2);
+    }
+
+    paymentMethods.forEach(function (id) {
+        const input =
+            document.getElementById(id);
+
+        if (input) {
+            input.addEventListener(
+                "change",
+                updatePaymentMethod
+            );
+        }
+    });
+
+    const upiInput =
+        document.getElementById("paymentUpiId");
+
+    if (upiInput) {
+        upiInput.addEventListener(
+            "input",
+            generatePaymentQr
+        );
+    }
+
+    const cardNumber =
+        document.getElementById(
+            "paymentCardNumber"
+        );
+
+    if (cardNumber) {
+        cardNumber.addEventListener(
+            "input",
+            function () {
+                this.value =
+                    formatCardNumber(
+                        this.value
+                    );
+            }
+        );
+    }
+
+    const expiry =
+        document.getElementById(
+            "paymentCardExpiry"
+        );
+
+    if (expiry) {
+        expiry.addEventListener(
+            "input",
+            function () {
+                this.value =
+                    formatExpiry(
+                        this.value
+                    );
+            }
+        );
+    }
+
+    const cvv =
+        document.getElementById(
+            "paymentCardCvv"
+        );
+
+    if (cvv) {
+        cvv.addEventListener(
+            "input",
+            function () {
+                this.value =
+                    String(
+                        this.value || ""
+                    )
+                    .replace(/\D/g, "")
+                    .slice(0, 4);
+            }
+        );
+    }
+
+    const couponInput =
+        document.getElementById(
+            "couponCode"
+        );
+
+    if (couponInput) {
+        couponInput.addEventListener(
+            "keydown",
+            function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    applyCoupon();
+                }
+            }
+        );
+    }
+
+    const paymentModal =
+        document.getElementById(
+            "paymentModal"
+        );
+
+    if (paymentModal) {
+        paymentModal.addEventListener(
+            "shown.bs.modal",
+            function () {
+                syncPaymentId();
+                updatePaymentAmounts();
+                updatePaymentMethod();
+            }
+        );
+    }
+
+    const paymentAmount =
+        document.getElementById(
+            "paymentAmount"
+        );
+
+    if (paymentAmount) {
+        const observer =
+            new MutationObserver(
+                function () {
+                    updatePaymentAmounts();
+
+                    const upiMethod =
+                        document.getElementById(
+                            "paymentMethodUpi"
+                        );
+
+                    if (
+                        upiMethod &&
+                        upiMethod.checked
+                    ) {
+                        generatePaymentQr();
+                    }
+                }
+            );
+
+        observer.observe(
+            paymentAmount,
+            {
+                childList: true,
+                characterData: true,
+                subtree: true
+            }
+        );
+    }
+
+    window.applyCoupon =
+        applyCoupon;
+
+    window.generatePaymentQr =
+        generatePaymentQr;
+
+    window.updatePaymentMethod =
+        updatePaymentMethod;
+
+    window.resetCoupon =
+        resetCoupon;
+})();
+</script>
+
+<script>
+(function () {
+    "use strict";
+
+    let rideMap = null;
+    let pickupMarker = null;
+    let dropMarker = null;
+    let routeLayer = null;
+
+    let routeRequestInProgress = false;
+    let pickupGeocodeInProgress = false;
+    let dropGeocodeInProgress = false;
+    let fareRequestInProgress = false;
+    let couponRequestInProgress = false;
+    let paymentRequestInProgress = false;
+    let formSubmitting = false;
+
+    let updatingPickupAddress = false;
+    let updatingDropAddress = false;
+
+    let pickupCityName = "";
+    let dropCityName = "";
+
+    let paymentModalInstance = null;
+
+    let couponApplied = false;
+    let appliedCouponCode = "";
+    let payableFareValue = null;
+
+    const DEFAULT_CENTER = [20.5937, 78.9629];
+    const DEFAULT_ZOOM = 5;
+
+    const pickupAddress = document.getElementById("id_pickup_address");
+    const dropAddress = document.getElementById("id_drop_address");
+
+    const pickupLatitude = document.getElementById("id_pickup_latitude");
+    const pickupLongitude = document.getElementById("id_pickup_longitude");
+    const dropLatitude = document.getElementById("id_drop_latitude");
+    const dropLongitude = document.getElementById("id_drop_longitude");
+
+    const estimatedDistance = document.getElementById("id_estimated_distance");
+    const estimatedDuration = document.getElementById("id_estimated_duration");
+    const estimatedFare = document.getElementById("id_estimated_fare");
+
+    const pickupStatus = document.getElementById("pickupStatus");
+    const dropStatus = document.getElementById("dropStatus");
+
+    const pickupIndicatorText = document.getElementById("pickupIndicatorText");
+    const dropIndicatorText = document.getElementById("dropIndicatorText");
+
+    const pickupCheck = document.getElementById("pickupCheck");
+    const dropCheck = document.getElementById("dropCheck");
+
+    const sideDistance = document.getElementById("sideDistance");
+    const sideDuration = document.getElementById("sideDuration");
+    const sideFare = document.getElementById("sideFare");
+
+    const routeSummary = document.getElementById("routeSummary");
+    const routeSummaryTitle = document.getElementById("routeSummaryTitle");
+    const routeSummaryText = document.getElementById("routeSummaryText");
+
+    const fareStatus = document.getElementById("fareStatus");
+    const locationStatusBadge = document.getElementById("locationStatusBadge");
+
+    const mapLoading = document.getElementById("mapLoading");
+    const mapLoadingText = document.getElementById("mapLoadingText");
+
+    const paymentModal = document.getElementById("paymentModal");
+    const paymentAlert = document.getElementById("paymentAlert");
+    const paymentDistance = document.getElementById("paymentDistance");
+    const paymentDuration = document.getElementById("paymentDuration");
+    const paymentVehicle = document.getElementById("paymentVehicle");
+    const paymentAmount = document.getElementById("paymentAmount");
+    const confirmPaymentBtn = document.getElementById("confirmPaymentBtn");
+    const ridePaymentId = document.getElementById("ridePaymentId");
+
+    const cardPaymentFields = document.getElementById("cardPaymentFields");
+    const upiPaymentFields = document.getElementById("upiPaymentFields");
+    const netbankingPaymentFields = document.getElementById("netbankingPaymentFields");
+    const walletPaymentFields = document.getElementById("walletPaymentFields");
+    const cashPaymentNotice = document.getElementById("cashPaymentNotice");
+
+    const couponCodeInput = document.getElementById("couponCode");
+    const couponStatus = document.getElementById("couponStatus");
+    const couponDetails = document.getElementById("couponDetails");
+    const couponOriginalFare = document.getElementById("couponOriginalFare");
+    const couponDiscount = document.getElementById("couponDiscount");
+    const couponFinalFare = document.getElementById("couponFinalFare");
+    const applyCouponBtn = document.getElementById("applyCouponBtn");
+    const couponFare = document.getElementById("couponFare");
+    const finalFareInput = document.getElementById("finalFare");
+
+    const paymentMethodInputs = document.querySelectorAll(
+        'input[name="payment_method"]'
+    );
+
+    function getVehicleTypeField() {
+        return document.getElementById(
+            "{{ form.vehicle_type.id_for_label }}"
+        );
+    }
+
+    function hasValue(element) {
+        return !!(
+            element &&
+            String(element.value || "").trim()
+        );
+    }
+
+    function getNumber(element) {
+        if (!element || !hasValue(element)) {
+            return null;
+        }
+
+        const value = Number(element.value);
+
+        return Number.isFinite(value) ? value : null;
+    }
+
+    function getEstimatedFareValue() {
+        const value = getNumber(estimatedFare);
+
+        return value !== null && value > 0
+            ? value
+            : null;
+    }
+
+    function getPayableFareValue() {
+        if (
+            payableFareValue !== null &&
+            Number.isFinite(payableFareValue) &&
+            payableFareValue >= 0
+        ) {
+            return payableFareValue;
+        }
+
+        const finalValue = getNumber(finalFareInput);
+
+        if (
+            couponApplied &&
+            finalValue !== null &&
+            finalValue >= 0
+        ) {
+            payableFareValue = finalValue;
+            return finalValue;
+        }
+
+        const estimated = getEstimatedFareValue();
+
+        if (estimated !== null) {
+            payableFareValue = estimated;
+            return estimated;
+        }
+
+        return null;
+    }
+
+    function setPayableFare(value) {
+        const amount = Number(value);
+
+        if (
+            !Number.isFinite(amount) ||
+            amount < 0
+        ) {
+            payableFareValue = null;
+
+            if (finalFareInput) {
+                finalFareInput.value = "";
+            }
+
+            return null;
+        }
+
+        payableFareValue = Number(
+            amount.toFixed(2)
+        );
+
+        if (finalFareInput) {
+            finalFareInput.value =
+                payableFareValue.toFixed(2);
+        }
+
+        return payableFareValue;
+    }
+
+    function updateFareDisplays() {
+        const estimated = getEstimatedFareValue();
+        const payable = getPayableFareValue();
+
+        if (sideFare) {
+            if (payable !== null) {
+                sideFare.textContent =
+                    "₹" + payable.toFixed(2);
+            } else {
+                sideFare.textContent = "Pending";
+            }
+        }
+
+        if (paymentAmount) {
+            paymentAmount.textContent =
+                payable !== null
+                    ? "₹" + payable.toFixed(2)
+                    : "₹0.00";
+        }
+
+        if (couponFare && estimated !== null) {
+            couponFare.value =
+                estimated.toFixed(2);
+        }
+
+        if (
+            finalFareInput &&
+            payable !== null
+        ) {
+            finalFareInput.value =
+                payable.toFixed(2);
+        }
+
+        return payable;
+    }
+
+    function resetCouponState(resetInput = false) {
+        couponApplied = false;
+        appliedCouponCode = "";
+
+        const estimated = getEstimatedFareValue();
+
+        payableFareValue =
+            estimated !== null
+                ? Number(estimated.toFixed(2))
+                : null;
+
+        if (finalFareInput) {
+            finalFareInput.value =
+                payableFareValue !== null
+                    ? payableFareValue.toFixed(2)
+                    : "";
+        }
+
+        if (couponDetails) {
+            couponDetails.classList.add("d-none");
+        }
+
+        if (couponStatus) {
+            couponStatus.textContent = "";
+            couponStatus.className = "small mt-2";
+        }
+
+        if (
+            resetInput &&
+            couponCodeInput
+        ) {
+            couponCodeInput.value = "";
+        }
+
+        updateFareDisplays();
+    }
+
+    async function applyCoupon(silent = false) {
+        if (couponRequestInProgress) {
+            return false;
+        }
+
+        if (
+            !couponCodeInput ||
+            !couponStatus ||
+            !couponDetails ||
+            !applyCouponBtn
+        ) {
+            return false;
+        }
+
+        const couponCode = String(
+            couponCodeInput.value || ""
+        ).trim().toUpperCase();
+
+        const fare = getEstimatedFareValue();
+
+        if (!couponCode) {
+            resetCouponState(false);
+
+            if (!silent) {
+                couponStatus.textContent =
+                    "Please enter a coupon code.";
+                couponStatus.className =
+                    "small mt-2 text-danger";
+            }
+
+            return false;
+        }
+
+        if (
+            fare === null ||
+            fare <= 0
+        ) {
+            if (!silent) {
+                couponStatus.textContent =
+                    "Please calculate the fare first.";
+                couponStatus.className =
+                    "small mt-2 text-danger";
+                couponDetails.classList.add("d-none");
+            }
+
+            return false;
+        }
+
+        couponRequestInProgress = true;
+        applyCouponBtn.disabled = true;
+
+        applyCouponBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-1"></span>Applying...';
+
+        if (!silent) {
+            couponStatus.textContent =
+                "Validating coupon...";
+            couponStatus.className =
+                "small mt-2 text-muted";
+        }
+
+        const formData = new FormData();
+
+        formData.set(
+            "coupon_code",
+            couponCode
+        );
+
+        formData.set(
+            "fare",
+            fare.toFixed(2)
+        );
+
+        const csrfToken =
+            document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+            )?.value || "";
+
+        formData.set(
+            "csrfmiddlewaretoken",
+            csrfToken
+        );
+
+        try {
+            const response = await fetch(
+                "{% url 'apply_coupon' %}",
+                {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    },
+                    body: formData
+                }
+            );
+
+            const data = await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.message ||
+                    "Coupon could not be applied."
+                );
+            }
+
+            const originalAmount = Number(
+                data.original_amount
+            );
+
+            const discount = Number(
+                data.discount
+            );
+
+            const finalAmount = Number(
+                data.final_amount
+            );
+
+            if (
+                !Number.isFinite(finalAmount) ||
+                finalAmount < 0
+            ) {
+                throw new Error(
+                    "Invalid discounted fare was returned."
+                );
+            }
+
+            couponApplied = true;
+
+            appliedCouponCode =
+                String(
+                    data.coupon_code ||
+                    couponCode
+                ).trim().toUpperCase();
+
+            payableFareValue =
+                Number(
+                    finalAmount.toFixed(2)
+                );
+
+            if (couponCodeInput) {
+                couponCodeInput.value =
+                    appliedCouponCode;
+            }
+
+            if (couponFare) {
+                couponFare.value =
+                    (
+                        Number.isFinite(originalAmount)
+                            ? originalAmount
+                            : fare
+                    ).toFixed(2);
+            }
+
+            if (finalFareInput) {
+                finalFareInput.value =
+                    payableFareValue.toFixed(2);
+            }
+
+            if (couponOriginalFare) {
+                couponOriginalFare.textContent =
+                    "₹" +
+                    (
+                        Number.isFinite(originalAmount)
+                            ? originalAmount
+                            : fare
+                    ).toFixed(2);
+            }
+
+            if (couponDiscount) {
+                couponDiscount.textContent =
+                    "-₹" +
+                    (
+                        Number.isFinite(discount)
+                            ? discount
+                            : 0
+                    ).toFixed(2);
+            }
+
+            if (couponFinalFare) {
+                couponFinalFare.textContent =
+                    "₹" +
+                    payableFareValue.toFixed(2);
+            }
+
+            couponDetails.classList.remove(
+                "d-none"
+            );
+
+            couponStatus.textContent =
+                data.message ||
+                "Coupon applied successfully.";
+
+            couponStatus.className =
+                "small mt-2 text-success fw-semibold";
+
+            updateFareDisplays();
+
+            return true;
+        } catch (error) {
+            console.error(
+                "Coupon error:",
+                error
+            );
+
+            resetCouponState(false);
+
+            couponStatus.textContent =
+                error.message ||
+                "Unable to apply coupon.";
+
+            couponStatus.className =
+                "small mt-2 text-danger";
+
+            return false;
+        } finally {
+            couponRequestInProgress = false;
+
+            applyCouponBtn.disabled = false;
+
+            applyCouponBtn.innerHTML =
+                '<i class="bi bi-check2-circle me-1"></i>Apply';
+        }
+    }
+
+    window.applyCoupon = applyCoupon;
+
+    function setMapLoading(show, text) {
+        if (!mapLoading) {
+            return;
+        }
+
+        if (show) {
+            if (mapLoadingText) {
+                mapLoadingText.textContent =
+                    text || "Loading...";
+            }
+
+            mapLoading.classList.remove(
+                "d-none"
+            );
+        } else {
+            mapLoading.classList.add(
+                "d-none"
+            );
+        }
+    }
+
+    function setLocationBadge(text, type) {
+        if (!locationStatusBadge) {
+            return;
+        }
+
+        locationStatusBadge.textContent =
+            text || "";
+
+        locationStatusBadge.className =
+            "badge rounded-pill border";
+
+        const classes = {
+            success: [
+                "bg-success-subtle",
+                "text-success"
+            ],
+            danger: [
+                "bg-danger-subtle",
+                "text-danger"
+            ],
+            warning: [
+                "bg-warning-subtle",
+                "text-warning"
+            ]
+        };
+
+        (
+            classes[type] || [
+                "bg-light",
+                "text-secondary"
+            ]
+        ).forEach(function (className) {
+            locationStatusBadge.classList.add(
+                className
+            );
+        });
+    }
+
+    function setPickupState(selected) {
+        if (
+            !pickupCheck ||
+            !pickupIndicatorText
+        ) {
+            return;
+        }
+
+        pickupCheck.textContent =
+            selected ? "Ready" : "Pending";
+
+        pickupCheck.className =
+            selected
+                ? "badge bg-success-subtle text-success"
+                : "badge bg-light text-secondary";
+
+        pickupIndicatorText.textContent =
+            selected
+                ? (
+                    pickupAddress?.value ||
+                    "Pickup selected"
+                )
+                : "Not selected";
+    }
+
+    function setDropState(selected) {
+        if (
+            !dropCheck ||
+            !dropIndicatorText
+        ) {
+            return;
+        }
+
+        dropCheck.textContent =
+            selected ? "Ready" : "Pending";
+
+        dropCheck.className =
+            selected
+                ? "badge bg-success-subtle text-success"
+                : "badge bg-light text-secondary";
+
+        dropIndicatorText.textContent =
+            selected
+                ? (
+                    dropAddress?.value ||
+                    "Destination selected"
+                )
+                : "Not selected";
+    }
+
+    function resetRouteData() {
+        if (
+            routeLayer &&
+            rideMap
+        ) {
+            rideMap.removeLayer(routeLayer);
+            routeLayer = null;
+        }
+
+        if (estimatedDistance) {
+            estimatedDistance.value = "";
+        }
+
+        if (estimatedDuration) {
+            estimatedDuration.value = "";
+        }
+
+        if (sideDistance) {
+            sideDistance.textContent = "—";
+        }
+
+        if (sideDuration) {
+            sideDuration.textContent = "—";
+        }
+
+        if (routeSummary) {
+            routeSummary.classList.add("d-none");
+        }
+
+        if (fareStatus) {
+            fareStatus.textContent =
+                "Fare will be calculated from the selected vehicle type, city pricing and active surge rules.";
+        }
+
+        if (estimatedFare) {
+            estimatedFare.value = "";
+        }
+
+        payableFareValue = null;
+
+        resetCouponState(false);
+    }
+
+    function createMap() {
+        if (
+            !document.getElementById(
+                "rideMap"
+            )
+        ) {
+            return;
+        }
+
+        rideMap = L.map(
+            "rideMap",
+            {
+                zoomControl: true,
+                scrollWheelZoom: true,
+                attributionControl: false
+            }
+        ).setView(
+            DEFAULT_CENTER,
+            DEFAULT_ZOOM
+        );
+
+        L.tileLayer(
+            "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3wf8_1_477b9c969e22fe3e205f303d",
+            {
+                subdomains: "abcd",
+                maxZoom: 20
+            }
+        ).addTo(rideMap);
+
+        rideMap.on(
+            "click",
+            function (event) {
+                setDropFromCoordinates(
+                    event.latlng.lat,
+                    event.latlng.lng,
+                    true
+                );
+            }
+        );
+    }
+
+    function createPickupMarker(lat, lng) {
+        if (!rideMap) {
+            return;
+        }
+
+        if (pickupMarker) {
+            rideMap.removeLayer(pickupMarker);
+        }
+
+        pickupMarker = L.marker(
+            [lat, lng],
+            {
+                title: "Pickup Location"
+            }
+        ).addTo(rideMap);
+
+        pickupMarker.bindPopup(
+            "<strong>Pickup Location</strong>"
+        );
+    }
+
+    function createDropMarker(lat, lng) {
+        if (!rideMap) {
+            return;
+        }
+
+        if (dropMarker) {
+            rideMap.removeLayer(dropMarker);
+        }
+
+        dropMarker = L.marker(
+            [lat, lng],
+            {
+                title: "Destination"
+            }
+        ).addTo(rideMap);
+
+        dropMarker.bindPopup(
+            "<strong>Destination</strong>"
+        );
+    }
+
+    function fitRouteBounds() {
+        if (!rideMap) {
+            return;
+        }
+
+        const points = [];
+
+        const pickupLat = getNumber(
+            pickupLatitude
+        );
+
+        const pickupLng = getNumber(
+            pickupLongitude
+        );
+
+        const dropLat = getNumber(
+            dropLatitude
+        );
+
+        const dropLng = getNumber(
+            dropLongitude
+        );
+
+        if (
+            pickupLat !== null &&
+            pickupLng !== null
+        ) {
+            points.push([
+                pickupLat,
+                pickupLng
+            ]);
+        }
+
+        if (
+            dropLat !== null &&
+            dropLng !== null
+        ) {
+            points.push([
+                dropLat,
+                dropLng
+            ]);
+        }
+
+        if (!points.length) {
+            return;
+        }
+
+        if (points.length === 1) {
+            rideMap.setView(
+                points[0],
+                15
+            );
+            return;
+        }
+
+        rideMap.fitBounds(
+            points,
+            {
+                padding: [40, 40]
+            }
+        );
+    }
+
+    async function reverseGeocode(
+        latitude,
+        longitude
+    ) {
+        const url =
+            "https://nominatim.openstreetmap.org/reverse" +
+            "?format=jsonv2" +
+            "&lat=" +
+            encodeURIComponent(latitude) +
+            "&lon=" +
+            encodeURIComponent(longitude) +
+            "&zoom=18" +
+            "&addressdetails=1";
+
+        const response = await fetch(
+            url,
+            {
+                headers: {
+                    Accept: "application/json"
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "Unable to identify this location."
+            );
+        }
+
+        return response.json();
+    }
+
+    function getReadableAddress(data, fallback) {
+        if (!data) {
+            return fallback;
+        }
+
+        if (data.display_name) {
+            return data.display_name;
+        }
+
+        if (data.address) {
+            const parts = [
+                data.address.road,
+                data.address.neighbourhood,
+                data.address.suburb,
+                data.address.city,
+                data.address.town,
+                data.address.village,
+                data.address.state,
+                data.address.country
+            ].filter(Boolean);
+
+            if (parts.length) {
+                return parts.join(", ");
+            }
+        }
+
+        return fallback;
+    }
+
+    async function searchGeocoding(query) {
+        const url =
+            "https://nominatim.openstreetmap.org/search" +
+            "?format=jsonv2" +
+            "&limit=1" +
+            "&addressdetails=1" +
+            "&q=" +
+            encodeURIComponent(query);
+
+        const response = await fetch(
+            url,
+            {
+                headers: {
+                    Accept: "application/json"
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "Location search failed."
+            );
+        }
+
+        const data = await response.json();
+
+        return Array.isArray(data) &&
+            data.length
+            ? data[0]
+            : null;
+    }
+
+    function getBestCityName(result) {
+        if (!result) {
+            return "";
+        }
+
+        const address = result.address || {};
+
+        const candidates = [
+            address.city,
+            address.municipality,
+            address.town,
+            address.city_district,
+            address.district,
+            address.county,
+            address.village,
+            address.locality,
+            address.suburb,
+            address.hamlet
+        ];
+
+        for (const value of candidates) {
+            if (
+                value &&
+                String(value).trim()
+            ) {
+                return String(value).trim();
+            }
+        }
+
+        const state = String(
+            address.state || ""
+        ).trim();
+
+        const country = String(
+            address.country || ""
+        ).trim();
+
+        if (
+            country.toLowerCase() === "india" &&
+            state.toLowerCase() === "chandigarh"
+        ) {
+            return "Chandigarh";
+        }
+
+        return state;
+    }
+
+    async function resolvePickupAddress(showStatus = true) {
+        const query = String(
+            pickupAddress?.value || ""
+        ).trim();
+
+        if (
+            !query ||
+            pickupGeocodeInProgress
+        ) {
+            return false;
+        }
+
+        pickupGeocodeInProgress = true;
+
+        if (showStatus) {
+            pickupStatus.textContent =
+                "Finding pickup location...";
+
+            setLocationBadge(
+                "Finding pickup",
+                "warning"
+            );
+        }
+
+        try {
+            const result =
+                await searchGeocoding(query);
+
+            if (!result) {
+                throw new Error(
+                    "No matching pickup location was found."
+                );
+            }
+
+            const latitude = Number(result.lat);
+            const longitude = Number(result.lon);
+
+            if (
+                !Number.isFinite(latitude) ||
+                !Number.isFinite(longitude)
+            ) {
+                throw new Error(
+                    "Invalid pickup coordinates were returned."
+                );
+            }
+
+            pickupLatitude.value =
+                latitude.toFixed(6);
+
+            pickupLongitude.value =
+                longitude.toFixed(6);
+
+            pickupCityName =
+                getBestCityName(result);
+
+            updatingPickupAddress = true;
+
+            pickupAddress.value =
+                result.display_name || query;
+
+            updatingPickupAddress = false;
+
+            createPickupMarker(
+                latitude,
+                longitude
+            );
+
+            setPickupState(true);
+
+            pickupStatus.textContent =
+                "Pickup location selected.";
+
+            setLocationBadge(
+                "Pickup ready",
+                "success"
+            );
+
+            if (rideMap) {
+                rideMap.setView(
+                    [latitude, longitude],
+                    15
+                );
+            }
+
+            return true;
+        } catch (error) {
+            pickupLatitude.value = "";
+            pickupLongitude.value = "";
+            pickupCityName = "";
+
+            setPickupState(false);
+
+            pickupStatus.textContent =
+                error.message ||
+                "Unable to find pickup location.";
+
+            setLocationBadge(
+                "Pickup not found",
+                "danger"
+            );
+
+            return false;
+        } finally {
+            pickupGeocodeInProgress = false;
+        }
+    }
+
+    async function resolveDropAddress(showStatus = true) {
+        const query = String(
+            dropAddress?.value || ""
+        ).trim();
+
+        if (
+            !query ||
+            dropGeocodeInProgress
+        ) {
+            return false;
+        }
+
+        dropGeocodeInProgress = true;
+
+        if (showStatus) {
+            dropStatus.textContent =
+                "Finding destination...";
+
+            setLocationBadge(
+                "Finding destination",
+                "warning"
+            );
+        }
+
+        try {
+            const result =
+                await searchGeocoding(query);
+
+            if (!result) {
+                throw new Error(
+                    "No matching destination was found."
+                );
+            }
+
+            const latitude = Number(result.lat);
+            const longitude = Number(result.lon);
+
+            if (
+                !Number.isFinite(latitude) ||
+                !Number.isFinite(longitude)
+            ) {
+                throw new Error(
+                    "Invalid destination coordinates were returned."
+                );
+            }
+
+            dropLatitude.value =
+                latitude.toFixed(6);
+
+            dropLongitude.value =
+                longitude.toFixed(6);
+
+            dropCityName =
+                getBestCityName(result);
+
+            updatingDropAddress = true;
+
+            dropAddress.value =
+                result.display_name || query;
+
+            updatingDropAddress = false;
+
+            createDropMarker(
+                latitude,
+                longitude
+            );
+
+            setDropState(true);
+
+            dropStatus.textContent =
+                "Destination selected.";
+
+            setLocationBadge(
+                "Destination ready",
+                "success"
+            );
+
+            if (rideMap) {
+                rideMap.setView(
+                    [latitude, longitude],
+                    15
+                );
+            }
+
+            return true;
+        } catch (error) {
+            dropLatitude.value = "";
+            dropLongitude.value = "";
+            dropCityName = "";
+
+            setDropState(false);
+
+            dropStatus.textContent =
+                error.message ||
+                "Unable to find destination.";
+
+            setLocationBadge(
+                "Destination not found",
+                "danger"
+            );
+
+            return false;
+        } finally {
+            dropGeocodeInProgress = false;
+        }
+    }
+
+    async function useCurrentLocation() {
+        const button =
+            document.getElementById(
+                "useCurrentLocationBtn"
+            );
+
+        if (!navigator.geolocation) {
+            pickupStatus.textContent =
+                "Geolocation is not supported by this browser.";
+
+            setLocationBadge(
+                "GPS unavailable",
+                "danger"
+            );
+
+            return false;
+        }
+
+        if (button) {
+            button.disabled = true;
+            button.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-1"></span> Detecting';
+        }
+
+        pickupStatus.textContent =
+            "Requesting your current location...";
+
+        setLocationBadge(
+            "Detecting location",
+            "warning"
+        );
+
+        return new Promise(function (resolve) {
+            navigator.geolocation.getCurrentPosition(
+                async function (position) {
+                    const latitude =
+                        position.coords.latitude;
+
+                    const longitude =
+                        position.coords.longitude;
+
+                    pickupLatitude.value =
+                        latitude.toFixed(6);
+
+                    pickupLongitude.value =
+                        longitude.toFixed(6);
+
+                    createPickupMarker(
+                        latitude,
+                        longitude
+                    );
+
+                    if (rideMap) {
+                        rideMap.setView(
+                            [
+                                latitude,
+                                longitude
+                            ],
+                            16
+                        );
+                    }
+
+                    pickupStatus.textContent =
+                        "Current location detected. Identifying address...";
+
+                    try {
+                        const data =
+                            await reverseGeocode(
+                                latitude,
+                                longitude
+                            );
+
+                        updatingPickupAddress = true;
+
+                        pickupAddress.value =
+                            getReadableAddress(
+                                data,
+                                "Current Location"
+                            );
+
+                        pickupCityName =
+                            getBestCityName(data);
+
+                        updatingPickupAddress = false;
+
+                        pickupStatus.textContent =
+                            "Current location selected.";
+
+                        setPickupState(true);
+
+                        setLocationBadge(
+                            "Pickup ready",
+                            "success"
+                        );
+                    } catch (error) {
+                        updatingPickupAddress = true;
+                        pickupAddress.value =
+                            "Current Location";
+                        updatingPickupAddress = false;
+
+                        setPickupState(true);
+
+                        pickupStatus.textContent =
+                            "Coordinates detected, but address lookup failed.";
+
+                        setLocationBadge(
+                            "Pickup ready",
+                            "success"
+                        );
+                    }
+
+                    await calculateRoute();
+
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML =
+                            '<i class="bi bi-crosshair me-1"></i> Current';
+                    }
+
+                    resolve(true);
+                },
+                function (error) {
+                    let message =
+                        "Unable to detect your location.";
+
+                    if (error.code === 1) {
+                        message =
+                            "Location permission was denied. Please allow location access in your browser.";
+                    } else if (error.code === 2) {
+                        message =
+                            "Your current location could not be determined.";
+                    } else if (error.code === 3) {
+                        message =
+                            "Location request timed out. Please try again.";
+                    }
+
+                    pickupStatus.textContent =
+                        message;
+
+                    setLocationBadge(
+                        "Location failed",
+                        "danger"
+                    );
+
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML =
+                            '<i class="bi bi-crosshair me-1"></i> Current';
+                    }
+
+                    resolve(false);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 30000
+                }
+            );
+        });
+    }
+
+    async function setDropFromCoordinates(
+        latitude,
+        longitude,
+        reverseLookup
+    ) {
+        dropLatitude.value =
+            Number(latitude).toFixed(6);
+
+        dropLongitude.value =
+            Number(longitude).toFixed(6);
+
+        createDropMarker(
+            latitude,
+            longitude
+        );
+
+        if (rideMap) {
+            rideMap.setView(
+                [latitude, longitude],
+                Math.max(
+                    rideMap.getZoom(),
+                    14
+                )
+            );
+        }
+
+        setDropState(true);
+
+        if (reverseLookup) {
+            dropStatus.textContent =
+                "Destination selected. Identifying address...";
+
+            try {
+                const data =
+                    await reverseGeocode(
+                        latitude,
+                        longitude
+                    );
+
+                updatingDropAddress = true;
+
+                dropAddress.value =
+                    getReadableAddress(
+                        data,
+                        "Selected Destination"
+                    );
+
+                dropCityName =
+                    getBestCityName(data);
+
+                updatingDropAddress = false;
+
+                dropStatus.textContent =
+                    "Destination selected.";
+            } catch (error) {
+                updatingDropAddress = true;
+                dropAddress.value =
+                    "Selected Destination";
+                updatingDropAddress = false;
+
+                dropStatus.textContent =
+                    "Destination selected, but address lookup failed.";
+            }
+        }
+
+        return calculateRoute();
+    }
+
+    async function searchDestination() {
+        const query = String(
+            dropAddress?.value || ""
+        ).trim();
+
+        if (!query) {
+            dropStatus.textContent =
+                "Enter a destination before searching.";
+
+            dropAddress.focus();
+
+            setLocationBadge(
+                "Destination required",
+                "warning"
+            );
+
+            return false;
+        }
+
+        const button =
+            document.getElementById(
+                "searchDestinationBtn"
+            );
+
+        if (button) {
+            button.disabled = true;
+            button.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-1"></span> Searching';
+        }
+
+        try {
+            const result =
+                await searchGeocoding(query);
+
+            if (!result) {
+                throw new Error(
+                    "No matching destination was found."
+                );
+            }
+
+            const latitude = Number(result.lat);
+            const longitude = Number(result.lon);
+
+            if (
+                !Number.isFinite(latitude) ||
+                !Number.isFinite(longitude)
+            ) {
+                throw new Error(
+                    "Invalid destination coordinates."
+                );
+            }
+
+            dropLatitude.value =
+                latitude.toFixed(6);
+
+            dropLongitude.value =
+                longitude.toFixed(6);
+
+            dropCityName =
+                getBestCityName(result);
+
+            updatingDropAddress = true;
+
+            dropAddress.value =
+                result.display_name || query;
+
+            updatingDropAddress = false;
+
+            createDropMarker(
+                latitude,
+                longitude
+            );
+
+            setDropState(true);
+
+            dropStatus.textContent =
+                "Destination selected.";
+
+            setLocationBadge(
+                "Destination ready",
+                "success"
+            );
+
+            return calculateRoute();
+        } catch (error) {
+            dropStatus.textContent =
+                error.message ||
+                "Destination search failed.";
+
+            setLocationBadge(
+                "Search failed",
+                "danger"
+            );
+
+            return false;
+        } finally {
+            if (button) {
+                button.disabled = false;
+                button.innerHTML =
+                    '<i class="bi bi-search me-1"></i> Search';
+            }
+        }
+    }
+
+    async function calculateRoute() {
+        const pickupLat = getNumber(
+            pickupLatitude
+        );
+
+        const pickupLng = getNumber(
+            pickupLongitude
+        );
+
+        const dropLat = getNumber(
+            dropLatitude
+        );
+
+        const dropLng = getNumber(
+            dropLongitude
+        );
+
+        if (
+            pickupLat === null ||
+            pickupLng === null ||
+            dropLat === null ||
+            dropLng === null
+        ) {
+            return false;
+        }
+
+        if (
+            Math.abs(pickupLat - dropLat) < 0.000001 &&
+            Math.abs(pickupLng - dropLng) < 0.000001
+        ) {
+            routeSummary.classList.remove(
+                "d-none"
+            );
+
+            routeSummaryTitle.textContent =
+                "Invalid route";
+
+            routeSummaryText.textContent =
+                "Pickup and destination cannot be the same.";
+
+            setLocationBadge(
+                "Invalid route",
+                "danger"
+            );
+
+            return false;
+        }
+
+        if (routeRequestInProgress) {
+            return false;
+        }
+
+        routeRequestInProgress = true;
+
+        setMapLoading(
+            true,
+            "Calculating route..."
+        );
+
+        setLocationBadge(
+            "Calculating route",
+            "warning"
+        );
+
+        try {
+            const coordinates =
+                pickupLng +
+                "," +
+                pickupLat +
+                ";" +
+                dropLng +
+                "," +
+                dropLat;
+
+            const url =
+                "https://router.project-osrm.org/route/v1/driving/" +
+                coordinates +
+                "?overview=full&geometries=geojson&steps=false";
+
+            const response = await fetch(
+                url,
+                {
+                    headers: {
+                        Accept: "application/json"
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    "Routing service is unavailable."
+                );
+            }
+
+            const data =
+                await response.json();
+
+            if (
+                data.code !== "Ok" ||
+                !data.routes ||
+                !data.routes.length
+            ) {
+                throw new Error(
+                    "No driving route was found."
+                );
+            }
+
+            const route = data.routes[0];
+
+            const distanceKm =
+                Number(route.distance) / 1000;
+
+            const durationMinutes =
+                Math.max(
+                    1,
+                    Math.round(
+                        Number(route.duration) / 60
+                    )
+                );
+
+            estimatedDistance.value =
+                distanceKm.toFixed(2);
+
+            estimatedDuration.value =
+                durationMinutes;
+
+            sideDistance.textContent =
+                distanceKm.toFixed(2) +
+                " km";
+
+            sideDuration.textContent =
+                durationMinutes +
+                " min";
+
+            if (
+                routeLayer &&
+                rideMap
+            ) {
+                rideMap.removeLayer(routeLayer);
+                routeLayer = null;
+            }
+
+            if (
+                route.geometry &&
+                route.geometry.coordinates &&
+                route.geometry.coordinates.length
+            ) {
+                const latLngs =
+                    route.geometry.coordinates.map(
+                        function (point) {
+                            return [
+                                point[1],
+                                point[0]
+                            ];
+                        }
+                    );
+
+                routeLayer =
+                    L.polyline(
+                        latLngs,
+                        {
+                            weight: 5,
+                            opacity: 0.85
+                        }
+                    ).addTo(rideMap);
+
+                rideMap.fitBounds(
+                    routeLayer.getBounds(),
+                    {
+                        padding: [40, 40]
+                    }
+                );
+            } else {
+                fitRouteBounds();
+            }
+
+            routeSummary.classList.remove(
+                "d-none"
+            );
+
+            routeSummaryTitle.textContent =
+                "Route calculated successfully";
+
+            routeSummaryText.textContent =
+                distanceKm.toFixed(2) +
+                " km · approximately " +
+                durationMinutes +
+                " minutes";
+
+            fareStatus.textContent =
+                "Updating fare...";
+
+            setLocationBadge(
+                "Route ready",
+                "success"
+            );
+
+            await updateFareDisplay();
+
+            return true;
+        } catch (error) {
+            routeSummary.classList.remove(
+                "d-none"
+            );
+
+            routeSummaryTitle.textContent =
+                "Route calculation failed";
+
+            routeSummaryText.textContent =
+                error.message ||
+                "Unable to calculate route.";
+
+            setLocationBadge(
+                "Route failed",
+                "danger"
+            );
+
+            return false;
+        } finally {
+            routeRequestInProgress = false;
+
+            setMapLoading(false);
+        }
+    }
+
+    async function updateFareDisplay() {
+        const vehicleType =
+            getVehicleTypeField();
+
+        const vehicleFareHint =
+            document.getElementById(
+                "vehicleFareHint"
+            );
+
+        const distance =
+            getNumber(estimatedDistance);
+
+        const duration =
+            getNumber(estimatedDuration);
+
+        const selectedVehicle =
+            vehicleType
+                ? vehicleType.value
+                : "";
+
+        const cityName =
+            pickupCityName ||
+            dropCityName;
+
+        if (
+            !selectedVehicle ||
+            distance === null ||
+            duration === null ||
+            !cityName
+        ) {
+            if (!selectedVehicle) {
+                fareStatus.textContent =
+                    "Select a vehicle type to calculate the fare.";
+            } else if (!cityName) {
+                fareStatus.textContent =
+                    "Location city is still being identified.";
+            } else {
+                fareStatus.textContent =
+                    "Calculate the route before selecting the fare.";
+            }
+
+            updateFareDisplays();
+
+            return;
+        }
+
+        if (fareRequestInProgress) {
+            return;
+        }
+
+        fareRequestInProgress = true;
+
+        fareStatus.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-1"></span> Updating fare...';
+
+        if (vehicleFareHint) {
+            vehicleFareHint.textContent =
+                "Calculating fare for the selected vehicle and route...";
+        }
+
+        try {
+            const url =
+                new URL(
+                    window.location.href
+                );
+
+            url.searchParams.set(
+                "fare_preview",
+                "1"
+            );
+
+            url.searchParams.set(
+                "vehicle_type",
+                selectedVehicle
+            );
+
+            url.searchParams.set(
+                "city_name",
+                cityName
+            );
+
+            url.searchParams.set(
+                "distance",
+                distance.toFixed(2)
+            );
+
+            url.searchParams.set(
+                "duration",
+                Math.round(duration)
+            );
+
+            if (
+                pickupAddress?.value
+            ) {
+                url.searchParams.set(
+                    "pickup_address",
+                    pickupAddress.value
+                );
+            }
+
+            if (
+                pickupLatitude?.value
+            ) {
+                url.searchParams.set(
+                    "pickup_latitude",
+                    pickupLatitude.value
+                );
+            }
+
+            if (
+                pickupLongitude?.value
+            ) {
+                url.searchParams.set(
+                    "pickup_longitude",
+                    pickupLongitude.value
+                );
+            }
+
+            if (
+                dropLatitude?.value
+            ) {
+                url.searchParams.set(
+                    "drop_latitude",
+                    dropLatitude.value
+                );
+            }
+
+            if (
+                dropLongitude?.value
+            ) {
+                url.searchParams.set(
+                    "drop_longitude",
+                    dropLongitude.value
+                );
+            }
+
+            const response = await fetch(
+                url.toString(),
+                {
+                    headers: {
+                        Accept: "application/json",
+                        "X-Requested-With":
+                            "XMLHttpRequest"
+                    }
+                }
+            );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.message ||
+                    "Fare could not be calculated."
+                );
+            }
+
+            const fare =
+                Number(data.fare);
+
+            if (
+                !Number.isFinite(fare) ||
+                fare <= 0
+            ) {
+                throw new Error(
+                    "Invalid fare was returned."
+                );
+            }
+
+            estimatedFare.value =
+                fare.toFixed(2);
+
+            if (couponFare) {
+                couponFare.value =
+                    fare.toFixed(2);
+            }
+
+            /*
+             * New fare means previous coupon calculation
+             * is no longer valid.
+             */
+            couponApplied = false;
+            appliedCouponCode = "";
+            payableFareValue =
+                Number(fare.toFixed(2));
+
+            if (finalFareInput) {
+                finalFareInput.value =
+                    payableFareValue.toFixed(2);
+            }
+
+            if (couponDetails) {
+                couponDetails.classList.add(
+                    "d-none"
+                );
+            }
+
+            fareStatus.textContent =
+                "Fare updated for " +
+                data.vehicle_type +
+                " in " +
+                data.city +
+                ".";
+
+            if (vehicleFareHint) {
+                vehicleFareHint.textContent =
+                    "Fare updates automatically whenever the vehicle is changed.";
+            }
+
+            updateFareDisplays();
+
+            /*
+             * If user had already entered a coupon,
+             * automatically re-validate it against
+             * the newly calculated fare.
+             */
+            if (
+                couponCodeInput &&
+                couponCodeInput.value.trim()
+            ) {
+                await applyCoupon(true);
+            }
+        } catch (error) {
+            fareStatus.textContent =
+                error.message ||
+                "Unable to update fare.";
+
+            if (vehicleFareHint) {
+                vehicleFareHint.textContent =
+                    "No fare was returned. Check the active pricing rule for this vehicle and location.";
+            }
+
+            resetCouponState(false);
+        } finally {
+            fareRequestInProgress = false;
+        }
+    }
+
+    function setPaymentAlert(message, type) {
+        if (!paymentAlert) {
+            return;
+        }
+
+        paymentAlert.textContent =
+            message || "";
+
+        paymentAlert.className =
+            "alert mb-3";
+
+        if (!message) {
+            paymentAlert.classList.add(
+                "d-none"
+            );
+            return;
+        }
+
+        paymentAlert.classList.add(
+            type === "success"
+                ? "alert-success"
+                : type === "danger"
+                    ? "alert-danger"
+                    : "alert-warning"
+        );
+
+        paymentAlert.classList.remove(
+            "d-none"
+        );
+    }
+
+    function updatePaymentMethodFields() {
+        const selected =
+            document.querySelector(
+                'input[name="payment_method"]:checked'
+            );
+
+        const method =
+            selected
+                ? selected.value
+                : "";
+
+        if (cardPaymentFields) {
+            cardPaymentFields.classList.toggle(
+                "d-none",
+                method !== "card"
+            );
+        }
+
+        if (upiPaymentFields) {
+            upiPaymentFields.classList.toggle(
+                "d-none",
+                method !== "upi"
+            );
+        }
+
+        if (netbankingPaymentFields) {
+            netbankingPaymentFields.classList.toggle(
+                "d-none",
+                method !== "netbanking"
+            );
+        }
+
+        if (walletPaymentFields) {
+            walletPaymentFields.classList.toggle(
+                "d-none",
+                method !== "wallet"
+            );
+        }
+
+        if (cashPaymentNotice) {
+            cashPaymentNotice.classList.toggle(
+                "d-none",
+                method !== "cash"
+            );
+        }
+
+        updateFareDisplays();
+
+        setPaymentAlert(
+            "",
+            "warning"
+        );
+    }
+
+    function openPaymentModal() {
+        if (!paymentModal) {
+            return false;
+        }
+
+        /*
+         * IMPORTANT:
+         * Payment popup always uses payableFareValue.
+         * This is the discounted fare after coupon.
+         */
+        const fare =
+            getPayableFareValue();
+
+        const distance =
+            getNumber(estimatedDistance);
+
+        const duration =
+            getNumber(estimatedDuration);
+
+        const vehicleType =
+            getVehicleTypeField();
+
+        const vehicleText =
+            vehicleType &&
+            vehicleType.selectedIndex >= 0
+                ? vehicleType.options[
+                    vehicleType.selectedIndex
+                ].text
+                : "—";
+
+        if (
+            fare === null ||
+            fare <= 0
+        ) {
+            setLocationBadge(
+                "Fare required",
+                "danger"
+            );
+
+            fareStatus.textContent =
+                "Please wait for the fare to be calculated before continuing.";
+
+            return false;
+        }
+
+        if (paymentDistance) {
+            paymentDistance.textContent =
+                distance !== null
+                    ? distance.toFixed(2) + " km"
+                    : "—";
+        }
+
+        if (paymentDuration) {
+            paymentDuration.textContent =
+                duration !== null
+                    ? Math.round(duration) + " min"
+                    : "—";
+        }
+
+        if (paymentVehicle) {
+            paymentVehicle.textContent =
+                vehicleText || "—";
+        }
+
+        /*
+         * THIS IS THE MAIN FIX.
+         * Never use estimatedFare here when coupon
+         * is already applied.
+         */
+        if (paymentAmount) {
+            paymentAmount.textContent =
+                "₹" + fare.toFixed(2);
+        }
+
+        setPaymentAlert(
+            couponApplied
+                ? "Coupon applied. Discounted fare is shown below."
+                : "",
+            couponApplied
+                ? "success"
+                : "warning"
+        );
+
+        paymentMethodInputs.forEach(
+            function (input) {
+                input.checked = false;
+            }
+        );
+
+        updatePaymentMethodFields();
+
+        if (
+            typeof bootstrap !== "undefined" &&
+            bootstrap.Modal
+        ) {
+            if (!paymentModalInstance) {
+                paymentModalInstance =
+                    new bootstrap.Modal(
+                        paymentModal,
+                        {
+                            backdrop: "static",
+                            keyboard: false
+                        }
+                    );
+            }
+
+            paymentModalInstance.show();
+
+            /*
+             * Run once again after modal rendering.
+             * This prevents another UI handler from
+             * leaving estimated fare in the popup.
+             */
+            requestAnimationFrame(
+                function () {
+                    const latestPayable =
+                        getPayableFareValue();
+
+                    if (
+                        paymentAmount &&
+                        latestPayable !== null
+                    ) {
+                        paymentAmount.textContent =
+                            "₹" +
+                            latestPayable.toFixed(2);
+                    }
+                }
+            );
+
+            return true;
+        }
+
+        return false;
+    }
+
+    function serializeRideRequestForm() {
+        const form =
+            document.getElementById(
+                "rideRequestForm"
+            );
+
+        const formData =
+            new FormData(form);
+
+        const paymentMethod =
+            document.querySelector(
+                'input[name="payment_method"]:checked'
+            );
+
+        const payable =
+            getPayableFareValue();
+
+        const estimated =
+            getEstimatedFareValue();
+
+        if (paymentMethod) {
+            formData.set(
+                "payment_method",
+                paymentMethod.value
+            );
+        }
+
+        if (payable !== null) {
+            const amount =
+                payable.toFixed(2);
+
+            formData.set(
+                "final_fare",
+                amount
+            );
+
+            formData.set(
+                "payment_amount",
+                amount
+            );
+
+            formData.set(
+                "amount",
+                amount
+            );
+        }
+
+        if (estimated !== null) {
+            formData.set(
+                "estimated_fare",
+                estimated.toFixed(2)
+            );
+        }
+
+        if (
+            couponApplied &&
+            appliedCouponCode
+        ) {
+            formData.set(
+                "coupon_code",
+                appliedCouponCode
+            );
+
+            formData.set(
+                "coupon_applied",
+                "1"
+            );
+
+            formData.set(
+                "coupon_discount",
+                Math.max(
+                    0,
+                    (
+                        estimated || 0
+                    ) -
+                    (
+                        payable || 0
+                    )
+                ).toFixed(2)
+            );
+        } else {
+            formData.delete(
+                "coupon_code"
+            );
+
+            formData.set(
+                "coupon_applied",
+                "0"
+            );
+
+            formData.delete(
+                "coupon_discount"
+            );
+        }
+
+        const fieldMap = {
+            paymentCardName: "card_name",
+            paymentCardNumber: "card_number",
+            paymentCardExpiry: "card_expiry",
+            paymentCardCvv: "card_cvv",
+            paymentUpiId: "upi_id",
+            paymentNetbankingBank: "netbanking_bank",
+            paymentWalletProvider: "wallet_provider"
+        };
+
+        Object.keys(fieldMap).forEach(
+            function (id) {
+                const element =
+                    document.getElementById(id);
+
+                if (
+                    element &&
+                    element.value
+                ) {
+                    formData.set(
+                        fieldMap[id],
+                        element.value
+                    );
+                }
+            }
+        );
+
+        return formData;
+    }
+
+    async function continuePayment() {
+        if (paymentRequestInProgress) {
+            return false;
+        }
+
+        const selected =
+            document.querySelector(
+                'input[name="payment_method"]:checked'
+            );
+
+        if (!selected) {
+            setPaymentAlert(
+                "Please select a payment method.",
+                "warning"
+            );
+
+            return false;
+        }
+
+        const method =
+            selected.value;
+
+        /*
+         * Get discounted fare from the same source
+         * used by payment popup.
+         */
+        const payableFare =
+            getPayableFareValue();
+
+        if (
+            payableFare === null ||
+            payableFare <= 0
+        ) {
+            setPaymentAlert(
+                "Please wait until the final payable fare is calculated.",
+                "danger"
+            );
+
+            return false;
+        }
+
+        if (method === "card") {
+            const cardName =
+                document.getElementById(
+                    "paymentCardName"
+                );
+
+            const cardNumber =
+                document.getElementById(
+                    "paymentCardNumber"
+                );
+
+            const cardExpiry =
+                document.getElementById(
+                    "paymentCardExpiry"
+                );
+
+            const cardCvv =
+                document.getElementById(
+                    "paymentCardCvv"
+                );
+
+            if (
+                !cardName ||
+                !cardNumber ||
+                !cardExpiry ||
+                !cardCvv ||
+                !cardName.value.trim() ||
+                !cardNumber.value.trim() ||
+                !cardExpiry.value.trim() ||
+                !cardCvv.value.trim()
+            ) {
+                setPaymentAlert(
+                    "Please complete all card details.",
+                    "warning"
+                );
+
+                return false;
+            }
+
+            if (
+                cardNumber.value.replace(
+                    /\D/g,
+                    ""
+                ).length < 4
+            ) {
+                setPaymentAlert(
+                    "Please enter a valid card number.",
+                    "warning"
+                );
+
+                return false;
+            }
+        }
+
+        if (method === "upi") {
+            const upiInput =
+                document.getElementById(
+                    "paymentUpiId"
+                );
+
+            if (
+                !upiInput ||
+                !upiInput.value.trim()
+            ) {
+                setPaymentAlert(
+                    "Please enter your UPI ID.",
+                    "warning"
+                );
+
+                return false;
+            }
+        }
+
+        if (method === "netbanking") {
+            const bank =
+                document.getElementById(
+                    "paymentNetbankingBank"
+                );
+
+            if (
+                !bank ||
+                !bank.value
+            ) {
+                setPaymentAlert(
+                    "Please select a bank.",
+                    "warning"
+                );
+
+                return false;
+            }
+        }
+
+        const form =
+            document.getElementById(
+                "rideRequestForm"
+            );
+
+        const createPaymentUrl =
+            "{% url 'create_ride_payment' %}";
+
+        const confirmPaymentUrl =
+            "{% url 'confirm_ride_payment' 0 %}";
+
+        paymentRequestInProgress = true;
+
+        if (confirmPaymentBtn) {
+            confirmPaymentBtn.disabled = true;
+
+            confirmPaymentBtn.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+        }
+
+        setPaymentAlert(
+            "Creating payment and validating ride request...",
+            "warning"
+        );
+
+        try {
+            const formData =
+                serializeRideRequestForm();
+
+            const csrfToken =
+                form.querySelector(
+                    'input[name="csrfmiddlewaretoken"]'
+                )?.value || "";
+
+            /*
+             * Final safety:
+             * send EXACTLY the discounted payable amount.
+             */
+            const paymentAmountValue =
+                payableFare.toFixed(2);
+
+            formData.set(
+                "final_fare",
+                paymentAmountValue
+            );
+
+            formData.set(
+                "payment_amount",
+                paymentAmountValue
+            );
+
+            formData.set(
+                "amount",
+                paymentAmountValue
+            );
+
+            const createResponse =
+                await fetch(
+                    createPaymentUrl,
+                    {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "X-Requested-With":
+                                "XMLHttpRequest",
+                            "Accept":
+                                "application/json",
+                            "X-CSRFToken":
+                                csrfToken
+                        }
+                    }
+                );
+
+            let createData = {};
+
+            try {
+                createData =
+                    await createResponse.json();
+            } catch (error) {
+                throw new Error(
+                    "Payment server returned an invalid response."
+                );
+            }
+
+            if (
+                !createResponse.ok ||
+                !createData.success
+            ) {
+                let message =
+                    createData.message ||
+                    "Payment could not be initiated.";
+
+                if (createData.errors) {
+                    Object.keys(
+                        createData.errors
+                    ).forEach(
+                        function (field) {
+                            const errors =
+                                createData.errors[field];
+
+                            if (
+                                Array.isArray(errors)
+                            ) {
+                                errors.forEach(
+                                    function (error) {
+                                        if (
+                                            error &&
+                                            error.message
+                                        ) {
+                                            message +=
+                                                " " +
+                                                error.message;
+                                        } else if (
+                                            typeof error ===
+                                            "string"
+                                        ) {
+                                            message +=
+                                                " " +
+                                                error;
+                                        }
+                                    }
+                                );
+                            }
+                        }
+                    );
+                }
+
+                throw new Error(message);
+            }
+
+            const paymentId =
+                createData.payment_id;
+
+            if (!paymentId) {
+                throw new Error(
+                    "Payment ID was not returned by the server."
+                );
+            }
+
+            if (ridePaymentId) {
+                ridePaymentId.value =
+                    paymentId;
+            }
+
+            setPaymentAlert(
+                "Payment initiated. Confirming payment...",
+                "warning"
+            );
+
+            const confirmUrl =
+                confirmPaymentUrl.replace(
+                    "/0/",
+                    "/" + paymentId + "/"
+                );
+
+            const confirmFormData =
+                new FormData();
+
+            confirmFormData.set(
+                "csrfmiddlewaretoken",
+                csrfToken
+            );
+
+            confirmFormData.set(
+                "payment_method",
+                method
+            );
+
+            confirmFormData.set(
+                "payment_amount",
+                paymentAmountValue
+            );
+
+            confirmFormData.set(
+                "final_fare",
+                paymentAmountValue
+            );
+
+            confirmFormData.set(
+                "amount",
+                paymentAmountValue
+            );
+
+            if (
+                couponApplied &&
+                appliedCouponCode
+            ) {
+                confirmFormData.set(
+                    "coupon_code",
+                    appliedCouponCode
+                );
+
+                confirmFormData.set(
+                    "coupon_applied",
+                    "1"
+                );
+            }
+
+            const confirmResponse =
+                await fetch(
+                    confirmUrl,
+                    {
+                        method: "POST",
+                        body: confirmFormData,
+                        headers: {
+                            "X-Requested-With":
+                                "XMLHttpRequest",
+                            "Accept":
+                                "application/json",
+                            "X-CSRFToken":
+                                csrfToken
+                        }
+                    }
+                );
+
+            let confirmData = {};
+
+            try {
+                confirmData =
+                    await confirmResponse.json();
+            } catch (error) {
+                throw new Error(
+                    "Payment confirmation returned an invalid response."
+                );
+            }
+
+            if (
+                !confirmResponse.ok ||
+                !confirmData.success
+            ) {
+                throw new Error(
+                    confirmData.message ||
+                    "Payment confirmation failed."
+                );
+            }
+
+            if (paymentModalInstance) {
+                paymentModalInstance.hide();
+            }
+
+            formSubmitting = true;
+
+            const saveButton =
+                document.getElementById(
+                    "saveRideRequestBtn"
+                );
+
+            if (saveButton) {
+                saveButton.disabled = true;
+
+                saveButton.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
+            }
+
+            if (confirmData.redirect_url) {
+                window.location.href =
+                    confirmData.redirect_url;
+            } else if (
+                confirmData.ride_request_id
+            ) {
+                window.location.href =
+                    "{% url 'ride_request_details' 0 %}"
+                        .replace(
+                            "/0/",
+                            "/" +
+                            confirmData.ride_request_id +
+                            "/"
+                        );
+            }
+
+            return true;
+        } catch (error) {
+            console.error(
+                "Payment error:",
+                error
+            );
+
+            setPaymentAlert(
+                error.message ||
+                "Payment could not be completed.",
+                "danger"
+            );
+
+            return false;
+        } finally {
+            paymentRequestInProgress = false;
+
+            if (confirmPaymentBtn) {
+                confirmPaymentBtn.disabled = false;
+
+                confirmPaymentBtn.innerHTML =
+                    '<i class="bi bi-shield-check me-1"></i>Continue Payment';
+            }
+        }
+    }
+
+    function clearDestination() {
+        dropLatitude.value = "";
+        dropLongitude.value = "";
+        dropAddress.value = "";
+
+        dropCityName = "";
+
+        setDropState(false);
+
+        dropStatus.textContent =
+            "Enter a destination or click the map.";
+
+        if (
+            dropMarker &&
+            rideMap
+        ) {
+            rideMap.removeLayer(dropMarker);
+            dropMarker = null;
+        }
+
+        resetRouteData();
+
+        setLocationBadge(
+            "Destination pending",
+            "warning"
+        );
+
+        fitRouteBounds();
+    }
+
+    function focusDestination() {
+        if (dropAddress) {
+            dropAddress.focus();
+            dropAddress.select();
+        }
+    }
+
+    function initializeExistingLocations() {
+        const pickupLat =
+            getNumber(pickupLatitude);
+
+        const pickupLng =
+            getNumber(pickupLongitude);
+
+        const dropLat =
+            getNumber(dropLatitude);
+
+        const dropLng =
+            getNumber(dropLongitude);
+
+        if (
+            pickupLat !== null &&
+            pickupLng !== null
+        ) {
+            createPickupMarker(
+                pickupLat,
+                pickupLng
+            );
+
+            setPickupState(true);
+
+            if (
+                pickupStatus &&
+                pickupAddress?.value
+            ) {
+                pickupStatus.textContent =
+                    "Existing pickup location loaded.";
+            }
+        }
+
+        if (
+            dropLat !== null &&
+            dropLng !== null
+        ) {
+            createDropMarker(
+                dropLat,
+                dropLng
+            );
+
+            setDropState(true);
+
+            if (
+                dropStatus &&
+                dropAddress?.value
+            ) {
+                dropStatus.textContent =
+                    "Existing destination loaded.";
+            }
+        }
+
+        if (
+            pickupLat !== null ||
+            dropLat !== null
+        ) {
+            fitRouteBounds();
+        }
+
+        const existingDistance =
+            getNumber(estimatedDistance);
+
+        const existingDuration =
+            getNumber(estimatedDuration);
+
+        if (
+            existingDistance !== null &&
+            sideDistance
+        ) {
+            sideDistance.textContent =
+                existingDistance.toFixed(2) +
+                " km";
+        }
+
+        if (
+            existingDuration !== null &&
+            sideDuration
+        ) {
+            sideDuration.textContent =
+                existingDuration +
+                " min";
+        }
+
+        const existingFare =
+            getEstimatedFareValue();
+
+        if (
+            existingFare !== null
+        ) {
+            payableFareValue =
+                Number(
+                    existingFare.toFixed(2)
+                );
+
+            if (finalFareInput) {
+                finalFareInput.value =
+                    payableFareValue.toFixed(2);
+            }
+        }
+
+        updateFareDisplays();
+
+        if (
+            pickupLat !== null &&
+            pickupLng !== null &&
+            dropLat !== null &&
+            dropLng !== null
+        ) {
+            calculateRoute();
+        }
+    }
+
+    async function validateBeforeSubmit(event) {
+        event.preventDefault();
+
+        if (formSubmitting) {
+            return false;
+        }
+
+        const form =
+            document.getElementById(
+                "rideRequestForm"
+            );
+
+        if (!form) {
+            return false;
+        }
+
+        let pickupLat =
+            getNumber(pickupLatitude);
+
+        let pickupLng =
+            getNumber(pickupLongitude);
+
+        let dropLat =
+            getNumber(dropLatitude);
+
+        let dropLng =
+            getNumber(dropLongitude);
+
+        if (
+            pickupLat === null ||
+            pickupLng === null
+        ) {
+            if (!hasValue(pickupAddress)) {
+                pickupStatus.textContent =
+                    "Please enter a pickup address or use Current Location.";
+
+                setLocationBadge(
+                    "Pickup required",
+                    "danger"
+                );
+
+                pickupAddress.focus();
+
+                return false;
+            }
+
+            if (!await resolvePickupAddress()) {
+                pickupAddress.focus();
+                return false;
+            }
+
+            pickupLat =
+                getNumber(pickupLatitude);
+
+            pickupLng =
+                getNumber(pickupLongitude);
+        }
+
+        if (
+            dropLat === null ||
+            dropLng === null
+        ) {
+            if (!hasValue(dropAddress)) {
+                dropStatus.textContent =
+                    "Please enter a destination.";
+
+                setLocationBadge(
+                    "Destination required",
+                    "danger"
+                );
+
+                dropAddress.focus();
+
+                return false;
+            }
+
+            if (!await resolveDropAddress()) {
+                dropAddress.focus();
+                return false;
+            }
+
+            dropLat =
+                getNumber(dropLatitude);
+
+            dropLng =
+                getNumber(dropLongitude);
+        }
+
+        if (
+            pickupLat === null ||
+            pickupLng === null ||
+            dropLat === null ||
+            dropLng === null
+        ) {
+            setLocationBadge(
+                "Location required",
+                "danger"
+            );
+
+            return false;
+        }
+
+        if (
+            Math.abs(pickupLat - dropLat) < 0.000001 &&
+            Math.abs(pickupLng - dropLng) < 0.000001
+        ) {
+            dropStatus.textContent =
+                "Pickup and destination cannot be the same.";
+
+            setLocationBadge(
+                "Invalid route",
+                "danger"
+            );
+
+            dropAddress.focus();
+
+            return false;
+        }
+
+        let distance =
+            getNumber(estimatedDistance);
+
+        let duration =
+            getNumber(estimatedDuration);
+
+        if (
+            distance === null ||
+            duration === null ||
+            distance <= 0 ||
+            duration <= 0
+        ) {
+            if (!await calculateRoute()) {
+                routeSummary.classList.remove(
+                    "d-none"
+                );
+
+                routeSummaryTitle.textContent =
+                    "Route calculation required";
+
+                routeSummaryText.textContent =
+                    "Please wait for the distance and duration to be calculated before saving.";
+
+                setLocationBadge(
+                    "Calculate route first",
+                    "warning"
+                );
+
+                return false;
+            }
+        }
+
+        distance =
+            getNumber(estimatedDistance);
+
+        duration =
+            getNumber(estimatedDuration);
+
+        if (
+            distance === null ||
+            duration === null ||
+            distance <= 0 ||
+            duration <= 0
+        ) {
+            setLocationBadge(
+                "Route required",
+                "warning"
+            );
+
+            return false;
+        }
+
+        if (
+            getEstimatedFareValue() === null
+        ) {
+            await updateFareDisplay();
+        }
+
+        const finalPayable =
+            getPayableFareValue();
+
+        if (
+            finalPayable === null ||
+            finalPayable <= 0
+        ) {
+            setLocationBadge(
+                "Fare required",
+                "danger"
+            );
+
+            fareStatus.textContent =
+                "Please wait for the fare to be calculated.";
+
+            return false;
+        }
+
+        if (
+            {{ is_edit|yesno:"true,false" }}
+        ) {
+            formSubmitting = true;
+
+            const saveButton =
+                document.getElementById(
+                    "saveRideRequestBtn"
+                );
+
+            if (saveButton) {
+                saveButton.disabled = true;
+
+                saveButton.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+            }
+
+            HTMLFormElement.prototype.submit.call(
+                form
+            );
+
+            return true;
+        }
+
+        return openPaymentModal();
+    }
+
+    window.useCurrentLocation =
+        useCurrentLocation;
+
+    window.searchDestination =
+        searchDestination;
+
+    window.calculateRoute =
+        calculateRoute;
+
+    window.clearDestination =
+        clearDestination;
+
+    window.focusDestination =
+        focusDestination;
+
+    window.continuePayment =
+        continuePayment;
+
+    window.updateFareDisplay =
+        updateFareDisplay;
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+            createMap();
+
+            initializeExistingLocations();
+
+            if (pickupAddress) {
+                pickupAddress.addEventListener(
+                    "input",
+                    function () {
+                        if (updatingPickupAddress) {
+                            return;
+                        }
+
+                        pickupLatitude.value = "";
+                        pickupLongitude.value = "";
+                        pickupCityName = "";
+
+                        if (
+                            pickupMarker &&
+                            rideMap
+                        ) {
+                            rideMap.removeLayer(
+                                pickupMarker
+                            );
+
+                            pickupMarker = null;
+                        }
+
+                        setPickupState(false);
+                        resetRouteData();
+
+                        pickupStatus.textContent =
+                            String(
+                                pickupAddress.value || ""
+                            ).trim()
+                                ? "Pickup address changed. Location will be found automatically."
+                                : "Enter pickup address manually or click Current.";
+
+                        setLocationBadge(
+                            "Pickup pending",
+                            "warning"
+                        );
+                    }
+                );
+
+                pickupAddress.addEventListener(
+                    "blur",
+                    async function () {
+                        if (
+                            updatingPickupAddress ||
+                            !hasValue(pickupAddress)
+                        ) {
+                            return;
+                        }
+
+                        if (
+                            getNumber(
+                                pickupLatitude
+                            ) === null ||
+                            getNumber(
+                                pickupLongitude
+                            ) === null
+                        ) {
+                            await resolvePickupAddress();
+                        }
+                    }
+                );
+
+                pickupAddress.addEventListener(
+                    "keydown",
+                    function (event) {
+                        if (
+                            event.key === "Enter"
+                        ) {
+                            event.preventDefault();
+
+                            if (
+                                hasValue(
+                                    pickupAddress
+                                )
+                            ) {
+                                resolvePickupAddress();
+                            }
+                        }
+                    }
+                );
+            }
+
+            if (dropAddress) {
+                dropAddress.addEventListener(
+                    "input",
+                    function () {
+                        if (updatingDropAddress) {
+                            return;
+                        }
+
+                        dropLatitude.value = "";
+                        dropLongitude.value = "";
+                        dropCityName = "";
+
+                        if (
+                            dropMarker &&
+                            rideMap
+                        ) {
+                            rideMap.removeLayer(
+                                dropMarker
+                            );
+
+                            dropMarker = null;
+                        }
+
+                        setDropState(false);
+                        resetRouteData();
+
+                        dropStatus.textContent =
+                            String(
+                                dropAddress.value || ""
+                            ).trim()
+                                ? "Destination changed. Location will be found automatically."
+                                : "Enter a destination or click the map.";
+
+                        setLocationBadge(
+                            "Destination pending",
+                            "warning"
+                        );
+                    }
+                );
+
+                dropAddress.addEventListener(
+                    "blur",
+                    async function () {
+                        if (
+                            updatingDropAddress ||
+                            !hasValue(dropAddress)
+                        ) {
+                            return;
+                        }
+
+                        if (
+                            getNumber(dropLatitude) === null ||
+                            getNumber(dropLongitude) === null
+                        ) {
+                            await resolveDropAddress();
+                        }
+                    }
+                );
+
+                dropAddress.addEventListener(
+                    "keydown",
+                    function (event) {
+                        if (
+                            event.key === "Enter"
+                        ) {
+                            event.preventDefault();
+                            searchDestination();
+                        }
+                    }
+                );
+            }
+
+            const form =
+                document.getElementById(
+                    "rideRequestForm"
+                );
+
+            if (form) {
+                form.addEventListener(
+                    "submit",
+                    validateBeforeSubmit
+                );
+            }
+
+            const vehicleType =
+                getVehicleTypeField();
+
+            if (vehicleType) {
+                vehicleType.addEventListener(
+                    "change",
+                    async function () {
+                        resetCouponState(false);
+                        await updateFareDisplay();
+                    }
+                );
+            }
+
+            if (estimatedFare) {
+                estimatedFare.addEventListener(
+                    "input",
+                    function () {
+                        if (!couponApplied) {
+                            const value =
+                                Number(
+                                    estimatedFare.value
+                                );
+
+                            payableFareValue =
+                                Number.isFinite(value) &&
+                                value >= 0
+                                    ? value
+                                    : null;
+
+                            if (
+                                finalFareInput &&
+                                payableFareValue !== null
+                            ) {
+                                finalFareInput.value =
+                                    payableFareValue.toFixed(2);
+                            }
+                        }
+
+                        updateFareDisplays();
+                    }
+                );
+            }
+
+            if (couponCodeInput) {
+                couponCodeInput.addEventListener(
+                    "input",
+                    function () {
+                        const value =
+                            String(
+                                couponCodeInput.value || ""
+                            )
+                                .trim()
+                                .toUpperCase();
+
+                        if (
+                            couponApplied &&
+                            value !== appliedCouponCode
+                        ) {
+                            resetCouponState(false);
+
+                            couponStatus.textContent =
+                                "Coupon code changed. Apply the new coupon.";
+
+                            couponStatus.className =
+                                "small mt-2 text-warning";
+                        }
+                    }
+                );
+
+                couponCodeInput.addEventListener(
+                    "keydown",
+                    function (event) {
+                        if (
+                            event.key === "Enter"
+                        ) {
+                            event.preventDefault();
+
+                            applyCoupon(false);
+                        }
+                    }
+                );
+            }
+
+            if (applyCouponBtn) {
+                applyCouponBtn.addEventListener(
+                    "click",
+                    function (event) {
+                        event.preventDefault();
+
+                        applyCoupon(false);
+                    }
+                );
+            }
+
+            paymentMethodInputs.forEach(
+                function (input) {
+                    input.addEventListener(
+                        "change",
+                        updatePaymentMethodFields
+                    );
+                }
+            );
+
+            updateFareDisplays();
+
+            setTimeout(
+                function () {
+                    if (rideMap) {
+                        rideMap.invalidateSize();
+                    }
+                },
+                300
+            );
+        }
+    );
+})();
+</script>
+{% endblock %}

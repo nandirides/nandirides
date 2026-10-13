@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+{% block title %}Feedback Management | NandiRide{% endblock %}
+{% block content %}
+<section class="content">
+    <div class="container-fluid py-3">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+            <div>
+                <h3 class="mb-1 fw-bold"><i class="bi bi-chat-left-text me-2"></i>Feedback Management</h3>
+                <p class="text-body-secondary mb-0">Manage customer feedback, enquiries and support messages.</p>
+            </div>
+            <a href="{% url 'contact' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-1"></i>Back
+            </a>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-body-secondary small fw-semibold text-uppercase">Total Feedback</div>
+                            <div class="fs-3 fw-bold mt-1">{{ total_feedback }}</div>
+                        </div>
+                        <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width:52px;height:52px;">
+                            <i class="bi bi-chat-square-text fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-body-secondary small fw-semibold text-uppercase">New</div>
+                            <div class="fs-3 fw-bold mt-1">{{ new_feedback }}</div>
+                        </div>
+                        <div class="bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center" style="width:52px;height:52px;">
+                            <i class="bi bi-envelope fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-body-secondary small fw-semibold text-uppercase">In Progress</div>
+                            <div class="fs-3 fw-bold mt-1">{{ in_progress_feedback }}</div>
+                        </div>
+                        <div class="bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center" style="width:52px;height:52px;">
+                            <i class="bi bi-hourglass-split fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-body-secondary small fw-semibold text-uppercase">Resolved</div>
+                            <div class="fs-3 fw-bold mt-1">{{ resolved_feedback }}</div>
+                        </div>
+                        <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center" style="width:52px;height:52px;">
+                            <i class="bi bi-check-circle fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <form method="get" id="feedbackFilterForm">
+                    <div class="row g-2">
+                        <div class="col-lg-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-body">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" name="q" id="feedbackSearch" value="{{ search }}" class="form-control" placeholder="Search by name, email, mobile or message..." autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <select name="status" class="form-select" onchange="document.getElementById('feedbackFilterForm').submit()">
+                                <option value="">All Status</option>
+                                {% for value,label in status_choices %}
+                                    <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-3">
+                            <select name="subject" class="form-select" onchange="document.getElementById('feedbackFilterForm').submit()">
+                                <option value="">All Subjects</option>
+                                {% for value,label in subject_choices %}
+                                    <option value="{{ value }}" {% if selected_subject == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-header bg-body border-bottom py-3">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div>
+                        <h5 class="mb-1 fw-bold"><i class="bi bi-inbox me-2"></i>Submitted Feedback</h5>
+                    </div>
+                    {% if search or selected_status or selected_subject %}
+                        <a href="{% url 'feedback_list' %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Clear Filters
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-3" style="width:70px;">#</th>
+                            <th>Customer</th>
+                            <th>Contact</th>
+                            <th>Subject</th>
+                            <th>Message</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th class="text-end px-3">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feedback in feedbacks %}
+                            <tr>
+                                <td class="px-3 fw-semibold">
+                                    {{ forloop.counter|add:feedbacks.start_index|add:"-1" }}
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width:40px;height:40px;">
+                                            {{ feedback.name|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">{{ feedback.name }}</div>
+                                            <div class="small text-body-secondary">{{ feedback.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if feedback.mobile_number %}
+                                        <div class="small"><i class="bi bi-telephone me-1"></i>{{ feedback.mobile_number }}</div>
+                                    {% else %}
+                                        <span class="text-body-secondary small">Not provided</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if feedback.subject == "general" %}
+                                        <span class="badge bg-primary-subtle text-primary">General Enquiry</span>
+                                    {% elif feedback.subject == "ride" %}
+                                        <span class="badge bg-info-subtle text-info">Ride Support</span>
+                                    {% elif feedback.subject == "booking" %}
+                                        <span class="badge bg-warning-subtle text-warning">Booking Issue</span>
+                                    {% elif feedback.subject == "payment" %}
+                                        <span class="badge bg-success-subtle text-success">Payment Issue</span>
+                                    {% elif feedback.subject == "account" %}
+                                        <span class="badge bg-secondary-subtle text-secondary">Account Support</span>
+                                    {% elif feedback.subject == "driver" %}
+                                        <span class="badge bg-dark-subtle text-dark">Driver Support</span>
+                                    {% elif feedback.subject == "feedback" %}
+                                        <span class="badge bg-primary-subtle text-primary">Feedback</span>
+                                    {% elif feedback.subject == "suggestion" %}
+                                        <span class="badge bg-success-subtle text-success">Suggestion</span>
+                                    {% elif feedback.subject == "complaint" %}
+                                        <span class="badge bg-danger-subtle text-danger">Complaint</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary">Other</span>
+                                    {% endif %}
+                                </td>
+                                <td style="min-width:240px;max-width:340px;">
+                                    <div class="text-truncate" style="max-width:320px;" title="{{ feedback.message }}">
+                                        {{ feedback.message }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if feedback.status == "new" %}
+                                        <span class="badge rounded-pill bg-warning-subtle text-warning">
+                                            <i class="bi bi-circle-fill me-1" style="font-size:7px;"></i>New
+                                        </span>
+                                    {% elif feedback.status == "in_progress" %}
+                                        <span class="badge rounded-pill bg-info-subtle text-info">
+                                            <i class="bi bi-arrow-repeat me-1"></i>In Progress
+                                        </span>
+                                    {% elif feedback.status == "resolved" %}
+                                        <span class="badge rounded-pill bg-success-subtle text-success">
+                                            <i class="bi bi-check-circle me-1"></i>Resolved
+                                        </span>
+                                    {% else %}
+                                        <span class="badge rounded-pill bg-secondary-subtle text-secondary">
+                                            <i class="bi bi-x-circle me-1"></i>Closed
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="small fw-semibold">{{ feedback.created_at|date:"d M Y" }}</div>
+                                    <div class="small text-body-secondary">{{ feedback.created_at|date:"h:i A" }}</div>
+                                </td>
+                                <td class="text-end px-3">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#feedbackModal{{ feedback.id }}">
+                                        <i class="bi bi-eye me-1"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <div class="modal fade" id="feedbackModal{{ feedback.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                    <div class="modal-content border-0 shadow">
+                                        <div class="modal-header">
+                                            <div>
+                                                <h5 class="modal-title fw-bold">
+                                                    <i class="bi bi-chat-left-text me-2"></i>Feedback Details
+                                                </h5>
+                                                <small class="text-body-secondary">Feedback {{ feedback.id }}</small>
+                                            </div>
+                                            <button type="button" class="btn btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="small text-body-secondary mb-1">Customer Name</div>
+                                                    <div class="fw-semibold">{{ feedback.name }}</div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="small text-body-secondary mb-1">Email</div>
+                                                    <div class="fw-semibold">{{ feedback.email }}</div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="small text-body-secondary mb-1">Mobile Number</div>
+                                                    <div class="fw-semibold">
+                                                        {% if feedback.mobile_number %}
+                                                            {{ feedback.mobile_number }}
+                                                        {% else %}
+                                                            <span class="text-body-secondary">Not provided</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="small text-body-secondary mb-1">Subject</div>
+                                                    <div class="fw-semibold">{{ feedback.get_subject_display }}</div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="small text-body-secondary mb-1">Status</div>
+                                                    <div>
+                                                        {% if feedback.status == "new" %}
+                                                            <span class="badge bg-warning-subtle text-warning">New</span>
+                                                        {% elif feedback.status == "in_progress" %}
+                                                            <span class="badge bg-info-subtle text-info">In Progress</span>
+                                                        {% elif feedback.status == "resolved" %}
+                                                            <span class="badge bg-success-subtle text-success">Resolved</span>
+                                                        {% else %}
+                                                            <span class="badge bg-secondary-subtle text-secondary">Closed</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="small text-body-secondary mb-1">Submitted On</div>
+                                                    <div class="fw-semibold">{{ feedback.created_at|date:"d M Y, h:i A" }}</div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="small text-body-secondary mb-1">Customer Message</div>
+                                                    <div class="bg-body-tertiary rounded p-3" style="white-space:pre-wrap;">{{ feedback.message }}</div>
+                                                </div>
+                                                {% if feedback.admin_note %}
+                                                    <div class="col-12">
+                                                        <div class="small text-body-secondary mb-1">Admin Note</div>
+                                                        <div class="bg-body-tertiary rounded p-3" style="white-space:pre-wrap;">{{ feedback.admin_note }}</div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                                                <i class="bi bi-x-lg me-1"></i>Close
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <div class="mb-3">
+                                        <i class="bi bi-inbox fs-1 text-body-secondary"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-1">No Feedback Found</h5>
+                                    <p class="text-body-secondary mb-0">
+                                        {% if search or selected_status or selected_subject %}
+                                            No feedback matches your current filters.
+                                        {% else %}
+                                            There are no feedback submissions yet.
+                                        {% endif %}
+                                    </p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <small class="text-body-secondary">
+                {% if feedbacks.paginator.count %}
+                 <i class="bi bi-file-earmark-text me-1"></i>  Showing {{ feedbacks.start_index }}–{{ feedbacks.end_index }} of {{ feedbacks.paginator.count }} feedback records
+                {% else %}
+                    No feedback records found
+                {% endif %}
+            </small>
+            {% if feedbacks.paginator.num_pages > 1 %}
+                <div class="card-footer bg-body border-top">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                        <div class="small text-body-secondary">
+                            Page <strong>{{ feedbacks.number }}</strong> of <strong>{{ feedbacks.paginator.num_pages }}</strong>
+                        </div>
+                        <nav aria-label="Feedback pagination">
+                            <ul class="pagination pagination-sm mb-0">
+                                {% if feedbacks.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_subject %}&subject={{ selected_subject|urlencode }}{% endif %}">
+                                            <i class="bi bi-chevron-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ feedbacks.previous_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_subject %}&subject={{ selected_subject|urlencode }}{% endif %}">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% for num in feedbacks.paginator.page_range %}
+                                    {% if feedbacks.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > feedbacks.number|add:"-2" and num < feedbacks.number|add:"2" %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_subject %}&subject={{ selected_subject|urlencode }}{% endif %}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if feedbacks.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ feedbacks.next_page_number }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_subject %}&subject={{ selected_subject|urlencode }}{% endif %}">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ feedbacks.paginator.num_pages }}{% if search %}&q={{ search|urlencode }}{% endif %}{% if selected_status %}&status={{ selected_status|urlencode }}{% endif %}{% if selected_subject %}&subject={{ selected_subject|urlencode }}{% endif %}">
+                                            <i class="bi bi-chevron-double-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        <div class="small text-body-secondary">
+                            10 records per page
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+<script>
+    (function() {
+        const searchInput = document.getElementById("feedbackSearch");
+        const form = document.getElementById("feedbackFilterForm");
+        if (!searchInput || !form) return;
+        let timer;
+        searchInput.addEventListener("input", function() {
+            clearTimeout(timer);
+            timer = setTimeout(function() {
+                form.submit();
+            }, 400);
+        });
+        searchInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                clearTimeout(timer);
+                form.submit();
+            }
+        });
+    })();
+</script>
+{% endblock %}

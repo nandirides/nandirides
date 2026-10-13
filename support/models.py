@@ -16,6 +16,8 @@ class SupportCategory(TimeStampedModel):
     is_active = models.BooleanField(
         default=True,
     )
+    def __str__(self):
+                return f"{self.name}"
 
 
 class SupportTicket(TimeStampedModel):
@@ -50,10 +52,18 @@ class SupportTicket(TimeStampedModel):
         blank=True,
         related_name="support_tickets",
     )
+    # vehicle = models.ForeignKey(
+    #     "vehicle.Vehicle",
+    #     on_delete=models.PROTECT,
+    #     null=True,
+    #     blank=True,
+    #     related_name="support_tickets",
+    # )
 
     category = models.ForeignKey(
         SupportCategory,
         on_delete=models.PROTECT,
+        related_name="support_tickets",
     )
 
     subject = models.CharField(
@@ -86,6 +96,8 @@ class SupportTicket(TimeStampedModel):
         null=True,
         blank=True,
     )
+
+    
 
 
 class Notification(TimeStampedModel):

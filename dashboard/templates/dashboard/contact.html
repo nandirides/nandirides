@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+{% block title %}Contact NandiRide{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span class="badge text-bg-primary rounded-pill px-3 py-2 mb-3">CONTACT NANDIRIDE</span>
+                    <h1 class="display-5 fw-bold mb-3">We're Here to Help</h1>
+                    <p class="fs-5 text-body-secondary mb-4">Have a question, suggestion, ride issue or feedback? Connect with the NandiRide team and let us know how we can help.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge rounded-pill text-bg-light border px-3 py-2"><i class="bi bi-headset text-primary me-1"></i>Customer Support</span>
+                        <span class="badge rounded-pill text-bg-light border px-3 py-2"><i class="bi bi-chat-square-text text-success me-1"></i>Feedback</span>
+                        <span class="badge rounded-pill text-bg-light border px-3 py-2"><i class="bi bi-shield-check text-warning me-1"></i>Ride Assistance</span>
+                        <span class="badge rounded-pill text-bg-light border px-3 py-2"><i class="bi bi-clock text-info me-1"></i>24/7 Platform</span>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary shadow-sm" style="width:150px;height:150px;">
+                        <i class="bi bi-headset" style="font-size:5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width:55px;height:55px;">
+                            <i class="bi bi-geo-alt-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <small class="text-body-secondary d-block">Our Location</small>
+                            <strong>{{ contact_address }}</strong>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="small text-body-secondary mb-0">NandiRide operations are based in Haridwar, Uttarakhand, India.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-success-subtle text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width:55px;height:55px;">
+                            <i class="bi bi-envelope-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <small class="text-body-secondary d-block">Email Support</small>
+                            <a href="mailto:{{ contact_email }}" class="fw-semibold text-decoration-none">{{ contact_email }}</a>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="small text-body-secondary mb-0">Send us your questions, suggestions or platform-related queries.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-warning-subtle text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width:55px;height:55px;">
+                            <i class="bi bi-telephone-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <small class="text-body-secondary d-block">Phone Support</small>
+                            {% for phone in contact_phones %}
+                            <a href="tel:{{ phone }}" class="d-block fw-semibold text-decoration-none">{{ phone }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="small text-body-secondary mb-0">Contact the team for assistance related to NandiRide services.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-xl-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-body border-bottom py-3">
+                    <h4 class="fw-bold mb-1"><i class="bi bi-info-circle-fill text-primary me-2"></i>How Can We Help?</h4>
+                    <p class="text-body-secondary small mb-0">Choose the appropriate option while submitting your message.</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                            <i class="bi bi-car-front-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Ride Support</h6>
+                            <p class="small text-body-secondary mb-0">Questions about rides, driver assignment, pickup, drop or ride status.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="rounded-3 bg-success-subtle text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                            <i class="bi bi-credit-card-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Payment Support</h6>
+                            <p class="small text-body-secondary mb-0">Get help with payments, transactions, refunds or payment-related questions.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="rounded-3 bg-warning-subtle text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Account Support</h6>
+                            <p class="small text-body-secondary mb-0">Need help with your account, profile, login or other account features?</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="rounded-3 bg-info-subtle text-info d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                            <i class="bi bi-chat-square-heart-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Feedback & Suggestions</h6>
+                            <p class="small text-body-secondary mb-0">Tell us what you like, what can be improved or what features you would like to see.</p>
+                        </div>
+                    </div>
+
+                    <div class="rounded-4 bg-body-secondary p-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-lightbulb-fill text-warning fs-2"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Your feedback matters</h6>
+                                <p class="small text-body-secondary mb-0">Every message helps us improve the NandiRide experience.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-body border-bottom py-3">
+                    <div class="d-flex align-items-center justify-content-between gap-2">
+                        <div>
+                            <h4 class="fw-bold mb-1"><i class="bi bi-chat-left-text-fill text-primary me-2"></i>Send Us a Message</h4>
+                            <p class="text-body-secondary small mb-0">Your message will be securely saved for our team.</p>
+                        </div>
+                        <span class="badge rounded-pill text-bg-primary">Feedback</span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="{% url 'contact' %}">
+                        {% csrf_token %}
+
+                        {% if feedback_form.non_field_errors %}
+                        <div class="alert alert-danger border-0 shadow-sm">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {{ feedback_form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="{{ feedback_form.name.id_for_label }}">Full Name</label>
+                                {{ feedback_form.name }}
+                                {% for error in feedback_form.name.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="{{ feedback_form.email.id_for_label }}">Email Address</label>
+                                {{ feedback_form.email }}
+                                {% for error in feedback_form.email.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="{{ feedback_form.mobile_number.id_for_label }}">Mobile Number <span class="text-body-secondary fw-normal">(Optional)</span></label>
+                                {{ feedback_form.mobile_number }}
+                                {% for error in feedback_form.mobile_number.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="{{ feedback_form.subject.id_for_label }}">Subject</label>
+                                {{ feedback_form.subject }}
+                                {% for error in feedback_form.subject.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="{{ feedback_form.message.id_for_label }}">Message</label>
+                                {{ feedback_form.message }}
+                                {% for error in feedback_form.message.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12">
+                                <div class="alert alert-primary border-0 mb-0">
+                                    <div class="d-flex gap-2">
+                                        <i class="bi bi-shield-check fs-5"></i>
+                                        <div class="small">
+                                            Your message will be recorded in the NandiRide system so the team can review and manage it.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 pt-2">
+                                    <button type="reset" class="btn btn-light border">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                                    </button>
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="bi bi-send-fill me-1"></i>Submit Message
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-body border-bottom py-3">
+            <h4 class="fw-bold mb-1"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Support Overview</h4>
+            <p class="text-body-secondary small mb-0">Current feedback records available in the NandiRide system.</p>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-6 col-md-4">
+                    <div class="border rounded-4 p-4 text-center h-100">
+                        <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center" style="width:55px;height:55px;">
+                            <i class="bi bi-chat-square-text-fill fs-4"></i>
+                        </div>
+                        <h3 class="fw-bold mt-3 mb-1">{{ total_feedback|default:"0" }}</h3>
+                        <small class="text-body-secondary">Total Messages</small>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-4">
+                    <div class="border rounded-4 p-4 text-center h-100">
+                        <div class="rounded-circle bg-warning-subtle text-warning d-inline-flex align-items-center justify-content-center" style="width:55px;height:55px;">
+                            <i class="bi bi-hourglass-split fs-4"></i>
+                        </div>
+                        <h3 class="fw-bold mt-3 mb-1">{{ new_feedback|default:"0" }}</h3>
+                        <small class="text-body-secondary">New Messages</small>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-4">
+                    <div class="border rounded-4 p-4 text-center h-100">
+                        <div class="rounded-circle bg-success-subtle text-success d-inline-flex align-items-center justify-content-center" style="width:55px;height:55px;">
+                            <i class="bi bi-check-circle-fill fs-4"></i>
+                        </div>
+                        <h3 class="fw-bold mt-3 mb-1">{{ resolved_feedback|default:"0" }}</h3>
+                        <small class="text-body-secondary">Resolved</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-body border-bottom py-3">
+                    <h4 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Support Process</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">1</div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Submit Message</h6>
+                            <p class="small text-body-secondary mb-0">Send your question, issue, suggestion or feedback through the form.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mb-4">
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">2</div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Team Review</h6>
+                            <p class="small text-body-secondary mb-0">The submitted message is stored and becomes available for support management.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3">
+                        <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">3</div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Resolution</h6>
+                            <p class="small text-body-secondary mb-0">The support team can review the issue and manage its status until resolution.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-body border-bottom py-3">
+                    <h4 class="fw-bold mb-0"><i class="bi bi-share-fill text-success me-2"></i>Connect With NandiRide</h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-body-secondary">For general enquiries and platform-related communication, you can also reach the NandiRide team through the available contact channels.</p>
+
+                    <div class="d-flex flex-column gap-3">
+                        <a href="mailto:{{ contact_email }}" class="text-decoration-none">
+                            <div class="border rounded-3 p-3 d-flex align-items-center gap-3">
+                                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width:45px;height:45px;">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </div>
+                                <div>
+                                    <small class="text-body-secondary d-block">Email</small>
+                                    <strong>{{ contact_email }}</strong>
+                                </div>
+                            </div>
+                        </a>
+
+                        <a href="tel:{{ contact_phones.0 }}" class="text-decoration-none">
+                            <div class="border rounded-3 p-3 d-flex align-items-center gap-3">
+                                <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center" style="width:45px;height:45px;">
+                                    <i class="bi bi-telephone-fill"></i>
+                                </div>
+                                <div>
+                                    <small class="text-body-secondary d-block">Phone</small>
+                                    <strong>{{ contact_phones.0 }}</strong>
+                                </div>
+                            </div>
+                        </a>
+
+                        <div class="border rounded-3 p-3 d-flex align-items-center gap-3">
+                            <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center" style="width:45px;height:45px;">
+                                <i class="bi bi-geo-alt-fill"></i>
+                            </div>
+                            <div>
+                                <small class="text-body-secondary d-block">Location</small>
+                                <strong>{{ contact_address }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-body border-bottom py-3">
+            <h4 class="fw-bold mb-0"><i class="bi bi-question-circle-fill text-info me-2"></i>Frequently Asked Questions</h4>
+        </div>
+        <div class="card-body p-3 p-lg-4">
+            <div class="accordion" id="contactFaq">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#contactFaqOne">
+                            How can I contact NandiRide?
+                        </button>
+                    </h2>
+                    <div id="contactFaqOne" class="accordion-collapse collapse show" data-bs-parent="#contactFaq">
+                        <div class="accordion-body text-body-secondary">
+                            You can use the feedback form on this page, send an email or contact NandiRide through the listed phone numbers.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#contactFaqTwo">
+                            Can I report a ride or payment issue?
+                        </button>
+                    </h2>
+                    <div id="contactFaqTwo" class="accordion-collapse collapse" data-bs-parent="#contactFaq">
+                        <div class="accordion-body text-body-secondary">
+                            Yes. Select Ride Support or Payment Issue from the subject list and describe the issue in the message field.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#contactFaqThree">
+                            Can I submit a suggestion?
+                        </button>
+                    </h2>
+                    <div id="contactFaqThree" class="accordion-collapse collapse" data-bs-parent="#contactFaq">
+                        <div class="accordion-body text-body-secondary">
+                            Yes. Select Suggestion and tell us what feature, service or improvement you would like to see.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#contactFaqFour">
+                            Where are submitted messages stored?
+                        </button>
+                    </h2>
+                    <div id="contactFaqFour" class="accordion-collapse collapse" data-bs-parent="#contactFaq">
+                        <div class="accordion-body text-body-secondary">
+                            Submitted messages are saved in the NandiRide database as Feedback records and can be managed from the administration side.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mt-4 overflow-hidden">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span class="badge text-bg-primary rounded-pill px-3 py-2 mb-3">NANDIRIDE</span>
+                    <h2 class="fw-bold mb-2">Safe • Comfortable • Reliable</h2>
+                    <p class="text-body-secondary fs-5 mb-0">Your questions, feedback and suggestions help us build a better mobility experience for riders and drivers.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="mailto:{{ contact_email }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-envelope-fill me-2"></i>Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

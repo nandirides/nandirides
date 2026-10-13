@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h4 class="mb-1 fw-bold">{{ page_title }}</h4>
+            <p class="text-muted mb-0">Manage payment refund details.</p>
+        </div>
+        <a href="{% url 'payment_detail' payment.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Payment
+        </a>
+    </div>
+    <div class="row g-4">
+        <div class="col-xl-4 col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-semibold">Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Payment Number</small>
+                        <span class="fw-semibold">{{ payment.payment_number }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Customer</small>
+                        <span class="fw-semibold">{{ payment.user.get_full_name|default:payment.user.username }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Payment Amount</small>
+                        <span class="fw-bold fs-5">₹{{ payment.amount|floatformat:2 }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Payment Method</small>
+                        <span>{{ payment.get_payment_method_display }}</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Payment Status</small>
+                        {% if payment.status == "success" %}
+                        <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">Successful</span>
+                        {% elif payment.status == "refunded" %}
+                        <span class="badge rounded-pill bg-info-subtle text-info px-3 py-2">Refunded</span>
+                        {% elif payment.status == "pending" %}
+                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 py-2">Pending</span>
+                        {% else %}
+                        <span class="badge rounded-pill bg-danger-subtle text-danger px-3 py-2">{{ payment.get_status_display }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-8 col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-1 fw-semibold">{{ page_title }}</h5>
+                    <small class="text-muted">Enter the refund information below.</small>
+                </div>
+                <div class="card-body">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.refund_amount.id_for_label }}" class="form-label fw-semibold">Refund Amount <span class="text-danger">*</span></label>
+                                {{ form.refund_amount }}
+                                {% for error in form.refund_amount.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                                <small class="text-muted">Maximum refundable amount: ₹{{ payment.amount|floatformat:2 }}</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                                {{ form.status }}
+                                {% for error in form.status.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-12">
+                                <label for="{{ form.reason.id_for_label }}" class="form-label fw-semibold">Refund Reason</label>
+                                {{ form.reason }}
+                                {% for error in form.reason.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.refund_reference.id_for_label }}" class="form-label fw-semibold">Refund Reference</label>
+                                {{ form.refund_reference }}
+                                {% for error in form.refund_reference.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.processed_at.id_for_label }}" class="form-label fw-semibold">Processed At</label>
+                                {{ form.processed_at }}
+                                {% for error in form.processed_at.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <a href="{% url 'payment_detail' payment.pk %}" class="btn btn-light border">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-1"></i>
+                                {% if refund %}Update Refund{% else %}Create Refund{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

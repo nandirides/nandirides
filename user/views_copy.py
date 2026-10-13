@@ -1109,7 +1109,7 @@ class UserProfileView(TemplateView):
             request,
             'user/profile/profile.html',
             {
-                'form': form,
+                # 'form': form,
                 'sidebar_menu': SIDEBAR_MENU,
             }
         )
