@@ -18,15 +18,18 @@ urlpatterns = [
         include("api.rides.urls"),
     ),
 
-    # path(
-    #     "drivers/",
-    #     include("api.drivers.urls"),
-    # ),
+    path(
+        "drivers/",
+        include("api.drivers.urls"),
+    ),
 
-    # path(
-    #     "vehicles/",
-    #     include("api.vehicles.urls"),
-    # ),
+    path("locations/", 
+         include("api.locations.urls")),
+
+    path(
+        "vehicles/",
+        include("api.vehicles.urls"),
+    ),
 
     # path(
     #     "payments/",

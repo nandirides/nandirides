@@ -433,11 +433,173 @@ body {
     margin: 0 .2rem;
 }
 .nav-tab-link:hover {
-    background: var(--bs-primary-bg-subtle);
-    color: var(--bs-primary) !important;
+    background: var(--bs-secondary-bg-subtle);
+    color: var(--bs-secondary) !important;
 }
 .nav-tab-link.active {
-    background: var(--bs-primary-bg-subtle);
-    color: var(--bs-primary) !important;
+    background: var(--bs-secondary-bg-subtle);
+    color: var(--bs-secondary) !important;
     font-weight: 600 !important;
+}
+
+.app-header{
+    box-sizing:border-box;
+    min-height:58px;
+    max-width:100%;
+}
+.app-header>.container-fluid{
+    min-width:0;
+    gap:8px;
+}
+.app-header .navbar-nav{
+    min-width:0;
+}
+.app-header .nav-item{
+    flex-shrink:0;
+}
+.app-header .nav-link{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.app-header .notification-dropdown{
+    width:360px;
+    max-width:calc(100vw - 20px);
+}
+.app-header .notification-list-scroll{
+    max-height:390px;
+    overflow-y:auto;
+}
+.app-header .notification-item,
+.app-header .notification-content{
+    min-width:0;
+    overflow-wrap:anywhere;
+}
+.app-header .notification-title,
+.app-header .notification-message{
+    overflow-wrap:anywhere;
+    word-break:break-word;
+}
+.app-header .notification-bell-wrapper{
+    position:relative;
+}
+.app-header .notification-badge{
+    position:absolute;
+    top:0;
+    right:0;
+}
+@media(max-width:991.98px){
+    .app-header{
+        left:0!important;
+        width:100%!important;
+        min-height:54px;
+        padding:5px 4px;
+    }
+    .app-header>.container-fluid{
+        padding-left:6px;
+        padding-right:6px;
+        gap:4px;
+    }
+    .app-header .navbar-nav{
+        flex-direction:row;
+        align-items:center;
+    }
+    .app-header .nav-link{
+        min-height:38px;
+        padding:7px;
+    }
+    .app-header .app-header-login{
+        left:0!important;
+        width:100%!important;
+    }
+}
+@media(max-width:767.98px){
+    .app-header .container-fluid{
+        flex-wrap:nowrap;
+    }
+    .app-header-login .position-absolute.top-50.start-50.translate-middle{
+        left:50%!important;
+        max-width:calc(100% - 120px);
+        gap:6px!important;
+        white-space:normal;
+    }
+    .app-header-login .position-absolute img{
+        width:32px;
+        height:32px;
+        flex-shrink:0;
+        object-fit:contain;
+    }
+    .app-header-login .position-absolute .fw-bold{
+        font-size:14px!important;
+        line-height:1.2;
+        white-space:normal;
+    }
+    .app-header-login .position-absolute .fs-5{
+        font-size:11px!important;
+        display:block;
+        line-height:1.2;
+    }
+    .app-header .notification-dropdown{
+        position:fixed!important;
+        top:58px!important;
+        right:8px!important;
+        left:auto!important;
+        width:min(360px,calc(100vw - 16px));
+        max-width:calc(100vw - 16px);
+        margin:0;
+    }
+    .app-header .dropdown-menu[style*="width:320px"]{
+        position:fixed!important;
+        top:58px!important;
+        right:8px!important;
+        left:auto!important;
+        width:min(320px,calc(100vw - 16px))!important;
+        max-width:calc(100vw - 16px);
+        margin:0;
+    }
+    .app-header .notification-list-scroll{
+        max-height:55vh;
+        overflow-y:auto;
+    }
+    .app-header .nav-item.dropdown.ms-1{
+        margin-left:2px!important;
+    }
+    .app-header .nav-item.dropdown.ms-1>a{
+        padding-left:5px!important;
+        padding-right:5px!important;
+    }
+}
+@media(max-width:420px){
+    .app-header>.container-fluid{
+        padding-left:3px;
+        padding-right:3px;
+        gap:2px;
+    }
+    .app-header .nav-link{
+        padding:6px 5px;
+    }
+    .app-header-login .position-absolute.top-50.start-50.translate-middle{
+        max-width:calc(100% - 105px);
+        gap:4px!important;
+    }
+    .app-header-login .position-absolute img{
+        width:27px;
+        height:27px;
+    }
+    .app-header-login .position-absolute .fw-bold{
+        font-size:12px!important;
+    }
+    .app-header-login .position-absolute .fs-5{
+        font-size:9px!important;
+    }
+    .app-header .notification-dropdown,
+    .app-header .dropdown-menu[style*="width:320px"]{
+        right:5px!important;
+        max-width:calc(100vw - 10px);
+    }
+}
+@media(prefers-reduced-motion:reduce){
+    .app-header{
+        transition:none!important;
+    }
 }

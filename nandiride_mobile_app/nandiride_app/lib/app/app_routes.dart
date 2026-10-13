@@ -1,3 +1,4 @@
+
 class AppRoutes {
   static const splash = '/';
   static const login = '/login';
@@ -13,6 +14,7 @@ class AppRoutes {
 
   // Driver screens
   static const driverHome = '/driver-home';
+  static const driverRegistration = '/driver-registration';
   static const rideRequests = '/ride-requests';
   static const tripDetails = '/trip-details';
   static const earnings = '/earnings';
