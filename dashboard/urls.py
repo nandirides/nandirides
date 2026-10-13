@@ -22,8 +22,10 @@ urlpatterns = [
         name="dashboard",
     ),
     path(
-        "/accounts/login/",
-        auth_views.LogoutView.as_view(),
+        "accounts/logout/",
+        auth_views.LogoutView.as_view(
+            next_page="/accounts/login/"
+        ),
         name="logoutAdmin",
     ),
     
