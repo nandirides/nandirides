@@ -1,7 +1,6 @@
 {% extends 'user/dashboard_base.html' %}
-{% block page_heading %}
-My Booking
-{% endblock %}
+{% load static %}
+{% block page_heading %}My Booking{% endblock %}
 {% block title %}NandiRide | Booking{% endblock %}
 {% block dashboard_content %}
 <div class="container-fluid">
@@ -10,9 +9,7 @@ My Booking
             <h2 class="fw-bold mb-1">My Booking</h2>
             <p class="text-muted mb-0">Book your ride quickly and safely</p>
         </div>
-        <span class="badge bg-danger rounded-pill px-3 py-2">
-            <i class="fa fa-circle me-1"></i> Available
-        </span>
+        <span class="badge bg-danger rounded-pill px-3 py-2"><i class="fa fa-circle me-1"></i> Available</span>
     </div>
     <div class="row g-4">
         <div class="col-lg-7">
@@ -20,85 +17,96 @@ My Booking
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-1">Trip Details</h5>
                     <p class="text-muted small mb-4">Enter your ride details below</p>
-                    <form method="POST" action="{% url 'booking' %}">
+                    <form method="POST" action="{% url 'booking' %}" id="bookingForm">
                         {% csrf_token %}
                         {{ form.booking_id }}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        {% endif %}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Pickup Location</label>
+                            <label for="{{ form.pickup_location.id_for_label }}" class="form-label fw-semibold">Pickup Location</label>
                             {{ form.pickup_location }}
-                            {% if form.pickup_location.errors %}
-                                <div class="text-danger small mt-1">{{ form.pickup_location.errors }}</div>
-                            {% endif %}
+                            {% if form.pickup_location.errors %}<div class="text-danger small mt-1">{{ form.pickup_location.errors }}</div>{% endif %}
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Destination</label>
+                            <label for="{{ form.destination.id_for_label }}" class="form-label fw-semibold">Destination</label>
                             {{ form.destination }}
-                            {% if form.destination.errors %}
-                                <div class="text-danger small mt-1">{{ form.destination.errors }}</div>
-                            {% endif %}
+                            {% if form.destination.errors %}<div class="text-danger small mt-1">{{ form.destination.errors }}</div>{% endif %}
                         </div>
+                        {{ form.pickup_latitude }}
+                        {{ form.pickup_longitude }}
+                        {{ form.drop_latitude }}
+                        {{ form.drop_longitude }}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-semibold mb-0">Route Map</label>
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="resetMapBtn"><i class="fa fa-rotate-left me-1"></i> Reset Map</button>
+                            </div>
+                            <div id="bookingMap" class="rounded-3 border" role="application" aria-label="Pickup and destination map" style="height:320px;width:100%;z-index:1;"></div>
+                            <div class="d-flex flex-wrap gap-3 mt-2 small">
+                                <span><i class="fa fa-circle text-success me-1"></i> Pickup</span>
+                                <span><i class="fa fa-location-dot text-danger me-1"></i> Destination</span>
+                                <span class="text-muted" id="mapStatus" aria-live="polite">Enter locations, then select a suggested place.</span>
+                            </div>
+                        </div>
+                        {% if form.pickup_latitude.errors %}<div class="text-danger small mb-2">{{ form.pickup_latitude.errors }}</div>{% endif %}
+                        {% if form.pickup_longitude.errors %}<div class="text-danger small mb-2">{{ form.pickup_longitude.errors }}</div>{% endif %}
+                        {% if form.drop_latitude.errors %}<div class="text-danger small mb-2">{{ form.drop_latitude.errors }}</div>{% endif %}
+                        {% if form.drop_longitude.errors %}<div class="text-danger small mb-2">{{ form.drop_longitude.errors }}</div>{% endif %}
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Select Ride</label>
                             <div class="row g-3">
+                            {% for vehicle in form.ride_type.field.queryset %}
                                 <div class="col-md-4">
-                                    <input type="radio" class="btn-check" name="ride_type" id="bike" value="Bike" autocomplete="off" required>
-                                    <label class="btn btn-outline-danger w-100 p-3" for="bike">
-                                        <i class="fa fa-motorcycle fs-3 d-block mb-2"></i>
-                                        Bike
+                                    <input type="radio" class="btn-check" name="ride_type" id="vehicle_{{ vehicle.pk }}" value="{{ vehicle.pk }}" autocomplete="off" {% if form.ride_type.value|stringformat:"s" == vehicle.pk|stringformat:"s" %}checked{% endif %} required>
+                                    <label class="btn btn-outline-danger w-100 p-3 h-100" for="vehicle_{{ vehicle.pk }}">
+                                        {% with vehicle_name=vehicle|stringformat:"s" %}
+                                            {% if "bike" in vehicle_name|lower or "motorcycle" in vehicle_name|lower %}
+                                                <i class="fa fa-motorcycle fs-3 d-block mb-2"></i>
+                                            {% elif "auto" in vehicle_name|lower %}
+                                                <i class="fa fa-car-side fs-3 d-block mb-2"></i>
+                                            {% else %}
+                                                <i class="fa fa-car fs-3 d-block mb-2"></i>
+                                            {% endif %}
+                                            <span>{{ vehicle_name }}</span>
+                                        {% endwith %}
                                     </label>
                                 </div>
-                                <div class="col-md-4">
-                                    <input type="radio" class="btn-check" name="ride_type" id="auto" value="Auto" autocomplete="off">
-                                    <label class="btn btn-outline-danger w-100 p-3" for="auto">
-                                        <i class="fa fa-car fs-3 d-block mb-2"></i>
-                                        Auto
-                                    </label>
-                                </div>
-                                <div class="col-md-4">
-                                    <input type="radio" class="btn-check" name="ride_type" id="sedan" value="Sedan" autocomplete="off">
-                                    <label class="btn btn-outline-danger w-100 p-3" for="sedan">
-                                        <i class="fa fa-car-side fs-3 d-block mb-2"></i>
-                                        Sedan
-                                    </label>
-                                </div>
+                            {% endfor %}
                             </div>
-                            {% if form.ride_type.errors %}
-                                <div class="text-danger small mt-2">{{ form.ride_type.errors }}</div>
-                            {% endif %}
+                            {% if form.ride_type.errors %}<div class="text-danger small mt-2">{{ form.ride_type.errors }}</div>{% endif %}
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Ride Date</label>
+                                <label for="{{ form.ride_date.id_for_label }}" class="form-label fw-semibold">Ride Date</label>
                                 {{ form.ride_date }}
-                                {% if form.ride_date.errors %}
-                                    <div class="text-danger small mt-1">{{ form.ride_date.errors }}</div>
-                                {% endif %}
+                                {% if form.ride_date.errors %}<div class="text-danger small mt-1">{{ form.ride_date.errors }}</div>{% endif %}
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Ride Time</label>
+                                <label for="{{ form.ride_time.id_for_label }}" class="form-label fw-semibold">Ride Time</label>
                                 {{ form.ride_time }}
-                                {% if form.ride_time.errors %}
-                                    <div class="text-danger small mt-1">{{ form.ride_time.errors }}</div>
-                                {% endif %}
+                                {% if form.ride_time.errors %}<div class="text-danger small mt-1">{{ form.ride_time.errors }}</div>{% endif %}
                             </div>
                         </div>
                         <div class="mb-3 mt-3">
-                            <label class="form-label fw-semibold">Passengers</label>
+                            <label for="{{ form.passengers.id_for_label }}" class="form-label fw-semibold">Passengers</label>
                             {{ form.passengers }}
-                            {% if form.passengers.errors %}
-                                <div class="text-danger small mt-1">{{ form.passengers.errors }}</div>
-                            {% endif %}
+                            {% if form.passengers.errors %}<div class="text-danger small mt-1">{{ form.passengers.errors }}</div>{% endif %}
                         </div>
+                        {% if form.coupon_code %}
+                            <div class="mb-3">
+                                <label for="{{ form.coupon_code.id_for_label }}" class="form-label fw-semibold">Coupon Code (Optional)</label>
+                                {{ form.coupon_code }}
+                                {% if form.coupon_code.errors %}<div class="text-danger small mt-1">{{ form.coupon_code.errors }}</div>{% endif %}
+                            </div>
+                        {% endif %}
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">Note</label>
+                            <label for="{{ form.note.id_for_label }}" class="form-label fw-semibold">Note</label>
                             {{ form.note }}
-                            {% if form.note.errors %}
-                                <div class="text-danger small mt-1">{{ form.note.errors }}</div>
-                            {% endif %}
+                            {% if form.note.errors %}<div class="text-danger small mt-1">{{ form.note.errors }}</div>{% endif %}
                         </div>
-                        <button type="submit" class="btn btn-danger w-100 rounded-pill py-3 fw-bold">
-                            <i class="fa fa-arrow-right me-2"></i>
-                            Confirm Booking & Continue Payment
+                        <button type="submit" class="btn btn-danger w-100 rounded-pill py-3 fw-bold" id="confirmBookingBtn">
+                            <i class="fa fa-arrow-right me-2"></i> Confirm Booking &amp; Continue Payment
                         </button>
                     </form>
                 </div>
@@ -107,80 +115,306 @@ My Booking
         <div class="col-lg-5">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">
-                        <i class="fa fa-receipt text-danger me-2"></i>
-                        Booking Summary
-                    </h5>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Base Fare</span>
-                        <strong>₹{{ booking_data.base_fare|default:"50" }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Ride Charge</span>
-                        <strong>₹{{ booking_data.ride_charge|default:"180" }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Distance</span>
-                        <strong>{{ booking_data.distance|default:"--" }} km</strong>
-                    </div>
+                    <h5 class="fw-bold mb-4"><i class="fa fa-receipt text-danger me-2"></i> Booking Summary</h5>
+                    <div class="d-flex justify-content-between mb-3"><span class="text-muted">Base Fare</span><strong>₹<span id="summaryBaseFare">{{ booking_data.base_fare|default:"50" }}</span></strong></div>
+                    <div class="d-flex justify-content-between mb-3"><span class="text-muted">Ride Charge</span><strong>₹<span id="summaryRideCharge">{{ booking_data.ride_charge|default:"--" }}</span></strong></div>
+                    <div class="d-flex justify-content-between mb-3"><span class="text-muted">Distance</span><strong><span id="summaryDistance">{{ booking_data.distance|default:"--" }}</span> km</strong></div>
                     <hr>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">Estimated Fare</span>
-                        <strong class="fs-4 text-danger">₹{{ booking_data.estimate_fare|default:"--" }}</strong>
-                    </div>
+                    <div class="d-flex justify-content-between align-items-center"><span class="fw-bold">Estimated Fare</span><strong class="fs-4 text-danger">₹<span id="summaryFare">{{ booking_data.estimate_fare|default:"--" }}</span></strong></div>
+                    <p class="text-muted small mt-3 mb-0">Final fare route, selected vehicle aur applicable charges ke hisaab se change ho sakta hai.</p>
                 </div>
             </div>
             <div class="card border-0 shadow-sm rounded-4 mt-4">
                 <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3">
-                        <i class="fa fa-circle-info text-danger me-2"></i>
-                        How NandiRide Works
-                    </h6>
+                    <h6 class="fw-bold mb-4"><i class="fa fa-circle-info text-danger me-2"></i> How NandiRide Works</h6>
                     <div class="d-flex mb-3">
                         <div class="rounded-circle bg-danger text-white px-3 py-2 fw-bold">1</div>
-                        <div class="ms-3">
-                            <strong>Enter Trip Details</strong>
-                            <p class="text-muted small mb-0">Choose pickup and destination.</p>
-                        </div>
+                        <div class="ms-3"><strong>Enter Trip Details</strong><p class="text-muted small mb-0">Choose pickup and destination on the map.</p></div>
                     </div>
                     <div class="d-flex mb-3">
                         <div class="rounded-circle bg-danger text-white px-3 py-2 fw-bold">2</div>
-                        <div class="ms-3">
-                            <strong>Select Your Ride</strong>
-                            <p class="text-muted small mb-0">Choose Bike, Auto or Sedan.</p>
-                        </div>
+                        <div class="ms-3"><strong>Select Your Ride</strong><p class="text-muted small mb-0">Choose your available vehicle type.</p></div>
                     </div>
                     <div class="d-flex">
                         <div class="rounded-circle bg-danger text-white px-3 py-2 fw-bold">3</div>
-                        <div class="ms-3">
-                            <strong>Complete Payment</strong>
-                            <p class="text-muted small mb-0">Confirm your booking securely.</p>
-                        </div>
+                        <div class="ms-3"><strong>Complete Payment</strong><p class="text-muted small mb-0">Review your booking and choose a payment method.</p></div>
                     </div>
                 </div>
             </div>
             <div class="card border-0 shadow-sm rounded-4 mt-4">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3">
-                            <i class="fa fa-headset text-white"></i>
-                        </div>
-                        <div class="ms-3">
-                            <h6 class="fw-bold mb-1">Need Help?</h6>
-                            <small class="text-muted">Contact NandiRide support for any booking related issue.</small>
-                        </div>
+                        <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3"><i class="fa fa-headset"></i></div>
+                        <div class="ms-3"><h6 class="fw-bold mb-1">Need Help?</h6><small class="text-muted">Contact NandiRide support for any booking related issue.</small></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-4">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 </div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const mapElement = document.getElementById("bookingMap");
+    const form = document.getElementById("bookingForm");
+    if (!mapElement || !form || typeof L === "undefined") {
+        const status = document.getElementById("mapStatus");
+        if (status) status.textContent = "Map load nahi ho paya. Internet connection check karein.";
+        return;
+    }
+    const pickupInput = document.getElementById("id_pickup_location") || document.querySelector('[name="pickup_location"]');
+    const destinationInput = document.getElementById("id_destination") || document.querySelector('[name="destination"]');
+    const pickupLatInput = document.getElementById("id_pickup_latitude") || document.querySelector('[name="pickup_latitude"]');
+    const pickupLngInput = document.getElementById("id_pickup_longitude") || document.querySelector('[name="pickup_longitude"]');
+    const dropLatInput = document.getElementById("id_drop_latitude") || document.querySelector('[name="drop_latitude"]');
+    const dropLngInput = document.getElementById("id_drop_longitude") || document.querySelector('[name="drop_longitude"]');
+    const mapStatus = document.getElementById("mapStatus");
+    const distanceOutput = document.getElementById("summaryDistance");
+    const rideChargeOutput = document.getElementById("summaryRideCharge");
+    const fareOutput = document.getElementById("summaryFare");
+    const baseFareOutput = document.getElementById("summaryBaseFare");
+    const map = L.map(mapElement, {
+        attributionControl: false
+    }).setView([29.9457, 78.1642], 12);
+    L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3wf8_1_477b9c969e22fe3e205f303d",
+        {
+            subdomains: "abcd",
+            maxZoom: 20
+        }
+    ).addTo(map);
+    let pickupMarker = null;
+    let dropMarker = null;
+    let routeLayer = null;
+    let selectingPoint = "pickup";
+    let requestSequence = 0;
+    const baseFare = 50;
+    const perKmRate = 12;
+    if (baseFareOutput) baseFareOutput.textContent = baseFare.toFixed(2);
+    function setStatus(message) {
+        if (mapStatus) mapStatus.textContent = message;
+    }
+    function setCoordinateFields(point, lat, lng) {
+        if (point === "pickup") {
+            if (pickupLatInput) pickupLatInput.value = lat.toFixed(6);
+            if (pickupLngInput) pickupLngInput.value = lng.toFixed(6);
+        } else {
+            if (dropLatInput) dropLatInput.value = lat.toFixed(6);
+            if (dropLngInput) dropLngInput.value = lng.toFixed(6);
+        }
+    }
+    function getPoint(point) {
+        const latInput = point === "pickup" ? pickupLatInput : dropLatInput;
+        const lngInput = point === "pickup" ? pickupLngInput : dropLngInput;
+        if (!latInput || !lngInput || latInput.value === "" || lngInput.value === "") return null;
+        const lat = Number(latInput.value);
+        const lng = Number(lngInput.value);
+        return Number.isFinite(lat) && Number.isFinite(lng) ? [lat, lng] : null;
+    }
+    function haversineKm(a, b) {
+        const rad = value => value * Math.PI / 180;
+        const dLat = rad(b[0] - a[0]);
+        const dLng = rad(b[1] - a[1]);
+        const value = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) ** 2;
+        return 6371 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+    }
+    function updateFare(distance) {
+        const roundedDistance = Math.max(0, distance);
+        const rideCharge = roundedDistance * perKmRate;
+        if (distanceOutput) distanceOutput.textContent = roundedDistance.toFixed(2);
+        if (rideChargeOutput) rideChargeOutput.textContent = rideCharge.toFixed(2);
+        if (fareOutput) fareOutput.textContent = (baseFare + rideCharge).toFixed(2);
+    }
+    function drawRoute() {
+        const pickup = getPoint("pickup");
+        const destination = getPoint("destination");
+        if (routeLayer) {
+            map.removeLayer(routeLayer);
+            routeLayer = null;
+        }
+        if (!pickup || !destination) {
+            if (pickup) map.setView(pickup, 14);
+            else if (destination) map.setView(destination, 14);
+            updateFare(0);
+            return;
+        }
+        const straightDistance = haversineKm(pickup, destination);
+        updateFare(straightDistance);
+        setStatus("Route calculate ho raha hai...");
+        const routeUrl = "https://router.project-osrm.org/route/v1/driving/" + pickup[1] + "," + pickup[0] + ";" + destination[1] + "," + destination[0] + "?overview=full&geometries=geojson";
+        const currentSequence = ++requestSequence;
+        fetch(routeUrl)
+            .then(response => {
+                if (!response.ok) throw new Error("Route unavailable");
+                return response.json();
+            })
+            .then(data => {
+                if (currentSequence !== requestSequence) return;
+                if (!data.routes || !data.routes.length) throw new Error("Route unavailable");
+                const route = data.routes[0];
+                const coordinates = route.geometry.coordinates.map(point => [point[1], point[0]]);
+                routeLayer = L.polyline(coordinates, { color: "#dc3545", weight: 5, opacity: 0.85 }).addTo(map);
+                map.fitBounds(routeLayer.getBounds(), { padding: [25, 25] });
+                updateFare(route.distance / 1000);
+                setStatus("Route ready: " + (route.distance / 1000).toFixed(2) + " km, approx. " + Math.round(route.duration / 60) + " min.");
+            })
+            .catch(() => {
+                if (currentSequence !== requestSequence) return;
+                map.fitBounds(L.latLngBounds([pickup, destination]), { padding: [25, 25] });
+                setStatus("Road route unavailable. Distance straight-line estimate hai; final fare alag ho sakta hai.");
+            });
+    }
+    function setPoint(point, lat, lng, address) {
+        const coordinates = [lat, lng];
+        setCoordinateFields(point, lat, lng);
+        if (point === "pickup") {
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            pickupMarker = L.marker(coordinates, { draggable: true }).addTo(map).bindPopup("Pickup Location");
+            pickupMarker.on("dragend", function (event) {
+                const position = event.target.getLatLng();
+                setCoordinateFields("pickup", position.lat, position.lng);
+                reverseGeocode("pickup", position.lat, position.lng);
+                drawRoute();
+            });
+            if (pickupInput && address) pickupInput.value = address;
+        } else {
+            if (dropMarker) map.removeLayer(dropMarker);
+            dropMarker = L.marker(coordinates, { draggable: true }).addTo(map).bindPopup("Destination");
+            dropMarker.on("dragend", function (event) {
+                const position = event.target.getLatLng();
+                setCoordinateFields("destination", position.lat, position.lng);
+                reverseGeocode("destination", position.lat, position.lng);
+                drawRoute();
+            });
+            if (destinationInput && address) destinationInput.value = address;
+        }
+        drawRoute();
+    }
+    function reverseGeocode(point, lat, lng) {
+        const input = point === "pickup" ? pickupInput : destinationInput;
+        if (!input) return;
+        setStatus("Selected point ka address find ho raha hai...");
+        fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lng))
+            .then(response => {
+                if (!response.ok) throw new Error("Address unavailable");
+                return response.json();
+            })
+            .then(data => {
+                if (data.display_name) input.value = data.display_name;
+                setStatus("Location selected. Zaroorat ho to marker drag karke adjust karein.");
+            })
+            .catch(() => setStatus("Coordinates selected, lekin address automatically nahi mila. Location ka address manually enter karein."));
+    }
+    function geocodeAddress(point) {
+        const input = point === "pickup" ? pickupInput : destinationInput;
+        if (!input || !input.value.trim()) {
+            setStatus("Pehle location ka address enter karein.");
+            return;
+        }
+        const query = input.value.trim();
+        setStatus("Location search ho rahi hai...");
+        fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=" + encodeURIComponent(query))
+            .then(response => {
+                if (!response.ok) throw new Error("Location search unavailable");
+                return response.json();
+            })
+            .then(results => {
+                if (!results.length) {
+                    setStatus("Location nahi mili. Map par sahi jagah click karein ya address refine karein.");
+                    return;
+                }
+                const result = results[0];
+                setPoint(point, Number(result.lat), Number(result.lon), result.display_name || query);
+                map.setView([Number(result.lat), Number(result.lon)], 15);
+                setStatus((point === "pickup" ? "Pickup" : "Destination") + " location selected.");
+            })
+            .catch(() => setStatus("Location search fail hui. Map par click karke location select karein."));
+    }
+    map.on("click", function (event) {
+        const point = selectingPoint;
+        setPoint(point, event.latlng.lat, event.latlng.lng, "");
+        reverseGeocode(point, event.latlng.lat, event.latlng.lng);
+        selectingPoint = point === "pickup" ? "destination" : "pickup";
+        setStatus(point === "pickup" ? "Pickup selected. Ab destination ke liye map par click karein." : "Destination selected.");
+    });
+    if (pickupInput) {
+        pickupInput.addEventListener("change", () => geocodeAddress("pickup"));
+        pickupInput.addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                geocodeAddress("pickup");
+            }
+        });
+    }
+    if (destinationInput) {
+        destinationInput.addEventListener("change", () => geocodeAddress("destination"));
+        destinationInput.addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                geocodeAddress("destination");
+            }
+        });
+    }
+    document.querySelectorAll('[name="ride_type"]').forEach(input => {
+        input.addEventListener("change", function () {
+            const selectedLabel = document.querySelector('label[for="' + this.id + '"]');
+            if (selectedLabel) setStatus("Selected ride: " + selectedLabel.textContent.trim() + ". Fare estimate route aur vehicle ke hisaab se server par verify hoga.");
+        });
+    });
+    const resetButton = document.getElementById("resetMapBtn");
+    if (resetButton) {
+        resetButton.addEventListener("click", function () {
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            if (dropMarker) map.removeLayer(dropMarker);
+            if (routeLayer) map.removeLayer(routeLayer);
+            pickupMarker = null;
+            dropMarker = null;
+            routeLayer = null;
+            [pickupLatInput, pickupLngInput, dropLatInput, dropLngInput].forEach(input => {
+                if (input) input.value = "";
+            });
+            map.setView([29.9457, 78.1642], 12);
+            updateFare(0);
+            setStatus("Map reset ho gaya. Pehle pickup, phir destination select karein.");
+        });
+    }
+    form.addEventListener("submit", function (event) {
+        const pickup = getPoint("pickup");
+        const destination = getPoint("destination");
+        if (!pickupInput || !pickupInput.value.trim() || !destinationInput || !destinationInput.value.trim()) {
+            event.preventDefault();
+            setStatus("Pickup aur destination dono enter karna zaroori hai.");
+            (pickupInput && !pickupInput.value.trim() ? pickupInput : destinationInput).focus();
+            return;
+        }
+        if (!pickup || !destination) {
+            event.preventDefault();
+            setStatus("Dono locations ke coordinates select karein. Address enter karne ke baad field se bahar click karein ya Enter dabayein.");
+            return;
+        }
+        if (Math.abs(pickup[0] - destination[0]) < 0.000001 && Math.abs(pickup[1] - destination[1]) < 0.000001) {
+            event.preventDefault();
+            setStatus("Pickup aur destination alag hone chahiye.");
+            return;
+        }
+        const selectedRide = form.querySelector('[name="ride_type"]:checked');
+        if (!selectedRide) {
+            event.preventDefault();
+            setStatus("Please ek available ride type select karein.");
+            return;
+        }
+        const button = document.getElementById("confirmBookingBtn");
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+        }
+    });
+    const existingPickup = getPoint("pickup");
+    const existingDestination = getPoint("destination");
+    if (existingPickup) setPoint("pickup", existingPickup[0], existingPickup[1], pickupInput ? pickupInput.value : "");
+    if (existingDestination) setPoint("destination", existingDestination[0], existingDestination[1], destinationInput ? destinationInput.value : "");
+    setTimeout(() => map.invalidateSize(), 150);
+});
+</script>
 {% endblock %}

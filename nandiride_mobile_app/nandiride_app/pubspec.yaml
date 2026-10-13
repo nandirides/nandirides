@@ -36,6 +36,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.6.0
   flutter_secure_storage: ^11.2.0
+  google_maps_flutter: ^2.18.2
+  geocoding: ^5.0.0
+  geolocator: ^14.1.1
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
 
 dev_dependencies:
   flutter_test:
@@ -91,3 +96,4 @@ flutter:
   # see https://flutter.dev/to/font-from-package
   assets:
     - assets/images/
+    - assets/images/mahadev_harki_pauri.png

@@ -1,5 +1,5 @@
 from django.urls import path
-
+from django.contrib.auth import views as auth_views
 from dashboard import views
 from drivers import views as driver_views
 from locations import views as locations_views
@@ -21,6 +21,14 @@ urlpatterns = [
         views.dashboard,
         name="dashboard",
     ),
+    path(
+        "accounts/logout/",
+        auth_views.LogoutView.as_view(
+            next_page="/accounts/login/"
+        ),
+        name="logoutAdmin",
+    ),
+    
     path(
         "about/",
         views.about,

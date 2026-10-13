@@ -1,3 +1,4 @@
+ 
 {% extends 'user/base.html' %}
 {% block title %}{{ site_name }} | Careers{% endblock %}
 {% block content %}
@@ -15,7 +16,7 @@
                         <a href="#open-positions" class="btn btn-light btn-lg rounded-pill px-4 fw-semibold">
                             <i class="fa-solid fa-magnifying-glass me-2 text-danger"></i>Explore Jobs
                         </a>
-                        <a href="{% url 'contact' %}" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-semibold">
+                        <a href="{% url 'user-contact' %}" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-semibold">
                             <i class="fa-solid fa-envelope me-2"></i>Talk to Us
                         </a>
                     </div>
@@ -94,18 +95,23 @@
                         <span class="input-group-text bg-white border-end-0">
                             <i class="fa-solid fa-magnifying-glass text-danger"></i>
                         </span>
-                        <input type="search" class="form-control border-start-0 border-end-0" placeholder="Search jobs by title, skill or keyword...">
-                        <button class="btn btn-danger px-4 fw-semibold" type="button">Search</button>
+                        <input id="careerSearch" type="search" class="form-control border-start-0" placeholder="Search jobs by title, skill or keyword..." aria-label="Search jobs" oninput="filterCareerJobs()">
                     </div>
                 </div>
                 <div class="col-lg-5">
-                    <select class="form-select form-select-lg shadow-sm">
-                        <option selected>All Departments</option>
+                    <select id="careerDepartment" class="form-select form-select-lg shadow-sm" aria-label="Filter jobs by department" onchange="filterCareerJobs()">
+                        <option value="">All Departments</option>
                         {% for department in departments %}
                         <option value="{{ department }}">{{ department }}</option>
                         {% endfor %}
                     </select>
                 </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                <small class="text-secondary">Search and department filters update automatically.</small>
+                <button type="button" id="careerReset" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="resetCareerFilters()">
+                    <i class="fa-solid fa-rotate-left me-1"></i>Reset Filters
+                </button>
             </div>
         </div>
     </section>
@@ -151,13 +157,13 @@
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                     <span class="badge bg-white text-dark border rounded-pill px-3 py-2">
-                        <i class="fa-solid fa-briefcase text-danger me-2"></i>{{ jobs|length }} Positions
+                        <i class="fa-solid fa-briefcase text-danger me-2"></i><span id="careerJobCount">{{ jobs|length }}</span> Positions
                     </span>
                 </div>
             </div>
-            <div class="row g-4">
+            <div id="careerJobs" class="row g-4">
                 {% for job in jobs %}
-                <div class="col-12 col-lg-6">
+                <div class="col-12 col-lg-6 career-job-item" data-department="{{ job.department|default:''|lower|escape }}" data-search="{{ job.title|default:''|lower|escape }} {{ job.department|default:''|lower|escape }} {{ job.location|default:''|lower|escape }} {{ job.type|default:''|lower|escape }} {{ job.experience|default:''|lower|escape }} {{ job.description|default:''|lower|escape }} {{ job.skills|join:' '|lower|escape }}">
                     <div class="card h-100 border-0 shadow-sm rounded-4">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
@@ -177,12 +183,16 @@
                                 {% endif %}
                             </div>
                             <div class="d-flex flex-wrap gap-2 mb-3">
+                                {% if job.location %}
                                 <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
                                     <i class="fa-solid fa-location-dot text-danger me-1"></i>{{ job.location }}
                                 </span>
+                                {% endif %}
+                                {% if job.type %}
                                 <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
                                     <i class="fa-solid fa-clock text-danger me-1"></i>{{ job.type }}
                                 </span>
+                                {% endif %}
                                 {% if job.experience %}
                                 <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
                                     <i class="fa-solid fa-user-tie text-danger me-1"></i>{{ job.experience }}
@@ -214,16 +224,16 @@
                                     Apply Now <i class="fa-solid fa-arrow-right ms-2"></i>
                                 </a>
                                 {% else %}
-                                <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold">
+                                <a href="{% url 'contact' %}" class="btn btn-danger rounded-pill px-4 fw-semibold">
                                     Apply Now <i class="fa-solid fa-arrow-right ms-2"></i>
-                                </button>
+                                </a>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="col-12">
+                <div class="col-12" id="careerNoJobs">
                     <div class="card border-0 shadow-sm rounded-4 text-center p-5">
                         <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex p-4 mx-auto mb-3">
                             <i class="fa-solid fa-briefcase display-6"></i>
@@ -236,6 +246,16 @@
                     </div>
                 </div>
                 {% endfor %}
+            </div>
+            <div id="careerNoMatches" class="col-12 d-none mt-4">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-5">
+                    <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex p-4 mx-auto mb-3">
+                        <i class="fa-solid fa-magnifying-glass display-6"></i>
+                    </div>
+                    <h4 class="fw-bold">No Matching Positions</h4>
+                    <p class="text-secondary mb-3">Try another keyword or select a different department.</p>
+                    <button type="button" class="btn btn-danger rounded-pill px-4 mx-auto" onclick="resetCareerFilters()">Clear Filters</button>
+                </div>
             </div>
         </div>
     </section>
@@ -250,9 +270,7 @@
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card h-100 border-0 shadow-sm rounded-4 text-center">
                         <div class="card-body p-4">
-                            <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3">
-                                <span class="fw-bold fs-5">01</span>
-                            </div>
+                            <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3"><span class="fw-bold fs-5">01</span></div>
                             <h5 class="fw-bold">Apply</h5>
                             <p class="text-secondary small mb-0">Find a role that matches your skills and submit your application.</p>
                         </div>
@@ -261,9 +279,7 @@
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card h-100 border-0 shadow-sm rounded-4 text-center">
                         <div class="card-body p-4">
-                            <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3">
-                                <span class="fw-bold fs-5">02</span>
-                            </div>
+                            <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3"><span class="fw-bold fs-5">02</span></div>
                             <h5 class="fw-bold">Connect</h5>
                             <p class="text-secondary small mb-0">Our team reviews your profile and gets in touch with you.</p>
                         </div>
@@ -272,9 +288,7 @@
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card h-100 border-0 shadow-sm rounded-4 text-center">
                         <div class="card-body p-4">
-                            <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3">
-                                <span class="fw-bold fs-5">03</span>
-                            </div>
+                            <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3"><span class="fw-bold fs-5">03</span></div>
                             <h5 class="fw-bold">Interview</h5>
                             <p class="text-secondary small mb-0">Meet the team and discuss your experience, skills and goals.</p>
                         </div>
@@ -283,9 +297,7 @@
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card h-100 border-0 shadow-sm rounded-4 text-center">
                         <div class="card-body p-4">
-                            <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3">
-                                <span class="fw-bold fs-5">04</span>
-                            </div>
+                            <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3"><span class="fw-bold fs-5">04</span></div>
                             <h5 class="fw-bold">Welcome</h5>
                             <p class="text-secondary small mb-0">Join {{ site_name }} and start building better journeys with us.</p>
                         </div>
@@ -311,4 +323,35 @@
         </div>
     </section>
 </div>
+<script>
+function filterCareerJobs() {
+    const searchInput = document.getElementById('careerSearch');
+    const departmentInput = document.getElementById('careerDepartment');
+    const jobItems = document.querySelectorAll('.career-job-item');
+    const noMatches = document.getElementById('careerNoMatches');
+    const jobCount = document.getElementById('careerJobCount');
+    const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const selectedDepartment = departmentInput ? departmentInput.value.trim().toLowerCase() : '';
+    let visibleCount = 0;
+    jobItems.forEach(function(item) {
+        const searchableText = (item.dataset.search || '').toLowerCase();
+        const department = (item.dataset.department || '').toLowerCase();
+        const matchesSearch = !searchTerm || searchableText.includes(searchTerm);
+        const matchesDepartment = !selectedDepartment || department === selectedDepartment;
+        const visible = matchesSearch && matchesDepartment;
+        item.classList.toggle('d-none', !visible);
+        if (visible) visibleCount++;
+    });
+    if (jobCount) jobCount.textContent = visibleCount;
+    if (noMatches) noMatches.classList.toggle('d-none', visibleCount !== 0 || jobItems.length === 0);
+}
+function resetCareerFilters() {
+    const searchInput = document.getElementById('careerSearch');
+    const departmentInput = document.getElementById('careerDepartment');
+    if (searchInput) searchInput.value = '';
+    if (departmentInput) departmentInput.value = '';
+    filterCareerJobs();
+}
+document.addEventListener('DOMContentLoaded', filterCareerJobs);
+</script>
 {% endblock %}

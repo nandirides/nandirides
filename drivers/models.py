@@ -24,6 +24,13 @@ class Driver(TimeStampedModel):
         related_name="driver",
     )
 
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        db_index=True,
+    )
+
     driver_code = models.CharField(
         max_length=50,
         unique=True,
@@ -39,9 +46,7 @@ class Driver(TimeStampedModel):
         blank=True,
     )
 
-    experience_years = models.PositiveIntegerField(
-        default=0,
-    )
+    experience_years = models.PositiveIntegerField(default=0)
 
     status = models.CharField(
         max_length=20,
@@ -57,18 +62,19 @@ class Driver(TimeStampedModel):
         db_index=True,
     )
 
+    is_online = models.BooleanField(default=False)
+
     rating = models.DecimalField(
         max_digits=3,
         decimal_places=2,
         default=0,
     )
 
-    total_rides = models.PositiveIntegerField(
-        default=0,
-    )
+    total_rides = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return self.driver_code
+        return f"{self.driver_code} - {self.phone}"
+
 
 class DriverDocument(TimeStampedModel):
 
@@ -96,24 +102,12 @@ class DriverDocument(TimeStampedModel):
         choices=DocumentType.choices,
     )
 
-    document_number = models.CharField(
-        max_length=100,
-        blank=True,
-    )
+    document_number = models.CharField(max_length=100, blank=True)
 
-    document_file = models.FileField(
-        upload_to="driver_documents/",
-    )
+    document_file = models.FileField(upload_to="driver_documents/")
 
-    issue_date = models.DateField(
-        null=True,
-        blank=True,
-    )
-
-    expiry_date = models.DateField(
-        null=True,
-        blank=True,
-    )
+    issue_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
 
     verification_status = models.CharField(
         max_length=20,
@@ -129,10 +123,8 @@ class DriverDocument(TimeStampedModel):
         related_name="verified_driver_documents",
     )
 
-    verified_at = models.DateTimeField(
-        null=True,
-        blank=True,
-    )
+    verified_at = models.DateTimeField(null=True, blank=True)
+
 
 class DriverBankAccount(TimeStampedModel):
 
@@ -142,30 +134,12 @@ class DriverBankAccount(TimeStampedModel):
         related_name="bank_accounts",
     )
 
-    account_holder_name = models.CharField(
-        max_length=150,
-    )
-
-    account_number = models.CharField(
-        max_length=50,
-    )
-
-    ifsc_code = models.CharField(
-        max_length=20,
-    )
-
-    bank_name = models.CharField(
-        max_length=150,
-    )
-
-    upi_id = models.CharField(
-        max_length=100,
-        blank=True,
-    )
-
-    is_primary = models.BooleanField(
-        default=False,
-    )
+    account_holder_name = models.CharField(max_length=150)
+    account_number = models.CharField(max_length=50)
+    ifsc_code = models.CharField(max_length=20)
+    bank_name = models.CharField(max_length=150)
+    upi_id = models.CharField(max_length=100, blank=True)
+    is_primary = models.BooleanField(default=False)
 
     verification_status = models.CharField(
         max_length=20,
@@ -187,44 +161,14 @@ class DriverEarning(TimeStampedModel):
         related_name="driver_earning",
     )
 
-    gross_fare = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-    )
+    gross_fare = models.DecimalField(max_digits=12, decimal_places=2)
+    commission = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    bonus = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    penalty = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    net_earning = models.DecimalField(max_digits=12, decimal_places=2)
 
-    commission = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=0,
-    )
-
-    tax = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=0,
-    )
-
-    bonus = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=0,
-    )
-
-    penalty = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=0,
-    )
-
-    net_earning = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-    )
-
-    status = models.CharField(
-        max_length=20,
-        default="pending",
-    )
+    status = models.CharField(max_length=20, default="pending")
 
 
 class DriverPayout(TimeStampedModel):
@@ -235,34 +179,14 @@ class DriverPayout(TimeStampedModel):
         related_name="payouts",
     )
 
-    amount = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-    )
-
-    payout_reference = models.CharField(
-        max_length=255,
-        blank=True,
-    )
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    payout_reference = models.CharField(max_length=255, blank=True)
 
     payment_method = models.CharField(
         max_length=30,
         default="bank_transfer",
     )
 
-    status = models.CharField(
-        max_length=20,
-        default="pending",
-    )
-
-    requested_at = models.DateTimeField(
-        auto_now_add=True,
-    )
-
-    processed_at = models.DateTimeField(
-        null=True,
-        blank=True,
-    )
-
-
-
+    status = models.CharField(max_length=20, default="pending")
+    requested_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
