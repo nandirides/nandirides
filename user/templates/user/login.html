@@ -17,6 +17,11 @@
                                 <span class="badge rounded-pill bg-white text-danger px-3 py-2"><i class="bi bi-lightning-charge me-1"></i>Fast</span>
                                 <span class="badge rounded-pill bg-white text-danger px-3 py-2"><i class="bi bi-geo-alt me-1"></i>Live Tracking</span>
                             </div>
+                            <div class="d-flex justify-content-center mt-3">
+                                <a href="{% url 'dashboard' %}" class="btn bg-white btn-outline-danger btn-sm rounded-pill px-3 py-2 fw-semibold shadow-sm admin-login-btn">
+                                    <i class="fa-solid fa-user-shield me-2"></i>Admin Login
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-7 bg-white">
@@ -41,7 +46,7 @@
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link fw-semibold" id="password-tab" data-bs-toggle="pill" data-bs-target="#password-login" type="button" role="tab" aria-controls="password-login" aria-selected="false">
-                                        <i class="fa-solid fa-user me-1"></i> Username & Password
+                                        <i class="fa-solid fa-user me-1"></i> Username &amp; Password
                                     </button>
                                 </li>
                             </ul>
@@ -80,7 +85,7 @@
                                             {% if field.name == 'password' %}
                                             <div class="input-group">
                                                 {{ field }}
-                                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Show password">
+                                                <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePassword" aria-label="Show password">
                                                     <i class="fa-solid fa-eye" id="passwordIcon"></i>
                                                 </button>
                                             </div>
@@ -156,7 +161,7 @@
                         </button>
                     </div>
                     <button type="submit" class="btn btn-danger btn-lg rounded-pill fw-bold w-100" id="verifyOtpBtn">
-                        <i class="fa-solid fa-check me-2"></i>Verify & Login
+                        <i class="fa-solid fa-check me-2"></i>Verify &amp; Login
                     </button>
                     <p class="text-secondary text-center small mt-3 mb-0">OTP API integration will be added later.</p>
                 </form>
@@ -165,11 +170,64 @@
     </div>
 </div>
 <style>
-#loginTabs .nav-link{color:#495057;background:#f1f3f5;border:1px solid #e9ecef;border-radius:12px;padding:12px 8px}
-#loginTabs .nav-link.active{background:#dc3545;color:#fff;border-color:#dc3545}
-.otp-digit{border:1px solid #ced4da;border-radius:10px}
-.otp-digit:focus{border-color:#dc3545;box-shadow:0 0 0 .2rem rgba(220,53,69,.15)}
-@media(max-width:380px){#otpInputs{gap:5px!important}.otp-digit{width:39px!important;height:47px!important;padding:4px}}
+#loginTabs .nav-link {
+    color: #343a40 !important;
+    background: #f1f3f5;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px 8px;
+    font-weight: 600;
+    transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+#loginTabs .nav-link:hover,
+#loginTabs .nav-link:focus-visible {
+    color: #b02a37 !important;
+    background: #fff0f1;
+    border-color: #dc3545;
+}
+#loginTabs .nav-link.active,
+#loginTabs .nav-link.active:hover,
+#loginTabs .nav-link.active:focus {
+    color: #fff !important;
+    background: #dc3545 !important;
+    border-color: #dc3545 !important;
+    box-shadow: 0 3px 8px rgba(220, 53, 69, .2);
+}
+#loginTabs .nav-link.active i {
+    color: #fff !important;
+}
+.admin-login-btn {
+    transition: all .2s ease;
+}
+.admin-login-btn:hover,
+.admin-login-btn:focus-visible {
+    color: #fff !important;
+    background: #dc3545 !important;
+    border-color: #dc3545 !important;
+    transform: translateY(-1px);
+}
+.otp-digit {
+    border: 1px solid #ced4da;
+    border-radius: 10px;
+}
+.otp-digit:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 .2rem rgba(220, 53, 69, .15);
+}
+@media(max-width:380px) {
+    #otpInputs {
+        gap: 5px !important;
+    }
+    .otp-digit {
+        width: 39px !important;
+        height: 47px !important;
+        padding: 4px;
+    }
+    #loginTabs .nav-link {
+        font-size: .82rem;
+        padding: 10px 5px;
+    }
+}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -189,7 +247,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const passwordIcon = document.getElementById('passwordIcon');
     let countdownInterval = null;
     let secondsRemaining = 60;
-    let demoOtp = '';
     function validateMobile() {
         const value = mobileInput.value.trim();
         const valid = /^[6-9]\d{9}$/.test(value);
@@ -240,7 +297,6 @@ document.addEventListener('DOMContentLoaded', function () {
         showMaskedMobile();
         otpError.textContent = '';
         resetOtpInputs();
-        demoOtp = '';
         startCountdown();
         otpModal.show();
     });
@@ -259,7 +315,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const pasted = (event.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
             if (!pasted) return;
             event.preventDefault();
-            pasted.split('').forEach((digit, i) => { if (otpDigits[i]) otpDigits[i].value = digit; });
+            pasted.split('').forEach((digit, i) => {
+                if (otpDigits[i]) otpDigits[i].value = digit;
+            });
             otpDigits[Math.min(pasted.length, 5)].focus();
         });
     });
