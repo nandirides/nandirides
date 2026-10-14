@@ -1,9 +1,12 @@
 {% load static %}
-
 <nav class="app-header navbar navbar-expand bg-body border-bottom shadow-sm {% if request.resolver_match.url_name == 'login' %}app-header-login{% else %}app-header-dashboard{% endif %}" style="position:fixed!important;top:0;right:0;z-index:1030!important;">
     <div class="container-fluid position-relative">
         <ul class="navbar-nav align-items-center">
-            {% if request.resolver_match.url_name != 'login' %}
+            {% if request.resolver_match.url_name == 'login' %}
+            <li class="nav-item d-flex align-items-center">
+                <img src="{% static 'user/images/logo.png' %}" alt="NandiRide Logo" width="42" height="42" class="rounded-3 shadow-sm">
+            </li>
+            {% else %}
             <li class="nav-item">
                 <a class="nav-link rounded" data-lte-toggle="sidebar" href="#" role="button" aria-label="Toggle sidebar" title="Toggle sidebar">
                     <i class="bi bi-list fs-5"></i>
@@ -48,13 +51,12 @@
             {% endif %}
         </ul>
         {% if request.resolver_match.url_name == 'login' %}
-        <div class="position-absolute top-50 start-50 translate-middle d-flex align-items-center gap-3 text-nowrap">
-            <img src="{% static 'user/images/logo.png' %}" alt="NandiRide Logo" width="42" height="42" class="rounded-3 shadow-sm">
+        <div class="position-absolute top-50 start-50 translate-middle text-center text-nowrap pe-none">
             <div class="lh-sm">
                 <div class="fw-bold fs-5 text-body">
                     Welcome to the Nandi<small class="text-warning">Ride</small>
-                    <span class="fs-5 text-body fw-semibold">Administration Portal</span>
                 </div>
+                <div class="fs-6 text-body fw-semibold">Administration Portal</div>
             </div>
         </div>
         {% endif %}
@@ -73,12 +75,7 @@
             </li>
             {% if user.is_authenticated %}
             <li class="nav-item dropdown notification-nav-item">
-                <a class="nav-link notification-bell-wrapper rounded-circle"
-                   href="#"
-                   role="button"
-                   aria-expanded="false"
-                   aria-label="Notifications"
-                   title="Notifications">
+                <a class="nav-link notification-bell-wrapper rounded-circle" href="#" role="button" aria-expanded="false" aria-label="Notifications" title="Notifications">
                     <i class="bi bi-bell fs-5"></i>
                     {% if unread_notifications_count > 0 %}
                     <span id="notification-badge" class="notification-badge">
@@ -101,16 +98,10 @@
                                     <i class="bi bi-bell-fill"></i>
                                 </div>
                                 <div class="flex-grow-1 notification-content">
-                                    <div class="fw-semibold text-body notification-title">
-                                        {{ notification.title }}
-                                    </div>
-                                    <small class="text-body-secondary notification-message">
-                                        {{ notification.message }}
-                                    </small>
+                                    <div class="fw-semibold text-body notification-title">{{ notification.title }}</div>
+                                    <small class="text-body-secondary notification-message">{{ notification.message }}</small>
                                     {% if notification.created_at %}
-                                    <small class="d-block text-body-secondary mt-1 notification-time">
-                                        {{ notification.created_at|timesince }} ago
-                                    </small>
+                                    <small class="d-block text-body-secondary mt-1 notification-time">{{ notification.created_at|timesince }} ago</small>
                                     {% endif %}
                                 </div>
                                 {% if not notification.is_read %}
@@ -127,9 +118,7 @@
                         {% endif %}
                     </li>
                     <li class="text-center border-top">
-                        <a href="{% url 'notification_list' %}" class="dropdown-item py-2 text-primary fw-medium">
-                            View all notifications
-                        </a>
+                        <a href="{% url 'notification_list' %}" class="dropdown-item py-2 text-primary fw-medium">View all notifications</a>
                     </li>
                 </ul>
             </li>
@@ -388,7 +377,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     const notificationStatusUrl = "{% url 'notification_status' %}";
-    const notificationBadge = document.getElementById("notification-badge");
     const notificationList = document.getElementById("notification-list");
     window.notificationAbortController = null;
     function updateNotificationBadge(count) {
