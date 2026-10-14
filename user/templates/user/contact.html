@@ -221,7 +221,7 @@
                                         <select id="feedbackSubject" name="subject" class="form-select bg-light" required>
                                             <option value="" disabled {% if not form_data.subject %}selected{% endif %}>Select a subject</option>
                                             {% for subject in contact_subjects %}
-                                            <option value="{{ subject }}" {% if form_data.subject == subject %}selected{% endif %}>{{ subject }}</option>
+                                            <option value="{{ subject.value }}" {% if form_data.subject == subject %}selected{% endif %}>{{ subject.value }}</option>
                                             {% empty %}
                                             <option value="General Enquiry" {% if form_data.subject == "General Enquiry" %}selected{% endif %}>General Enquiry</option>
                                             <option value="Ride Support" {% if form_data.subject == "Ride Support" %}selected{% endif %}>Ride Support</option>

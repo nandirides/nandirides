@@ -434,13 +434,13 @@ class UserBookingView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in before booking a ride.")
-            return redirect("login")
+            return redirect("user-login")
         return booking_page(request)
 
     def post(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in before booking a ride.")
-            return redirect("login")
+            return redirect("user-login")
         form = Booking(request.POST)
         if not form.is_valid():
             return booking_page(request, form)
@@ -526,7 +526,7 @@ class UserPaymentView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view payments.")
-            return redirect("login")
+            return redirect("user-login")
         request_id = get_booking_request_id(request)
         ride_request = get_owned_request(request, request_id)
         if not ride_request:
@@ -538,7 +538,7 @@ class UserPaymentView(View):
     def post(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to make a payment.")
-            return redirect("login")
+            return redirect("user-login")
         request_id = get_booking_request_id(request)
         if not request_id:
             messages.error(request, "Booking reference is missing. Please select a booking.")
@@ -585,7 +585,7 @@ class UserMyRideView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view your rides.")
-            return redirect("login")
+            return redirect("user-login")
         requests = get_user_requests(request.user)
         request_id = request.GET.get("request_id")
         selected = get_object_or_404(requests, pk=request_id) if request_id else requests.first()
@@ -604,7 +604,7 @@ class UserDashboardView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view your dashboard.")
-            return redirect("login")
+            return redirect("user-login")
         requests = get_user_requests(request.user)
         payments = PaymentModel.objects.filter(user=request.user, status=PaymentModel.Status.SUCCESS)
         total_spent = payments.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
@@ -642,7 +642,7 @@ class TrackRideView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to track a ride.")
-            return redirect("login")
+            return redirect("user-login")
         request_id = request.GET.get("request_id")
         ride_request = get_owned_request(request, request_id)
         if not ride_request:
@@ -761,7 +761,7 @@ class PaymentDetailsView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view payments.")
-            return redirect("login")
+            return redirect("user-login")
         payment_id = request.GET.get("payment_id")
         if payment_id:
             payment_query = PaymentModel.objects.filter(user=request.user)
@@ -786,7 +786,7 @@ class PaymentReceiptView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view receipts.")
-            return redirect("login")
+            return redirect("user-login")
         payment_id = request.GET.get("payment_id")
         payment = get_object_or_404(PaymentModel, pk=payment_id, user=request.user) if payment_id else PaymentModel.objects.filter(user=request.user).order_by("-created_at").first()
         return render(request, "user/profile/paymentreceipt.html", {
@@ -803,7 +803,7 @@ class CancelRideView(View):
     def post(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to cancel a ride.")
-            return redirect("login")
+            return redirect("user-login")
         request_id = get_booking_request_id(request)
         if not request_id:
             messages.error(request, "Booking reference is missing.")
