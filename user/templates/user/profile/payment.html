@@ -1,265 +1,400 @@
+
 {% extends 'user/dashboard_base.html' %}
-{% block page_heading %}
-Payment
-{% endblock %}
+{% block page_heading %}Payment{% endblock %}
 {% block title %}{{ site_name }} | Payment{% endblock %}
 {% block dashboard_content %}
-<div class="container-fluid">
+<div class="container-fluid py-2">
     <div class="mb-4">
-        <h2 class="fw-bold mb-1">
-            <i class="fa-solid fa-credit-card text-danger me-2"></i>
-            Payment
-        </h2>
-        <p class="text-muted mb-0">Complete your payment to confirm your NandiRide</p>
+        <h2 class="fw-bold mb-1"><i class="fa-solid fa-credit-card text-danger me-2"></i>Payment</h2>
+        <p class="text-body-secondary mb-0">Complete your payment to confirm your NandiRide</p>
     </div>
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
-                <i class="fa-solid fa-circle-info me-2"></i>
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
     {% if booking_data %}
-        <div class="row g-4">
-            <div class="col-lg-7">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold mb-1">Select Payment Method</h5>
-                        <p class="text-muted small mb-4">Choose how you want to pay for your ride</p>
-                        {% if request_id %}
-                            <form method="POST" action="{% url 'payment' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="request_id" value="{{ request_id }}">
-                                <div class="mb-3">
-                                    <input type="radio" class="btn-check" name="payment_type" id="upi" value="upi" autocomplete="off" checked required>
-                                    <label for="upi" class="btn btn-outline-danger w-100 text-start p-3 rounded-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-light text-danger rounded-3 p-3">
-                                                <i class="fa-solid fa-mobile-screen-button fs-5"></i>
-                                            </div>
-                                            <div class="flex-grow-1 ms-3">
-                                                <h6 class="fw-bold mb-1">UPI</h6>
-                                                <small class="text-muted">Google Pay, PhonePe, Paytm & other UPI apps</small>
-                                            </div>
-                                            <i class="fa-solid fa-circle-check text-danger fs-5"></i>
-                                        </div>
-                                    </label>
-                                </div>
-                                <div class="mb-3">
-                                    <input type="radio" class="btn-check" name="payment_type" id="card" value="card" autocomplete="off" required>
-                                    <label for="card" class="btn btn-outline-danger w-100 text-start p-3 rounded-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-light text-danger rounded-3 p-3">
-                                                <i class="fa-solid fa-credit-card fs-5"></i>
-                                            </div>
-                                            <div class="flex-grow-1 ms-3">
-                                                <h6 class="fw-bold mb-1">Credit / Debit Card</h6>
-                                                <small class="text-muted">Visa, Mastercard, RuPay & more</small>
-                                            </div>
-                                            <i class="fa-solid fa-circle-check text-danger fs-5"></i>
-                                        </div>
-                                    </label>
-                                </div>
-                                <div class="mb-3">
-                                    <input type="radio" class="btn-check" name="payment_type" id="netbanking" value="netbanking" autocomplete="off" required>
-                                    <label for="netbanking" class="btn btn-outline-danger w-100 text-start p-3 rounded-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-light text-danger rounded-3 p-3">
-                                                <i class="fa-solid fa-building-columns fs-5"></i>
-                                            </div>
-                                            <div class="flex-grow-1 ms-3">
-                                                <h6 class="fw-bold mb-1">Net Banking</h6>
-                                                <small class="text-muted">Pay using your bank account</small>
-                                            </div>
-                                            <i class="fa-solid fa-circle-check text-danger fs-5"></i>
-                                        </div>
-                                    </label>
-                                </div>
-                                <div class="mb-3">
-                                    <input type="radio" class="btn-check" name="payment_type" id="cash" value="cash" autocomplete="off" required>
-                                    <label for="cash" class="btn btn-outline-danger w-100 text-start p-3 rounded-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-light text-danger rounded-3 p-3">
-                                                <i class="fa-solid fa-money-bill-wave fs-5"></i>
-                                            </div>
-                                            <div class="flex-grow-1 ms-3">
-                                                <h6 class="fw-bold mb-1">Cash</h6>
-                                                <small class="text-muted">Pay directly to the driver</small>
-                                            </div>
-                                            <i class="fa-solid fa-circle-check text-danger fs-5"></i>
-                                        </div>
-                                    </label>
-                                </div>
-                                <button type="submit" class="btn btn-danger w-100 py-3 rounded-3 fw-semibold mt-3">
-                                    <i class="fa-solid fa-lock me-2"></i>
-                                    Continue with ₹{{ booking_data.total_amount|default:booking_data.estimate_fare|default:booking_data.fare|default:"0" }}
-                                </button>
-                                <p class="text-muted small text-center mt-3 mb-0">
-                                    <i class="fa-solid fa-circle-info me-1"></i>
-                                    Online payments remain pending until confirmed by the payment provider.
-                                </p>
-                            </form>
-                        {% else %}
-                            <div class="alert alert-warning rounded-3 mb-0" role="alert">
-                                <i class="fa-solid fa-circle-exclamation me-2"></i>
-                                The booking reference is missing. Please open your booking again and continue to payment.
-                                <div class="mt-3">
-                                    <a href="{% url 'booking' %}" class="btn btn-danger rounded-pill px-4">
-                                        <i class="fa-solid fa-car me-2"></i>Book a Ride
-                                    </a>
-                                </div>
-                            </div>
-                        {% endif %}
+    <div class="row g-3 g-lg-4">
+        <div class="col-12 col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-3 p-md-4">
+                    <div class="alert alert-info small mb-4">
+                        <i class="fa-solid fa-circle-info me-2"></i>
+                        <strong>Demo Payment Mode:</strong> Online payment methods will use demo success processing. Cash payment will remain pending. No real money will be transferred.
                     </div>
-                </div>
-                <div class="card border-0 shadow-sm rounded-4 mt-4">
-                    <div class="card-body p-3">
-                        <div class="d-flex align-items-center">
-                            <div class="rounded-circle bg-light text-danger p-3">
-                                <i class="fa-solid fa-shield-halved fs-5"></i>
+                    <h5 class="fw-bold mb-1">Select Payment Method</h5>
+                    <p class="text-body-secondary small mb-4">Choose your preferred payment method</p>
+                    {% if request_id %}
+                    <form method="POST" action="{% url 'payment' %}" id="paymentForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="request_id" value="{{ request_id }}">
+                        <input type="hidden" name="upi_app" id="selectedUpiApp" value="">
+                        <div class="row g-2 mb-4">
+                            <div class="col-6 col-md-4">
+                                <input type="radio" class="btn-check" name="payment_type" id="upi" value="upi" autocomplete="off" checked required>
+                                <label for="upi" class="btn btn-outline-danger w-100 h-100 p-2 p-sm-3 text-start rounded-3">
+                                    <i class="fa-solid fa-qrcode d-block fs-4 mb-2"></i>
+                                    <span class="fw-bold">UPI / QR</span>
+                                    <small class="d-block text-body-secondary mt-1">Demo payment</small>
+                                </label>
                             </div>
-                            <div class="ms-3">
-                                <h6 class="fw-bold mb-1">Safe & Secure Payment</h6>
-                                <small class="text-muted">Your payment information is protected. Never share your UPI PIN, OTP or card PIN with anyone.</small>
+                            <div class="col-6 col-md-4">
+                                <input type="radio" class="btn-check" name="payment_type" id="card" value="card" autocomplete="off" required>
+                                <label for="card" class="btn btn-outline-danger w-100 h-100 p-2 p-sm-3 text-start rounded-3">
+                                    <i class="fa-solid fa-credit-card d-block fs-4 mb-2"></i>
+                                    <span class="fw-bold">Card</span>
+                                    <small class="d-block text-body-secondary mt-1">Demo success</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <input type="radio" class="btn-check" name="payment_type" id="netbanking" value="netbanking" autocomplete="off" required>
+                                <label for="netbanking" class="btn btn-outline-danger w-100 h-100 p-2 p-sm-3 text-start rounded-3">
+                                    <i class="fa-solid fa-building-columns d-block fs-4 mb-2"></i>
+                                    <span class="fw-bold">Net Banking</span>
+                                    <small class="d-block text-body-secondary mt-1">Demo success</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <input type="radio" class="btn-check" name="payment_type" id="wallet" value="wallet" autocomplete="off" required>
+                                <label for="wallet" class="btn btn-outline-danger w-100 h-100 p-2 p-sm-3 text-start rounded-3">
+                                    <i class="fa-solid fa-wallet d-block fs-4 mb-2"></i>
+                                    <span class="fw-bold">Wallet</span>
+                                    <small class="d-block text-body-secondary mt-1">Demo success</small>
+                                </label>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <input type="radio" class="btn-check" name="payment_type" id="cash" value="cash" autocomplete="off" required>
+                                <label for="cash" class="btn btn-outline-danger w-100 h-100 p-2 p-sm-3 text-start rounded-3">
+                                    <i class="fa-solid fa-money-bill-wave d-block fs-4 mb-2"></i>
+                                    <span class="fw-bold">Cash</span>
+                                    <small class="d-block text-body-secondary mt-1">Pay your driver</small>
+                                </label>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-5">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold mb-4">
-                            <i class="fa-solid fa-receipt text-danger me-2"></i>
-                            Ride Summary
-                        </h5>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-muted">Booking ID</span>
-                            <strong>#{{ booking_data.booking_id|default:booking_data.request_number|default:request_id }}</strong>
-                        </div>
-                        <div class="d-flex align-items-center my-3">
-                            <div class="rounded-circle bg-success bg-opacity-10 text-success p-3">
-                                <i class="fa-solid fa-location-dot"></i>
-                            </div>
-                            <div class="ms-3">
-                                <small class="text-muted">Pickup</small>
-                                <h6 class="fw-semibold mb-0">{{ booking_data.pickup_location|default:booking_data.pickup|default:"Not selected" }}</h6>
-                            </div>
-                        </div>
-                        <div class="border-start border-2 ms-4 py-2"></div>
-                        <div class="d-flex align-items-center my-3">
-                            <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3">
-                                <i class="fa-solid fa-location-crosshairs"></i>
-                            </div>
-                            <div class="ms-3">
-                                <small class="text-muted">Destination</small>
-                                <h6 class="fw-semibold mb-0">{{ booking_data.destination|default:booking_data.drop|default:"Not selected" }}</h6>
-                            </div>
-                        </div>
-                        <hr class="my-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-muted">Ride Type</span>
-                            <strong>
-                                {% with ride_type=booking_data.ride_type|stringformat:"s" %}
-                                    {% if ride_type|lower == "bike" %}
-                                        <i class="fa-solid fa-motorcycle text-danger me-1"></i>
-                                    {% elif ride_type|lower == "auto" %}
-                                        <i class="fa-solid fa-car text-danger me-1"></i>
-                                    {% elif ride_type|lower == "sedan" %}
-                                        <i class="fa-solid fa-car-side text-danger me-1"></i>
-                                    {% else %}
-                                        <i class="fa-solid fa-car text-danger me-1"></i>
+                        <div id="upiDetails" class="card bg-body-tertiary border-0 mb-3">
+                            <div class="card-body p-3 p-md-4">
+                                <div class="text-center mb-3">
+                                    <i class="fa-solid fa-mobile-screen-button fs-2 text-danger mb-2"></i>
+                                    <h5 class="fw-bold mb-1">Pay with UPI</h5>
+                                    <p class="small text-body-secondary mb-0">Select a demo UPI app</p>
+                                </div>
+                                <div class="row g-2 mb-4">
+                                    <div class="col-6 col-sm-3">
+                                        <input type="radio" class="btn-check upi-app-option" name="upi_app_option" id="upiGpay" value="google_pay" autocomplete="off">
+                                        <label for="upiGpay" class="btn btn-outline-danger bg-body text-body w-100 h-100 p-2 rounded-3 text-center">
+                                            <i class="fa-brands fa-google-pay d-block fs-2 mb-1"></i>
+                                            <span class="fw-semibold small">Google Pay</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <input type="radio" class="btn-check upi-app-option" name="upi_app_option" id="upiPhonePe" value="phonepe" autocomplete="off">
+                                        <label for="upiPhonePe" class="btn btn-outline-danger bg-body text-body w-100 h-100 p-2 rounded-3 text-center">
+                                            <i class="fa-solid fa-mobile-screen-button d-block fs-2 mb-1"></i>
+                                            <span class="fw-semibold small">PhonePe</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <input type="radio" class="btn-check upi-app-option" name="upi_app_option" id="upiBhim" value="bhim" autocomplete="off">
+                                        <label for="upiBhim" class="btn btn-outline-danger bg-body text-body w-100 h-100 p-2 rounded-3 text-center">
+                                            <i class="fa-solid fa-indian-rupee-sign d-block fs-2 mb-1"></i>
+                                            <span class="fw-semibold small">BHIM UPI</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <input type="radio" class="btn-check upi-app-option" name="upi_app_option" id="upiOther" value="other" autocomplete="off">
+                                        <label for="upiOther" class="btn btn-outline-danger bg-body text-body w-100 h-100 p-2 rounded-3 text-center">
+                                            <i class="fa-solid fa-building-columns d-block fs-2 mb-1"></i>
+                                            <span class="fw-semibold small">Other UPI</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="border rounded-3 bg-body p-3 text-center">
+                                    <h6 class="fw-bold mb-2">NandiRide Dummy QR Code</h6>
+                                    <p class="small text-body-secondary mb-3">For demo UI testing only</p>
+                                    <div class="d-flex justify-content-center">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&amp;data=NANDIRIDE-DUMMY-QR-NOT-A-REAL-PAYMENT" alt="NandiRide dummy QR code, not for payment" class="img-fluid border rounded-3 bg-white p-2 mb-3" width="240" height="240" loading="eager">
+                                    </div>
+                                    <span class="badge text-bg-warning text-wrap">DEMO ONLY — NOT A REAL PAYMENT QR</span>
+                                    <p class="small text-body-secondary mt-3 mb-0">Selecting a UPI app will simulate demo payment success when the backend is configured for demo mode. This QR cannot transfer money.</p>
+                                    {% if merchant_upi_id %}
+                                    <div class="border-top mt-3 pt-3">
+                                        <div class="small text-body-secondary">Configured merchant UPI ID</div>
+                                        <div class="fw-bold text-break">{{ merchant_upi_id }}</div>
+                                    </div>
                                     {% endif %}
-                                    {{ booking_data.ride_type|default:"Not selected" }}
-                                {% endwith %}
-                            </strong>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-muted">Date</span>
-                            <strong>{{ booking_data.ride_date|default:"Not selected" }}</strong>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-muted">Time</span>
-                            <strong>{{ booking_data.ride_time|default:"Not selected" }}</strong>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-muted">Passengers</span>
-                            <strong>
-                                <i class="fa-solid fa-users text-danger me-1"></i>
-                                {{ booking_data.passengers|default:"1" }}
-                            </strong>
-                        </div>
-                        {% if booking_data.distance %}
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="text-muted">Distance</span>
-                                <strong>{{ booking_data.distance }} km</strong>
+                                </div>
+                                <div id="upiAppMessage" class="alert alert-info small mt-3 mb-0 d-none" role="status" aria-live="polite"></div>
                             </div>
-                        {% endif %}
-                        <hr>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Base Fare</span>
-                            <span>₹{{ booking_data.base_fare|default:"0" }}</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Ride Charge</span>
-                            <span>₹{{ booking_data.ride_charge|default:"0" }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Platform Fee</span>
-                            <span>₹{{ booking_data.platform_fee|default:"0" }}</span>
-                        </div>
-                        {% if booking_data.discount_amount %}
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Discount</span>
-                                <span class="text-success">−₹{{ booking_data.discount_amount }}</span>
+                        <div id="cardDetails" class="card bg-body-tertiary border-0 mb-3 d-none">
+                            <div class="card-body p-3 p-md-4">
+                                <h6 class="fw-bold mb-3"><i class="fa-solid fa-credit-card text-danger me-2"></i>Card Payment</h6>
+                                <div class="alert alert-success mb-0">
+                                    <i class="fa-solid fa-circle-check me-2"></i>
+                                    Demo mode: submitting this option will request the backend to mark the payment as successful. No card details are needed and no real card payment will occur.
+                                </div>
                             </div>
-                        {% endif %}
-                        <hr>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">Total Amount</span>
-                            <strong class="fs-4 text-danger">₹{{ booking_data.total_amount|default:booking_data.estimate_fare|default:booking_data.fare|default:"0" }}</strong>
                         </div>
-                        {% if booking_data.payment_status %}
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="text-muted">Payment Status</span>
-                                <span class="badge {% if booking_data.payment_status == 'success' %}text-bg-success{% elif booking_data.payment_status == 'failed' %}text-bg-danger{% elif booking_data.payment_status == 'refunded' %}text-bg-info{% else %}text-bg-warning{% endif %}">
-                                    {{ booking_data.payment_status|title }}
-                                </span>
+                        <div id="netbankingDetails" class="card bg-body-tertiary border-0 mb-3 d-none">
+                            <div class="card-body p-3 p-md-4">
+                                <h6 class="fw-bold mb-3"><i class="fa-solid fa-building-columns text-danger me-2"></i>Net Banking</h6>
+                                <label for="bank_name" class="form-label">Select Your Bank</label>
+                                <select class="form-select" id="bank_name" name="bank_name">
+                                    <option value="">Choose your bank</option>
+                                    <option value="sbi">State Bank of India</option>
+                                    <option value="hdfc">HDFC Bank</option>
+                                    <option value="icici">ICICI Bank</option>
+                                    <option value="axis">Axis Bank</option>
+                                    <option value="kotak">Kotak Mahindra Bank</option>
+                                    <option value="pnb">Punjab National Bank</option>
+                                    <option value="bob">Bank of Baroda</option>
+                                    <option value="canara">Canara Bank</option>
+                                    <option value="union">Union Bank of India</option>
+                                    <option value="idfc">IDFC FIRST Bank</option>
+                                    <option value="indusind">IndusInd Bank</option>
+                                    <option value="yes">YES BANK</option>
+                                    <option value="other">Other Bank</option>
+                                </select>
+                                <p class="small text-body-secondary mt-2 mb-0">Bank selection is for demo purposes. No bank login or transfer will occur.</p>
                             </div>
-                        {% endif %}
+                        </div>
+                        <div id="walletDetails" class="card bg-body-tertiary border-0 mb-3 d-none">
+                            <div class="card-body p-3 p-md-4">
+                                <h6 class="fw-bold mb-3"><i class="fa-solid fa-wallet text-danger me-2"></i>Wallet Payment</h6>
+                                <div class="d-flex align-items-center justify-content-between border rounded-3 p-3 mb-3 gap-3">
+                                    <div>
+                                        <span class="small text-body-secondary d-block">Available Balance</span>
+                                        <strong class="fs-5 text-success">₹{{ wallet_balance|default:'0.00' }}</strong>
+                                    </div>
+                                    <i class="fa-solid fa-wallet fs-2 text-success"></i>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 gap-3">
+                                    <span class="text-body-secondary">Ride Amount</span>
+                                    <strong class="text-nowrap">₹{{ booking_data.total_amount|default:booking_data.estimate_fare|default:booking_data.fare|default:'0' }}</strong>
+                                </div>
+                                <p class="small text-body-secondary mb-0">Demo mode does not deduct real wallet funds. The backend must validate the selected method and create the payment record.</p>
+                            </div>
+                        </div>
+                        <div id="cashDetails" class="alert alert-warning d-none mb-3">
+                            <i class="fa-solid fa-money-bill-wave me-2"></i>
+                            <strong>Pay your driver in cash.</strong> Your ride booking will be created and the payment status should remain pending until cash is received.
+                        </div>
+                        <div class="border rounded-3 p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center gap-3">
+                                <span class="text-body-secondary">Total Payable</span>
+                                <strong class="fs-4 text-danger text-nowrap">₹{{ booking_data.total_amount|default:booking_data.estimate_fare|default:booking_data.fare|default:"0" }}</strong>
+                            </div>
+                        </div>
+                        <button type="submit" id="paymentSubmit" class="btn btn-danger w-100 py-3 rounded-3 fw-semibold mt-2">
+                            <i class="fa-solid fa-check-circle me-2"></i>Confirm Demo Payment
+                        </button>
+                        <p class="text-body-secondary small text-center mt-3 mb-0"><i class="fa-solid fa-shield-halved me-1"></i>Demo only. No real payment is processed.</p>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-warning mb-0">
+                        <i class="fa-solid fa-circle-exclamation me-2"></i>Booking reference is missing. Please open your booking again.
+                        <div class="mt-3"><a href="{% url 'booking' %}" class="btn btn-danger"><i class="fa-solid fa-car me-2"></i>Book a Ride</a></div>
                     </div>
+                    {% endif %}
                 </div>
-                <div class="card border-0 shadow-sm rounded-4 mt-4">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center">
-                            <div class="rounded-circle bg-light text-danger p-3">
-                                <i class="fa-solid fa-headset fs-5"></i>
-                            </div>
-                            <div class="ms-3">
-                                <h6 class="fw-bold mb-1">Need Help?</h6>
-                                <small class="text-muted">Contact NandiRide support for payment-related issues.</small>
-                            </div>
+            </div>
+            <div class="card border-0 shadow-sm rounded-4 mt-3">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-body-tertiary text-danger p-3"><i class="fa-solid fa-shield-halved fs-5"></i></div>
+                        <div class="ms-3">
+                            <h6 class="fw-bold mb-1">Safe & Secure Payment</h6>
+                            <small class="text-body-secondary">This page is currently in demo mode. Actual payment gateway integration will be added later.</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="col-12 col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-3 p-md-4">
+                    <h5 class="fw-bold mb-4"><i class="fa-solid fa-receipt text-danger me-2"></i>Ride Summary</h5>
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <span class="text-body-secondary">Booking ID</span>
+                        <strong class="text-end text-break">#{{ booking_data.booking_id|default:booking_data.request_number|default:request_id }}</strong>
+                    </div>
+                    <div class="d-flex align-items-center my-3">
+                        <div class="rounded-circle bg-success bg-opacity-10 text-success p-3"><i class="fa-solid fa-location-dot"></i></div>
+                        <div class="ms-3 min-w-0">
+                            <small class="text-body-secondary">Pickup</small>
+                            <h6 class="fw-semibold mb-0 text-break">{{ booking_data.pickup_location|default:booking_data.pickup|default:"Not selected" }}</h6>
+                        </div>
+                    </div>
+                    <div class="border-start border-2 ms-4 py-2"></div>
+                    <div class="d-flex align-items-center my-3">
+                        <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3"><i class="fa-solid fa-location-crosshairs"></i></div>
+                        <div class="ms-3 min-w-0">
+                            <small class="text-body-secondary">Destination</small>
+                            <h6 class="fw-semibold mb-0 text-break">{{ booking_data.destination|default:booking_data.drop|default:"Not selected" }}</h6>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-between gap-3 mb-3"><span class="text-body-secondary">Ride Type</span><strong class="text-end">{{ booking_data.ride_type|default:"Not selected" }}</strong></div>
+                    <div class="d-flex justify-content-between gap-3 mb-3"><span class="text-body-secondary">Date</span><strong class="text-end">{{ booking_data.ride_date|default:"Not selected" }}</strong></div>
+                    <div class="d-flex justify-content-between gap-3 mb-3"><span class="text-body-secondary">Time</span><strong class="text-end">{{ booking_data.ride_time|default:"Not selected" }}</strong></div>
+                    <div class="d-flex justify-content-between gap-3 mb-3"><span class="text-body-secondary">Passengers</span><strong>{{ booking_data.passengers|default:"1" }}</strong></div>
+                    {% if booking_data.distance %}
+                    <div class="d-flex justify-content-between gap-3 mb-3"><span class="text-body-secondary">Distance</span><strong>{{ booking_data.distance }} km</strong></div>
+                    {% endif %}
+                    <hr>
+                    <div class="d-flex justify-content-between gap-3 mb-2"><span class="text-body-secondary">Base Fare</span><span class="text-nowrap">₹{{ booking_data.base_fare|default:"0" }}</span></div>
+                    <div class="d-flex justify-content-between gap-3 mb-2"><span class="text-body-secondary">Ride Charge</span><span class="text-nowrap">₹{{ booking_data.ride_charge|default:"0" }}</span></div>
+                    <div class="d-flex justify-content-between gap-3 mb-2"><span class="text-body-secondary">Platform Fee</span><span class="text-nowrap">₹{{ booking_data.platform_fee|default:"0" }}</span></div>
+                    {% if booking_data.discount_amount %}
+                    <div class="d-flex justify-content-between gap-3 mb-2"><span class="text-body-secondary">Discount</span><span class="text-success text-nowrap">−₹{{ booking_data.discount_amount }}</span></div>
+                    {% endif %}
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center gap-3">
+                        <span class="fw-bold">Total Amount</span>
+                        <strong class="fs-4 text-danger text-nowrap">₹{{ booking_data.total_amount|default:booking_data.estimate_fare|default:booking_data.fare|default:"0" }}</strong>
+                    </div>
+                    {% if booking_data.payment_status %}
+                    <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
+                        <span class="text-body-secondary">Payment Status</span>
+                        <span class="badge {% if booking_data.payment_status == 'success' %}text-bg-success{% elif booking_data.payment_status == 'failed' %}text-bg-danger{% elif booking_data.payment_status == 'refunded' %}text-bg-info{% else %}text-bg-warning{% endif %}">{{ booking_data.payment_status|title }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm rounded-4 mt-3">
+                <div class="card-body p-3 p-md-4">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-body-tertiary text-danger p-3"><i class="fa-solid fa-headset fs-5"></i></div>
+                        <div class="ms-3">
+                            <h6 class="fw-bold mb-1">Need Help?</h6>
+                            <small class="text-body-secondary">Contact NandiRide support for payment-related issues.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     {% else %}
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body text-center py-5">
-                <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center p-4 mb-3">
-                    <i class="fa-solid fa-receipt fs-3"></i>
-                </div>
-                <h4 class="fw-bold">No Booking Found</h4>
-                <p class="text-muted">Please create a booking before making payment.</p>
-                <a href="{% url 'booking' %}" class="btn btn-danger rounded-pill px-4">
-                    <i class="fa-solid fa-car me-2"></i>
-                    Book a Ride
-                </a>
-            </div>
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body text-center py-5">
+            <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center p-4 mb-3"><i class="fa-solid fa-receipt fs-3"></i></div>
+            <h4 class="fw-bold">No Booking Found</h4>
+            <p class="text-body-secondary">Please create a booking before making payment.</p>
+            <a href="{% url 'booking' %}" class="btn btn-danger rounded-pill px-4"><i class="fa-solid fa-car me-2"></i>Book a Ride</a>
         </div>
+    </div>
     {% endif %}
 </div>
+<script>
+(function () {
+    const detailIds = {
+        upi: 'upiDetails',
+        card: 'cardDetails',
+        netbanking: 'netbankingDetails',
+        wallet: 'walletDetails',
+        cash: 'cashDetails'
+    };
+    const form = document.getElementById('paymentForm');
+    if (!form) return;
+    const upiMessage = document.getElementById('upiAppMessage');
+    const selectedUpiApp = document.getElementById('selectedUpiApp');
+    const upiOptions = document.querySelectorAll('.upi-app-option');
+    const submitButton = document.getElementById('paymentSubmit');
+    const amount = '{{ booking_data.total_amount|default:booking_data.estimate_fare|default:booking_data.fare|default:"0"|escapejs }}';
+    const upiNames = {
+        google_pay: 'Google Pay',
+        phonepe: 'PhonePe',
+        bhim: 'BHIM UPI',
+        other: 'Other UPI'
+    };
+    function updateUpiButtons() {
+        upiOptions.forEach(function (radio) {
+            const label = document.querySelector('label[for="' + radio.id + '"]');
+            if (!label) return;
+            const active = radio.checked || radio.dataset.hovered === 'true';
+            label.classList.remove('btn-danger', 'btn-outline-danger', 'bg-body', 'text-body', 'text-white');
+            if (active) {
+                label.classList.add('btn-danger', 'text-white');
+                label.style.backgroundColor = '#dc3545';
+                label.style.borderColor = '#dc3545';
+                label.style.color = '#ffffff';
+            } else {
+                label.classList.add('btn-outline-danger', 'bg-body', 'text-body');
+                label.style.backgroundColor = '';
+                label.style.borderColor = '';
+                label.style.color = '';
+            }
+        });
+    }
+    upiOptions.forEach(function (radio) {
+        const label = document.querySelector('label[for="' + radio.id + '"]');
+        if (!label) return;
+        radio.dataset.hovered = 'false';
+        label.addEventListener('mouseenter', function () {
+            radio.dataset.hovered = 'true';
+            updateUpiButtons();
+        });
+        label.addEventListener('mouseleave', function () {
+            radio.dataset.hovered = 'false';
+            updateUpiButtons();
+        });
+        radio.addEventListener('change', function () {
+            if (selectedUpiApp) selectedUpiApp.value = this.value;
+            updateUpiButtons();
+            if (upiMessage) {
+                upiMessage.textContent = upiNames[this.value] + ' selected. Demo payment only; no money will be transferred.';
+                upiMessage.classList.remove('d-none');
+            }
+        });
+    });
+    function showPaymentDetails(method) {
+        Object.keys(detailIds).forEach(function (key) {
+            const panel = document.getElementById(detailIds[key]);
+            if (panel) panel.classList.toggle('d-none', key !== method);
+        });
+        if (submitButton) {
+            if (method === 'cash') {
+                submitButton.innerHTML = '<i class="fa-solid fa-car me-2"></i>Book Ride & Pay Driver';
+            } else {
+                submitButton.innerHTML = '<i class="fa-solid fa-check-circle me-2"></i>Confirm Demo Payment · ₹' + amount;
+            }
+        }
+        if (upiMessage && method !== 'upi') {
+            upiMessage.classList.add('d-none');
+            upiMessage.textContent = '';
+        }
+    }
+    document.querySelectorAll('input[name="payment_type"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            if (this.checked) showPaymentDetails(this.value);
+        });
+    });
+    form.addEventListener('submit', function (event) {
+        const selected = form.querySelector('input[name="payment_type"]:checked');
+        if (!selected) {
+            event.preventDefault();
+            window.alert('Please select a payment method.');
+            return;
+        }
+        if (selected.value === 'upi' && !selectedUpiApp.value) {
+            event.preventDefault();
+            window.alert('Please select Google Pay, PhonePe, BHIM UPI or Other UPI.');
+            return;
+        }
+        if (selected.value === 'netbanking') {
+            const bank = document.getElementById('bank_name');
+            if (bank && !bank.value) {
+                event.preventDefault();
+                window.alert('Please select your bank.');
+                bank.focus();
+                return;
+            }
+        }
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Processing...';
+        }
+    });
+    updateUpiButtons();
+    const initialUpi = form.querySelector('.upi-app-option:checked');
+    if (initialUpi && selectedUpiApp) selectedUpiApp.value = initialUpi.value;
+    const initial = form.querySelector('input[name="payment_type"]:checked');
+    if (initial) showPaymentDetails(initial.value);
+})();
+</script>
 {% endblock %}

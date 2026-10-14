@@ -4,17 +4,15 @@
 <div class="container-fluid mt-auto rounded-3">
     <div class="row g-0">
         <aside class="col-md-3 col-lg-2 bg-white border-end min-vh-100 d-none d-md-block">
-            <div class="position-sticky top-0 p-3">
+            <div class="position-sticky p-3" style="top:80px;">
                 <div class="text-center mb-4">
-                    <img src="{% static 'user/images/user_image.jpg' %}" alt="NandiRide" class="img-fluid rounded-circle shadow-sm" style="width:90px;height:90px;object-fit:cover;">
-                    <h6 class="fw-bold mt-3 mb-1">NandiRide</h6>
-                    <small class="text-secondary">Ride Booking</small>
+                    <img src="{% static 'user/images/nandi.png' %}" alt="NandiRide" class="img-fluid rounded-circle shadow-sm" style="width:90px;height:90px;object-fit:cover;">
                 </div>
-                <div class="nav flex-column nav-pills gap-2">
+                <div class="nav flex-column gap-2">
                     {% for item in sidebar_menu %}
-                    <a href="{% url item.url %}" class="nav-link slide d-flex align-items-center px-3 py-2 {% if request.resolver_match.url_name == item.url %}active bg-danger text-white{% endif %}">
-                        <span class="me-3"><i class="{{ item.icon }}"></i></span>
-                        <span>{{ item.name }}</span>
+                    <a href="{% url item.url %}" class="nav-link  fw-bold d-flex align-items-center gap-3 px-3 py-2 rounded-pill text-decoration-none {% if request.resolver_match.url_name == item.url %}active bg-danger text-white fw-bold{% else %}text-dark fw-normal{% endif %}" {% if request.resolver_match.url_name == item.url %}aria-current="page"{% endif %}>
+                        <i class="{{ item.icon }} flex-shrink-0 text-center {% if request.resolver_match.url_name == item.url %}text-white fw-bold{% endif %}" style="width:22px;"></i>
+                        <span class="d-inline-block flex-grow-1 text-start text-wrap {% if request.resolver_match.url_name == item.url %}text-white fw-bold{% endif %}">{% firstof item.name item.url %}</span>
                     </a>
                     {% endfor %}
                 </div>
@@ -30,12 +28,12 @@
             </div>
         </aside>
         <div class="col-12 d-md-none bg-white border-bottom shadow-sm p-3">
-            <div class="d-flex align-items-center justify-content-between">
-                <button class="btn btn-danger rounded-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="Open navigation">
+            <div class="d-flex align-items-center justify-content-between gap-2">
+                <button class="btn btn-danger rounded-3 flex-shrink-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="Open navigation">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <div class="fw-bold fs-5">Nandi<span class="text-danger">Ride</span></div>
-                <div class="dropdown">
+                <div class="fw-bold fs-5 text-nowrap">Nandi<span class="text-danger">Ride</span></div>
+                <div class="dropdown flex-shrink-0">
                     <button class="btn btn-light border rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
                         <i class="fa-solid fa-user text-danger"></i>
                     </button>
@@ -45,15 +43,14 @@
                         <li><a class="dropdown-item" href="{% url 'resetpassword' %}"><i class="fa-solid fa-key me-2"></i>Change Password</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                        <button type="button" class="dropdown-item text-danger rounded-2 py-2" data-bs-toggle="modal" data-bs-target="#signOutModal">
-                            <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
-                        </button>
+                            <button type="button" class="dropdown-item text-danger rounded-2 py-2" data-bs-toggle="modal" data-bs-target="#signOutModal">
+                                <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                            </button>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
-        <!-- Logout Confirmation Modal -->
         {% if user.is_authenticated %}
         <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -78,7 +75,7 @@
             </div>
         </div>
         {% endif %}
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel" style="width:min(300px,85vw);">
             <div class="offcanvas-header border-bottom">
                 <div class="d-flex align-items-center">
                     <img src="{% static 'user/images/user_image.jpg' %}" alt="NandiRide" class="rounded-circle me-2" style="width:45px;height:45px;object-fit:cover;">
@@ -89,15 +86,16 @@
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
-            <div class="offcanvas-body">
+            <div class="offcanvas-body d-flex flex-column">
                 <div class="nav flex-column gap-2">
                     {% for item in sidebar_menu %}
-                    <div class="nav-item">
-                        <a href="{% url item.url %}" class="nav-link slide d-flex align-items-center px-3 py-2 fw-bold rounded-pill {% if request.resolver_match.url_name == item.url %}active bg-danger text-white{% endif %}">
-                            <i class="{{ item.icon }} me-2"></i>
-                            <span>{{ item.name }}</span>
-                        </a>
-                    </div>
+                    <a href="{% url item.url %}" class="nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-3 text-decoration-none {% if request.resolver_match.url_name == item.url %}active bg-danger text-white fw-bold{% else %}text-dark fw-normal{% endif %}" {% if request.resolver_match.url_name == item.url %}aria-current="page"{% endif %}>
+                        <i class="{{ item.icon }} flex-shrink-0 text-center {% if request.resolver_match.url_name == item.url %}text-white fw-bold{% endif %}" style="width:24px;"></i>
+                        <span class="d-inline-block flex-grow-1 text-start text-wrap {% if request.resolver_match.url_name == item.url %}text-white fw-bold{% endif %}">{% firstof item.name item.url %}</span>
+                        {% if request.resolver_match.url_name == item.url %}
+                        <i class="fa-solid fa-check flex-shrink-0 ms-auto text-white fw-bold"></i>
+                        {% endif %}
+                    </a>
                     {% endfor %}
                 </div>
                 <div class="bg-danger-subtle rounded-3 p-3 mt-4">
@@ -114,26 +112,16 @@
         <main class="col-12 col-md-9 col-lg-10 bg-light min-vh-100">
             <header class="bg-white border-bottom shadow-sm px-3 px-md-4 py-3">
                 <div class="d-flex justify-content-between align-items-center gap-2">
-                    <div>
-                        <h4 class="fw-bold mb-1">{% block page_heading %}Dashboard{% endblock %}</h4>
+                    <div class="min-w-0">
+                        <h4 class="fw-bold mb-1 text-break">{% block page_heading %}Dashboard{% endblock %}</h4>
                         <small class="text-secondary d-none d-sm-block">Welcome to your NandiRide dashboard</small>
                     </div>
                 </div>
             </header>
-            <div class="p-2 p-md-2 mb-lg-0">
+            <div class="p-2 p-md-3 mb-lg-0">
                 {% block dashboard_content %}{% endblock %}
             </div>
         </main>
     </div>
 </div>
-{% if messages %}
-<div class="position-fixed top-0 end-0 p-3" style="z-index:1100;max-width:400px;width:100%;">
-    {% for message in messages %}
-    <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show shadow-sm" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
 {% endblock content %}

@@ -4,7 +4,7 @@ from user import views
 urlpatterns = [
     
     path('', views.HomeView.as_view(), name='home'),
-    path('cancel-ride/', views.CancelRideView.as_view(), name='cancel-ride'),
+    path('cancel/ride/', views.CancelRideView.as_view(), name='cancel-ride'),
     path('booking/', views.UserBookingView.as_view(), name='booking'),
     path('payment/', views.UserPaymentView.as_view(), name='payment'),
     path('myride/', views.UserMyRideView.as_view(), name='myride'),
