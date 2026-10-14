@@ -11,12 +11,12 @@ class AdminInactivityTimeoutMiddleware:
             if last_activity:
                 try:
                     last_activity=timezone.datetime.fromtimestamp(float(last_activity),tz=timezone.get_current_timezone())
-                    if (now-last_activity).total_seconds()>=1800:
+                    if (now-last_activity).total_seconds()>=600:
                         logout(request)
                         request.session.flush()
                         return redirect("/accounts/login/")
                 except (TypeError,ValueError,OverflowError):
                     request.session.pop("admin_last_activity",None)
             request.session["admin_last_activity"]=now.timestamp()
-            request.session.set_expiry(1800)
+            request.session.set_expiry(600)
         return self.get_response(request)

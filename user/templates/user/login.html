@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     function showMaskedMobile() {
         const value = mobileInput.value.trim();
-        maskedMobile.textContent = '+91 ' + value.slice(0, 2) + 'XXXXXX' + value.slice(-2);
+        maskedMobile.textContent = '+91 ' + value;
     }
     function resetOtpInputs() {
         otpDigits.forEach(input => input.value = '');
