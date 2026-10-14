@@ -83,10 +83,10 @@
                                         <div class="mb-3">
                                             <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
                                             {% if field.name == 'password' %}
-                                            <div class="input-group">
+                                            <div class="position-relative">
                                                 {{ field }}
-                                                <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePassword" aria-label="Show password">
-                                                    <i class="fa-solid fa-eye" id="passwordIcon"></i>
+                                                <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent text-secondary px-3" data-target="{{ field.id_for_label }}" aria-label="Show password" aria-controls="{{ field.id_for_label }}" style="z-index:5;" >
+                                                    <i class="fa-solid fa-eye"></i>
                                                 </button>
                                             </div>
                                             {% else %}
@@ -348,19 +348,16 @@ document.addEventListener('DOMContentLoaded', function () {
     otpModalElement.addEventListener('hidden.bs.modal', function () {
         clearInterval(countdownInterval);
     });
-    if (togglePassword) {
-        const password = document.querySelector('#loginForm input[name="password"]');
-        if (password) {
-            password.classList.add('form-control', 'form-control-lg', 'bg-light');
-            password.setAttribute('autocomplete', 'current-password');
-            togglePassword.addEventListener('click', function () {
-                const show = password.type === 'password';
-                password.type = show ? 'text' : 'password';
-                passwordIcon.className = show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
-                togglePassword.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
-            });
-        }
-    }
+    document.querySelectorAll('[data-target]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const input = document.getElementById(button.dataset.target);
+            if (!input) return;
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            button.innerHTML = show ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+            button.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        });
+    });
     const username = document.querySelector('#loginForm input[name="username"]');
     if (username) {
         username.classList.add('form-control', 'form-control-lg', 'bg-light');

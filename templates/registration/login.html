@@ -3,24 +3,23 @@
 {% block title %}Login{% endblock %}
 {% block body_class %}bg-body-tertiary overflow-hidden{% endblock %}
 {% block page_layout %}
-<main class="app-main overflow-hidden" style="padding-top:57px;height:100vh;min-height:100vh;">
-    <div class="app-content h-100 overflow-hidden">
-        <div class="container-fluid h-100 d-flex align-items-center justify-content-center px-3" style="padding-top:74px;padding-bottom:24px;">
-            <div class="row justify-content-center w-100">
-                <div class="col-12 col-lg-9 col-xl-8">
-                    <div class="card border-0 shadow rounded-4 overflow-hidden">
+<main class="app-main login-page-main">
+    <div class="app-content login-page-content">
+        <div class="container-fluid login-page-container">
+            <div class="row justify-content-center align-items-center login-page-row">
+                <div class="col-12 col-lg-9 col-xl-8 login-page-column">
+                    <div class="card border-0 shadow rounded-4 login-page-card">
                         <div class="row g-0">
                             <div class="col-md-5 d-none d-md-block">
-                                <div class="h-100 bg-primary text-white p-4 d-flex flex-column justify-content-between">
+                                <div class="bg-primary text-white p-4 d-flex flex-column justify-content-between login-page-brand-panel">
                                     <div>
                                         <div class="d-flex align-items-center mb-4">
-                                            <div class="bg-white text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:46px;height:46px;">
-                                                <!-- <i class="bi bi-car-front-fill fs-4"></i> -->
-                                                 <img src="{% static 'user/images/logo.png' %}" alt="NandiRide Logo" width="42" height="42" class="rounded-3 shadow-sm">
+                                            <div class="bg-white text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width:46px;height:46px;flex-shrink:0;">
+                                                <img src="{% static 'user/images/logo.png' %}" alt="NandiRide Logo" width="42" height="42" class="rounded-3 shadow-sm">
                                             </div>
                                             <div>
                                                 <h3 class="fw-bold mb-0">NandiRide</h3>
-                                                <small class="">Admin Portal</small>
+                                                <small>Admin Portal</small>
                                             </div>
                                         </div>
                                         <span class="badge bg-white text-primary rounded-pill px-3 py-2 mb-3">
@@ -56,17 +55,16 @@
                                 </div>
                             </div>
                             <div class="col-12 col-md-7">
-                                <div class="card-body p-4 p-lg-5">
-                                    <div class="text-center mb-4">
-                                        <div class="d-md-none bg-primary text-white rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width:48px;height:48px;">
-                                            <i class="bi bi-car-front-fill fs-4"></i>
+                                <div class="card-body login-page-form-body">
+                                    <div class="login-page-header">
+                                        <div class="login-page-header-content">
+                                            <div class="text-primary fw-semibold small text-uppercase">Administrator Login</div>
+                                            <h3 class="fw-bold mt-2 mb-1 login-page-heading">Sign in to your account</h3>
+                                            <p class="text-body-secondary small mb-0 login-page-subtitle">Enter your credentials to continue</p>
                                         </div>
-                                        <div class="text-primary fw-semibold small text-uppercase">Administrator Login</div>
-                                        <h3 class="fw-bold mt-2 mb-1">Sign in to your account</h3>
-                                        <p class="text-body-secondary small mb-0">Enter your credentials to continue</p>
                                     </div>
                                     {% if form.errors %}
-                                    <div class="alert alert-danger border-0 shadow-sm rounded-3 py-2 px-3 d-flex align-items-center mb-4" role="alert">
+                                    <div class="alert alert-danger border-0 shadow-sm rounded-3 py-2 px-3 d-flex align-items-center login-page-error" role="alert">
                                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                         <div>
                                             <span class="fw-semibold">Login failed.</span>
@@ -74,10 +72,10 @@
                                         </div>
                                     </div>
                                     {% endif %}
-                                    <form method="post" autocomplete="off">
+                                    <form method="post" autocomplete="on">
                                         {% csrf_token %}
-                                        <div class="mb-3">
-                                            <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold small mb-2">
+                                        <div class="login-page-field">
+                                            <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold small login-page-form-label">
                                                 <i class="bi bi-person-fill text-primary me-1"></i>
                                                 Username
                                             </label>
@@ -86,8 +84,8 @@
                                                 {{ form.username }}
                                             </div>
                                         </div>
-                                        <div class="mb-4">
-                                            <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold small mb-2">
+                                        <div class="login-page-password-field">
+                                            <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold small login-page-form-label">
                                                 <i class="bi bi-lock-fill text-primary me-1"></i>
                                                 Password
                                             </label>
@@ -99,12 +97,12 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-3 py-2 shadow-sm">
+                                        <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-3 py-2 shadow-sm login-page-submit">
                                             <i class="bi bi-box-arrow-in-right me-2"></i>
                                             Sign In to Dashboard
                                         </button>
                                     </form>
-                                    <div class="row g-0 border-top mt-4 pt-3 text-center">
+                                    <div class="row g-0 border-top text-center login-page-features">
                                         <div class="col-4">
                                             <i class="bi bi-shield-check text-primary"></i>
                                             <div class="small text-body-secondary mt-1">Secure</div>
@@ -118,7 +116,7 @@
                                             <div class="small text-body-secondary mt-1">Reliable</div>
                                         </div>
                                     </div>
-                                    <div class="text-center mt-3">
+                                    <div class="text-center login-page-footer">
                                         <small class="text-body-secondary">
                                             <i class="bi bi-c-circle me-1"></i>
                                             NandiRide Admin Portal
@@ -142,12 +140,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const togglePassword = document.getElementById("togglePassword");
     const passwordIcon = document.getElementById("passwordIcon");
     if (username) {
-        username.classList.add("form-control","rounded-3","ps-5","py-2");
-        username.style.minHeight = "46px";
+        username.classList.add("form-control", "rounded-3", "ps-5", "py-2", "login-page-input");
+        username.style.minHeight = "inherit";
+        username.setAttribute("autocomplete", "username");
+        username.setAttribute("autocapitalize", "none");
+        username.setAttribute("spellcheck", "false");
     }
     if (password) {
-        password.classList.add("form-control","rounded-3","ps-5","pe-5","py-2");
-        password.style.minHeight = "46px";
+        password.classList.add("form-control", "rounded-3", "ps-5", "pe-5", "py-2", "login-page-input");
+        password.style.minHeight = "inherit";
+        password.setAttribute("autocomplete", "current-password");
     }
     if (togglePassword && password && passwordIcon) {
         togglePassword.addEventListener("click", function () {
