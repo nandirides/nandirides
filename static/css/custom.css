@@ -603,3 +603,94 @@ body {
         transition:none!important;
     }
 }
+
+html,body{width:100%;height:100%;margin:0;overflow:hidden!important}
+.login-page-main{box-sizing:border-box;height:100vh;height:100dvh;min-height:0!important;padding-top:57px!important;overflow:hidden!important}
+.login-page-content{box-sizing:border-box;height:100%;min-height:0!important;overflow:hidden!important}
+.login-page-container{box-sizing:border-box;height:100%;min-height:0!important;padding:16px 16px 24px!important;display:flex;align-items:center;justify-content:center;overflow:hidden!important}
+.login-page-row{width:100%;margin:0!important;min-height:0}
+.login-page-column{min-width:0}
+.login-page-card{width:100%;max-height:100%;border-radius:1rem!important;overflow:hidden!important}
+.login-page-card>.row{min-height:0}
+.login-page-brand-panel{min-height:0;height:100%;overflow:hidden}
+.login-page-form-body{padding:clamp(1rem,2.5vh,2rem) clamp(1rem,3vw,3rem);min-width:0}
+.login-page-input{min-height:42px}
+.login-page-mobile-logo{width:48px;height:48px}
+.login-page-header{position:relative;padding:0}
+.login-page-header-content{width:100%;text-align:center}
+.login-page-corner-logo{display:none!important}
+.login-page-heading{font-size:clamp(1.15rem,2vw,1.5rem)}
+.login-page-subtitle{font-size:clamp(.75rem,1.2vw,.875rem)}
+.login-page-field{margin-bottom:.8rem!important}
+.login-page-password-field{margin-bottom:1rem!important}
+.login-page-form-label{margin-bottom:.4rem!important}
+.login-page-features{margin-top:1rem!important;padding-top:.65rem!important}
+.login-page-footer{margin-top:.65rem!important}
+.login-page-submit{min-height:42px}
+.login-page-error{font-size:.875rem;margin-bottom:1rem!important}
+@media(max-width:991.98px){
+    .login-page-container{padding:12px 16px 20px!important}
+    .login-page-column{width:100%;padding:0!important}
+    .login-page-card{max-width:560px;margin:0 auto;border-radius:18px!important}
+    .login-page-form-body{padding:clamp(.85rem,2.2vh,1.4rem) clamp(1rem,4vw,1.5rem)!important}
+    .login-page-header{margin-bottom:1rem!important}
+    .login-page-heading{font-size:clamp(1.1rem,3vw,1.4rem)}
+    .login-page-input{min-height:40px;font-size:16px}
+    .login-page-submit{min-height:42px;padding-top:.45rem!important;padding-bottom:.45rem!important}
+    .login-page-features{margin-top:.8rem!important;padding-top:.55rem!important}
+    .login-page-footer{margin-top:.5rem!important}
+}
+@media(max-width:767.98px){
+    .login-page-main{padding-top:57px!important}
+    .login-page-content{height:100%;min-height:0!important}
+    .login-page-container{padding:12px 12px 20px!important}
+    .login-page-row{flex:0 1 auto}
+    .login-page-card{width:100%;max-width:480px;max-height:100%;margin:0 auto!important;border-radius:18px!important;clip-path:inset(0 round 18px)}
+    .login-page-form-body{padding:clamp(.7rem,2.2vh,1.2rem) clamp(.9rem,4vw,1.25rem)!important}
+    .login-page-header{padding:0!important;margin-bottom:clamp(.65rem,1.8vh,1rem)!important}
+    .login-page-heading{font-size:clamp(1.05rem,4.5vw,1.35rem);margin-top:.4rem!important}
+    .login-page-subtitle{font-size:.78rem}
+    .login-page-form-label{font-size:.8rem!important;margin-bottom:.3rem!important}
+    .login-page-field{margin-bottom:clamp(.5rem,1.5vh,.8rem)!important}
+    .login-page-password-field{margin-bottom:clamp(.65rem,1.7vh,1rem)!important}
+    .login-page-input{min-height:40px;font-size:16px}
+    .login-page-submit{min-height:42px;font-size:.9rem}
+    .login-page-features{margin-top:clamp(.6rem,1.8vh,.9rem)!important;padding-top:.5rem!important}
+    .login-page-features .small{font-size:.75rem}
+    .login-page-footer{margin-top:.5rem!important}
+    .login-page-error{padding:.5rem .65rem!important;font-size:.78rem;margin-bottom:.7rem!important}
+}
+@media(max-width:360px){
+    .login-page-container{padding:8px 8px 16px!important}
+    .login-page-form-body{padding:.65rem .8rem!important}
+    .login-page-heading{font-size:1.05rem}
+    .login-page-subtitle{font-size:.72rem}
+    .login-page-features .small{font-size:.68rem}
+    .login-page-submit{font-size:.82rem}
+}
+@media(max-height:760px){
+    .login-page-container{padding-top:8px!important;padding-bottom:12px!important}
+    .login-page-form-body{padding-top:.75rem!important;padding-bottom:.75rem!important}
+    .login-page-header{margin-bottom:.7rem!important}
+    .login-page-heading{margin-top:.3rem!important}
+    .login-page-field{margin-bottom:.55rem!important}
+    .login-page-password-field{margin-bottom:.7rem!important}
+    .login-page-features{margin-top:.65rem!important;padding-top:.45rem!important}
+    .login-page-footer{margin-top:.4rem!important}
+}
+@media(max-height:650px){
+    .login-page-container{padding:4px 10px 8px!important}
+    .login-page-form-body{padding:.5rem 1rem!important}
+    .login-page-header{margin-bottom:.45rem!important}
+    .login-page-heading{font-size:1.05rem;margin-top:.2rem!important}
+    .login-page-subtitle{font-size:.7rem}
+    .login-page-form-label{margin-bottom:.2rem!important}
+    .login-page-field{margin-bottom:.4rem!important}
+    .login-page-password-field{margin-bottom:.5rem!important}
+    .login-page-input{min-height:36px}
+    .login-page-submit{min-height:38px;padding-top:.3rem!important;padding-bottom:.3rem!important}
+    .login-page-features{margin-top:.45rem!important;padding-top:.35rem!important}
+    .login-page-features .small{margin-top:0!important;font-size:.68rem}
+    .login-page-footer{margin-top:.3rem!important}
+    .login-page-error{padding:.3rem .5rem!important;margin-bottom:.4rem!important}
+}

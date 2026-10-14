@@ -270,7 +270,7 @@ class About(TemplateView):
         context = super().get_context_data(**kwargs)
         context.update({
             "site_name": "NandiRide",
-            "about_hero": {"title": "Ride Smarter,", "highlight": "Travel Better", "description": "NandiRide makes everyday travel simple, reliable and convenient with safe rides and a smooth booking experience.", "button": "Book Your Ride", "button_icon": "fa-solid fa-car", "button_url": reverse("booking"), "secondary_button": "Contact Us", "secondary_button_icon": "fa-solid fa-headset", "secondary_button_url": reverse("contact")},
+            "about_hero": {"title": "Ride Smarter,", "highlight": "Travel Better", "description": "NandiRide makes everyday travel simple, reliable and convenient with safe rides and a smooth booking experience.", "button": "Book Your Ride", "button_icon": "fa-solid fa-car", "button_url": reverse("booking"), "secondary_button": "Contact Us", "secondary_button_icon": "fa-solid fa-headset", "secondary_button_url": reverse("user-contact")},
             "about_intro": {"small": "WHO WE ARE", "title": "Your Journey, Our Responsibility", "description": "NandiRide is built to provide a simple, comfortable and reliable ride booking experience for everyone. From booking to payment, we focus on making every step easy."},
             "about_features": [
                 {"icon": "fa-solid fa-shield-halved", "title": "Safe & Reliable", "description": "We focus on providing dependable rides and a comfortable travel experience."},
@@ -318,7 +318,7 @@ class ServicesView(TemplateView):
                 {"icon": "fa-solid fa-calendar-check", "title": "Schedule a Ride", "description": "Plan your journey in advance and schedule your ride according to your time.", "features": ["Advance booking", "Flexible timing", "Easy planning"], "button": "Schedule", "button_icon": "fa-solid fa-calendar-days", "url": "booking", "popular": False, "popular_text": "Popular"},
                 {"icon": "fa-solid fa-credit-card", "title": "Easy Payments", "description": "Enjoy a simple and convenient payment experience after every ride.", "features": ["Secure payment", "Multiple options", "Payment history"], "button": "View Payment", "button_icon": "fa-solid fa-wallet", "url": "payment", "popular": False, "popular_text": "Popular"},
                 {"icon": "fa-solid fa-route", "title": "Long Distance Ride", "description": "Travel comfortably between cities with convenient long-distance rides.", "features": ["Comfortable travel", "Flexible routes", "Reliable service"], "button": "Book Ride", "button_icon": "fa-solid fa-arrow-right", "url": "booking", "popular": False, "popular_text": "Popular"},
-                {"icon": "fa-solid fa-headset", "title": "24/7 Support", "description": "Our support team is available to help you whenever you need assistance.", "features": ["Quick assistance", "Ride support", "Customer care"], "button": "Contact Us", "button_icon": "fa-solid fa-headset", "url": "contact", "popular": False, "popular_text": "Popular"},
+                {"icon": "fa-solid fa-headset", "title": "24/7 Support", "description": "Our support team is available to help you whenever you need assistance.", "features": ["Quick assistance", "Ride support", "Customer care"], "button": "Contact Us", "button_icon": "fa-solid fa-headset", "url": "user-contact", "popular": False, "popular_text": "Popular"},
             ],
             "empty_services": {"title": "No Services Available", "description": "Services will be displayed here when they are available."},
             "cta": {"icon": "fa-solid fa-road", "badge": "START YOUR JOURNEY", "title": "Ready For Your Next Ride?", "description": "Book your journey with NandiRide today and enjoy a simple travel experience.", "button": "Book Now", "button_icon": "fa-solid fa-car", "url": "booking"},
@@ -342,10 +342,10 @@ class CareerView(TemplateView):
                 {"icon": "fa-solid fa-heart", "title": "People First", "description": "We care about our people and aim to create a positive and respectful workplace."},
             ],
             "jobs": [
-                {"icon": "fa-solid fa-code", "title": "Django Backend Developer", "department": "Technology", "location": "India", "type": "Full Time", "experience": "1-3 Years", "salary": "Competitive", "description": "Build scalable backend services and APIs for the NandiRide ride booking platform.", "skills": ["Python", "Django", "DRF", "PostgreSQL"], "url": "contact", "featured": True},
-                {"icon": "fa-solid fa-mobile-screen-button", "title": "React Native Developer", "department": "Technology", "location": "India", "type": "Full Time", "experience": "1-3 Years", "salary": "Competitive", "description": "Create smooth and reliable mobile experiences for NandiRide customers and drivers.", "skills": ["React Native", "JavaScript", "API", "Git"], "url": "contact", "featured": False},
-                {"icon": "fa-solid fa-headset", "title": "Customer Support Executive", "department": "Customer Support", "location": "India", "type": "Full Time", "experience": "0-2 Years", "salary": "Competitive", "description": "Help customers with bookings, rides, payments and general NandiRide support.", "skills": ["Communication", "Customer Service", "Problem Solving"], "url": "contact", "featured": False},
-                {"icon": "fa-solid fa-gears", "title": "Operations Executive", "department": "Operations", "location": "India", "type": "Full Time", "experience": "1-3 Years", "salary": "Competitive", "description": "Support daily ride operations and help maintain a reliable experience for customers and drivers.", "skills": ["Operations", "Management", "Communication"], "url": "contact", "featured": False},
+                {"icon": "fa-solid fa-code", "title": "Django Backend Developer", "department": "Technology", "location": "India", "type": "Full Time", "experience": "1-3 Years", "salary": "Competitive", "description": "Build scalable backend services and APIs for the NandiRide ride booking platform.", "skills": ["Python", "Django", "DRF", "PostgreSQL"], "url": "user-contact", "featured": True},
+                {"icon": "fa-solid fa-mobile-screen-button", "title": "React Native Developer", "department": "Technology", "location": "India", "type": "Full Time", "experience": "1-3 Years", "salary": "Competitive", "description": "Create smooth and reliable mobile experiences for NandiRide customers and drivers.", "skills": ["React Native", "JavaScript", "API", "Git"], "url": "user-contact", "featured": False},
+                {"icon": "fa-solid fa-headset", "title": "Customer Support Executive", "department": "Customer Support", "location": "India", "type": "Full Time", "experience": "0-2 Years", "salary": "Competitive", "description": "Help customers with bookings, rides, payments and general NandiRide support.", "skills": ["Communication", "Customer Service", "Problem Solving"], "url": "user-contact", "featured": False},
+                {"icon": "fa-solid fa-gears", "title": "Operations Executive", "department": "Operations", "location": "India", "type": "Full Time", "experience": "1-3 Years", "salary": "Competitive", "description": "Support daily ride operations and help maintain a reliable experience for customers and drivers.", "skills": ["Operations", "Management", "Communication"], "url": "user-contact", "featured": False},
             ],
         })
         return context
@@ -422,7 +422,7 @@ class ContactView(TemplateView):
                 message=message,
             )
             messages.success(request, "Thank you for contacting NandiRide. Your message has been submitted successfully.")
-            return redirect("contact")
+            return redirect("user-contact")
         except Exception:
             messages.error(request, "We could not submit your message. Please try again.")
             return self.render_to_response(self.get_context_data())
@@ -724,7 +724,7 @@ class UserSignupView(TemplateView):
                     user.save()
                     form.save_profile(user)
                 messages.success(request, "Account created. Please log in.")
-                return redirect("login")
+                return redirect("user-login")
             except (AttributeError, TypeError, ValidationError) as exc:
                 messages.error(request, f"Unable to create account: {exc}")
         return render(request, self.template_name, {"form": form, "social_links": SOCIAL_LINKS})
@@ -860,7 +860,7 @@ class HelpChatbotView(View):
             reply = "Open My Rides and use the cancellation option if your ride is eligible."
         elif "booking id" in message or message == "id":
             reply = f"Your booking ID is {booking_data.get('booking_id')}." if booking_data else "No booking was found for your account."
-        elif any(word in message for word in ["contact", "support", "help"]):
+        elif any(word in message for word in ["user-contact", "support", "help"]):
             reply = "Contact NandiRide support at support@nandiride.com or use the Contact page."
         else:
             reply = "You can ask about booking, payment, tracking, cancellation, booking ID, or support."

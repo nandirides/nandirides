@@ -45,15 +45,39 @@
                         <li><a class="dropdown-item" href="{% url 'resetpassword' %}"><i class="fa-solid fa-key me-2"></i>Change Password</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <form method="post" action="{% url 'logout' %}" class="m-0">
-                                {% csrf_token %}
-                                <button type="submit" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</button>
-                            </form>
+                        <button type="button" class="dropdown-item text-danger rounded-2 py-2" data-bs-toggle="modal" data-bs-target="#signOutModal">
+                            <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                        </button>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
+        <!-- Logout Confirmation Modal -->
+        {% if user.is_authenticated %}
+        <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-body text-center p-4">
+                        <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px;height:70px;">
+                            <i class="fa-solid fa-right-from-bracket text-danger fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-2" id="signOutModalLabel">Logout Confirmation</h5>
+                        <p class="text-muted mb-4">Are you sure you want to logout from your NandiRide account?</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                            <form method="post" action="{% url 'logoutUser' %}" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger rounded-pill px-4">
+                                    <i class="fa-solid fa-right-from-bracket me-1"></i>Yes, Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
             <div class="offcanvas-header border-bottom">
                 <div class="d-flex align-items-center">

@@ -1,4 +1,3 @@
-
 <!-- NandiRide Floating Chatbot -->
 <button type="button" id="openChatbot" class="btn btn-danger rounded-circle shadow-lg position-fixed d-flex align-items-center justify-content-center" style="width:64px;height:64px;right:22px;bottom:22px;z-index:1053;" aria-label="Open NandiRide Chat Assistant" aria-controls="chatbotWindow" aria-expanded="false">
     <i class="fa-solid fa-comments fs-3" id="chatLauncherIcon"></i>
@@ -220,13 +219,13 @@
         if(text.includes("payment")||text.includes("refund")||text.includes("पैसा")||text.includes("भुगतान")){
             return "Payment details ke liye Payments option open karein. Refund ya failed payment ki madad ke liye transaction details ready rakhein, lekin password ya OTP share na karein.";
         }
-        if(text.includes("support")||text.includes("contact")||text.includes("help")||text.includes("सहायता")){
+        if(text.includes("support")||text.includes("user-contact")||text.includes("help")||text.includes("सहायता")){
             return "Support team se contact karne ke liye Contact Us page visit karein. Apna issue, ride number (agar applicable ho) aur contact details share karein.";
         }
         if(text.includes("driver")||text.includes("ड्राइवर")){
             return "Driver ya ride assignment se judi madad ke liye apni ride ka status check karein aur zarurat ho to support team se contact karein.";
         }
-        if(text.includes("account")||text.includes("profile")||text.includes("login")||text.includes("अकाउंट")){
+        if(text.includes("account")||text.includes("profile")||text.includes("user-login")||text.includes("अकाउंट")){
             return "Account ya login issue ke liye profile aur account settings check karein. Apna password, OTP ya sensitive payment information chat mein share na karein.";
         }
         if(text.includes("thank")||text.includes("धन्यवाद")){

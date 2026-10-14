@@ -445,8 +445,8 @@ main {
     .navbar {
         margin-left: 0.5rem ;
         margin-right: 0.5rem ;
-        margin-top: 0.5rem !important;
-        border-radius: 0.75rem !important;
+        /* margin-top: 0.5rem !important; */
+        /* border-radius: 0.75rem !important; */
     }
 
     .navbar-brand img {
