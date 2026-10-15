@@ -61,13 +61,6 @@
         </div>
         {% endif %}
         <ul class="navbar-nav ms-auto align-items-center">
-            {% if request.resolver_match.url_name != 'login' %}
-            <li class="nav-item d-md-none">
-                <a class="nav-link rounded-circle" href="#" aria-label="Search" title="Search">
-                    <i class="bi bi-search"></i>
-                </a>
-            </li>
-            {% endif %}
             <li class="nav-item">
                 <button type="button" class="nav-link border-0 bg-transparent rounded-circle" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
                     <i class="bi bi-moon-fill" id="theme-icon"></i>

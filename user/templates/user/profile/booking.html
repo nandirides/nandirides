@@ -1,22 +1,26 @@
+
 {% extends 'user/dashboard_base.html' %}
 {% load static %}
-{% block page_heading %}My Booking{% endblock %}
-{% block title %}NandiRide | Booking{% endblock %}
+{% block page_heading %}Book a Ride{% endblock %}
+{% block title %}NandiRide | Book Your Ride{% endblock %}
 {% block dashboard_content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">My Booking</h2>
-            <p class="text-muted mb-0">Book your ride quickly and safely</p>
-        </div>
-        <span class="badge bg-danger rounded-pill px-3 py-2"><i class="fa fa-circle me-1"></i> Available</span>
-    </div>
-    <div class="row g-4">
-        <div class="col-lg-7">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-1">Trip Details</h5>
-                    <p class="text-muted small mb-4">Enter your ride details below</p>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<div class="container-fluid py-2">
+    <section class="bg-danger text-white rounded-3 p-4 mb-4">
+        <div class="small mb-2">NANDIRIDE • YOUR RIDE, YOUR WAY</div>
+        <h1 class="h2 fw-bold mb-2">Where would you like to go?</h1>
+        <p class="mb-0">Choose your locations, select your ride and proceed to secure payment.</p>
+    </section>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    <div class="row g-4 align-items-start">
+        <div class="col-12 col-xl-7">
+            <div class="card border rounded-3 shadow-sm mb-4">
+                <div class="card-body p-3 p-md-4">
+                    <h2 class="h5 fw-bold mb-1"><i class="fa fa-map-location-dot text-danger me-2"></i>Trip Details</h2>
                     <form method="POST" action="{% url 'booking' %}" id="bookingForm">
                         {% csrf_token %}
                         {{ form.booking_id }}
@@ -24,266 +28,435 @@
                             <div class="alert alert-danger">{{ form.non_field_errors }}</div>
                         {% endif %}
                         <div class="mb-3">
-                            <label for="{{ form.pickup_location.id_for_label }}" class="form-label fw-semibold">Pickup Location</label>
+                            <label for="{{ form.pickup_location.id_for_label }}" class="form-label fw-bold"><i class="fa fa-circle-dot text-success me-2"></i>Pickup Location</label>
                             {{ form.pickup_location }}
-                            {% if form.pickup_location.errors %}<div class="text-danger small mt-1">{{ form.pickup_location.errors }}</div>{% endif %}
+                            {% if form.pickup_location.errors %}
+                                <div class="text-danger small mt-1">{{ form.pickup_location.errors }}</div>
+                            {% endif %}
                         </div>
-                        <div class="mb-3">
-                            <label for="{{ form.destination.id_for_label }}" class="form-label fw-semibold">Destination</label>
+                        <div class="mb-4">
+                            <label for="{{ form.destination.id_for_label }}" class="form-label fw-bold"><i class="fa fa-location-dot text-danger me-2"></i>Destination</label>
                             {{ form.destination }}
-                            {% if form.destination.errors %}<div class="text-danger small mt-1">{{ form.destination.errors }}</div>{% endif %}
+                            {% if form.destination.errors %}
+                                <div class="text-danger small mt-1">{{ form.destination.errors }}</div>
+                            {% endif %}
                         </div>
-                        {{ form.pickup_latitude }}
-                        {{ form.pickup_longitude }}
-                        {{ form.drop_latitude }}
-                        {{ form.drop_longitude }}
-                        <div class="mb-3">
+                        {{ form.pickup_latitude }}{{ form.pickup_longitude }}{{ form.drop_latitude }}{{ form.drop_longitude }}
+                        <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label class="form-label fw-semibold mb-0">Route Map</label>
-                                <button type="button" class="btn btn-sm btn-outline-danger" id="resetMapBtn"><i class="fa fa-rotate-left me-1"></i> Reset Map</button>
+                                <label class="form-label fw-bold mb-0">Route Map</label>
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" id="resetMapBtn"><i class="fa fa-rotate-left me-1"></i>Reset</button>
                             </div>
-                            <div id="bookingMap" class="rounded-3 border" role="application" aria-label="Pickup and destination map" style="height:320px;width:100%;z-index:1;"></div>
+                            <div class="ratio ratio-4x3">
+                                <div id="bookingMap" class="border rounded-3"></div>
+                            </div>
                             <div class="d-flex flex-wrap gap-3 mt-2 small">
-                                <span><i class="fa fa-circle text-success me-1"></i> Pickup</span>
-                                <span><i class="fa fa-location-dot text-danger me-1"></i> Destination</span>
-                                <span class="text-muted" id="mapStatus" aria-live="polite">Enter locations, then select a suggested place.</span>
+                                <span><i class="fa fa-circle text-success me-1"></i>Pickup</span>
+                                <span><i class="fa fa-location-dot text-danger me-1"></i>Destination</span>
+                                <span><i class="fa fa-minus text-success me-1"></i>Road Route</span>
                             </div>
+                            <div id="mapStatus" class="badge bg-success text-white small mt-3 mb-0" role="status" aria-live="polite">Select pickup and destination to display the road route.</div>
                         </div>
-                        {% if form.pickup_latitude.errors %}<div class="text-danger small mb-2">{{ form.pickup_latitude.errors }}</div>{% endif %}
-                        {% if form.pickup_longitude.errors %}<div class="text-danger small mb-2">{{ form.pickup_longitude.errors }}</div>{% endif %}
-                        {% if form.drop_latitude.errors %}<div class="text-danger small mb-2">{{ form.drop_latitude.errors }}</div>{% endif %}
-                        {% if form.drop_longitude.errors %}<div class="text-danger small mb-2">{{ form.drop_longitude.errors }}</div>{% endif %}
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Select Ride</label>
-                            <div class="row g-3">
-                            {% for vehicle in form.ride_type.field.queryset %}
-                                <div class="col-md-4">
-                                    <input type="radio" class="btn-check" name="ride_type" id="vehicle_{{ vehicle.pk }}" value="{{ vehicle.pk }}" autocomplete="off" {% if form.ride_type.value|stringformat:"s" == vehicle.pk|stringformat:"s" %}checked{% endif %} required>
-                                    <label class="btn btn-outline-danger w-100 p-3 h-100" for="vehicle_{{ vehicle.pk }}">
-                                        {% with vehicle_name=vehicle|stringformat:"s" %}
-                                            {% if "bike" in vehicle_name|lower or "motorcycle" in vehicle_name|lower %}
-                                                <i class="fa fa-motorcycle fs-3 d-block mb-2"></i>
-                                            {% elif "auto" in vehicle_name|lower %}
-                                                <i class="fa fa-car-side fs-3 d-block mb-2"></i>
-                                            {% else %}
-                                                <i class="fa fa-car fs-3 d-block mb-2"></i>
-                                            {% endif %}
-                                            <span>{{ vehicle_name }}</span>
-                                        {% endwith %}
-                                    </label>
-                                </div>
-                            {% endfor %}
-                            </div>
-                            {% if form.ride_type.errors %}<div class="text-danger small mt-2">{{ form.ride_type.errors }}</div>{% endif %}
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="{{ form.ride_date.id_for_label }}" class="form-label fw-semibold">Ride Date</label>
-                                {{ form.ride_date }}
-                                {% if form.ride_date.errors %}<div class="text-danger small mt-1">{{ form.ride_date.errors }}</div>{% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label for="{{ form.ride_time.id_for_label }}" class="form-label fw-semibold">Ride Time</label>
-                                {{ form.ride_time }}
-                                {% if form.ride_time.errors %}<div class="text-danger small mt-1">{{ form.ride_time.errors }}</div>{% endif %}
-                            </div>
-                        </div>
-                        <div class="mb-3 mt-3">
-                            <label for="{{ form.passengers.id_for_label }}" class="form-label fw-semibold">Passengers</label>
-                            {{ form.passengers }}
-                            {% if form.passengers.errors %}<div class="text-danger small mt-1">{{ form.passengers.errors }}</div>{% endif %}
-                        </div>
-                        {% if form.coupon_code %}
-                            <div class="mb-3">
-                                <label for="{{ form.coupon_code.id_for_label }}" class="form-label fw-semibold">Coupon Code (Optional)</label>
-                                {{ form.coupon_code }}
-                                {% if form.coupon_code.errors %}<div class="text-danger small mt-1">{{ form.coupon_code.errors }}</div>{% endif %}
-                            </div>
+                        {% if form.pickup_latitude.errors %}
+                            <div class="text-danger small mb-2">{{ form.pickup_latitude.errors }}</div>
+                        {% endif %}
+                        {% if form.pickup_longitude.errors %}
+                            <div class="text-danger small mb-2">{{ form.pickup_longitude.errors }}</div>
+                        {% endif %}
+                        {% if form.drop_latitude.errors %}
+                            <div class="text-danger small mb-2">{{ form.drop_latitude.errors }}</div>
+                        {% endif %}
+                        {% if form.drop_longitude.errors %}
+                            <div class="text-danger small mb-2">{{ form.drop_longitude.errors }}</div>
                         {% endif %}
                         <div class="mb-4">
-                            <label for="{{ form.note.id_for_label }}" class="form-label fw-semibold">Note</label>
-                            {{ form.note }}
-                            {% if form.note.errors %}<div class="text-danger small mt-1">{{ form.note.errors }}</div>{% endif %}
+                            <label class="form-label fw-bold">Select Your Ride</label>
+                            <div class="row g-2">
+                                {% for vehicle in form.ride_type.field.queryset %}
+                                    <div class="col-6 col-md-4">
+                                        <input type="radio" class="btn-check" name="ride_type" id="vehicle_{{ vehicle.pk }}" value="{{ vehicle.pk }}" data-vehicle-name="{{ vehicle|stringformat:'s'|escape }}" autocomplete="off" {% if form.ride_type.value|stringformat:"s" == vehicle.pk|stringformat:"s" %}checked{% endif %} required>
+                                        <label class="btn btn-outline-danger w-100 h-100 py-3 rounded-3" for="vehicle_{{ vehicle.pk }}">
+                                            {% with vehicle_name=vehicle|stringformat:"s" %}
+                                                {% if "bike" in vehicle_name|lower or "motorcycle" in vehicle_name|lower %}
+                                                    <i class="fa fa-motorcycle d-block fs-3 mb-2"></i>
+                                                {% elif "auto" in vehicle_name|lower %}
+                                                    <i class="fa fa-car-side d-block fs-3 mb-2"></i>
+                                                {% else %}
+                                                    <i class="fa fa-car d-block fs-3 mb-2"></i>
+                                                {% endif %}
+                                                <span class="fw-bold small">{{ vehicle_name }}</span>
+                                            {% endwith %}
+                                        </label>
+                                    </div>
+                                {% empty %}
+                                    <div class="col-12">
+                                        <div class="alert alert-warning">No ride types are currently available.</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.ride_type.errors %}
+                                <div class="text-danger small mt-2">{{ form.ride_type.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Select a ride type to view the estimated fare after your route is ready.</div>
                         </div>
-                        <button type="submit" class="btn btn-danger w-100 rounded-pill py-3 fw-bold" id="confirmBookingBtn">
-                            <i class="fa fa-arrow-right me-2"></i> Confirm Booking &amp; Continue Payment
-                        </button>
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6">
+                                <label for="{{ form.ride_date.id_for_label }}" class="form-label fw-bold"><i class="fa fa-calendar-day text-danger me-2"></i>Ride Date</label>
+                                {{ form.ride_date }}
+                                {% if form.ride_date.errors %}
+                                    <div class="text-danger small mt-1">{{ form.ride_date.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="{{ form.ride_time.id_for_label }}" class="form-label fw-bold"><i class="fa fa-clock text-danger me-2"></i>Ride Time</label>
+                                {{ form.ride_time }}
+                                {% if form.ride_time.errors %}
+                                    <div class="text-danger small mt-1">{{ form.ride_time.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-12 col-sm-6">
+                                <label for="{{ form.passengers.id_for_label }}" class="form-label fw-bold">Passengers</label>
+                                {{ form.passengers }}
+                                {% if form.passengers.errors %}
+                                    <div class="text-danger small mt-1">{{ form.passengers.errors }}</div>
+                                {% endif %}
+                            </div>
+                            {% if form.coupon_code %}
+                                <div class="col-12 col-sm-6">
+                                    <label for="{{ form.coupon_code.id_for_label }}" class="form-label fw-bold">Coupon Code (Optional)</label>
+                                    {{ form.coupon_code }}
+                                    {% if form.coupon_code.errors %}
+                                        <div class="text-danger small mt-1">{{ form.coupon_code.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="mt-3 mb-4">
+                            <label for="{{ form.note.id_for_label }}" class="form-label fw-bold">Special Instructions (Optional)</label>
+                            {{ form.note }}
+                            {% if form.note.errors %}
+                                <div class="text-danger small mt-1">{{ form.note.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100 py-3 fw-bold rounded-3" id="confirmBookingBtn"><i class="fa fa-lock me-2"></i>Proceed to Secure Payment <i class="fa fa-arrow-right ms-2"></i></button>
+                        <p class="text-muted small text-center mt-3 mb-0"><i class="fa fa-shield-halved text-danger me-1"></i>Ride confirmation must happen only after server-side payment verification.</p>
                     </form>
                 </div>
             </div>
         </div>
-        <div class="col-lg-5">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4"><i class="fa fa-receipt text-danger me-2"></i> Booking Summary</h5>
-                    <div class="d-flex justify-content-between mb-3"><span class="text-muted">Base Fare</span><strong>₹<span id="summaryBaseFare">{{ booking_data.base_fare|default:"50" }}</span></strong></div>
-                    <div class="d-flex justify-content-between mb-3"><span class="text-muted">Ride Charge</span><strong>₹<span id="summaryRideCharge">{{ booking_data.ride_charge|default:"--" }}</span></strong></div>
-                    <div class="d-flex justify-content-between mb-3"><span class="text-muted">Distance</span><strong><span id="summaryDistance">{{ booking_data.distance|default:"--" }}</span> km</strong></div>
+        <div class="col-12 col-xl-5">
+            <div class="card border rounded-3 shadow-sm mb-4">
+                <div class="card-body p-3 p-md-4">
+                    <h2 class="h5 fw-bold mb-4"><i class="fa fa-receipt text-danger me-2"></i>Booking Summary</h2>
+                    <div class="d-flex justify-content-between gap-2 mb-3">
+                        <span class="text-muted">Selected Ride</span>
+                        <strong id="summaryVehicle">Not selected</strong>
+                    </div>
+                    <div class="d-flex justify-content-between gap-2 mb-3">
+                        <span class="text-muted">Base Fare</span>
+                        <strong>₹<span id="summaryBaseFare">--</span></strong>
+                    </div>
+                    <div class="d-flex justify-content-between gap-2 mb-3">
+                        <span class="text-muted">Ride Charge</span>
+                        <strong>₹<span id="summaryRideCharge">--</span></strong>
+                    </div>
+                    <div class="d-flex justify-content-between gap-2 mb-3">
+                        <span class="text-muted">Distance</span>
+                        <strong><span id="summaryDistance">--</span> km</strong>
+                    </div>
                     <hr>
-                    <div class="d-flex justify-content-between align-items-center"><span class="fw-bold">Estimated Fare</span><strong class="fs-4 text-danger">₹<span id="summaryFare">{{ booking_data.estimate_fare|default:"--" }}</span></strong></div>
-                    <p class="text-muted small mt-3 mb-0">Final fare route, selected vehicle aur applicable charges ke hisaab se change ho sakta hai.</p>
+                    <div class="bg-light border border-danger rounded-3 p-3">
+                        <div class="small text-muted mb-1">Estimated Total Fare</div>
+                        <div class="h2 fw-bold text-danger mb-0">₹<span id="summaryFare">--</span></div>
+                    </div>
+                    <p id="fareMessage" class="text-muted small mt-3 mb-0">Choose pickup and destination, wait for the route, then select a vehicle to calculate your fare.</p>
                 </div>
             </div>
-            <div class="card border-0 shadow-sm rounded-4 mt-4">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-4"><i class="fa fa-circle-info text-danger me-2"></i> How NandiRide Works</h6>
-                    <div class="d-flex mb-3">
-                        <div class="rounded-circle bg-danger text-white px-3 py-2 fw-bold">1</div>
-                        <div class="ms-3"><strong>Enter Trip Details</strong><p class="text-muted small mb-0">Choose pickup and destination on the map.</p></div>
+            <div class="card border rounded-3 shadow-sm mb-4">
+                <div class="card-body p-3 p-md-4">
+                    <h2 class="h6 fw-bold mb-4">How NandiRide Works</h2>
+                    <div class="d-flex gap-3 mb-4">
+                        <span class="badge bg-danger rounded-circle p-2 align-self-start">1</span>
+                        <div>
+                            <strong>Choose Your Route</strong>
+                            <p class="text-muted small mb-0">Select pickup and destination.</p>
+                        </div>
                     </div>
-                    <div class="d-flex mb-3">
-                        <div class="rounded-circle bg-danger text-white px-3 py-2 fw-bold">2</div>
-                        <div class="ms-3"><strong>Select Your Ride</strong><p class="text-muted small mb-0">Choose your available vehicle type.</p></div>
+                    <div class="d-flex gap-3 mb-4">
+                        <span class="badge bg-danger rounded-circle p-2 align-self-start">2</span>
+                        <div>
+                            <strong>Select Your Ride</strong>
+                            <p class="text-muted small mb-0">Choose a vehicle and valid date/time.</p>
+                        </div>
                     </div>
-                    <div class="d-flex">
-                        <div class="rounded-circle bg-danger text-white px-3 py-2 fw-bold">3</div>
-                        <div class="ms-3"><strong>Complete Payment</strong><p class="text-muted small mb-0">Review your booking and choose a payment method.</p></div>
+                    <div class="d-flex gap-3">
+                        <span class="badge bg-danger rounded-circle p-2 align-self-start">3</span>
+                        <div>
+                            <strong>Pay to Confirm</strong>
+                            <p class="text-muted small mb-0">Booking confirmation follows verified successful payment.</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="card border-0 shadow-sm rounded-4 mt-4">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3"><i class="fa fa-headset"></i></div>
-                        <div class="ms-3"><h6 class="fw-bold mb-1">Need Help?</h6><small class="text-muted">Contact NandiRide support for any booking related issue.</small></div>
+            <div class="card border rounded-3 shadow-sm">
+                <div class="card-body p-3 d-flex align-items-center gap-3">
+                    <span class="bg-danger-subtle text-danger rounded-circle p-3"><i class="fa fa-headset fs-5"></i></span>
+                    <div>
+                        <h3 class="h6 fw-bold mb-1">Need Help?</h3>
+                        <p class="text-muted small mb-0">Contact NandiRide support for booking or payment issues.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const mapElement = document.getElementById("bookingMap");
+    "use strict";
     const form = document.getElementById("bookingForm");
-    if (!mapElement || !form || typeof L === "undefined") {
-        const status = document.getElementById("mapStatus");
-        if (status) status.textContent = "Map load nahi ho paya. Internet connection check karein.";
+    const mapElement = document.getElementById("bookingMap");
+    const mapStatus = document.getElementById("mapStatus");
+    if (!form || !mapElement || typeof L === "undefined") {
+        if (mapStatus) {
+            mapStatus.classList.remove("bg-success");
+            mapStatus.classList.add("bg-danger");
+            mapStatus.textContent = "Map load nahi hua. Internet connection check karein.";
+        }
         return;
     }
-    const pickupInput = document.getElementById("id_pickup_location") || document.querySelector('[name="pickup_location"]');
-    const destinationInput = document.getElementById("id_destination") || document.querySelector('[name="destination"]');
-    const pickupLatInput = document.getElementById("id_pickup_latitude") || document.querySelector('[name="pickup_latitude"]');
-    const pickupLngInput = document.getElementById("id_pickup_longitude") || document.querySelector('[name="pickup_longitude"]');
-    const dropLatInput = document.getElementById("id_drop_latitude") || document.querySelector('[name="drop_latitude"]');
-    const dropLngInput = document.getElementById("id_drop_longitude") || document.querySelector('[name="drop_longitude"]');
-    const mapStatus = document.getElementById("mapStatus");
+    const field = name => document.getElementById("id_" + name) || form.querySelector('[name="' + name + '"]');
+    const pickupInput = field("pickup_location");
+    const destinationInput = field("destination");
+    const pickupLatInput = field("pickup_latitude");
+    const pickupLngInput = field("pickup_longitude");
+    const dropLatInput = field("drop_latitude");
+    const dropLngInput = field("drop_longitude");
+    const dateInput = field("ride_date");
+    const timeInput = field("ride_time");
     const distanceOutput = document.getElementById("summaryDistance");
-    const rideChargeOutput = document.getElementById("summaryRideCharge");
+    const chargeOutput = document.getElementById("summaryRideCharge");
     const fareOutput = document.getElementById("summaryFare");
     const baseFareOutput = document.getElementById("summaryBaseFare");
-    const map = L.map(mapElement, {
-        attributionControl: false
-    }).setView([29.9457, 78.1642], 12);
-    L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3wf8_1_477b9c969e22fe3e205f303d",
-        {
-            subdomains: "abcd",
-            maxZoom: 20
-        }
-    ).addTo(map);
+    const vehicleOutput = document.getElementById("summaryVehicle");
+    const fareMessage = document.getElementById("fareMessage");
+    const submitButton = document.getElementById("confirmBookingBtn");
+    const resetButton = document.getElementById("resetMapBtn");
     let pickupMarker = null;
     let dropMarker = null;
     let routeLayer = null;
     let selectingPoint = "pickup";
     let requestSequence = 0;
-    const baseFare = 50;
-    const perKmRate = 12;
-    if (baseFareOutput) baseFareOutput.textContent = baseFare.toFixed(2);
-    function setStatus(message) {
-        if (mapStatus) mapStatus.textContent = message;
+    let geocodeSequence = 0;
+    let isSubmitting = false;
+    let routeDistanceKm = null;
+    const defaultBaseFare = 50;
+    const defaultPerKmRate = 12;
+    function getSelectedVehicle() {
+        return form.querySelector('[name="ride_type"]:checked');
     }
-    function setCoordinateFields(point, lat, lng) {
-        if (point === "pickup") {
-            if (pickupLatInput) pickupLatInput.value = lat.toFixed(6);
-            if (pickupLngInput) pickupLngInput.value = lng.toFixed(6);
-        } else {
-            if (dropLatInput) dropLatInput.value = lat.toFixed(6);
-            if (dropLngInput) dropLngInput.value = lng.toFixed(6);
+    function getVehiclePricing() {
+        const selected = getSelectedVehicle();
+        if (!selected) return null;
+        const pricing = {};
+        {% for vehicle in form.ride_type.field.queryset %}
+        pricing["{{ vehicle.pk|escapejs }}"] = {
+            name: "{{ vehicle|stringformat:'s'|escapejs }}",
+            baseFare: Number("{{ vehicle.base_fare|default_if_none:''|escapejs }}"),
+            perKmRate: Number("{{ vehicle.per_km_fare|default_if_none:''|escapejs }}")
+        };
+        {% endfor %}
+        const item = pricing[selected.value];
+        if (!item) {
+            return {
+                name: selected.dataset.vehicleName || "Selected ride",
+                baseFare: defaultBaseFare,
+                perKmRate: defaultPerKmRate
+            };
         }
+        return {
+            name: item.name,
+            baseFare: Number.isFinite(item.baseFare) && item.baseFare > 0 ? item.baseFare : defaultBaseFare,
+            perKmRate: Number.isFinite(item.perKmRate) && item.perKmRate > 0 ? item.perKmRate : defaultPerKmRate
+        };
+    }
+    function localNow() {
+        const now = new Date();
+        return {
+            date: now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0"),
+            time: String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0")
+        };
+    }
+    function applyDateLimits() {
+        if (!dateInput || !timeInput) return;
+        const now = localNow();
+        dateInput.min = now.date;
+        if (!dateInput.value || dateInput.value < now.date) dateInput.value = now.date;
+        timeInput.min = dateInput.value === now.date ? now.time : "00:00";
+        if (dateInput.value === now.date && timeInput.value && timeInput.value < now.time) timeInput.value = "";
+    }
+    if (dateInput) {
+        dateInput.addEventListener("focus", applyDateLimits);
+        dateInput.addEventListener("change", applyDateLimits);
+    }
+    if (timeInput) timeInput.addEventListener("focus", applyDateLimits);
+    applyDateLimits();
+    const map = L.map(mapElement, {attributionControl: false}).setView([29.9457, 78.1642], 12);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3wf8_1_477b9c969e22fe3e205f303d", {subdomains: "abcd", maxZoom: 20}).addTo(map);
+    function status(message, error = false) {
+        if (!mapStatus) return;
+        mapStatus.classList.toggle("bg-success", !error);
+        mapStatus.classList.toggle("bg-danger", error);
+        mapStatus.textContent = message;
+    }
+    function resetFareDisplay(message = "Select a ride type to calculate the estimated fare after your route is ready.", clearDistance = false) {
+        if (clearDistance) routeDistanceKm = null;
+        if (distanceOutput) distanceOutput.textContent = "--";
+        if (chargeOutput) chargeOutput.textContent = "--";
+        if (fareOutput) fareOutput.textContent = "--";
+        if (baseFareOutput) baseFareOutput.textContent = "--";
+        if (vehicleOutput) {
+            const vehicle = getVehiclePricing();
+            vehicleOutput.textContent = vehicle ? vehicle.name : "Not selected";
+        }
+        if (fareMessage) fareMessage.textContent = message;
+    }
+    function setCoordinates(point, lat, lng) {
+        const latField = point === "pickup" ? pickupLatInput : dropLatInput;
+        const lngField = point === "pickup" ? pickupLngInput : dropLngInput;
+        if (latField) latField.value = Number(lat).toFixed(6);
+        if (lngField) lngField.value = Number(lng).toFixed(6);
     }
     function getPoint(point) {
-        const latInput = point === "pickup" ? pickupLatInput : dropLatInput;
-        const lngInput = point === "pickup" ? pickupLngInput : dropLngInput;
-        if (!latInput || !lngInput || latInput.value === "" || lngInput.value === "") return null;
-        const lat = Number(latInput.value);
-        const lng = Number(lngInput.value);
-        return Number.isFinite(lat) && Number.isFinite(lng) ? [lat, lng] : null;
+        const latField = point === "pickup" ? pickupLatInput : dropLatInput;
+        const lngField = point === "pickup" ? pickupLngInput : dropLngInput;
+        if (!latField || !lngField || !latField.value.trim() || !lngField.value.trim()) return null;
+        const lat = Number(latField.value);
+        const lng = Number(lngField.value);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+        return [lat, lng];
     }
-    function haversineKm(a, b) {
-        const rad = value => value * Math.PI / 180;
-        const dLat = rad(b[0] - a[0]);
-        const dLng = rad(b[1] - a[1]);
-        const value = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) ** 2;
-        return 6371 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+    function updateFare(km) {
+        const vehicle = getVehiclePricing();
+        if (!vehicle) {
+            resetFareDisplay("Route ready. Select a ride type to see the estimated fare.");
+            return;
+        }
+        km = Math.max(0, Number(km) || 0);
+        routeDistanceKm = km;
+        if (distanceOutput) distanceOutput.textContent = km.toFixed(2);
+        if (chargeOutput) chargeOutput.textContent = (km * vehicle.perKmRate).toFixed(2);
+        if (baseFareOutput) baseFareOutput.textContent = vehicle.baseFare.toFixed(2);
+        if (fareOutput) fareOutput.textContent = (vehicle.baseFare + km * vehicle.perKmRate).toFixed(2);
+        if (vehicleOutput) vehicleOutput.textContent = vehicle.name;
+        if (fareMessage) fareMessage.textContent = "Estimated fare for " + vehicle.name + ". Final fare will be calculated and verified by the server.";
     }
-    function updateFare(distance) {
-        const roundedDistance = Math.max(0, distance);
-        const rideCharge = roundedDistance * perKmRate;
-        if (distanceOutput) distanceOutput.textContent = roundedDistance.toFixed(2);
-        if (rideChargeOutput) rideChargeOutput.textContent = rideCharge.toFixed(2);
-        if (fareOutput) fareOutput.textContent = (baseFare + rideCharge).toFixed(2);
+    function refreshFareForSelectedVehicle() {
+        const vehicle = getVehiclePricing();
+        if (vehicleOutput) vehicleOutput.textContent = vehicle ? vehicle.name : "Not selected";
+        if (!vehicle) {
+            resetFareDisplay("Select a ride type to calculate the estimated fare after your route is ready.");
+            return;
+        }
+        if (routeLayer && routeDistanceKm !== null) {
+            updateFare(routeDistanceKm);
+            return;
+        }
+        resetFareDisplay("Ride selected: " + vehicle.name + ". Select pickup and destination and wait for the road route to calculate the estimate.");
+    }
+    function clearRoute() {
+        if (routeLayer) map.removeLayer(routeLayer);
+        routeLayer = null;
+        routeDistanceKm = null;
     }
     function drawRoute() {
         const pickup = getPoint("pickup");
-        const destination = getPoint("destination");
-        if (routeLayer) {
-            map.removeLayer(routeLayer);
-            routeLayer = null;
-        }
-        if (!pickup || !destination) {
+        const drop = getPoint("destination");
+        const sequence = ++requestSequence;
+        clearRoute();
+        if (!pickup || !drop) {
+            resetFareDisplay("Select pickup and destination to calculate the route and fare.");
             if (pickup) map.setView(pickup, 14);
-            else if (destination) map.setView(destination, 14);
-            updateFare(0);
+            else if (drop) map.setView(drop, 14);
+            status("Pickup aur destination dono select karein.");
             return;
         }
-        const straightDistance = haversineKm(pickup, destination);
-        updateFare(straightDistance);
-        setStatus("Route calculate ho raha hai...");
-        const routeUrl = "https://router.project-osrm.org/route/v1/driving/" + pickup[1] + "," + pickup[0] + ";" + destination[1] + "," + destination[0] + "?overview=full&geometries=geojson";
-        const currentSequence = ++requestSequence;
-        fetch(routeUrl)
-            .then(response => {
-                if (!response.ok) throw new Error("Route unavailable");
-                return response.json();
-            })
-            .then(data => {
-                if (currentSequence !== requestSequence) return;
-                if (!data.routes || !data.routes.length) throw new Error("Route unavailable");
-                const route = data.routes[0];
-                const coordinates = route.geometry.coordinates.map(point => [point[1], point[0]]);
-                routeLayer = L.polyline(coordinates, { color: "#dc3545", weight: 5, opacity: 0.85 }).addTo(map);
-                map.fitBounds(routeLayer.getBounds(), { padding: [25, 25] });
-                updateFare(route.distance / 1000);
-                setStatus("Route ready: " + (route.distance / 1000).toFixed(2) + " km, approx. " + Math.round(route.duration / 60) + " min.");
-            })
-            .catch(() => {
-                if (currentSequence !== requestSequence) return;
-                map.fitBounds(L.latLngBounds([pickup, destination]), { padding: [25, 25] });
-                setStatus("Road route unavailable. Distance straight-line estimate hai; final fare alag ho sakta hai.");
-            });
+        if (Math.abs(pickup[0] - drop[0]) < 0.000001 && Math.abs(pickup[1] - drop[1]) < 0.000001) {
+            resetFareDisplay("Pickup aur destination alag hone chahiye.");
+            status("Pickup aur destination alag hone chahiye.", true);
+            return;
+        }
+        resetFareDisplay("Road route calculate ho raha hai...");
+        status("Route ready ho raha hai...");
+        const url = "https://router.project-osrm.org/route/v1/driving/" + pickup[1] + "," + pickup[0] + ";" + drop[1] + "," + drop[0] + "?overview=full&geometries=geojson&steps=false";
+        fetch(url).then(response => {
+            if (!response.ok) throw new Error("Route unavailable");
+            return response.json();
+        }).then(data => {
+            if (sequence !== requestSequence) return;
+            if (data.code !== "Ok" || !data.routes || !data.routes.length) throw new Error("No route found");
+            const route = data.routes[0];
+            const coordinates = route.geometry.coordinates.map(point => [point[1], point[0]]);
+            routeLayer = L.polyline(coordinates, {color: "#16a34a", weight: 6, opacity: 0.95, lineCap: "round", lineJoin: "round"}).addTo(map);
+            map.fitBounds(routeLayer.getBounds(), {padding: [28, 28]});
+            const km = route.distance / 1000;
+            routeDistanceKm = km;
+            if (getSelectedVehicle()) {
+                updateFare(km);
+            } else {
+                resetFareDisplay("Route ready. " + km.toFixed(2) + " km. Select a ride type to see the estimated fare.");
+            }
+            status("Route ready • " + km.toFixed(2) + " km • Approx. " + Math.round(route.duration / 60) + " min.");
+        }).catch(() => {
+            if (sequence !== requestSequence) return;
+            clearRoute();
+            resetFareDisplay("Road route unavailable. Please check your locations and try again.");
+            status("Road route nahi mil paya. Internet aur locations check karein.", true);
+        });
+    }
+    async function reverseGeocode(point, lat, lng) {
+        const input = point === "pickup" ? pickupInput : destinationInput;
+        const sequence = ++geocodeSequence;
+        if (!input) return;
+        status("Location address search ho raha hai...");
+        try {
+            const response = await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lng));
+            if (!response.ok) throw new Error("Address unavailable");
+            const data = await response.json();
+            if (sequence !== geocodeSequence) return;
+            if (data.display_name) input.value = data.display_name;
+            status("Location selected. Marker drag karke adjust kar sakte hain.");
+        } catch (error) {
+            if (sequence === geocodeSequence) status("Coordinates select ho gaye, lekin address nahi mila. Address manually enter karein.", true);
+        }
     }
     function setPoint(point, lat, lng, address) {
+        lat = Number(lat);
+        lng = Number(lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+            status("Valid map coordinates select karein.", true);
+            return;
+        }
+        setCoordinates(point, lat, lng);
         const coordinates = [lat, lng];
-        setCoordinateFields(point, lat, lng);
         if (point === "pickup") {
             if (pickupMarker) map.removeLayer(pickupMarker);
-            pickupMarker = L.marker(coordinates, { draggable: true }).addTo(map).bindPopup("Pickup Location");
-            pickupMarker.on("dragend", function (event) {
+            pickupMarker = L.marker(coordinates, {draggable: true}).addTo(map).bindPopup("Pickup Location");
+            pickupMarker.on("dragend", event => {
                 const position = event.target.getLatLng();
-                setCoordinateFields("pickup", position.lat, position.lng);
+                setCoordinates("pickup", position.lat, position.lng);
                 reverseGeocode("pickup", position.lat, position.lng);
                 drawRoute();
             });
             if (pickupInput && address) pickupInput.value = address;
         } else {
             if (dropMarker) map.removeLayer(dropMarker);
-            dropMarker = L.marker(coordinates, { draggable: true }).addTo(map).bindPopup("Destination");
-            dropMarker.on("dragend", function (event) {
+            dropMarker = L.marker(coordinates, {draggable: true}).addTo(map).bindPopup("Destination");
+            dropMarker.on("dragend", event => {
                 const position = event.target.getLatLng();
-                setCoordinateFields("destination", position.lat, position.lng);
+                setCoordinates("destination", position.lat, position.lng);
                 reverseGeocode("destination", position.lat, position.lng);
                 drawRoute();
             });
@@ -291,130 +464,146 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         drawRoute();
     }
-    function reverseGeocode(point, lat, lng) {
-        const input = point === "pickup" ? pickupInput : destinationInput;
-        if (!input) return;
-        setStatus("Selected point ka address find ho raha hai...");
-        fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lng))
-            .then(response => {
-                if (!response.ok) throw new Error("Address unavailable");
-                return response.json();
-            })
-            .then(data => {
-                if (data.display_name) input.value = data.display_name;
-                setStatus("Location selected. Zaroorat ho to marker drag karke adjust karein.");
-            })
-            .catch(() => setStatus("Coordinates selected, lekin address automatically nahi mila. Location ka address manually enter karein."));
-    }
-    function geocodeAddress(point) {
+    async function geocodeAddress(point) {
         const input = point === "pickup" ? pickupInput : destinationInput;
         if (!input || !input.value.trim()) {
-            setStatus("Pehle location ka address enter karein.");
+            status("Pehle location address enter karein.", true);
             return;
         }
         const query = input.value.trim();
-        setStatus("Location search ho rahi hai...");
-        fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=" + encodeURIComponent(query))
-            .then(response => {
-                if (!response.ok) throw new Error("Location search unavailable");
-                return response.json();
-            })
-            .then(results => {
-                if (!results.length) {
-                    setStatus("Location nahi mili. Map par sahi jagah click karein ya address refine karein.");
-                    return;
-                }
-                const result = results[0];
-                setPoint(point, Number(result.lat), Number(result.lon), result.display_name || query);
-                map.setView([Number(result.lat), Number(result.lon)], 15);
-                setStatus((point === "pickup" ? "Pickup" : "Destination") + " location selected.");
-            })
-            .catch(() => setStatus("Location search fail hui. Map par click karke location select karein."));
+        const sequence = ++geocodeSequence;
+        status("Location search ho rahi hai...");
+        try {
+            const response = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=" + encodeURIComponent(query));
+            if (!response.ok) throw new Error("Search unavailable");
+            const results = await response.json();
+            if (sequence !== geocodeSequence) return;
+            if (!results.length) {
+                status("Location nahi mili. Address refine karein.", true);
+                return;
+            }
+            const result = results[0];
+            setPoint(point, Number(result.lat), Number(result.lon), result.display_name || query);
+            map.setView([Number(result.lat), Number(result.lon)], 15);
+            status((point === "pickup" ? "Pickup" : "Destination") + " selected. Route update ho raha hai.");
+        } catch (error) {
+            if (sequence === geocodeSequence) status("Location search fail hui. Internet check karein ya map par click karein.", true);
+        }
     }
-    map.on("click", function (event) {
+    map.on("click", event => {
         const point = selectingPoint;
         setPoint(point, event.latlng.lat, event.latlng.lng, "");
         reverseGeocode(point, event.latlng.lat, event.latlng.lng);
         selectingPoint = point === "pickup" ? "destination" : "pickup";
-        setStatus(point === "pickup" ? "Pickup selected. Ab destination ke liye map par click karein." : "Destination selected.");
     });
-    if (pickupInput) {
-        pickupInput.addEventListener("change", () => geocodeAddress("pickup"));
-        pickupInput.addEventListener("keydown", event => {
+    [[pickupInput, "pickup"], [destinationInput, "destination"]].forEach(([input, point]) => {
+        if (!input) return;
+        input.addEventListener("change", () => geocodeAddress(point));
+        input.addEventListener("keydown", event => {
             if (event.key === "Enter") {
                 event.preventDefault();
-                geocodeAddress("pickup");
+                geocodeAddress(point);
             }
         });
-    }
-    if (destinationInput) {
-        destinationInput.addEventListener("change", () => geocodeAddress("destination"));
-        destinationInput.addEventListener("keydown", event => {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                geocodeAddress("destination");
+        input.addEventListener("input", () => {
+            const latField = point === "pickup" ? pickupLatInput : dropLatInput;
+            const lngField = point === "pickup" ? pickupLngInput : dropLngInput;
+            if (latField) latField.value = "";
+            if (lngField) lngField.value = "";
+            if (point === "pickup" && pickupMarker) {
+                map.removeLayer(pickupMarker);
+                pickupMarker = null;
             }
-        });
-    }
-    document.querySelectorAll('[name="ride_type"]').forEach(input => {
-        input.addEventListener("change", function () {
-            const selectedLabel = document.querySelector('label[for="' + this.id + '"]');
-            if (selectedLabel) setStatus("Selected ride: " + selectedLabel.textContent.trim() + ". Fare estimate route aur vehicle ke hisaab se server par verify hoga.");
+            if (point === "destination" && dropMarker) {
+                map.removeLayer(dropMarker);
+                dropMarker = null;
+            }
+            drawRoute();
         });
     });
-    const resetButton = document.getElementById("resetMapBtn");
     if (resetButton) {
-        resetButton.addEventListener("click", function () {
-            if (pickupMarker) map.removeLayer(pickupMarker);
-            if (dropMarker) map.removeLayer(dropMarker);
-            if (routeLayer) map.removeLayer(routeLayer);
+        resetButton.addEventListener("click", () => {
+            requestSequence++;
+            geocodeSequence++;
+            [pickupMarker, dropMarker, routeLayer].forEach(layer => {
+                if (layer) map.removeLayer(layer);
+            });
             pickupMarker = null;
             dropMarker = null;
             routeLayer = null;
+            routeDistanceKm = null;
             [pickupLatInput, pickupLngInput, dropLatInput, dropLngInput].forEach(input => {
                 if (input) input.value = "";
             });
+            if (pickupInput) pickupInput.value = "";
+            if (destinationInput) destinationInput.value = "";
+            selectingPoint = "pickup";
+            resetFareDisplay("Select pickup and destination to calculate the route and fare.");
             map.setView([29.9457, 78.1642], 12);
-            updateFare(0);
-            setStatus("Map reset ho gaya. Pehle pickup, phir destination select karein.");
+            status("Map reset. Pehle pickup, phir destination select karein.");
         });
     }
-    form.addEventListener("submit", function (event) {
+    form.querySelectorAll('[name="ride_type"]').forEach(input => {
+        input.addEventListener("change", refreshFareForSelectedVehicle);
+    });
+    form.addEventListener("submit", event => {
+        if (isSubmitting) {
+            event.preventDefault();
+            return;
+        }
+        applyDateLimits();
         const pickup = getPoint("pickup");
-        const destination = getPoint("destination");
-        if (!pickupInput || !pickupInput.value.trim() || !destinationInput || !destinationInput.value.trim()) {
+        const drop = getPoint("destination");
+        if (!pickupInput?.value.trim() || !destinationInput?.value.trim()) {
             event.preventDefault();
-            setStatus("Pickup aur destination dono enter karna zaroori hai.");
-            (pickupInput && !pickupInput.value.trim() ? pickupInput : destinationInput).focus();
+            status("Pickup aur destination dono enter karein.", true);
             return;
         }
-        if (!pickup || !destination) {
+        if (!pickup || !drop) {
             event.preventDefault();
-            setStatus("Dono locations ke coordinates select karein. Address enter karne ke baad field se bahar click karein ya Enter dabayein.");
+            status("Dono addresses search karke coordinates select karein.", true);
             return;
         }
-        if (Math.abs(pickup[0] - destination[0]) < 0.000001 && Math.abs(pickup[1] - destination[1]) < 0.000001) {
+        if (Math.abs(pickup[0] - drop[0]) < 0.000001 && Math.abs(pickup[1] - drop[1]) < 0.000001) {
             event.preventDefault();
-            setStatus("Pickup aur destination alag hone chahiye.");
+            status("Pickup aur destination alag hone chahiye.", true);
             return;
         }
-        const selectedRide = form.querySelector('[name="ride_type"]:checked');
-        if (!selectedRide) {
+        if (!routeLayer || routeDistanceKm === null) {
             event.preventDefault();
-            setStatus("Please ek available ride type select karein.");
+            status("Road route ready hone ka wait karein.", true);
             return;
         }
-        const button = document.getElementById("confirmBookingBtn");
-        if (button) {
-            button.disabled = true;
-            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+        if (!getSelectedVehicle()) {
+            event.preventDefault();
+            status("Payment se pehle ride type select karein.", true);
+            return;
+        }
+        const now = localNow();
+        if (dateInput && (!dateInput.value || dateInput.value < now.date)) {
+            event.preventDefault();
+            status("Past date allowed nahi hai.", true);
+            dateInput.focus();
+            return;
+        }
+        if (dateInput && timeInput && dateInput.value === now.date && (!timeInput.value || timeInput.value < now.time)) {
+            event.preventDefault();
+            status("Aaj ke liye current ya future time select karein.", true);
+            timeInput.focus();
+            return;
+        }
+        isSubmitting = true;
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Proceeding to Payment...';
         }
     });
-    const existingPickup = getPoint("pickup");
-    const existingDestination = getPoint("destination");
-    if (existingPickup) setPoint("pickup", existingPickup[0], existingPickup[1], pickupInput ? pickupInput.value : "");
-    if (existingDestination) setPoint("destination", existingDestination[0], existingDestination[1], destinationInput ? destinationInput.value : "");
-    setTimeout(() => map.invalidateSize(), 150);
+    const pickup = getPoint("pickup");
+    const drop = getPoint("destination");
+    if (pickup) setPoint("pickup", pickup[0], pickup[1], pickupInput ? pickupInput.value : "");
+    if (drop) setPoint("destination", drop[0], drop[1], destinationInput ? destinationInput.value : "");
+    refreshFareForSelectedVehicle();
+    setTimeout(() => map.invalidateSize(), 250);
 });
 </script>
 {% endblock %}
