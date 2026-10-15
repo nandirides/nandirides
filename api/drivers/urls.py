@@ -15,7 +15,7 @@ urlpatterns = [
     path("register/", DriverRegistrationAPIView.as_view(), name="register"),
     path("me/", DriverMyProfileAPIView.as_view(), name="my-profile"),
     path(
-        "online-status/",
+        "online/status/",
         DriverOnlineStatusAPIView.as_view(),
         name="online-status",
     ),
@@ -25,7 +25,7 @@ urlpatterns = [
         name="documents",
     ),
     path(
-        "bank-accounts/",
+        "bank/accounts/",
         DriverBankAccountListCreateAPIView.as_view(),
         name="bank-accounts",
     ),

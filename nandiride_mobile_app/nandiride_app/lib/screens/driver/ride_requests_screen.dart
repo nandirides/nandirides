@@ -1,21 +1,19 @@
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
 import '../../app/app_theme.dart';
+import '../../app/app_routes.dart';
 import '../../services/driver_service.dart';
 
 class RideRequestsScreen extends StatefulWidget {
   const RideRequestsScreen({super.key});
-
   @override
-  State<RideRequestsScreen> createState() =>
-      _RideRequestsScreenState();
+  State<RideRequestsScreen> createState() => _RideRequestsScreenState();
 }
 
 class _RideRequestsScreenState extends State<RideRequestsScreen> {
   bool _isLoading = true;
   bool _isOffline = false;
   String? _error;
-
   List<Map<String, dynamic>> _requests = [];
   int? _acceptingRequestId;
 
@@ -25,22 +23,78 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
     _loadRequests();
   }
 
-  void _showMessage(String message) {
+  void _showMessage(String message, {bool isError = false}) {
     if (!mounted) return;
-
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: AppTheme.primary,
+          backgroundColor: isError ? AppTheme.error : AppTheme.primary,
           behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
         ),
       );
   }
 
   String _errorMessage(Object error) {
-    return error.toString().replaceFirst('Exception: ', '');
+    return error.toString().replaceFirst('Exception: ', '').trim();
+  }
+
+  int? _parseId(dynamic value) {
+    if (value is int && value > 0) return value;
+    if (value is num && value > 0) return value.toInt();
+    final parsed = int.tryParse(value?.toString().trim() ?? '');
+    return parsed != null && parsed > 0 ? parsed : null;
+  }
+
+  Map<String, dynamic>? _asMap(dynamic value) {
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return null;
+  }
+
+  Map<String, dynamic> _unwrapResponse(Map<String, dynamic> response) {
+    final data = response['data'];
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return response;
+  }
+
+  int? _extractRideId(Map<String, dynamic> response) {
+    final data = _unwrapResponse(response);
+    final ride = _asMap(data['ride']) ??
+        _asMap(data['accepted_ride']) ??
+        _asMap(data['assigned_ride']);
+
+    final candidates = [
+      data['ride_id'],
+      data['rideId'],
+      data['accepted_ride_id'],
+      data['assigned_ride_id'],
+      ride?['id'],
+      ride?['ride_id'],
+    ];
+
+    for (final candidate in candidates) {
+      final id = _parseId(candidate);
+      if (id != null) return id;
+    }
+
+    // A top-level id is only accepted when the response identifies
+    // the returned object as a ride, not merely a ride request.
+    final type = (data['type'] ??
+            data['object_type'] ??
+            data['resource'] ??
+            '')
+        .toString()
+        .toLowerCase();
+
+    if (type == 'ride' || type == 'accepted_ride') {
+      return _parseId(data['id']);
+    }
+
+    return null;
   }
 
   Future<void> _loadRequests({bool showLoader = true}) async {
@@ -52,14 +106,10 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
     }
 
     try {
-      // Step 1: Get the driver's current profile and online status.
       final profile = await DriverService.getMyProfile();
-
       if (!mounted) return;
 
-      final bool online = profile['is_online'] == true;
-
-      if (!online) {
+      if (profile['is_online'] != true) {
         setState(() {
           _requests = [];
           _isOffline = true;
@@ -69,10 +119,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
         return;
       }
 
-      // Step 2: Request available rides from the backend.
-      final response =
-          await DriverService.getPendingRideRequests();
-
+      final response = await DriverService.getPendingRideRequests();
       final dynamic rawResults =
           response['results'] ?? response['data'] ?? [];
 
@@ -83,8 +130,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
             .whereType<Map>()
             .map((item) => Map<String, dynamic>.from(item))
             .toList();
-      } else if (rawResults is Map &&
-          rawResults['results'] is List) {
+      } else if (rawResults is Map && rawResults['results'] is List) {
         requests = (rawResults['results'] as List)
             .whereType<Map>()
             .map((item) => Map<String, dynamic>.from(item))
@@ -92,7 +138,6 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
       }
 
       if (!mounted) return;
-
       setState(() {
         _requests = requests;
         _isOffline = false;
@@ -101,7 +146,6 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-
       setState(() {
         _isLoading = false;
         _error = _errorMessage(e);
@@ -109,86 +153,96 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
     }
   }
 
-  Future<void> _acceptRide(
-    Map<String, dynamic> rideRequest,
-  ) async {
+  Future<void> _acceptRide(Map<String, dynamic> rideRequest) async {
     if (_acceptingRequestId != null) return;
 
-    final dynamic rawId = rideRequest['id'];
-    final int? requestId = rawId is int
-        ? rawId
-        : int.tryParse(rawId?.toString() ?? '');
+    final requestId = _parseId(
+      rideRequest['id'] ?? rideRequest['request_id'],
+    );
 
     if (requestId == null) {
-      _showMessage('Invalid ride request ID.');
+      _showMessage('Invalid ride request ID.', isError: true);
       return;
     }
 
-    setState(() {
-      _acceptingRequestId = requestId;
-    });
+    setState(() => _acceptingRequestId = requestId);
 
     try {
       final response = await DriverService.acceptRide(requestId);
-
       if (!mounted) return;
+
+      final rideId = _extractRideId(response);
 
       setState(() {
         _requests.removeWhere(
-          (item) => item['id'].toString() == requestId.toString(),
+          (item) =>
+              _parseId(item['id'] ?? item['request_id']) == requestId,
         );
       });
 
-      _showMessage(
-        response['message']?.toString() ??
-            'Ride accepted successfully.',
+      final message = response['message']?.toString() ??
+          _unwrapResponse(response)['message']?.toString() ??
+          'Ride accepted successfully.';
+
+      _showMessage(message);
+
+      if (rideId == null) {
+        _showMessage(
+          'Ride accepted, but the API did not return a Ride ID. '
+          'Please check DriverService.acceptRide() response.',
+          isError: true,
+        );
+        await _loadRequests(showLoader: false);
+        return;
+      }
+
+      await Navigator.of(context).pushNamed(
+        AppRoutes.tripDetails,
+        arguments: {'rideId': rideId},
       );
 
-      await _loadRequests(showLoader: false);
+      if (mounted) await _loadRequests(showLoader: false);
     } catch (e) {
       if (!mounted) return;
-
-      _showMessage(_errorMessage(e));
-
+      _showMessage(_errorMessage(e), isError: true);
       await _loadRequests(showLoader: false);
     } finally {
       if (mounted) {
-        setState(() {
-          _acceptingRequestId = null;
-        });
+        setState(() => _acceptingRequestId = null);
       }
     }
   }
 
   String _locationText(dynamic value) {
     if (value is Map) {
-      final address = value['address']?.toString() ?? '';
-      final city = value['city']?.toString() ?? '';
-
-      if (address.isNotEmpty && city.isNotEmpty) {
-        return '$address, $city';
-      }
-
-      if (address.isNotEmpty) return address;
-      if (city.isNotEmpty) return city;
+      final address = (value['address'] ??
+              value['pickup_address'] ??
+              value['drop_address'] ??
+              '')
+          .toString()
+          .trim();
+      final city = (value['city'] ?? '').toString().trim();
+      final combined = [address, city]
+          .where((part) => part.isNotEmpty)
+          .toSet()
+          .join(', ');
+      if (combined.isNotEmpty) return combined;
     }
-
-    return value?.toString() ?? 'Location unavailable';
+    if (value != null && value.toString().trim().isNotEmpty) {
+      return value.toString();
+    }
+    return 'Location unavailable';
   }
 
   String _money(dynamic value) {
     final amount = double.tryParse(value?.toString() ?? '');
-
     if (amount == null) return 'N/A';
-
     return '₹${amount.toStringAsFixed(2)}';
   }
 
   String _distance(dynamic value) {
     final distance = double.tryParse(value?.toString() ?? '');
-
     if (distance == null) return 'N/A';
-
     return '${distance.toStringAsFixed(2)} km';
   }
 
@@ -232,13 +286,8 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
   }
 
   Widget _buildRideCard(Map<String, dynamic> ride) {
-    final dynamic rawId = ride['id'];
-    final int? id = rawId is int
-        ? rawId
-        : int.tryParse(rawId?.toString() ?? '');
-
-    final bool isAccepting =
-        id != null && _acceptingRequestId == id;
+    final id = _parseId(ride['id'] ?? ride['request_id']);
+    final isAccepting = id != null && _acceptingRequestId == id;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -273,7 +322,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Request ${ride['request_number'] ?? '#${ride['id']}'}',
+                      'Request ${ride['request_number'] ?? '#${ride['id'] ?? ride['request_id'] ?? ''}'}',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w900,
@@ -282,8 +331,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      ride['vehicle_type_name']?.toString() ??
-                          'Ride request',
+                      ride['vehicle_type_name']?.toString() ?? 'Ride request',
                       style: TextStyle(
                         fontSize: 12,
                         color: AppTheme.textSecondary,
@@ -339,7 +387,8 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
                       Text(
                         _money(
                           ride['final_fare'] ??
-                              ride['estimated_fare'],
+                              ride['estimated_fare'] ??
+                              ride['fare'],
                         ),
                         style: const TextStyle(
                           color: AppTheme.primary,
@@ -369,7 +418,10 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        _distance(ride['estimated_distance_km']),
+                        _distance(
+                          ride['estimated_distance_km'] ??
+                              ride['distance_km'],
+                        ),
                         style: const TextStyle(
                           color: AppTheme.primary,
                           fontSize: 16,
@@ -387,7 +439,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
             width: double.infinity,
             height: 50,
             child: ElevatedButton.icon(
-              onPressed: _acceptingRequestId != null
+              onPressed: _acceptingRequestId != null || id == null
                   ? null
                   : () => _acceptRide(ride),
               icon: isAccepting
@@ -399,12 +451,8 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : const Icon(
-                      Icons.check_circle_outline_rounded,
-                    ),
-              label: Text(
-                isAccepting ? 'Accepting...' : 'Accept Ride',
-              ),
+                  : const Icon(Icons.check_circle_outline_rounded),
+              label: Text(isAccepting ? 'Accepting...' : 'Accept Ride'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
@@ -452,8 +500,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Please go online from the Driver Dashboard '
-              'to view available ride requests.',
+              'Please go online from the Driver Dashboard to view available ride requests.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppTheme.textSecondary,
@@ -505,8 +552,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              'New ride requests will appear here when '
-              'they are available for your driver account.',
+              'New ride requests will appear here when they are available for your driver account.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppTheme.textSecondary,
@@ -581,9 +627,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
         actions: [
           IconButton(
             tooltip: 'Refresh requests',
-            onPressed: _isLoading
-                ? null
-                : () => _loadRequests(),
+            onPressed: _isLoading ? null : () => _loadRequests(),
             icon: const Icon(Icons.refresh_rounded),
           ),
           const SizedBox(width: 6),
@@ -658,9 +702,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
             ),
             Expanded(
               child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
+                  ? const Center(child: CircularProgressIndicator())
                   : _error != null
                       ? _buildErrorState()
                       : _isOffline
@@ -677,9 +719,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
                                         const AlwaysScrollableScrollPhysics(),
                                     itemCount: _requests.length,
                                     itemBuilder: (context, index) =>
-                                        _buildRideCard(
-                                      _requests[index],
-                                    ),
+                                        _buildRideCard(_requests[index]),
                                   ),
                                 ),
             ),
