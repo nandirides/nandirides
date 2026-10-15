@@ -14,7 +14,7 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body d-flex align-items-center">
-                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-3 me-3"><i class="fa-solid fa-indian-rupee-sign fs-4"></i></div>
+                    <div class="bg-danger bg-opacity-10 text-white rounded-circle p-3 me-3"><i class="fa-solid fa-indian-rupee-sign fs-4"></i></div>
                     <div><small class="text-muted d-block">Total Paid</small><h4 class="fw-bold mb-0">₹{{ total_paid|default:"0.00" }}</h4></div>
                 </div>
             </div>
@@ -22,7 +22,7 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body d-flex align-items-center">
-                    <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 me-3"><i class="fa-solid fa-circle-check fs-4"></i></div>
+                    <div class="bg-success bg-opacity-10 text-white rounded-circle p-3 me-3"><i class="fa-solid fa-circle-check fs-4"></i></div>
                     <div><small class="text-muted d-block">Successful</small><h4 class="fw-bold mb-0">{{ successful_count|default:"0" }}</h4></div>
                 </div>
             </div>
@@ -30,7 +30,7 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body d-flex align-items-center">
-                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3"><i class="fa-solid fa-clock fs-4"></i></div>
+                    <div class="bg-warning bg-opacity-10 text-white rounded-circle p-3 me-3"><i class="fa-solid fa-clock fs-4"></i></div>
                     <div><small class="text-muted d-block">Pending</small><h4 class="fw-bold mb-0">{{ pending_count|default:"0" }}</h4></div>
                 </div>
             </div>
@@ -38,7 +38,7 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body d-flex align-items-center">
-                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-3 me-3"><i class="fa-solid fa-circle-xmark fs-4"></i></div>
+                    <div class="bg-danger bg-opacity-10 text-white rounded-circle p-3 me-3"><i class="fa-solid fa-circle-xmark fs-4"></i></div>
                     <div><small class="text-muted d-block">Failed</small><h4 class="fw-bold mb-0">{{ failed_count|default:"0" }}</h4></div>
                 </div>
             </div>
@@ -51,7 +51,7 @@
                 <div class="card-body">
                     {% if booking_data %}
                         <div class="text-center mb-4">
-                            <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex p-3 mb-3"><i class="fa-solid fa-indian-rupee-sign fs-2"></i></div>
+                            <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex p-3 mb-3"><i class="fa-solid fa-indian-rupee-sign text-white fs-2"></i></div>
                             <h2 class="fw-bold mb-1">₹{{ booking_data.total_amount|default:"0.00" }}</h2>
                             {% if booking_data.payment_status == "Paid" or booking_data.payment_status == "Success" %}
                                 <span class="badge bg-success rounded-pill px-3 py-2"><i class="fa-solid fa-check me-1"></i>Successful</span>
@@ -100,55 +100,144 @@
                         <span class="badge bg-body-secondary text-body">{{ payments|length|default:"0" }} Transaction(s)</span>
                     </div>
                 </div>
+                
                 <div class="card-body p-0">
                     {% if payments %}
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+
+                        <!-- Fixed height table with vertical scrollbar -->
+                        <div style="
+                            height: 450px;
+                            max-height: 450px;
+                            overflow-y: scroll;
+                            overflow-x: auto;
+                            display: block;
+                            position: relative;
+                            width: 100%;
+                        ">
+
+                            <table class="table table-hover align-middle mb-0" style="width: 100%;">
                                 <thead class="table-light">
-                                    <tr><th class="ps-3">Transaction</th><th>Date</th><th>Method</th><th>Amount</th><th>Status</th><th class="text-end pe-3">Action</th></tr>
+                                    <tr>
+                                        <th class="ps-3 text-nowrap"
+                                            style="position: sticky; top: 0; z-index: 5; background: #f8f9fa;">
+                                            Transaction
+                                        </th>
+                                        <th class="text-nowrap"
+                                            style="position: sticky; top: 0; z-index: 5; background: #f8f9fa;">
+                                            Date
+                                        </th>
+                                        <th class="text-nowrap"
+                                            style="position: sticky; top: 0; z-index: 5; background: #f8f9fa;">
+                                            Method
+                                        </th>
+                                        <th class="text-nowrap"
+                                            style="position: sticky; top: 0; z-index: 5; background: #f8f9fa;">
+                                            Amount
+                                        </th>
+                                        <th class="text-nowrap"
+                                            style="position: sticky; top: 0; z-index: 5; background: #f8f9fa;">
+                                            Status
+                                        </th>
+                                        <th class="text-end pe-3 text-nowrap"
+                                            style="position: sticky; top: 0; z-index: 5; background: #f8f9fa;">
+                                            Action
+                                        </th>
+                                    </tr>
                                 </thead>
+
                                 <tbody>
                                     {% for payment_item in payments %}
-                                        <tr>
-                                            <td class="ps-3">
-                                                <div class="fw-semibold text-break">{{ payment_item.payment_number|default:payment_item.pk }}</div>
-                                                <small class="text-muted">Booking #{% if payment_item.ride_request %}{{ payment_item.ride_request.request_number }}{% elif payment_item.ride %}{{ payment_item.ride.pk }}{% else %}—{% endif %}</small>
-                                            </td>
-                                            <td>
-                                                <div>{{ payment_item.created_at|date:"d M Y"|default:"—" }}</div>
-                                                <small class="text-muted">{{ payment_item.created_at|date:"h:i A"|default:"" }}</small>
-                                            </td>
-                                            <td class="text-uppercase">{{ payment_item.payment_method|default:"—" }}</td>
-                                            <td class="fw-bold">₹{{ payment_item.amount|default:"0.00" }}</td>
-                                            <td>
-                                                {% if payment_item.status == "success" or payment_item.status == "successful" or payment_item.status == "paid" or payment_item.status == "completed" %}
-                                                    <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-check me-1"></i>Success</span>
-                                                {% elif payment_item.status == "pending" %}
-                                                    <span class="badge bg-warning-subtle text-warning-emphasis"><i class="fa-solid fa-clock me-1"></i>Pending</span>
-                                                {% elif payment_item.status == "refunded" %}
-                                                    <span class="badge bg-info-subtle text-info-emphasis"><i class="fa-solid fa-rotate-left me-1"></i>Refunded</span>
+                                    <tr>
+                                        <td class="ps-3">
+                                            <div class="fw-semibold text-break">
+                                                {{ payment_item.payment_number|default:payment_item.pk }}
+                                            </div>
+                                            <small class="text-muted">
+                                                Booking ID :
+                                                {% if payment_item.ride_request %}
+                                                    {{ payment_item.ride_request.request_number|default:payment_item.ride_request.pk }}
+                                                {% elif payment_item.ride %}
+                                                    {{ payment_item.ride.pk }}
                                                 {% else %}
-                                                    <span class="badge bg-danger-subtle text-danger"><i class="fa-solid fa-xmark me-1"></i>{{ payment_item.status|default:"Failed"|title }}</span>
+                                                    —
                                                 {% endif %}
-                                            </td>
-                                            <td class="text-end pe-3">
-                                                <a href="{% url 'paymentdetails' %}?payment_id={{ payment_item.pk }}" class="btn btn-sm btn-outline-danger" aria-label="View payment details"><i class="fa-solid fa-eye"></i></a>
-                                                <a href="{% url 'paymentreceipt' %}?payment_id={{ payment_item.pk }}" class="btn btn-sm btn-outline-danger" aria-label="View payment receipt"><i class="fa-solid fa-receipt"></i></a>
-                                            </td>
-                                        </tr>
+                                            </small>
+                                        </td>
+
+                                        <td class="text-nowrap">
+                                            <div>
+                                                {{ payment_item.created_at|date:"d M Y"|default:"—" }}
+                                            </div>
+                                            <small class="text-muted">
+                                                {{ payment_item.created_at|date:"h:i A"|default:"" }}
+                                            </small>
+                                        </td>
+
+                                        <td class="text-uppercase text-nowrap">
+                                            {{ payment_item.get_payment_method_display|default:payment_item.payment_method|default:"—" }}
+                                        </td>
+
+                                        <td class="fw-bold text-nowrap">
+                                            ₹{{ payment_item.amount|default:"0.00" }}
+                                        </td>
+
+                                        <td class="text-nowrap">
+                                            {% if payment_item.status == "success" or payment_item.status == "successful" or payment_item.status == "paid" or payment_item.status == "completed" %}
+                                                <span class="badge bg-success-subtle text-success">
+                                                    <i class="fa-solid fa-check me-1"></i>Success
+                                                </span>
+                                            {% elif payment_item.status == "pending" %}
+                                                <span class="badge text-warning">
+                                                    <i class="fa-solid fa-clock me-1"></i>Pending
+                                                </span>
+                                            {% elif payment_item.status == "refunded" %}
+                                                <span class="badge bg-info-subtle text-info">
+                                                    <i class="fa-solid fa-rotate-left me-1"></i>Refunded
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger-subtle text-danger">
+                                                    <i class="fa-solid fa-xmark me-1"></i>{{ payment_item.get_status_display|default:payment_item.status|default:"Failed"|title }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-end pe-3 text-nowrap">
+                                            <a href="{% url 'paymentdetails' %}?payment_id={{ payment_item.pk }}"
+                                            class="btn btn-sm btn-outline-danger"
+                                            aria-label="View payment details"
+                                            title="Payment Details">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+
+                                            <a href="{% url 'paymentreceipt' %}?payment_id={{ payment_item.pk }}"
+                                            class="btn btn-sm btn-outline-danger"
+                                            aria-label="View payment receipt"
+                                            title="Payment Receipt">
+                                                <i class="fa-solid fa-receipt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
                                     {% endfor %}
                                 </tbody>
+
                             </table>
                         </div>
+
                     {% else %}
                         <div class="text-center py-5 px-3">
-                            <div class="mb-3"><i class="fa-solid fa-credit-card text-danger" style="font-size:50px;"></i></div>
+                            <div class="mb-3">
+                                <i class="fa-solid fa-credit-card text-danger"
+                                style="font-size: 50px;"></i>
+                            </div>
                             <h5 class="fw-bold">No Transactions Yet</h5>
                             <p class="text-muted">You haven't made any payments yet.</p>
-                            <a href="{% url 'booking' %}" class="btn btn-danger"><i class="fa-solid fa-car me-1"></i>Book a Ride</a>
+                            <a href="{% url 'booking' %}" class="btn btn-danger">
+                                <i class="fa-solid fa-car me-1"></i>Book a Ride
+                            </a>
                         </div>
                     {% endif %}
                 </div>
+
             </div>
         </div>
     </div>
