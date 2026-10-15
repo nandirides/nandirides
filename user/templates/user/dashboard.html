@@ -257,13 +257,5 @@
     <div class="text-center mt-4 mb-2">
         <small class="text-secondary"><i class="fa-solid fa-shield-halved text-success me-1"></i>Your rides and payments are shown from your account records.</small>
     </div>
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
 </div>
 {% endblock %}

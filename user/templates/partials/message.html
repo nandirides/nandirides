@@ -1,0 +1,50 @@
+<div class="app-content">
+    <div class="container-fluid">
+        {% if messages %}
+            <div id="toast-container" class="position-fixed end-0 p-3 d-flex flex-column gap-2" style="top:70px;z-index:1090;pointer-events:none;max-width:100%;width:max-content;">
+                {% for message in messages %}
+                    <div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'danger' in message.tags %}danger{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% elif 'info' in message.tags %}info{% else %}secondary{% endif %} alert-dismissible fade show shadow-sm rounded-3 d-flex align-items-start gap-2 mb-0 px-3 py-3"
+                         role="alert"
+                         data-auto-dismiss="10000"
+                         style="pointer-events:auto;width:max-content;min-width:250px;max-width:min(420px,calc(100vw - 2rem));box-sizing:border-box;overflow-wrap:anywhere;">
+                        {% if 'success' in message.tags %}
+                            <i class="bi bi-check-circle-fill fs-5 flex-shrink-0 mt-1"></i>
+                        {% elif 'error' in message.tags or 'danger' in message.tags %}
+                            <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0 mt-1"></i>
+                        {% elif 'warning' in message.tags %}
+                            <i class="bi bi-exclamation-circle-fill fs-5 flex-shrink-0 mt-1"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle-fill fs-5 flex-shrink-0 mt-1"></i>
+                        {% endif %}
+                        <span class="flex-grow-1" style="min-width:0;white-space:normal;overflow-wrap:anywhere;padding-right:8px;">{{ message }}</span>
+                        <button type="button" class="btn-close flex-shrink-0 ms-auto" data-bs-dismiss="alert" aria-label="Close" style="position:static;padding:0.4rem;margin:0;opacity:0.7;"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('#toast-container [data-auto-dismiss="10000"]').forEach(function (toast) {
+        var timer = setTimeout(function () {
+            if (toast.isConnected) {
+                if (window.bootstrap && window.bootstrap.Alert) {
+                    window.bootstrap.Alert.getOrCreateInstance(toast).close();
+                } else {
+                    toast.classList.remove('show');
+                    toast.remove();
+                }
+            }
+        }, 10000);
+        var closeButton = toast.querySelector('[data-bs-dismiss="alert"]');
+        if (closeButton) {
+            closeButton.addEventListener('click', function () {
+                clearTimeout(timer);
+            });
+        }
+    });
+});
+</script>

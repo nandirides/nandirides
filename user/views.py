@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
@@ -16,7 +16,6 @@ from django.views.generic import TemplateView
 from user.forms import UserForm, LoginForm, Profile, ForgetPassword, ResetPassword, Booking, Payment as PaymentForm, MyRide, Driver, UserProfileForm, UserAddressForm, CustomerCreateForm
 from django.contrib.auth import get_user_model
 from user.models import Feedback
-from dashboard.models import UserProfile
 User = get_user_model()
 from drivers.forms import DriverForm, DriverDocumentForm, DriverBankAccountForm
 from locations.models import Location
@@ -24,6 +23,15 @@ from rides.models import RideRequest, Ride, RideTracking
 from payments.models import Payment as PaymentModel
 from promotions.models import Coupon, CouponUsage
 from django.http import Http404
+from vehicles.models import VehicleType
+from django.core.paginator import Paginator
+
+# ==================== NANDIRIDE FARE SETTINGS ====================
+
+PLATFORM_FEE = Decimal("10.00")
+MINIMUM_FARE_DISTANCE_KM = Decimal("1.00")
+
+# ==================== END FARE SETTINGS ====================
 
 SIDEBAR_MENU = [
     {"icon": "fa fa-dashboard", "name": "Dashboard", "url": "user-dashboard"},
@@ -60,28 +68,75 @@ def calculate_distance_km(lat1, lon1, lat2, lon2):
 
 
 def calculate_fare(vehicle_type, distance):
-    name = str(vehicle_type).lower()
-    if "bike" in name or "motorcycle" in name:
-        base, rate, fee = Decimal("30.00"), Decimal("8.00"), Decimal("10.00")
-    elif "auto" in name or "rickshaw" in name:
-        base, rate, fee = Decimal("40.00"), Decimal("12.00"), Decimal("10.00")
-    else:
-        base, rate, fee = Decimal("50.00"), Decimal("15.00"), Decimal("15.00")
-    distance = Decimal(str(max(float(distance), 1))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    charge = (distance * rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    total = (base + charge + fee).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    """
+    Calculate fare using the selected VehicleType model.
+
+    Fare breakdown:
+        base_fare
+        ride_charge
+        platform_fee
+        total_amount
+        final_fare
+    """
+
+    distance = Decimal(str(distance)).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    if distance <= Decimal("0.00"):
+        raise ValidationError("Ride distance must be greater than zero.")
+
+    # Apply the minimum fare distance.
+    billable_distance = max(
+        distance,
+        MINIMUM_FARE_DISTANCE_KM,
+    )
+
+    # The form may provide a VehicleType instance or its primary key.
+    if not hasattr(vehicle_type, "base_fare"):
+        from locations.models import VehicleType
+
+        vehicle_type = get_object_or_404(
+            VehicleType,
+            pk=vehicle_type,
+            is_active=True,
+        )
+
+    base_fare = Decimal(str(vehicle_type.base_fare or "0.00"))
+    per_km_rate = Decimal(str(vehicle_type.per_km_rate or "0.00"))
+
+    if base_fare < 0 or per_km_rate < 0:
+        raise ValidationError("Vehicle fare configuration is invalid.")
+
+    ride_charge = (
+        billable_distance * per_km_rate
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    platform_fee = PLATFORM_FEE
+
+    total_amount = (
+        base_fare + ride_charge + platform_fee
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
     return {
-        "base_fare": base,
-        "ride_charge": charge,
-        "platform_fee": fee,
+        "base_fare": base_fare,
+        "ride_charge": ride_charge,
+        "platform_fee": platform_fee,
         "distance": distance,
-        "total_amount": total,
-        "estimate_fare": total,
-        "final_fare": total,
+        "billable_distance": billable_distance,
+        "total_amount": total_amount,
+        "estimate_fare": total_amount,
+        "final_fare": total_amount,
         "discount_amount": Decimal("0.00"),
         "coupon": None,
     }
-
 
 def apply_coupon_to_fare(user, coupon_code, fare):
     result = dict(fare)
@@ -127,45 +182,155 @@ def get_request_payment(ride_request):
 
 def get_request_data(ride_request):
     payment = get_request_payment(ride_request)
-    ride = Ride.objects.filter(ride_request=ride_request).select_related("driver", "vehicle").first()
-    scheduled = timezone.localtime(ride_request.scheduled_at) if ride_request.scheduled_at else None
-    amount = ride_request.final_fare or ride_request.estimated_fare or Decimal("0.00")
+
+    ride = (
+        Ride.objects
+        .filter(ride_request=ride_request)
+        .select_related("driver", "vehicle")
+        .first()
+    )
+
+    scheduled = (
+        timezone.localtime(ride_request.scheduled_at)
+        if ride_request.scheduled_at
+        else None
+    )
+
+    distance = Decimal(
+        str(ride_request.estimated_distance or "0.00")
+    )
+
+    # Use the saved booking fare as the source of truth.
+    final_amount = Decimal(
+        str(
+            ride_request.final_fare
+            if ride_request.final_fare is not None
+            else ride_request.estimated_fare or "0.00"
+        )
+    )
+
+    discount_amount = Decimal(
+        str(ride_request.discount_amount or "0.00")
+    )
+
+    # Reconstruct the fare breakdown using the saved vehicle rates.
+    vehicle_type = ride_request.vehicle_type
+
+    base_fare = Decimal(
+        str(getattr(vehicle_type, "base_fare", 0) or 0)
+    )
+
+    per_km_rate = Decimal(
+        str(getattr(vehicle_type, "per_km_rate", 0) or 0)
+    )
+
+    billable_distance = max(
+        distance,
+        MINIMUM_FARE_DISTANCE_KM,
+    )
+
+    ride_charge = (
+        billable_distance * per_km_rate
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    platform_fee = PLATFORM_FEE
+
+    # If the booking has a coupon, total_amount is the pre-discount total.
+    total_amount = (
+        final_amount + discount_amount
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    # Avoid displaying a reconstructed total inconsistent with the
+    # amount actually saved on the booking.
+    if discount_amount == Decimal("0.00"):
+        total_amount = final_amount
+
+    # Use the actual saved total to derive a consistent breakup.
+    # This also accommodates bookings created under older fare rules.
+    if base_fare + ride_charge + platform_fee != total_amount:
+        platform_fee = max(
+            Decimal("0.00"),
+            total_amount - base_fare - ride_charge,
+        ).quantize(
+            Decimal("0.01"),
+            rounding=ROUND_HALF_UP,
+        )
+
     return {
-        "phone": getattr(ride_request.passenger, "phone", "") or getattr(ride_request.passenger, "mobile_number", ""),
+        "phone": (
+            getattr(ride_request.passenger, "phone", "")
+            or getattr(ride_request.passenger, "mobile_number", "")
+        ),
         "request_id": ride_request.pk,
         "booking_id": ride_request.request_number,
         "request_number": ride_request.request_number,
         "ride_request": ride_request,
         "ride": ride,
+
         "pickup_location": ride_request.pickup_location.address,
         "destination": ride_request.drop_location.address,
         "pickup": ride_request.pickup_location.address,
         "drop": ride_request.drop_location.address,
-        "ride_type": str(ride_request.vehicle_type),
-        "ride_date": scheduled.date() if scheduled else ride_request.requested_at.date(),
+
+        "ride_type": str(vehicle_type),
+        "ride_date": (
+            scheduled.date()
+            if scheduled
+            else timezone.localtime(ride_request.requested_at).date()
+        ),
         "ride_time": scheduled.strftime("%H:%M") if scheduled else "",
+
         "status": ride_request.get_status_display(),
         "ride_status": ride_request.get_status_display(),
         "passengers": 1,
-        "distance": str(ride_request.estimated_distance or 0),
-        "base_fare": Decimal("0.00"),
-        "ride_charge": Decimal("0.00"),
-        "platform_fee": Decimal("0.00"),
-        "total_amount": amount,
-        "fare": amount,
-        "estimate_fare": amount,
-        "discount_amount": ride_request.discount_amount,
+
+        "distance": str(distance),
+        "billable_distance": str(billable_distance),
+
+        "base_fare": base_fare,
+        "ride_charge": ride_charge,
+        "platform_fee": platform_fee,
+
+        "total_amount": total_amount,
+        "fare": final_amount,
+        "estimate_fare": final_amount,
+        "final_fare": final_amount,
+        "discount_amount": discount_amount,
+
         "payment": payment,
         "payment_type": payment.payment_method if payment else "",
-        "payment_status": payment.get_status_display() if payment else "Not initiated",
+        "payment_status": (
+            payment.get_status_display()
+            if payment
+            else "Not initiated"
+        ),
         "payment_id": payment.payment_number if payment else "",
-        "payment_date": timezone.localtime(payment.paid_at).strftime("%d %b %Y") if payment and payment.paid_at else "",
-        "payment_time": timezone.localtime(payment.paid_at).strftime("%I:%M %p") if payment and payment.paid_at else "",
+        "payment_date": (
+            timezone.localtime(payment.paid_at).strftime("%d %b %Y")
+            if payment and payment.paid_at
+            else ""
+        ),
+        "payment_time": (
+            timezone.localtime(payment.paid_at).strftime("%I:%M %p")
+            if payment and payment.paid_at
+            else ""
+        ),
+
         "driver_name": str(ride.driver) if ride else "",
         "driver_phone": getattr(ride.driver, "phone", "") if ride else "",
         "driver_rating": "",
         "vehicle": str(ride.vehicle) if ride else "",
-        "vehicle_number": getattr(ride.vehicle, "registration_number", "") if ride else "",
+        "vehicle_number": (
+            getattr(ride.vehicle, "registration_number", "")
+            if ride
+            else ""
+        ),
         "eta": "",
         "remaining_distance": "",
     }
@@ -178,17 +343,25 @@ def booking_page(request, form=None, booking_data=None):
         "site_name": "NandiRide",
     })
 
+
 def payment_page(request, form=None, booking_data=None):
     booking_data = booking_data or {}
     if booking_data.get("request_id"):
         request.session["pending_ride_request_id"] = booking_data["request_id"]
+    payments_queryset = PaymentModel.objects.filter(user=request.user).order_by("-created_at")
+    paginator = Paginator(payments_queryset, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
     return render(request, "user/profile/payment.html", {
         "form": form or PaymentForm(),
         "sidebar_menu": SIDEBAR_MENU,
         "booking_data": booking_data,
         "request_id": booking_data.get("request_id", ""),
+        "open_payment_popup": True,
+        "payments": page_obj,
+        "page_obj": page_obj,
         "site_name": "NandiRide",
     })
+
 
 def get_owned_request(request, request_id=None):
     if request_id:
@@ -377,12 +550,12 @@ class ContactView(TemplateView):
         context = super().get_context_data(**kwargs)
         context.update({
             "site_name": "NandiRide",
-            "contact_phone": "+91 9410554430",
+            "contact_phone": "+91 9410XXXXXX",
             "contact_email": "support@nandiride.com",
             "contact_hours": "24 Hours / 7 Days",
             "contact_address": "Haridwar, Uttarakhand (India)",
             "contact_info": [
-                {"icon": "fa-solid fa-phone", "title": "Call Us", "description": "Talk directly with our support team.", "value": "+91 9410554430", "link": "tel:+919410554430"},
+                {"icon": "fa-solid fa-phone", "title": "Call Us", "description": "Talk directly with our support team.", "value": "+91 9410XXXXXX", "link": "tel:+919410554430"},
                 {"icon": "fa-solid fa-envelope", "title": "Email Us", "description": "Send us your questions anytime.", "value": "support@nandiride.com", "link": "mailto:support@nandiride.com"},
                 {"icon": "fa-solid fa-clock", "title": "Support Hours", "description": "Our customer support is available.", "value": "24/7 Support", "link": ""},
                 {"icon": "fa-solid fa-location-dot", "title": "Location", "description": "Serving customers across India.", "value": "Haridwar, Uttarakhand (India)", "link": ""},
@@ -434,13 +607,13 @@ class UserBookingView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in before booking a ride.")
-            return redirect("login")
+            return redirect("user-login")
         return booking_page(request)
 
     def post(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in before booking a ride.")
-            return redirect("login")
+            return redirect("user-login")
         form = Booking(request.POST)
         if not form.is_valid():
             return booking_page(request, form)
@@ -463,7 +636,15 @@ class UserBookingView(View):
         if distance < 0.05:
             form.add_error(None, "Pickup and destination must be different.")
             return booking_page(request, form)
-        fare = calculate_fare(data["ride_type"], distance)
+        vehicle_type = data["ride_type"]
+        if not hasattr(vehicle_type, "base_fare"):
+            vehicle_type = get_object_or_404(
+                VehicleType,
+                pk=vehicle_type,
+                is_active=True,
+            )
+
+        fare = calculate_fare(vehicle_type, distance)
         coupon, coupon_error = None, None
         if data.get("coupon_code"):
             fare, coupon_error = apply_coupon_to_fare(request.user, data["coupon_code"], fare)
@@ -522,28 +703,67 @@ class UserBookingView(View):
 
 # ==================== PAYMENT ====================
 
+
 class UserPaymentView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view payments.")
-            return redirect("login")
-        request_id = get_booking_request_id(request)
-        ride_request = get_owned_request(request, request_id)
-        if not ride_request:
-            messages.info(request, "Please book a ride first.")
-            return redirect("booking")
-        request.session["pending_ride_request_id"] = ride_request.pk
-        return payment_page(request, PaymentForm(), get_request_data(ride_request))
+            return redirect("user-login")
+        request_id = request.GET.get("request_id")
+        if request.GET.get("popup") == "1" and request_id:
+            ride_request = get_owned_request(request, request_id)
+            if not ride_request:
+                messages.error(request, "Booking not found.")
+                return redirect("booking")
+            return payment_page(request, PaymentForm(), get_request_data(ride_request))
+        payments = PaymentModel.objects.filter(
+            user=request.user
+        ).select_related(
+            "ride_request",
+            "ride_request__pickup_location",
+            "ride_request__drop_location",
+            "ride_request__vehicle_type",
+        ).order_by("-created_at")
+        payment_id = request.GET.get("payment_id")
+        payment = None
+        if payment_id:
+            if str(payment_id).isdigit():
+                payment = payments.filter(pk=int(payment_id)).first()
+            else:
+                payment = payments.filter(payment_number=payment_id).first()
+            if payment is None:
+                raise Http404("Payment not found.")
+        elif request_id and str(request_id).isdigit():
+            payment = payments.filter(ride_request_id=int(request_id)).first()
+        else:
+            payment = payments.first()
+        booking_data = (
+            get_request_data(payment.ride_request)
+            if payment and payment.ride_request
+            else {}
+        )
+        return render(request, "user/profile/paymentdetails.html", {
+            "sidebar_menu": SIDEBAR_MENU,
+            "form": PaymentForm(),
+            "payment": payment,
+            "payments": payments,
+            "booking_data": booking_data,
+            "site_name": "NandiRide",
+        })
 
     def post(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to make a payment.")
-            return redirect("login")
+            return redirect("user-login")
         request_id = get_booking_request_id(request)
         if not request_id:
             messages.error(request, "Booking reference is missing. Please select a booking.")
-            return redirect("myride")
-        ride_request = get_object_or_404(RideRequest, pk=request_id, passenger=request.user)
+            return redirect("payment")
+        ride_request = get_object_or_404(
+            RideRequest,
+            pk=request_id,
+            passenger=request.user,
+        )
         form = PaymentForm(request.POST)
         if not form.is_valid():
             return payment_page(request, form, get_request_data(ride_request))
@@ -556,10 +776,12 @@ class UserPaymentView(View):
             form.add_error(None, "The booking amount is invalid. Please contact support.")
             return payment_page(request, form, get_request_data(ride_request))
         with transaction.atomic():
-            payment = PaymentModel.objects.select_for_update().filter(ride_request=ride_request).first()
+            payment = PaymentModel.objects.select_for_update().filter(
+                ride_request=ride_request
+            ).first()
             if payment and payment.status == PaymentModel.Status.SUCCESS:
                 messages.info(request, "This booking has already been paid.")
-                return redirect(f"{reverse('myride')}?request_id={ride_request.pk}")
+                return redirect(f"{reverse('payment')}?payment_id={payment.pk}")
             if payment is None:
                 PaymentModel.objects.create(
                     payment_number=build_number("PAY"),
@@ -574,10 +796,22 @@ class UserPaymentView(View):
                 payment.payment_method = method
                 payment.amount = amount
                 payment.status = PaymentModel.Status.PENDING
-                payment.metadata = {**(payment.metadata or {}), "source": "customer_web"}
-                payment.save(update_fields=["payment_method", "amount", "status", "metadata", "updated_at"])
-        messages.info(request, "Payment method saved. Status remains Pending until payment is verified.")
-        return redirect(f"{reverse('myride')}?request_id={ride_request.pk}")
+                payment.metadata = {
+                    **(payment.metadata or {}),
+                    "source": "customer_web",
+                }
+                payment.save(update_fields=[
+                    "payment_method",
+                    "amount",
+                    "status",
+                    "metadata",
+                    "updated_at",
+                ])
+        messages.info(
+            request,
+            "Payment method saved. Status remains Pending until payment is verified."
+        )
+        return redirect(f"{reverse('payment')}?request_id={ride_request.pk}")
 
 # ==================== MY RIDES ====================
 
@@ -585,7 +819,7 @@ class UserMyRideView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view your rides.")
-            return redirect("login")
+            return redirect("user-login")
         requests = get_user_requests(request.user)
         request_id = request.GET.get("request_id")
         selected = get_object_or_404(requests, pk=request_id) if request_id else requests.first()
@@ -604,7 +838,7 @@ class UserDashboardView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view your dashboard.")
-            return redirect("login")
+            return redirect("user-login")
         requests = get_user_requests(request.user)
         payments = PaymentModel.objects.filter(user=request.user, status=PaymentModel.Status.SUCCESS)
         total_spent = payments.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
@@ -642,7 +876,7 @@ class TrackRideView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to track a ride.")
-            return redirect("login")
+            return redirect("user-login")
         request_id = request.GET.get("request_id")
         ride_request = get_owned_request(request, request_id)
         if not ride_request:
@@ -761,7 +995,7 @@ class PaymentDetailsView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view payments.")
-            return redirect("login")
+            return redirect("user-login")
         payment_id = request.GET.get("payment_id")
         if payment_id:
             payment_query = PaymentModel.objects.filter(user=request.user)
@@ -786,7 +1020,7 @@ class PaymentReceiptView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view receipts.")
-            return redirect("login")
+            return redirect("user-login")
         payment_id = request.GET.get("payment_id")
         payment = get_object_or_404(PaymentModel, pk=payment_id, user=request.user) if payment_id else PaymentModel.objects.filter(user=request.user).order_by("-created_at").first()
         return render(request, "user/profile/paymentreceipt.html", {
@@ -800,10 +1034,10 @@ class PaymentReceiptView(View):
 # ==================== CANCEL RIDE ====================
 
 class CancelRideView(View):
-    def post(self, request):
+    def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to cancel a ride.")
-            return redirect("login")
+            return redirect("user-login")
         request_id = get_booking_request_id(request)
         if not request_id:
             messages.error(request, "Booking reference is missing.")

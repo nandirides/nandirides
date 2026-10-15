@@ -49,16 +49,6 @@
                                     <h2 class="fw-bold text-dark mb-2">Sign Up</h2>
                                     <p class="text-secondary mb-0">Enter your details to get started.</p>
                                 </div>
-                                {% if messages %}
-                                <div class="mb-3">
-                                    {% for message in messages %}
-                                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
-                                        <i class="bi bi-info-circle me-2"></i>{{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
                                 <form method="post" action="" id="signupForm" novalidate>
                                     {% csrf_token %}
                                     {% if form.non_field_errors %}

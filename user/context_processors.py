@@ -6,11 +6,11 @@ def site_data(request):
         # SITE
         'site_name': 'NandiRide',
         'site_tagline': "Thank you for choosing NandiRide. Let's travel together!",
-        'phone': '+91 9410554430',
+        'phone': '+91 941055XXXX',
         'phone2': '+91 4421-554430',
         'email': 'support@nandidride.com',
         'email2': 'nandidride@gmail.com',
-        'location': 'Haridwar, India',
+        'location': 'Haridwar, Uttrakhand (India)',
         'current_year': datetime.now().year,
         'footer_tag': 'All Rights Reserved',
 
@@ -29,12 +29,12 @@ def site_data(request):
             {
                 'name': 'Services',
                 'url': reverse('user-services'),
-                'icon': 'fa fa-cogs',
+                'icon': 'fa-solid fa-gears',
             },
             {
                 'name': 'Blog',
                 'url': reverse('user-blog'),
-                'icon': 'fa fa-cogs',
+                'icon': 'fa-solid fa-book-open',
             },
             {
                 'name': 'Career',

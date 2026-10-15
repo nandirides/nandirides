@@ -115,6 +115,10 @@ class Ride(TimeStampedModel):
         max_length=50,
         unique=True,
     )
+    pickup_otp_hash = models.CharField(max_length=128, blank=True, default="")
+    pickup_otp_expires_at = models.DateTimeField(null=True, blank=True)
+    pickup_otp_verified_at = models.DateTimeField(null=True, blank=True)
+
 
     ride_request = models.OneToOneField(
         RideRequest,

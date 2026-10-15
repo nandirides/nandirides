@@ -66,8 +66,8 @@ http://127.0.0.1:8000/api/v1/auth/register/
 
 http://127.0.0.1:8000/api/v1/auth/login/
 {
-  "username": "smukul",
-  "password": "Ride@123",
+  "username": "nandirides",
+  "password": "Ride@123"
 }
 
 Meeting Link : https://meet.google.com/cgr-bghj-arr

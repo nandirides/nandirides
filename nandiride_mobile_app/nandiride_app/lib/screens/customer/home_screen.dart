@@ -70,9 +70,11 @@ class _HomeScreenState extends State<HomeScreen>
   void _openBooking({String? rideType}) {
     Navigator.pushNamed(
       context,
-      AppRoutes.booking,
+      '/booking',
       arguments: {
-        if (rideType != null) 'rideType': rideType,
+        'pickup': 'Haridwar',
+        'drop': 'Rishikesh',
+        'rideType': 'bike',
       },
     );
   }
@@ -240,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'NAMASTE! 👋',
+          'Welcome! 👋',
           style: TextStyle(
             color: muted,
             fontSize: 12,

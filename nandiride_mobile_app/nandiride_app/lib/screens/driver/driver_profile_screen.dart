@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-import '../../app/app_theme.dart';
 import '../../services/driver_service.dart';
 
 class DriverProfileScreen extends StatefulWidget {

@@ -1,0 +1,84 @@
+{% load static %}
+<footer class="bg-danger text-white mt-auto mx-2 mx-sm-3 mx-lg-2 mb-2 rounded-3">
+    <div class="container-fluid px-3 px-sm-4 px-lg-5 py-5">
+        <div class="row g-4">
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width:58px;height:58px;">
+                        <img src="{% static 'user/images/logo.png' %}" alt="NandiRide Logo" width="50" height="50" class="img-fluid">
+                    </div>
+                    <span class="fw-bold fs-4">Nandi<span class="text-warning">Ride</span></span>
+                </div>
+                <p class="text-white mb-0">{{ site_tagline }}</p>
+            </div>
+            <div class="col-6 col-md-6 col-lg-2">
+                <h6 class="fw-bold mb-3">Quick Links</h6>
+                <div class="d-flex flex-column gap-2">
+                    {% for nav in nav_links %}
+                    <a href="{{ nav.url }}" class="footer-link text-white text-decoration-none d-flex align-items-center">
+                        <i class="{{ nav.icon }} me-2"></i><span>{{ nav.name }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-6 col-md-6 col-lg-2">
+                <h6 class="fw-bold mb-3">Support</h6>
+                <div class="d-flex flex-column gap-2">
+                    {% for support in support_links %}
+                    <a href="{{ support.url }}" class="footer-link text-white text-decoration-none d-flex align-items-center">
+                        <i class="fa-solid fa-angle-right me-2"></i><span>{{ support.name }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <h6 class="fw-bold mb-3">Contact Us</h6>
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-start">
+                        <span class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:34px;height:34px;">
+                            <i class="fa-solid fa-phone"></i>
+                        </span>
+                        <div class="ms-3">
+                            <span class="d-block">{{ phone }}</span>
+                            {% if phone2 %}<span class="d-block text-white-50">{{ phone2 }}</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start">
+                        <span class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:34px;height:34px;">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                        <div class="ms-3 text-break">
+                            <span class="d-block">{{ email }}</span>
+                            {% if email2 %}<span class="d-block text-white-50">{{ email2 }}</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start">
+                        <span class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:34px;height:34px;">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </span>
+                        <span class="ms-3 text-break">{{ location }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-2">
+                <h6 class="fw-bold mb-3">Follow Us</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for social in social_links %}
+                    <a href="{{ social.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ social.name }}" class="nav-link social-link bg-white text-danger rounded-circle d-flex align-items-center justify-content-center text-decoration-none" style="width:42px;height:42px;">
+                        <i class="{{ social.icon }}"></i>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <hr class="border-light opacity-50 my-4">
+        <div class="row align-items-center g-2">
+            <div class="col-12 col-md-6 text-center text-md-start">
+                <small>© {{ current_year }} {{ site_name }}. {{ footer_tag }}</small>
+            </div>
+            <div class="col-12 col-md-6 text-center text-md-end">
+                <small>Made with <i class="fa-solid fa-heart mx-1"></i> for Nandi Ride</small>
+            </div>
+        </div>
+    </div>
+</footer>
