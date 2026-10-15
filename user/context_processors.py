@@ -29,12 +29,12 @@ def site_data(request):
             {
                 'name': 'Services',
                 'url': reverse('user-services'),
-                'icon': 'fa fa-cogs',
+                'icon': 'fa-solid fa-gears',
             },
             {
                 'name': 'Blog',
                 'url': reverse('user-blog'),
-                'icon': 'fa fa-cogs',
+                'icon': 'fa-solid fa-book-open',
             },
             {
                 'name': 'Career',

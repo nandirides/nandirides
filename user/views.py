@@ -24,6 +24,7 @@ from payments.models import Payment as PaymentModel
 from promotions.models import Coupon, CouponUsage
 from django.http import Http404
 from vehicles.models import VehicleType
+from django.core.paginator import Paginator
 
 # ==================== NANDIRIDE FARE SETTINGS ====================
 
@@ -342,17 +343,25 @@ def booking_page(request, form=None, booking_data=None):
         "site_name": "NandiRide",
     })
 
+
 def payment_page(request, form=None, booking_data=None):
     booking_data = booking_data or {}
     if booking_data.get("request_id"):
         request.session["pending_ride_request_id"] = booking_data["request_id"]
+    payments_queryset = PaymentModel.objects.filter(user=request.user).order_by("-created_at")
+    paginator = Paginator(payments_queryset, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
     return render(request, "user/profile/payment.html", {
         "form": form or PaymentForm(),
         "sidebar_menu": SIDEBAR_MENU,
         "booking_data": booking_data,
         "request_id": booking_data.get("request_id", ""),
+        "open_payment_popup": True,
+        "payments": page_obj,
+        "page_obj": page_obj,
         "site_name": "NandiRide",
     })
+
 
 def get_owned_request(request, request_id=None):
     if request_id:
@@ -541,12 +550,12 @@ class ContactView(TemplateView):
         context = super().get_context_data(**kwargs)
         context.update({
             "site_name": "NandiRide",
-            "contact_phone": "+91 9410554430",
+            "contact_phone": "+91 9410XXXXXX",
             "contact_email": "support@nandiride.com",
             "contact_hours": "24 Hours / 7 Days",
             "contact_address": "Haridwar, Uttarakhand (India)",
             "contact_info": [
-                {"icon": "fa-solid fa-phone", "title": "Call Us", "description": "Talk directly with our support team.", "value": "+91 9410554430", "link": "tel:+919410554430"},
+                {"icon": "fa-solid fa-phone", "title": "Call Us", "description": "Talk directly with our support team.", "value": "+91 9410XXXXXX", "link": "tel:+919410554430"},
                 {"icon": "fa-solid fa-envelope", "title": "Email Us", "description": "Send us your questions anytime.", "value": "support@nandiride.com", "link": "mailto:support@nandiride.com"},
                 {"icon": "fa-solid fa-clock", "title": "Support Hours", "description": "Our customer support is available.", "value": "24/7 Support", "link": ""},
                 {"icon": "fa-solid fa-location-dot", "title": "Location", "description": "Serving customers across India.", "value": "Haridwar, Uttarakhand (India)", "link": ""},
@@ -694,18 +703,53 @@ class UserBookingView(View):
 
 # ==================== PAYMENT ====================
 
+
 class UserPaymentView(View):
     def get(self, request):
         if not request.user.is_authenticated:
             messages.info(request, "Please log in to view payments.")
             return redirect("user-login")
-        request_id = get_booking_request_id(request)
-        ride_request = get_owned_request(request, request_id)
-        if not ride_request:
-            messages.info(request, "Please book a ride first.")
-            return redirect("booking")
-        request.session["pending_ride_request_id"] = ride_request.pk
-        return payment_page(request, PaymentForm(), get_request_data(ride_request))
+        request_id = request.GET.get("request_id")
+        if request.GET.get("popup") == "1" and request_id:
+            ride_request = get_owned_request(request, request_id)
+            if not ride_request:
+                messages.error(request, "Booking not found.")
+                return redirect("booking")
+            return payment_page(request, PaymentForm(), get_request_data(ride_request))
+        payments = PaymentModel.objects.filter(
+            user=request.user
+        ).select_related(
+            "ride_request",
+            "ride_request__pickup_location",
+            "ride_request__drop_location",
+            "ride_request__vehicle_type",
+        ).order_by("-created_at")
+        payment_id = request.GET.get("payment_id")
+        payment = None
+        if payment_id:
+            if str(payment_id).isdigit():
+                payment = payments.filter(pk=int(payment_id)).first()
+            else:
+                payment = payments.filter(payment_number=payment_id).first()
+            if payment is None:
+                raise Http404("Payment not found.")
+        elif request_id and str(request_id).isdigit():
+            payment = payments.filter(ride_request_id=int(request_id)).first()
+        else:
+            payment = payments.first()
+        booking_data = (
+            get_request_data(payment.ride_request)
+            if payment and payment.ride_request
+            else {}
+        )
+        return render(request, "user/profile/paymentdetails.html", {
+            "sidebar_menu": SIDEBAR_MENU,
+            "form": PaymentForm(),
+            "payment": payment,
+            "payments": payments,
+            "booking_data": booking_data,
+            "site_name": "NandiRide",
+        })
 
     def post(self, request):
         if not request.user.is_authenticated:
@@ -714,8 +758,12 @@ class UserPaymentView(View):
         request_id = get_booking_request_id(request)
         if not request_id:
             messages.error(request, "Booking reference is missing. Please select a booking.")
-            return redirect("myride")
-        ride_request = get_object_or_404(RideRequest, pk=request_id, passenger=request.user)
+            return redirect("payment")
+        ride_request = get_object_or_404(
+            RideRequest,
+            pk=request_id,
+            passenger=request.user,
+        )
         form = PaymentForm(request.POST)
         if not form.is_valid():
             return payment_page(request, form, get_request_data(ride_request))
@@ -728,10 +776,12 @@ class UserPaymentView(View):
             form.add_error(None, "The booking amount is invalid. Please contact support.")
             return payment_page(request, form, get_request_data(ride_request))
         with transaction.atomic():
-            payment = PaymentModel.objects.select_for_update().filter(ride_request=ride_request).first()
+            payment = PaymentModel.objects.select_for_update().filter(
+                ride_request=ride_request
+            ).first()
             if payment and payment.status == PaymentModel.Status.SUCCESS:
                 messages.info(request, "This booking has already been paid.")
-                return redirect(f"{reverse('myride')}?request_id={ride_request.pk}")
+                return redirect(f"{reverse('payment')}?payment_id={payment.pk}")
             if payment is None:
                 PaymentModel.objects.create(
                     payment_number=build_number("PAY"),
@@ -746,10 +796,22 @@ class UserPaymentView(View):
                 payment.payment_method = method
                 payment.amount = amount
                 payment.status = PaymentModel.Status.PENDING
-                payment.metadata = {**(payment.metadata or {}), "source": "customer_web"}
-                payment.save(update_fields=["payment_method", "amount", "status", "metadata", "updated_at"])
-        messages.info(request, "Payment method saved. Status remains Pending until payment is verified.")
-        return redirect(f"{reverse('myride')}?request_id={ride_request.pk}")
+                payment.metadata = {
+                    **(payment.metadata or {}),
+                    "source": "customer_web",
+                }
+                payment.save(update_fields=[
+                    "payment_method",
+                    "amount",
+                    "status",
+                    "metadata",
+                    "updated_at",
+                ])
+        messages.info(
+            request,
+            "Payment method saved. Status remains Pending until payment is verified."
+        )
+        return redirect(f"{reverse('payment')}?request_id={ride_request.pk}")
 
 # ==================== MY RIDES ====================
 
