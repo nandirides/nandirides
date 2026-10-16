@@ -1022,7 +1022,7 @@ class PaymentReceiptView(View):
             messages.info(request, "Please log in to view receipts.")
             return redirect("user-login")
         payment_id = request.GET.get("payment_id")
-        payment = get_object_or_404(PaymentModel, pk=payment_id, user=request.user) if payment_id else PaymentModel.objects.filter(user=request.user).order_by("-created_at").first()
+        payment = get_object_or_404(PaymentModel, payment_number=payment_id, user=request.user) if payment_id else PaymentModel.objects.filter(user=request.user).order_by("-created_at").first()
         return render(request, "user/profile/paymentreceipt.html", {
             "sidebar_menu": SIDEBAR_MENU,
             "form": PaymentForm(),
