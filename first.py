@@ -5,6 +5,18 @@ pip install python-dotenv
 pip install whitenoise
 pip install gunicorn
 
+flutter clean
+flutter pub get
+flutter run
+
+cd D:\nandirides\nandiride_mobile_app\nandiride_app
+flutter pub get
+flutter analyze
+flutter build apk --debug
+
+Build पूरा होने पर APK सामान्यतः यहाँ मिलेगी:
+D:\nandirides\nandiride_mobile_app\nandiride_app\build\app\outputs\flutter-apk\app-debug.apk
+
 
 https://console.neon.tech/app/projects/fancy-haze-58430108/branches/br-flat-thunder-b3zen3ko 
 

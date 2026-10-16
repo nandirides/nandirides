@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'app_routes.dart';
 import 'app_theme.dart';
@@ -27,6 +26,45 @@ import '../screens/driver/driver_profile_screen.dart';
 class NandiRideApp extends StatelessWidget {
   const NandiRideApp({super.key});
 
+  int? _extractRideId(Object? arguments) {
+    if (arguments is int) {
+      return arguments > 0 ? arguments : null;
+    }
+
+    if (arguments is num) {
+      final id = arguments.toInt();
+      return id > 0 ? id : null;
+    }
+
+    if (arguments is String) {
+      final id = int.tryParse(arguments.trim());
+      return id != null && id > 0 ? id : null;
+    }
+
+    if (arguments is Map) {
+      for (final key in [
+        'rideId',
+        'ride_id',
+        'accepted_ride_id',
+        'assigned_ride_id',
+        'trip_id',
+        'tripId',
+      ]) {
+        final value = arguments[key];
+        if (value is int && value > 0) return value;
+        if (value is num && value.toInt() > 0) {
+          return value.toInt();
+        }
+        if (value is String) {
+          final id = int.tryParse(value.trim());
+          if (id != null && id > 0) return id;
+        }
+      }
+    }
+
+    return null;
+  }
+
   Route<dynamic>? _buildRoute(RouteSettings settings) {
     final Widget? page = switch (settings.name) {
       // Splash and authentication
@@ -46,7 +84,9 @@ class NandiRideApp extends StatelessWidget {
       AppRoutes.driverHome => const DriverHomeScreen(),
       AppRoutes.driverRegistration => const DriverRegistrationScreen(),
       AppRoutes.rideRequests => const RideRequestsScreen(),
-      AppRoutes.tripDetails => const TripDetailsScreen(),
+      AppRoutes.tripDetails => TripDetailsScreen(
+          rideId: _extractRideId(settings.arguments),
+        ),
       AppRoutes.earnings => const EarningsScreen(),
       AppRoutes.driverProfile => const DriverProfileScreen(),
 
@@ -58,7 +98,6 @@ class NandiRideApp extends StatelessWidget {
       return null;
     }
 
-    // Show splash screen without a page transition.
     if (settings.name == AppRoutes.splash) {
       return MaterialPageRoute<dynamic>(
         builder: (_) => page,
@@ -66,7 +105,6 @@ class NandiRideApp extends StatelessWidget {
       );
     }
 
-    // Smooth fade and upward slide transition.
     return PageRouteBuilder<dynamic>(
       settings: settings,
       transitionDuration: AppTheme.animationNormal,

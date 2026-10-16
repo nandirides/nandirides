@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../../app/app_theme.dart';
 import '../../app/app_routes.dart';
@@ -6,6 +5,7 @@ import '../../services/driver_service.dart';
 
 class RideRequestsScreen extends StatefulWidget {
   const RideRequestsScreen({super.key});
+
   @override
   State<RideRequestsScreen> createState() => _RideRequestsScreenState();
 }
@@ -43,55 +43,95 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
 
   int? _parseId(dynamic value) {
     if (value is int && value > 0) return value;
-    if (value is num && value > 0) return value.toInt();
+    if (value is num && value.toInt() > 0) return value.toInt();
     final parsed = int.tryParse(value?.toString().trim() ?? '');
     return parsed != null && parsed > 0 ? parsed : null;
   }
 
   Map<String, dynamic>? _asMap(dynamic value) {
-    if (value is Map) return Map<String, dynamic>.from(value);
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
     return null;
   }
 
   Map<String, dynamic> _unwrapResponse(Map<String, dynamic> response) {
-    final data = response['data'];
-    if (data is Map) {
-      return Map<String, dynamic>.from(data);
+    dynamic current = response;
+    for (var i = 0; i < 6; i++) {
+      if (current is! Map) break;
+      final map = Map<String, dynamic>.from(current);
+      dynamic nested;
+      for (final key in ['data', 'result', 'response', 'payload']) {
+        if (map[key] is Map) {
+          nested = map[key];
+          break;
+        }
+      }
+      if (nested == null) return map;
+      current = nested;
     }
-    return response;
+    return _asMap(current) ?? response;
   }
 
-  int? _extractRideId(Map<String, dynamic> response) {
-    final data = _unwrapResponse(response);
-    final ride = _asMap(data['ride']) ??
-        _asMap(data['accepted_ride']) ??
-        _asMap(data['assigned_ride']);
+  int? _findRideId(dynamic value, {int depth = 0}) {
+    if (depth > 8 || value is! Map) return null;
+    final map = Map<String, dynamic>.from(value);
 
-    final candidates = [
-      data['ride_id'],
-      data['rideId'],
-      data['accepted_ride_id'],
-      data['assigned_ride_id'],
-      ride?['id'],
-      ride?['ride_id'],
-    ];
-
-    for (final candidate in candidates) {
-      final id = _parseId(candidate);
+    for (final key in [
+      'ride_id',
+      'rideId',
+      'accepted_ride_id',
+      'assigned_ride_id',
+      'trip_id',
+      'tripId',
+    ]) {
+      final id = _parseId(map[key]);
       if (id != null) return id;
     }
 
-    // A top-level id is only accepted when the response identifies
-    // the returned object as a ride, not merely a ride request.
-    final type = (data['type'] ??
-            data['object_type'] ??
-            data['resource'] ??
+    const rideObjectKeys = [
+      'ride',
+      'accepted_ride',
+      'assigned_ride',
+      'ride_details',
+      'ride_detail',
+      'trip',
+      'assigned_trip',
+    ];
+
+    for (final key in rideObjectKeys) {
+      final nested = map[key];
+      if (nested is Map) {
+        final nestedMap = Map<String, dynamic>.from(nested);
+        final id = _parseId(
+          nestedMap['ride_id'] ??
+              nestedMap['rideId'] ??
+              nestedMap['id'],
+        );
+        if (id != null) return id;
+        final deeperId = _findRideId(nestedMap, depth: depth + 1);
+        if (deeperId != null) return deeperId;
+      }
+    }
+
+    for (final key in ['data', 'result', 'response', 'payload']) {
+      final nested = map[key];
+      if (nested is Map) {
+        final id = _findRideId(nested, depth: depth + 1);
+        if (id != null) return id;
+      }
+    }
+
+    final type = (map['type'] ??
+            map['object_type'] ??
+            map['resource'] ??
             '')
         .toString()
+        .trim()
         .toLowerCase();
 
-    if (type == 'ride' || type == 'accepted_ride') {
-      return _parseId(data['id']);
+    if (['ride', 'rides', 'accepted_ride', 'trip'].contains(type)) {
+      return _parseId(map['id']);
     }
 
     return null;
@@ -171,7 +211,28 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
       final response = await DriverService.acceptRide(requestId);
       if (!mounted) return;
 
-      final rideId = _extractRideId(response);
+      debugPrint('ACCEPTED REQUEST ID: $requestId');
+      debugPrint('ACCEPT RIDE FULL RESPONSE: $response');
+
+      final rideId = DriverService.extractRideId(response) ??
+          _findRideId(response);
+
+      debugPrint('EXTRACTED ACTUAL RIDE ID: $rideId');
+
+      if (rideId == null || rideId <= 0) {
+        _showMessage(
+          'Ride accept response mein actual Ride ID nahi mili. '
+          'Console mein ACCEPT RIDE FULL RESPONSE check karein.',
+          isError: true,
+        );
+        return;
+      }
+
+      final data = _unwrapResponse(response);
+      final message = (data['message'] ??
+              response['message'] ??
+              'Ride accepted successfully.')
+          .toString();
 
       setState(() {
         _requests.removeWhere(
@@ -180,29 +241,27 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
         );
       });
 
-      final message = response['message']?.toString() ??
-          _unwrapResponse(response)['message']?.toString() ??
-          'Ride accepted successfully.';
-
       _showMessage(message);
 
-      if (rideId == null) {
-        _showMessage(
-          'Ride accepted, but the API did not return a Ride ID. '
-          'Please check DriverService.acceptRide() response.',
-          isError: true,
-        );
-        await _loadRequests(showLoader: false);
-        return;
-      }
+      debugPrint('NAVIGATING TO TRIP DETAILS WITH RIDE ID: $rideId');
 
-      await Navigator.of(context).pushNamed(
+      final result = await Navigator.of(context).pushNamed<dynamic>(
         AppRoutes.tripDetails,
-        arguments: {'rideId': rideId},
+        arguments: <String, dynamic>{
+          'rideId': rideId,
+          'ride_id': rideId,
+        },
       );
 
-      if (mounted) await _loadRequests(showLoader: false);
-    } catch (e) {
+      debugPrint('TRIP DETAILS ROUTE RESULT: $result');
+
+      if (mounted) {
+        await _loadRequests(showLoader: false);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Accept ride error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
       if (!mounted) return;
       _showMessage(_errorMessage(e), isError: true);
       await _loadRequests(showLoader: false);
@@ -228,9 +287,11 @@ class _RideRequestsScreenState extends State<RideRequestsScreen> {
           .join(', ');
       if (combined.isNotEmpty) return combined;
     }
+
     if (value != null && value.toString().trim().isNotEmpty) {
       return value.toString();
     }
+
     return 'Location unavailable';
   }
 

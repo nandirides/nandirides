@@ -11,12 +11,26 @@ from rides.models import Ride, RideRequest, RideDriverAssignment
 from vehicles.models import DriverVehicle, Vehicle
 from .serializers import RideSerializer
 
+
 class DriverRideRequestSerializer(serializers.ModelSerializer):
     pickup_details = serializers.SerializerMethodField()
     drop_details = serializers.SerializerMethodField()
-    vehicle_type_name = serializers.CharField(source="vehicle_type.name", read_only=True)
-    estimated_distance_km = serializers.DecimalField(source="estimated_distance", max_digits=10, decimal_places=2, read_only=True, allow_null=True)
-    estimated_duration_minutes = serializers.IntegerField(source="estimated_duration", read_only=True, allow_null=True)
+    vehicle_type_name = serializers.CharField(
+        source="vehicle_type.name",
+        read_only=True,
+    )
+    estimated_distance_km = serializers.DecimalField(
+        source="estimated_distance",
+        max_digits=10,
+        decimal_places=2,
+        read_only=True,
+        allow_null=True,
+    )
+    estimated_duration_minutes = serializers.IntegerField(
+        source="estimated_duration",
+        read_only=True,
+        allow_null=True,
+    )
 
     class Meta:
         model = RideRequest
@@ -62,12 +76,16 @@ def get_driver_for_user(user):
         driver = Driver.objects.get(user=user)
     except Driver.DoesNotExist:
         return None, "Driver profile not found."
+
     if driver.status != Driver.Status.ACTIVE:
         return None, "Your driver account is not active."
+
     if driver.verification_status != Driver.VerificationStatus.VERIFIED:
         return None, "Your driver account is not verified."
+
     if not driver.is_online:
         return None, "Go online before accessing ride requests."
+
     return driver, None
 
 
@@ -77,17 +95,23 @@ class DriverRideRequestsAPIView(APIView):
     def get(self, request):
         driver, error = get_driver_for_user(request.user)
         if error:
-            return Response({"detail": error}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": error},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         vehicle_type_ids = DriverVehicle.objects.filter(
             driver=driver,
             is_current=True,
             vehicle__status=Vehicle.Status.ACTIVE,
         ).values_list("vehicle__vehicle_type_id", flat=True)
+
         if not vehicle_type_ids.exists():
             return Response(
                 {"detail": "No active vehicle is assigned to your profile."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
         requests = (
             RideRequest.objects
             .filter(
@@ -109,7 +133,9 @@ class DriverRideRequestsAPIView(APIView):
             .order_by("-requested_at")
             .distinct()
         )
+
         data = DriverRideRequestSerializer(requests, many=True).data
+
         return Response({
             "count": len(data),
             "results": data,
@@ -122,25 +148,41 @@ class DriverAcceptRideAPIView(APIView):
     def post(self, request, request_id):
         driver, error = get_driver_for_user(request.user)
         if error:
-            return Response({"detail": error}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {
+                    "success": False,
+                    "detail": error,
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         with transaction.atomic():
             ride_request = get_object_or_404(
                 RideRequest.objects.select_for_update(),
                 pk=request_id,
             )
+
             if ride_request.status not in [
                 RideRequest.Status.REQUESTED,
                 RideRequest.Status.SEARCHING,
             ]:
                 return Response(
-                    {"detail": "This ride request is no longer available."},
+                    {
+                        "success": False,
+                        "detail": "This ride request is no longer available.",
+                    },
                     status=status.HTTP_409_CONFLICT,
                 )
+
             if Ride.objects.filter(ride_request=ride_request).exists():
                 return Response(
-                    {"detail": "This ride has already been assigned."},
+                    {
+                        "success": False,
+                        "detail": "This ride has already been assigned.",
+                    },
                     status=status.HTTP_409_CONFLICT,
                 )
+
             assignment = (
                 DriverVehicle.objects
                 .select_related("vehicle", "vehicle__vehicle_type")
@@ -153,11 +195,16 @@ class DriverAcceptRideAPIView(APIView):
                 .order_by("-created_at")
                 .first()
             )
+
             if assignment is None:
                 return Response(
-                    {"detail": "No active matching vehicle is assigned to you."},
+                    {
+                        "success": False,
+                        "detail": "No active matching vehicle is assigned to you.",
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
             ride = Ride.objects.create(
                 ride_request=ride_request,
                 passenger=ride_request.passenger,
@@ -170,25 +217,31 @@ class DriverAcceptRideAPIView(APIView):
                 duration_minutes=ride_request.estimated_duration or 0,
                 status=Ride.Status.DRIVER_ASSIGNED,
             )
+
             ride_request.status = RideRequest.Status.ACCEPTED
             ride_request.save(update_fields=["status", "updated_at"])
+
             RideDriverAssignment.objects.create(
                 ride=ride,
                 driver=driver,
                 status=RideDriverAssignment.Status.ACCEPTED,
                 accepted_at=timezone.now(),
             )
-        return Response(
-            {
-                "success": True,
-                "message": "Ride accepted successfully.",
-                "ride": RideSerializer(
-                    ride,
-                    context={"request": request},
-                ).data,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+
+            ride_data = RideSerializer(
+                ride,
+                context={"request": request},
+            ).data
+
+            actual_ride_id = ride.pk
+
+        return Response({
+        "success": True,
+        "message": "Ride accepted successfully.",
+        "ride_id": ride.pk,
+        "ride": RideSerializer(ride, context={"request": request}).data,
+    }, status=status.HTTP_201_CREATED)
+
 
 class DriverRideDetailsAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -216,7 +269,10 @@ class DriverRideDetailsAPIView(APIView):
                     "drop_location",
                     "ride_request__vehicle_type",
                 )
-                .get(pk=ride_id, driver=driver)
+                .get(
+                    pk=ride_id,
+                    driver=driver,
+                )
             )
         except Ride.DoesNotExist:
             return Response(
@@ -228,6 +284,7 @@ class DriverRideDetailsAPIView(APIView):
 
         return Response({
             "success": True,
+            "ride_id": ride.pk,
             "ride": RideSerializer(
                 ride,
                 context={"request": request},
@@ -235,14 +292,30 @@ class DriverRideDetailsAPIView(APIView):
             "pickup_details": {
                 "address": ride.pickup_location.address,
                 "city": str(ride.pickup_location.city),
-                "latitude": getattr(ride.pickup_location, "latitude", None),
-                "longitude": getattr(ride.pickup_location, "longitude", None),
+                "latitude": getattr(
+                    ride.pickup_location,
+                    "latitude",
+                    None,
+                ),
+                "longitude": getattr(
+                    ride.pickup_location,
+                    "longitude",
+                    None,
+                ),
             },
             "drop_details": {
                 "address": ride.drop_location.address,
                 "city": str(ride.drop_location.city),
-                "latitude": getattr(ride.drop_location, "latitude", None),
-                "longitude": getattr(ride.drop_location, "longitude", None),
+                "latitude": getattr(
+                    ride.drop_location,
+                    "latitude",
+                    None,
+                ),
+                "longitude": getattr(
+                    ride.drop_location,
+                    "longitude",
+                    None,
+                ),
             },
             "fare": str(
                 ride_request.final_fare
@@ -251,7 +324,9 @@ class DriverRideDetailsAPIView(APIView):
                 if ride_request.estimated_fare is not None
                 else 0
             ),
-            "discount_amount": str(ride_request.discount_amount or 0),
+            "discount_amount": str(
+                ride_request.discount_amount or 0
+            ),
             "distance_km": str(ride.distance_km),
             "duration_minutes": ride.duration_minutes,
         })
