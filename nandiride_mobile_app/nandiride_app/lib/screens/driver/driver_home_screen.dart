@@ -217,7 +217,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'NAMASTE, DRIVER!',
+                  'Welcome, DRIVER!',
                   style: TextStyle(
                     color: gold,
                     fontSize: 11,

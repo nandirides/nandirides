@@ -46,7 +46,7 @@
                     <i class="fa-solid fa-robot"></i>
                 </div>
                 <div class="bg-white shadow-sm rounded-4 rounded-top-start-0 px-3 py-3" style="max-width:85%;">
-                    <p class="mb-1 small fw-bold">Namaste! Welcome to NandiRide 🙏</p>
+                    <p class="mb-1 small fw-bold">Welcome! Welcome to NandiRide 🙏</p>
                     <p class="mb-0 small text-secondary">I'm your ride assistant. You can ask me about bookings, fares, tracking, payments and account support.</p>
                     <small class="text-secondary d-block mt-2 chatbot-time"></small>
                 </div>
@@ -198,8 +198,8 @@
     }
     function makeReply(message){
         const text=message.toLowerCase().trim();
-        if(/\b(hi|hello|hey|namaste|नमस्ते)\b/.test(text)){
-            return "Namaste! 🙏 NandiRide mein aapka swagat hai. Aap ride booking, fare, tracking, payment ya account support ke baare mein pooch sakte hain.";
+        if(/\b(hi|hello|hey|Welcome|नमस्ते)\b/.test(text)){
+            return "Welcome! 🙏 NandiRide mein aapka swagat hai. Aap ride booking, fare, tracking, payment ya account support ke baare mein pooch sakte hain.";
         }
         if(text.includes("fare")||text.includes("price")||text.includes("cost")||text.includes("kiraya")||text.includes("भाड़ा")){
             return "Fare estimate ke liye pickup aur drop location chahiye. Booking page par pickup aur destination enter karke available fare check karein. Main abhi aapke live route ka actual fare calculate nahi kar raha hoon.";
